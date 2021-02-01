@@ -4,7 +4,7 @@ import javafx.geometry.Point2D;
 
 public class Transform extends Component {
 
-    public static String type = "transform";
+    public String type = "transform";
 
     public Point2D position;
     public double rotation;
