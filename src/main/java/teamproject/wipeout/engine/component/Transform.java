@@ -1,10 +1,10 @@
-package teamproject.wipeout.engine.components;
+package teamproject.wipeout.engine.component;
 
 import javafx.geometry.Point2D;
 
-public class Transform extends Component {
+public class Transform extends GameComponent {
 
-    public String type = "transform";
+    public static String type = "transform";
 
     public Point2D position;
     public double rotation;
@@ -14,8 +14,8 @@ public class Transform extends Component {
         this.rotation = 0;
     }
 
-    public Transform(Point2D position) {
-        this.position = position;
+    public Transform(double x, double y) {
+        this.position = new Point2D(x, y);
     }
 
     public Transform(Point2D position, double rotation) {
