@@ -1,6 +1,6 @@
 package teamproject.wipeout.engine.component;
 
-public class MoveRightComponent extends GameComponent {
+public class MoveRightComponent implements GameComponent {
     public float speed;
 
     public MoveRightComponent() {
@@ -9,5 +9,9 @@ public class MoveRightComponent extends GameComponent {
 
     public MoveRightComponent(float speed) {
         this.speed = speed;
+    }
+
+    public String getType() {
+        return "move-right";
     }
 }

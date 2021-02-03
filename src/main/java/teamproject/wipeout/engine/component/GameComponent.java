@@ -1,5 +1,5 @@
 package teamproject.wipeout.engine.component;
 
-public abstract class GameComponent {
-    public static String type = "component";
+public interface GameComponent {
+    public String getType();
 }

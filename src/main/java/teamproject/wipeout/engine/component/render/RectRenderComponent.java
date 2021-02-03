@@ -6,9 +6,7 @@ import javafx.scene.paint.Paint;
 
 import teamproject.wipeout.engine.component.GameComponent;
 
-public class RectRenderComponent extends GameComponent implements Renderable {
-
-    public static String type = "render-rect";
+public class RectRenderComponent implements GameComponent, Renderable {
 
     public Paint color;
     public float width;
@@ -29,5 +27,9 @@ public class RectRenderComponent extends GameComponent implements Renderable {
     public void render(GraphicsContext gc, double x, double y) {
         gc.setFill(this.color);
         gc.fillRect(x, y, this.width, this.height);
+    }
+
+    public String getType() {
+        return "render-rect";
     }
 }
