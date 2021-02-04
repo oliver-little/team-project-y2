@@ -6,7 +6,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.PhysicsComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
