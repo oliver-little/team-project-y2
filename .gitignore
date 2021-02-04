@@ -38,6 +38,8 @@ buildNumber.properties
 
 # IDE Specific
 .vscode
+.idea/
+*.iml
 
 .classpath
 .project
