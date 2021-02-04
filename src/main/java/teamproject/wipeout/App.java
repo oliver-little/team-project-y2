@@ -7,6 +7,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -22,6 +23,7 @@ public class App extends Application {
         RenderSystem renderer = new RenderSystem(gameScene, canvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new MovementSystem(gameScene));
+        systemUpdater.addSystem(new CollisionSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
         
@@ -29,8 +31,14 @@ public class App extends Application {
         nge.addComponent(new Transform(250,250));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
         nge.addComponent(new MovementComponent(80f, -100f, -20f, 40f));
+        nge.addComponent(new CollisionComponent());
 
         //add more entities here
+        GameEntity platform = gameScene.createEntity();
+        platform.addComponent(new Transform(300,300));
+        platform.addComponent(new RectRenderComponent(Color.DARKRED, 200, 200));
+        platform.addComponent(new MovementComponent(0, 0, 0, 0));
+        platform.addComponent(new CollisionComponent());
         
         Scene scene = new Scene(new StackPane(canvas), 800, 600);
         stage.setScene(scene);
