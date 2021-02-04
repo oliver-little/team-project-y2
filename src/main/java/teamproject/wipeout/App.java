@@ -30,6 +30,7 @@ public class App extends Application {
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
         nge.addComponent(new PhysicsComponent(80f, -100f, -20f, 40f));
 
+        //add more entities here
         
         Scene scene = new Scene(new StackPane(canvas), 800, 600);
         stage.setScene(scene);
