@@ -12,31 +12,33 @@ import java.util.HashSet;
 public class InputHandler {
 
     private final Scene inputScene;
-    private HashSet<KeyCode> performingActions;
+    private final HashSet<KeyCode> performingKeyActions;
+    private MouseButton isDragging;
 
     public InputHandler(Scene scene) {
         this.inputScene = scene;
-        this.performingActions = new HashSet<KeyCode>();
+        this.performingKeyActions = new HashSet<KeyCode>();
+        this.isDragging = null;
     }
 
     public void onKeyPress(KeyCode key, InputKeyAction onPress) {
-        inputScene.addEventHandler(KeyEvent.KEY_PRESSED, (pressedKey) -> {
+        inputScene.addEventFilter(KeyEvent.KEY_PRESSED, (pressedKey) -> {
             KeyCode pressedKeyCode = pressedKey.getCode();
-            if (this.performingActions.contains(pressedKeyCode)) {
+            if (this.performingKeyActions.contains(pressedKeyCode)) {
                 return;
             }
             if (pressedKeyCode == key) {
-                this.performingActions.add(key);
+                this.performingKeyActions.add(key);
                 onPress.performKeyAction();
             }
         });
     }
 
     public void onKeyRelease(KeyCode key, InputKeyAction action) {
-        inputScene.addEventHandler(KeyEvent.KEY_RELEASED, (releasedKey) -> {
+        inputScene.addEventFilter(KeyEvent.KEY_RELEASED, (releasedKey) -> {
             if (releasedKey.getCode() == key) {
                 action.performKeyAction();
-                this.performingActions.remove(key);
+                this.performingKeyActions.remove(key);
             }
         });
     }
@@ -48,8 +50,34 @@ public class InputHandler {
 
     public void onMouseClick(MouseButton button, InputMouseAction action) {
         inputScene.addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
-            if (mouseClick.getButton() == button) {
+            MouseButton mouseButton = mouseClick.getButton();
+
+            // MOUSE_CLICKED is called even after MOUSE_RELEASED in the onMouseDrag function
+            // so to not call both, isDragging is set to false in this method rather than onMouseDrag.
+            if (this.isDragging != null) {
+                if (this.isDragging == mouseButton) {
+                    this.isDragging = null;
+                }
+                return;
+            }
+
+            if (mouseButton == button) {
                 action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
+            }
+        });
+    }
+
+    public void onMouseDrag(MouseButton button, InputMouseAction dragAction, InputMouseAction releaseAction) {
+        inputScene.addEventHandler(MouseEvent.MOUSE_DRAGGED, (mouseClick) -> {
+            if (mouseClick.getButton() == button) {
+                this.isDragging = button;
+                dragAction.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
+            }
+        });
+
+        inputScene.addEventHandler(MouseEvent.MOUSE_RELEASED, (mouseRelease) -> {
+            if (this.isDragging == mouseRelease.getButton()) {
+                releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY());
             }
         });
     }

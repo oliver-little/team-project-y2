@@ -41,23 +41,27 @@ public class App extends Application {
 
         InputHandler input = new InputHandler(scene);
         input.addKeyAction(KeyCode.LEFT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(60f, 0f),
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(60f, 0f));
 
         input.addKeyAction(KeyCode.RIGHT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(60f, 0f),
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(60f, 0f));
 
         input.addKeyAction(KeyCode.UP,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 60f),
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 60f));
 
         input.addKeyAction(KeyCode.DOWN,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 60f),
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 60f));
 
         input.onMouseClick(MouseButton.PRIMARY,
-                (x, y) -> System.out.println("X: " + x +"\nY: " + y));
+                (x, y) -> System.out.println("_X: " + x +"\n_Y: " + y));
+
+        input.onMouseDrag(MouseButton.SECONDARY,
+                (x, y) -> System.out.println("X: " + x +"\nY: " + y),
+                (x, y) -> System.out.println("*X: " + x +"\n*Y: " + y));
 
         stage.setScene(scene);
         stage.show();
