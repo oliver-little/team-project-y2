@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
@@ -50,20 +52,31 @@ public class CollisionSystem implements GameSystem {
     
     private boolean collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
-    	RectRenderComponent r1 = g1.getComponent(RectRenderComponent.class);
-    	Point2D dimensionPoint1 = new Point2D(r1.width, r1.height); 
+    	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
+    	Rectangle bb1[] = c1.boundingBoxes;
     	
     	Transform t2 = g2.getComponent(Transform.class);
-    	RectRenderComponent r2 = g2.getComponent(RectRenderComponent.class);
-    	Point2D dimensionPoint2 = new Point2D(r2.width, r2.height); 
+    	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
+    	Rectangle bb2[] = c2.boundingBoxes;
     	
-    	Point2D minP1 = t1.position;
-    	Point2D maxP1 = minP1.add(dimensionPoint1);
-    	Point2D minP2 = t2.position;
-    	Point2D maxP2 = minP2.add(dimensionPoint2);
+    	for(int i=0;i<bb1.length;i++) {
+    		Rectangle s1 = bb1[i];
+    		Point2D dimensionPoint1 = new Point2D(s1.getWidth(), s1.getHeight()); 
+        	for(int j=0;j<bb2.length;j++) {
+        		Rectangle s2 = bb2[j];
+        		Point2D dimensionPoint2 = new Point2D(s2.getWidth(), s2.getHeight()); 
+        		//add coord of top left corner to offset
+            	Point2D minP1 = t1.position.add(new Point2D(s1.getX(),s1.getY()));
+            	Point2D maxP1 = minP1.add(dimensionPoint1);
+            	Point2D minP2 = t2.position.add(new Point2D(s2.getX(),s2.getY()));
+            	Point2D maxP2 = minP2.add(dimensionPoint2);
+            	if(intersects(minP1, maxP1, minP2, maxP2)) {
+            		return true;
+            	}
+        	}
+    	}
     	
-    
-    	return intersects(minP1, maxP1, minP2, maxP2);
+    	return false;
 
     }
     
