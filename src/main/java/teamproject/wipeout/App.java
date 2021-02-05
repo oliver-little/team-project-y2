@@ -57,9 +57,10 @@ public class App extends Application {
                 () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 60f));
 
         input.onMouseClick(MouseButton.PRIMARY,
-                (x, y) -> System.out.println("_X: " + x +"\n_Y: " + y));
+                (x, y) -> System.out.println("+X: " + x +"\n+Y: " + y));
 
         input.onMouseDrag(MouseButton.SECONDARY,
+                (x, y) -> System.out.println("_X: " + x +"\n_Y: " + y),
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y),
                 (x, y) -> System.out.println("*X: " + x +"\n*Y: " + y));
 
