@@ -1,9 +1,11 @@
 package teamproject.wipeout.engine.system;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.Transform;
@@ -59,17 +61,17 @@ public class CollisionSystem implements GameSystem {
     private boolean collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
     	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
-    	Rectangle bb1[] = c1.boundingBoxes;
+    	Shape bb1[] = c1.boundingBoxes;
     	
     	Transform t2 = g2.getComponent(Transform.class);
     	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
-    	Rectangle bb2[] = c2.boundingBoxes;
+    	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		Rectangle r1 = addAbsolutePosition(t1.position, bb1[i]);
+    		Rectangle r1 = addAbsolutePosition(t1.position, castToShape(bb1[i]));
 
         	for(int j=0;j<bb2.length;j++) {
-        		Rectangle r2 = addAbsolutePosition(t2.position, bb2[j]);
+        		Rectangle r2 = addAbsolutePosition(t2.position, castToShape(bb2[j]));
             	if(intersects(r1,r2)) {
             		return true;
             	}
@@ -78,6 +80,38 @@ public class CollisionSystem implements GameSystem {
     	
     	return false;
 
+    }
+    
+    /**
+     * Converts a generic shape to specific
+     * @param <T>
+     * @param s shape to cast
+     * @return casted shape
+     */
+    // https://stackoverflow.com/a/450874
+    private <T extends Shape> T castToShape(Shape s) {
+    	if(s.getClass()==Rectangle.class) {
+    		return (T) s;
+    	}
+    	else if(s.getClass()==Circle.class) {
+    		return (T) s;
+    	}
+    	return null;
+    }
+    
+    /**
+     * Takes an array of different shapes and returns just the rectangles
+     * @param shapes array of different shapes
+     * @return just the rectangles from the array
+     */
+    private Rectangle[] getRectangles(Shape[] shapes) {
+    	ArrayList<Rectangle> r = new ArrayList<Rectangle>();
+    	for(int i=0; i<shapes.length;i++) {
+    		if(shapes[i].getClass()==Rectangle.class) {
+    			r.add((Rectangle) shapes[i]);
+    		}
+    	}
+    	return (Rectangle[]) r.toArray();
     }
     
     /**
