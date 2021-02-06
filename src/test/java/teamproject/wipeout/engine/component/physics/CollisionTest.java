@@ -33,6 +33,11 @@ class CollisionTest
 		//close but not colliding
 		assertFalse(CollisionSystem.intersects(r1,r2));
 		
+		r1 = new Rectangle(12,12,4,4);
+		r2 = new Rectangle(10,10,10,10);
+		//r1 inside r2
+		assertTrue(CollisionSystem.intersects(r1,r2));
+		
 		r1 = new Rectangle(10,10,10,10);
 		r2 = new Rectangle(12,12,4,4);
 		//r2 inside r1
@@ -44,12 +49,12 @@ class CollisionTest
 		assertTrue(CollisionSystem.intersects(r1,r2));
 		
 		r1 = new Rectangle(10,10,10,10);
-		r2 = new Rectangle(0,10,5,5);
+		r2 = new Rectangle(0,10,10,5);
 		//collides at bottom left corner of r1
 		assertTrue(CollisionSystem.intersects(r1,r2));
 		
 		r1 = new Rectangle(10,10,10,10);
-		r2 = new Rectangle(10,0,4,4);
+		r2 = new Rectangle(10,0,4,10);
 		//collides at top right corner of r1
 		assertTrue(CollisionSystem.intersects(r1,r2));
 	}

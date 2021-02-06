@@ -104,6 +104,20 @@ public class CollisionSystem implements GameSystem {
     		return true;
     	}
     	
+    	else if(maxP2.getX()>=minP1.getX() && maxP2.getY()>=minP1.getY() && maxP2.getX()<=maxP1.getX() && maxP2.getY()<=maxP1.getY()) {
+    		return true;
+    	}
+    	else if(minP2.getX()>=minP1.getX() && minP2.getY()>=minP1.getY() && minP2.getX()<=maxP1.getX() && minP2.getY()<=maxP1.getY()) {
+    		return true;
+    	}
+    	else if(minP2.getX()>=minP1.getX() && maxP2.getY()>=minP1.getY() && minP2.getX()<=maxP1.getX() && maxP2.getY()<=maxP1.getY()) {
+    		return true;
+    	}
+    	else if(maxP2.getX()>=minP1.getX() && minP2.getY()>=minP1.getY() && maxP2.getX()<=maxP1.getX() && minP2.getY()<=maxP1.getY()) {
+    		return true;
+    	}
+    	
+    	
     	return false;
     }
    
