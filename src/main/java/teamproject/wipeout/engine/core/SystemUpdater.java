@@ -14,6 +14,12 @@ public class SystemUpdater implements Consumer<Double> {
         this._systems = new ArrayList<GameSystem>();
     }
 
+    public void cleanup() {
+        for (GameSystem system : this._systems) {
+            system.cleanup();
+        }
+    }
+
     public void addSystem(GameSystem g) {
         this._systems.add(g);
     }

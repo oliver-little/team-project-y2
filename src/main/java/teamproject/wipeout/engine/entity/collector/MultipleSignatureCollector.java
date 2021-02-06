@@ -8,7 +8,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.core.GameScene;
 
-public class MultipleSignatureCollector implements EntityCollector {
+public class MultipleSignatureCollector {
 
     protected List<Set<Class<? extends GameComponent>>> _signatures;
     protected SignatureEntityCollector[] _signatureCollectors;
@@ -19,6 +19,12 @@ public class MultipleSignatureCollector implements EntityCollector {
 
         for (int i = 0; i < signatures.size(); i++) {
             this._signatureCollectors[i] = new SignatureEntityCollector(e, signatures.get(i));
+        }
+    }
+
+    public void cleanup() {
+        for (SignatureEntityCollector entityCollector : this._signatureCollectors) {
+            entityCollector.cleanup();
         }
     }
 

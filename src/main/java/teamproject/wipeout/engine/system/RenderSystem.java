@@ -26,6 +26,10 @@ public class RenderSystem implements GameSystem {
         this._gc = canvas.getGraphicsContext2D();
     }
 
+    public void cleanup() {
+        this._scene.cleanup();
+    }
+
     public void accept(Double timeStep) {
         this._gc.clearRect(0, 0, this._canvas.getWidth(), this._canvas.getHeight());
         for (Set<Class<? extends GameComponent>> signature : signaturePattern) {
