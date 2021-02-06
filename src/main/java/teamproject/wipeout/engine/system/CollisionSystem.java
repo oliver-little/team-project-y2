@@ -128,6 +128,24 @@ public class CollisionSystem implements GameSystem {
     }
     
     /**
+     * Checks whether two circles intersect
+     * @param c1 first circle
+     * @param c2 second circle
+     * @return true if the circles intersect, false otherwise
+     */
+    public static boolean intersects(Circle c1, Circle c2) {
+    	//intersect if the distance between their two centres is less than the sum of their radiuses
+    	double radiusSum = c1.getRadius()+c2.getRadius();
+    	double distanceBetweenCentres = Math.sqrt(Math.pow(c1.getCenterX()-c2.getCenterX(), 2)+(Math.pow(c1.getCenterY()-c2.getCenterY(), 2)));
+    	
+    	if(distanceBetweenCentres <= radiusSum) {
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
      * Checks whether two rectangles intersect
      * @param r1 first rectangle
      * @param r2 second rectangle

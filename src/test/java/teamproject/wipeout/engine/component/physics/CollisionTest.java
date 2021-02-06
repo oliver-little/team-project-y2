@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.system.CollisionSystem;
 
@@ -12,7 +13,7 @@ class CollisionTest
 {
 
 	@Test
-	void testRectangleNotIntersects()
+	void testRectanglesNotIntersects()
 	{
 		Rectangle r1 = new Rectangle(0,0,10,10);
 		Rectangle r2 = new Rectangle(20,20,10,10);
@@ -21,7 +22,7 @@ class CollisionTest
 
 	
 	@Test
-	void testRectangleIntersects()
+	void testRectanglesIntersects()
 	{
 		Rectangle r1 = new Rectangle(10,10,10,10);
 		Rectangle r2 = new Rectangle(0,0,10,10);
@@ -59,4 +60,11 @@ class CollisionTest
 		assertTrue(CollisionSystem.intersects(r1,r2));
 	}
 	
+	
+	@Test
+	void testCirclesIntersect() {
+		Circle c1 = new Circle(0,0,10);
+		Circle c2 = new Circle(1,1,10);
+		assertTrue(CollisionSystem.intersects(c1, c2));
+	}
 }
