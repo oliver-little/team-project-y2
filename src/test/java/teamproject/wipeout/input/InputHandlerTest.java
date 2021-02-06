@@ -26,17 +26,14 @@ import java.util.concurrent.atomic.AtomicReference;
 @ExtendWith(ApplicationExtension.class)
 public class InputHandlerTest {
 
-    private final double stageWidth = 100.0;
+    private final double stageWidth = 300.0;
     private final double stageHeight = 100.0;
 
     private InputHandler inputHandler;
     private Point2D stagePosition;
 
-    /**
-     * Will be called with before each test method.
-     *
-     * @param stage - Will be injected by the test runner.
-     */
+    // Start will be called before each test method.
+    // "stage" argument will be injected by the test runner.
     @Start
     private void start(Stage stage) {
         Canvas canvas = new Canvas(stageWidth, stageHeight);
@@ -50,9 +47,8 @@ public class InputHandlerTest {
         this.stagePosition = new Point2D(stage.getX(), stage.getY());
     }
 
-    /**
-     * @param robot - Will be injected by the test runner.
-     */
+    // "robot" test method argument will be supplied by the test runner for all tests.
+
     @RepeatedTest(3)
     @DisplayName("onKeyPress")
     void testKeyPress(FxRobot robot) {
@@ -200,8 +196,8 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseDrag without onMouseClick")
-    void testPureMouseDrag(FxRobot robot) {
+    @DisplayName("onMouseDrag within stage bounds")
+    void testMouseDragWithinStage(FxRobot robot) {
         AtomicReference<Point2D> primaryButtonStartDrag = new AtomicReference<>(null);
         AtomicReference<Point2D> secondaryButtonStartDrag = new AtomicReference<>(null);
 
@@ -221,13 +217,13 @@ public class InputHandlerTest {
                 (x, y) -> secondaryButtonDragging.set(new Point2D(x, y)),
                 (x, y) -> secondaryButtonEndDrag.set(new Point2D(x, y)));
 
-        Point2D primaryDragStart = new Point2D(1, 1);
+        Point2D primaryDragStart = Point2D.ZERO;
         Point2D primaryDragEnd = new Point2D(stageWidth / 2, stageHeight / 2);
         Point2D secondaryDragStart = new Point2D(stageWidth / 2, stageHeight / 2);
         Point2D secondaryDragEnd = new Point2D(stageWidth - 1, stageHeight - 1);
 
         robot.drag(stagePosition.add(primaryDragStart), MouseButton.PRIMARY);
-        robot.dropBy((stageWidth / 2) - 1, (stageHeight / 2) - 1);
+        robot.dropTo(stagePosition.add(primaryDragEnd));
         robot.drag(stagePosition.add(secondaryDragStart), MouseButton.SECONDARY);
         robot.dropTo(stagePosition.add(secondaryDragEnd));
 
@@ -247,8 +243,54 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
+    @DisplayName("onMouseDrag outside stage bounds")
+    void testMouseDragOutsideStage(FxRobot robot) {
+        AtomicReference<Point2D> primaryButtonStartDrag = new AtomicReference<>(null);
+        AtomicReference<Point2D> secondaryButtonStartDrag = new AtomicReference<>(null);
+
+        AtomicReference<Point2D> primaryButtonDragging = new AtomicReference<>(null);
+        AtomicReference<Point2D> secondaryButtonDragging = new AtomicReference<>(null);
+
+        AtomicReference<Point2D> primaryButtonEndDrag = new AtomicReference<>(null);
+        AtomicReference<Point2D> secondaryButtonEndDrag = new AtomicReference<>(null);
+
+        inputHandler.onMouseDrag(MouseButton.PRIMARY,
+                (x, y) -> primaryButtonStartDrag.set(new Point2D(x, y)),
+                (x, y) -> primaryButtonDragging.set(new Point2D(x, y)),
+                (x, y) -> primaryButtonEndDrag.set(new Point2D(x, y)));
+
+        inputHandler.onMouseDrag(MouseButton.SECONDARY,
+                (x, y) -> secondaryButtonStartDrag.set(new Point2D(x, y)),
+                (x, y) -> secondaryButtonDragging.set(new Point2D(x, y)),
+                (x, y) -> secondaryButtonEndDrag.set(new Point2D(x, y)));
+
+        Point2D primaryDragStart = Point2D.ZERO;
+        Point2D midStage = new Point2D(stageWidth / 2, stageHeight / 2);
+        Point2D secondaryDragEnd = Point2D.ZERO;
+
+        robot.drag(primaryDragStart, MouseButton.PRIMARY);
+        robot.dropTo(stagePosition.add(midStage));
+        robot.drag(stagePosition.add(midStage), MouseButton.SECONDARY);
+        robot.dropTo(secondaryDragEnd);
+
+        Assertions.assertNull(primaryButtonStartDrag.get(),
+                "onMouseDrag primary start isn't null even though it started outside the stage's bounds.");
+        Assertions.assertNull(primaryButtonEndDrag.get(),
+                "onMouseDrag primary end isn't null even though it started outside the stage's bounds.");
+        Assertions.assertEquals(primaryButtonEndDrag.get(), primaryButtonDragging.get(),
+                "onMouseDrag primary isn't accurate.");
+
+        Assertions.assertNotNull(secondaryButtonStartDrag.get(),
+                "onMouseDrag secondary start is null even though it started inside the stage's bounds.");
+        Assertions.assertNotNull(secondaryButtonEndDrag.get(),
+                "onMouseDrag secondary end is null even though it started inside the stage's bounds.");
+        Assertions.assertEquals(secondaryButtonEndDrag.get(), secondaryButtonDragging.get(),
+                "onMouseDrag secondary isn't accurate.");
+    }
+
+    @RepeatedTest(3)
     @DisplayName("onMouseDrag with onMouseClick")
-    void testMixedMouseDrag(FxRobot robot) {
+    void testMouseInputCombined(FxRobot robot) {
         AtomicInteger primaryButtonClickCount = new AtomicInteger(0);
         AtomicInteger middleButtonClickCount = new AtomicInteger(0);
         AtomicInteger secondaryButtonClickCount = new AtomicInteger(0);
@@ -450,7 +492,8 @@ public class InputHandlerTest {
     @RepeatedTest(3)
     @DisplayName("Testing all input methods but disabled")
     void testInputsDisabled(FxRobot robot) {
-        inputHandler.disableInput = true;
+        inputHandler.setDisableInput(true);
+        Assertions.assertTrue(inputHandler.getDisableInput(), "Input wasn't disabled.");
 
         AtomicInteger keyPressACount = new AtomicInteger(0);
         AtomicInteger keyReleaseACount = new AtomicInteger(0);
@@ -533,8 +576,8 @@ public class InputHandlerTest {
         robot.clickOn(stagePosition.add(secondaryDragStart), Motion.DIRECT, MouseButton.MIDDLE);
         robot.clickOn(stagePosition.add(secondaryDragStart), Motion.DIRECT, MouseButton.SECONDARY);
 
-        Assertions.assertTrue(inputHandler.disableInput, "Input wasn't disabled.");
-        inputHandler.disableInput = false;
+        inputHandler.setDisableInput(false);
+        Assertions.assertFalse(inputHandler.getDisableInput(), "Input wasn't enabled.");
 
         Assertions.assertEquals(0, keyPressACount.get(),
                 "onKeyPress 'A' presses count isn't accurate.");
