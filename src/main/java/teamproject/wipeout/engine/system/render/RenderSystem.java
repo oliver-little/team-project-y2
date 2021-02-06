@@ -16,7 +16,7 @@ import teamproject.wipeout.engine.system.GameSystem;
 public class RenderSystem implements GameSystem {
 
     public static final Set<Class<? extends GameComponent>> cameraSignaturePattern = Set.of(Transform.class, CameraComponent.class);
-    public static final Set<Class<? extends GameComponent>> renderSignaturePattern = Set.of(Transform.class, RectRenderComponent.class);
+    public static final Set<Class<? extends GameComponent>> renderSignaturePattern = Set.of(Transform.class, RenderComponent.class);
 
     private Affine _identityTransform;
 
@@ -73,7 +73,7 @@ public class RenderSystem implements GameSystem {
         List<GameEntity> entities = this._renderableEntityCollector.getEntities();
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
-            Renderable r = entity.getComponent(RectRenderComponent.class);
+            RenderComponent r = entity.getComponent(RenderComponent.class);
             r.render(this._gc, t.position.getX(), t.position.getY());
         }
     }
