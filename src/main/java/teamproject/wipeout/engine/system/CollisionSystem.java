@@ -80,7 +80,7 @@ public class CollisionSystem implements GameSystem {
 
     }
     
-    private boolean intersects(Point2D minP1, Point2D maxP1, Point2D minP2, Point2D maxP2) {
+    public static boolean intersects(Point2D minP1, Point2D maxP1, Point2D minP2, Point2D maxP2) {
     	
     	if(maxP1.getX()>=minP2.getX() && maxP1.getY()>=minP2.getY() && maxP1.getX()<=maxP2.getX() && maxP1.getY()<=maxP2.getY()) {
     		return true;
