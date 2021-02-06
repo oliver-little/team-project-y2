@@ -60,17 +60,20 @@ public class CollisionSystem implements GameSystem {
     	Rectangle bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		Rectangle s1 = bb1[i];
-    		Point2D dimensionPoint1 = new Point2D(s1.getWidth(), s1.getHeight()); 
+    		//add absolute coord of top left corner
+    		Rectangle r1 = new Rectangle(bb1[i].getX()+t1.position.getX(),
+    									 bb1[i].getY()+t1.position.getY(),
+    									 bb1[i].getWidth(),
+    									 bb1[i].getHeight());
+
         	for(int j=0;j<bb2.length;j++) {
-        		Rectangle s2 = bb2[j];
-        		Point2D dimensionPoint2 = new Point2D(s2.getWidth(), s2.getHeight()); 
-        		//add coord of top left corner to offset
-            	Point2D minP1 = t1.position.add(new Point2D(s1.getX(),s1.getY()));
-            	Point2D maxP1 = minP1.add(dimensionPoint1);
-            	Point2D minP2 = t2.position.add(new Point2D(s2.getX(),s2.getY()));
-            	Point2D maxP2 = minP2.add(dimensionPoint2);
-            	if(intersects(minP1, maxP1, minP2, maxP2)) {
+        		//add absolute coord of top left corner
+        		Rectangle r2 = new Rectangle(bb2[j].getX()+t2.position.getX(),
+        									 bb2[j].getY()+t2.position.getY(),
+        									 bb2[j].getWidth(),
+        									 bb2[j].getHeight());
+        		
+            	if(intersects(r1,r2)) {
             		return true;
             	}
         	}
@@ -80,7 +83,13 @@ public class CollisionSystem implements GameSystem {
 
     }
     
-    public static boolean intersects(Point2D minP1, Point2D maxP1, Point2D minP2, Point2D maxP2) {
+    public static boolean intersects(Rectangle r1, Rectangle r2) {
+    	Point2D d1 = new Point2D(r1.getWidth(), r1.getHeight());
+    	Point2D d2 = new Point2D(r2.getWidth(), r2.getHeight());
+    	Point2D minP1 = new Point2D(r1.getX(),r1.getY());
+    	Point2D maxP1 = minP1.add(d1);
+    	Point2D minP2 = new Point2D(r2.getX(),r2.getY());
+    	Point2D maxP2 = minP2.add(d2);
     	
     	if(maxP1.getX()>=minP2.getX() && maxP1.getY()>=minP2.getY() && maxP1.getX()<=maxP2.getX() && maxP1.getY()<=maxP2.getY()) {
     		return true;
@@ -95,8 +104,8 @@ public class CollisionSystem implements GameSystem {
     		return true;
     	}
     	
-    	
     	return false;
     }
+   
 
 }

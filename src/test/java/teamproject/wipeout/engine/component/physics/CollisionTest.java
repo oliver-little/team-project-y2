@@ -5,19 +5,53 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
+import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.system.CollisionSystem;
 
 class CollisionTest
 {
 
 	@Test
-	void testNotIntersects()
+	void testRectangleNotIntersects()
 	{
-    	Point2D minP1 = new Point2D(0,0);
-    	Point2D maxP1 = new Point2D(10,10);
-    	Point2D minP2 = new Point2D(20,20);
-    	Point2D maxP2 = new Point2D(40,40);
-		assertFalse(CollisionSystem.intersects(minP1, maxP1, minP2, maxP2));
+		Rectangle r1 = new Rectangle(0,0,10,10);
+		Rectangle r2 = new Rectangle(20,20,10,10);
+		assertFalse(CollisionSystem.intersects(r1,r2));
 	}
 
+	
+	@Test
+	void testRectangleIntersects()
+	{
+		Rectangle r1 = new Rectangle(10,10,10,10);
+		Rectangle r2 = new Rectangle(0,0,10,10);
+		//collides at top left corner of r1
+		assertTrue(CollisionSystem.intersects(r1,r2));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(0,0,9,9);
+		//close but not colliding
+		assertFalse(CollisionSystem.intersects(r1,r2));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(12,12,4,4);
+		//r2 inside r1
+		assertTrue(CollisionSystem.intersects(r1,r2));
+				
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(10,10,4,4);
+		//collides at bottom right corner of r1
+		assertTrue(CollisionSystem.intersects(r1,r2));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(0,10,5,5);
+		//collides at bottom left corner of r1
+		assertTrue(CollisionSystem.intersects(r1,r2));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(10,0,4,4);
+		//collides at top right corner of r1
+		assertTrue(CollisionSystem.intersects(r1,r2));
+	}
+	
 }
