@@ -16,21 +16,13 @@ public class SignatureEntityCollector extends BaseEntityCollector {
     protected Set<Class<? extends GameComponent>> _signature;
     protected List<GameEntity> _entityList;
 
-    private GameScene _entityManager;
-
-    public SignatureEntityCollector(GameScene e, Set<Class<? extends GameComponent>> signature) {
-        this._entityManager = e;
+    public SignatureEntityCollector(GameScene scene, Set<Class<? extends GameComponent>> signature) {
+        super(scene);
 
         // Convert signature to a list internally for faster iteration
         this._signature = signature;
 
         this._entityList = new ArrayList<GameEntity>();
-
-        this._entityManager.entityChangeEvent.addObserver(this);
-    }
-
-    public void cleanup() {
-        this._entityManager.entityChangeEvent.removeObserver(this);
     }
 
     public List<GameEntity> getEntities() {

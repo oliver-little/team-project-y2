@@ -1,10 +1,22 @@
 package teamproject.wipeout.engine.entity.collector;
 
+import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
-import teamproject.wipeout.util.EventObserver;
 
-public abstract class BaseEntityCollector implements EntityCollector, EventObserver<EntityChangeData> {
+public abstract class BaseEntityCollector implements EntityCollector {
+
+    protected GameScene _scene;
+
+    public BaseEntityCollector(GameScene scene) {
+        this._scene = scene;
+
+        scene.entityChangeEvent.addObserver(this);
+    }
+
+    public void cleanup() {
+        this._scene.entityChangeEvent.removeObserver(this);
+    }
     
     public void eventCallback(EntityChangeData e) {
         String change = e.getChange();

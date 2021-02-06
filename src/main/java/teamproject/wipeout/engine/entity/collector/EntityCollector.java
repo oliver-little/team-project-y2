@@ -1,9 +1,8 @@
 package teamproject.wipeout.engine.entity.collector;
 
-import java.util.List;
+import teamproject.wipeout.engine.entity.event.EntityChangeData;
+import teamproject.wipeout.util.EventObserver;
 
-import teamproject.wipeout.engine.entity.GameEntity;
-
-public interface EntityCollector {
-    public List<GameEntity> getEntities();
+public interface EntityCollector extends EventObserver<EntityChangeData> {
+    public void cleanup();
 }
