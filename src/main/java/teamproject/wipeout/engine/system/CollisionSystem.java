@@ -50,6 +50,12 @@ public class CollisionSystem implements GameSystem {
         
     }
     
+    /**
+     * Checks whether two game entities collide (whether any of one's bounding boxes overlaps with the other's)
+     * @param g1 first game entity
+     * @param g2 second game entity
+     * @return true if they collide, false otherwise
+     */
     private boolean collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
     	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
@@ -60,19 +66,10 @@ public class CollisionSystem implements GameSystem {
     	Rectangle bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		//add absolute coord of top left corner
-    		Rectangle r1 = new Rectangle(bb1[i].getX()+t1.position.getX(),
-    									 bb1[i].getY()+t1.position.getY(),
-    									 bb1[i].getWidth(),
-    									 bb1[i].getHeight());
+    		Rectangle r1 = addAbsolutePosition(t1.position, bb1[i]);
 
         	for(int j=0;j<bb2.length;j++) {
-        		//add absolute coord of top left corner
-        		Rectangle r2 = new Rectangle(bb2[j].getX()+t2.position.getX(),
-        									 bb2[j].getY()+t2.position.getY(),
-        									 bb2[j].getWidth(),
-        									 bb2[j].getHeight());
-        		
+        		Rectangle r2 = addAbsolutePosition(t2.position, bb2[j]);
             	if(intersects(r1,r2)) {
             		return true;
             	}
@@ -83,6 +80,25 @@ public class CollisionSystem implements GameSystem {
 
     }
     
+    /**
+     * Adds the coordinate of the location of the rectangle to the relative position of the bounding box
+     * @param p location of the rectangle
+     * @param r the bounding box
+     * @return bounding box at correct location
+     */
+    private Rectangle addAbsolutePosition(Point2D p, Rectangle r) {
+    	return new Rectangle(r.getX()+p.getX(),
+    						 r.getY()+p.getY(),
+    						 r.getWidth(),
+    						 r.getHeight());
+    }
+    
+    /**
+     * Checks whether two rectangles intersect
+     * @param r1 first rectangle
+     * @param r2 second rectangle
+     * @return true if the rectangles intersect, false otherwise
+     */
     public static boolean intersects(Rectangle r1, Rectangle r2) {
     	Point2D d1 = new Point2D(r1.getWidth(), r1.getHeight());
     	Point2D d2 = new Point2D(r2.getWidth(), r2.getHeight());
@@ -91,6 +107,7 @@ public class CollisionSystem implements GameSystem {
     	Point2D minP2 = new Point2D(r2.getX(),r2.getY());
     	Point2D maxP2 = minP2.add(d2);
     	
+    	//this may be able to be reduced
     	if(maxP1.getX()>=minP2.getX() && maxP1.getY()>=minP2.getY() && maxP1.getX()<=maxP2.getX() && maxP1.getY()<=maxP2.getY()) {
     		return true;
     	}
