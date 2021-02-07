@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.assets;
+package teamproject.wipeout.game.assetmanagement;
 
 import java.io.File;
 import java.io.FileInputStream;
