@@ -16,7 +16,8 @@ public class GameSound {
     private Boolean playing;
     
     /**
-     * @param path  location of track file
+     * This is a class used to implement the backing track (music).
+     * @param path  location of track/music file
      */
     public GameSound(String path) {
     	Media media = new Media(new File(path).toURI().toString());
@@ -34,6 +35,9 @@ public class GameSound {
     	playing = true;
     }
     
+    /**
+     * Method to switch between playing and pausing
+     */
     public void playPause() {
 	    if(playing) {	
     		player.pause();
@@ -49,10 +53,18 @@ public class GameSound {
     	playing = false;
     }
     
+    /**
+     * Method to set the volume.
+     * @param volume  double value between 0.0 (inaudible) and 1.0 (full volume).
+     */
     public void setVolume(double volume) {
     	player.setVolume(volume);
     }
     
+    /**
+     * Method to get the volume.
+     * @return a double value between 0.0 (inaudible) and 1.0 (full volume).
+     */
     public double getVolume() {
     	return player.getVolume();
     }
