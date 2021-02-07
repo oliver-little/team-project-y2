@@ -13,7 +13,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.core.*;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
-import teamproject.wipeout.game.assets.SpriteManager;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 public class App extends Application {
 
