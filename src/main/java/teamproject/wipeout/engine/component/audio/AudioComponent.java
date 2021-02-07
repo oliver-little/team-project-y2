@@ -1,34 +1,34 @@
-package teamproject.wipeout.engine.component.sound;
+package teamproject.wipeout.engine.component.audio;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
-
 import teamproject.wipeout.engine.component.GameComponent;
 
-public class SoundComponent implements GameComponent{
+public class AudioComponent implements GameComponent {
 
 	private Boolean _play; //set to True when the sound needs to be played
 	private Media media;
 	
 	/**
 	 * This is a component class for adding sound effects to entities.
-	 * The SoundSystem checks the boolean attribute {@link #_play} to decide if the sound needs to play.
-	 * @param path  location of the sound file
+	 * The AudioSystem checks the boolean attribute {@link #_play} to decide if the sound needs to play.
+	 * @param audioFileName	name of the audio file
 	 */
-	public SoundComponent(String path) {
-		this.media = new Media(new File(path).toURI().toString());
+	public AudioComponent(String audioFileName) {
+		String filePath = this.getClass().getClassLoader().getResource("audio/" + audioFileName).toString(); // TODO: Handle null value -> throw exception
+
+		this.media = new Media(filePath);
 		this._play = false;
 	}
 	   
 	public String getType()
 	{
-		return "sound";
+		return "audio";
 	}
 	
 	/**
-	 * called by the SoundSystem to create a MediaPlayer and play sound.
+	 * called by the AudioSystem to create a MediaPlayer and play sound.
 	 */
 	public void playSound() {
 		MediaPlayer player = new MediaPlayer(media);
