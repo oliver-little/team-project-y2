@@ -9,7 +9,6 @@ import javafx.util.Duration;
  */
 public class GameAudio {
 	
-	//private Media media;
     private MediaPlayer player;
     private Boolean playing;
     

@@ -9,6 +9,7 @@ public class AudioComponent implements GameComponent {
 
 	private Boolean _play; //set to True when the sound needs to be played
 	private Media media;
+	private double volume;
 	
 	/**
 	 * This is a component class for adding sound effects to entities.
@@ -20,6 +21,7 @@ public class AudioComponent implements GameComponent {
 
 		this.media = new Media(filePath);
 		this._play = false;
+		this.volume = 1.0f; //initially set to full volume
 	}
 	   
 	public String getType()
@@ -32,6 +34,7 @@ public class AudioComponent implements GameComponent {
 	 */
 	public void playSound() {
 		MediaPlayer player = new MediaPlayer(media);
+		player.setVolume(volume);
 		player.play();
 		_play = false; //switched back to false so the sound only plays once.
 	}
@@ -46,4 +49,20 @@ public class AudioComponent implements GameComponent {
 	public boolean toPlay() {
 		return _play; //used to see if the sound needs to be played.
 	}
+	
+	/**
+     * Method to set the volume, done by AudioSystem.
+     * @param volume  double value between 0.0 (inaudible) and 1.0 (full volume).
+     */
+    public void setVolume(double volume) {
+    	this.volume = volume;
+    }
+    
+    /**
+     * Method to get the volume.
+     * @return a double value between 0.0 (inaudible) and 1.0 (full volume).
+     */
+    public double getVolume() {
+    	return volume;
+    }
 }

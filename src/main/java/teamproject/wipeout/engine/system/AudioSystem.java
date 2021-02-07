@@ -11,6 +11,7 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 public class AudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector _entityCollector;
+	private double spotEffectsVolume;
 	
 	/**
 	 * System which dictates which sounds to play
@@ -18,6 +19,7 @@ public class AudioSystem implements GameSystem {
 	 */
     public AudioSystem(GameScene e) {
         this._entityCollector = new SignatureEntityCollector(e, Set.of(AudioComponent.class)); //collects entities with AudioComponents
+        this.spotEffectsVolume = 1.0f; //initialised to full volume
     }
     
     /**
@@ -28,8 +30,25 @@ public class AudioSystem implements GameSystem {
 		for (GameEntity entity : entities) { //iterates through all entities with AudioComponents
 			AudioComponent s = entity.getComponent(AudioComponent.class);
 			if (s.toPlay()) {
+				s.setVolume(spotEffectsVolume); //applies the spot effects volume to component before playing
 				s.playSound();
 			}
 		}
+	}
+	
+	/**
+	 * sets the volume for all AudioComponent spot effects.
+	 * @param  a double value between 0.0 (inaudible) and 1.0 (full volume).
+	 */
+	public void setSpotEffectsVolume(double volume) {
+		spotEffectsVolume = volume;
+	}
+	
+	/**
+	 * returns the volume for all AudioComponent spot effects.
+	 * @return  a double value between 0.0 (inaudible) and 1.0 (full volume).
+	 */
+	public double getSpotEffectsVolume() {
+		return spotEffectsVolume;
 	}
 }
