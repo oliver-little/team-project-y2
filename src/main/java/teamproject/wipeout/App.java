@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.PhysicsComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
+import teamproject.wipeout.engine.component.sound.SoundComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.core.*;
 import teamproject.wipeout.engine.system.*;
@@ -62,12 +63,20 @@ public class App extends Application {
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));
         
         
-        GameSound gs = new GameSound("src\\main\\java\\teamproject\\wipeout\\sound\\backingTrack.mp3");
+        systemUpdater.addSystem(new SoundSystem(gameScene));
+        SoundComponent ngeSound = new SoundComponent("src\\main\\java\\teamproject\\wipeout\\sound\\glassSmashing.mp3"); //TODO: path may need changing?
+        nge.addComponent(ngeSound);
+        
+        input.addKeyAction(KeyCode.D, 
+        		() -> ngeSound.play(), 
+        		() -> {}); //example - pressing the D key will trigger the sound
+        
+        GameSound gs = new GameSound("src\\main\\java\\teamproject\\wipeout\\sound\\backingTrack.mp3");  //TODO: path may need changing?
         gs.play();
         
         input.addKeyAction(KeyCode.S, 
         		() -> gs.playPause(), 
-        		() -> {});
+        		() -> {}); //example - pressing the S key will switch between play and pause
         
         stage.setScene(scene);
         stage.show();
