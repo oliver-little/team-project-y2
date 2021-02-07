@@ -38,36 +38,36 @@ public class App extends Application {
         nge.addComponent(new Transform(250,250));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
 
-        PhysicsComponent ngePhysics = new PhysicsComponent(0f, 0f, 0f, 0f);
+        MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
 
         InputHandler input = new InputHandler(scene);
         input.addKeyAction(KeyCode.LEFT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f));
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f),
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(500f, 0f));
 
         input.addKeyAction(KeyCode.RIGHT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f));
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(500f, 0f),
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f));
 
         input.addKeyAction(KeyCode.UP,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f));
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f),
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f));
 
         input.addKeyAction(KeyCode.DOWN,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f));
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f),
+                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f));
 
         input.onMouseClick(MouseButton.PRIMARY,
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));
         
         
-        GameSound gs = new GameSound("src\\main\\java\\teamproject\\wipeout\\sound\\backingTrack.mp3");
-        gs.play();
+        // GameSound gs = new GameSound("src\\main\\java\\teamproject\\wipeout\\sound\\backingTrack.mp3");
+        // gs.play();
         
-        input.addKeyAction(KeyCode.S, 
-        		() -> gs.playPause(), 
-        		() -> {});
+        // input.addKeyAction(KeyCode.S, 
+        // 		() -> gs.playPause(), 
+        // 		() -> {});
         
         stage.setScene(scene);
         stage.show();
