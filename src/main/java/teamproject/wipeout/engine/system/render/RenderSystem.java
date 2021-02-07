@@ -14,8 +14,7 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
 public class RenderSystem implements GameSystem {
-
-    public static final Set<Class<? extends GameComponent>> cameraSignaturePattern = Set.of(Transform.class, CameraComponent.class);
+    
     public static final Set<Class<? extends GameComponent>> renderSignaturePattern = Set.of(Transform.class, RenderComponent.class);
 
     private Affine _identityTransform;

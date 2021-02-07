@@ -3,9 +3,11 @@ package teamproject.wipeout;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.PhysicsComponent;
 import teamproject.wipeout.engine.component.render.*;
@@ -29,21 +31,30 @@ public class App extends Application {
         SpriteManager spriteManager = new SpriteManager();
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
+
+        GameEntity camera = gameScene.createEntity();
+        camera.addComponent(new Transform(0, 0));
+        camera.addComponent(new CameraComponent(2));
+        camera.addComponent(new TagComponent("MainCamera"));
         
         GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(250,250));
+        nge.addComponent(new Transform(10,10));
         //nge.addComponent(new RenderComponent(new RectRenderable(Color.DARKRED, 20, 20)));
         //nge.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "sprite.png"))));
 
         try {
             spriteManager.loadSpriteSheet(imgPath + "spritesheet.png", 32, 32);
-            nge.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getSprite(imgPath + "spritesheet.png", 9, 9))));
+            Image[][] spriteSheet = spriteManager.getSpriteSheet(imgPath + "spritesheet.png");
+            Image[] frames = new Image[spriteSheet.length];
+            for (int row = 0; row < spriteSheet.length; row++) {
+                frames[row] = spriteSheet[row][2];
+            }
+            
+            nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-
-        nge.addComponent(new PhysicsComponent(80f, -100f, -20f, 40f));
 
         
         Scene scene = new Scene(new StackPane(canvas), 1920, 1080);

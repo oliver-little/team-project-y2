@@ -42,15 +42,16 @@ public class SpriteManager {
     } 
 
 
-    public Image getSprite(String path, int x, int y) throws FileNotFoundException {
-
+    public Image[][] getSpriteSheet(String path) throws FileNotFoundException {
         if (!spriteSheetCache.containsKey(path)) {
             throw new FileNotFoundException("Sprite sheet not loaded.");
         }
 
-        return spriteSheetCache.get(path)[x][y];
+        return spriteSheetCache.get(path);
+    }
 
-
+    public Image getSprite(String path, int x, int y) throws FileNotFoundException {
+        return this.getSpriteSheet(path)[x][y];
     }
 
     public void loadSpriteSheet(String path, int width, int height) throws FileNotFoundException, IOException {
@@ -69,9 +70,7 @@ public class SpriteManager {
             }
         }
 
-        spriteSheetCache.put(path,subImage); 
-
-            
+        spriteSheetCache.put(path,subImage);     
     }
 
     private static Image getSubImage(BufferedImage image, int xStart, int yStart, int width, int height) {
