@@ -152,40 +152,43 @@ public class CollisionSystem implements GameSystem {
      * @return true if the rectangles intersect, false otherwise
      */
     public static boolean intersects(Rectangle r1, Rectangle r2) {
-    	Point2D d1 = new Point2D(r1.getWidth(), r1.getHeight());
-    	Point2D d2 = new Point2D(r2.getWidth(), r2.getHeight());
-    	Point2D minP1 = new Point2D(r1.getX(),r1.getY());
-    	Point2D maxP1 = minP1.add(d1);
-    	Point2D minP2 = new Point2D(r2.getX(),r2.getY());
-    	Point2D maxP2 = minP2.add(d2);
+    	//top left, bottom right, top right, bottom left corners of r1
+    	Point2D tl = new Point2D(r1.getX(),r1.getY());
+    	Point2D br = tl.add(new Point2D(r1.getWidth(), r1.getHeight()));
+    	Point2D tr = tl.add(new Point2D(r1.getWidth(), 0));
+    	Point2D bl = tl.add(new Point2D(0, r1.getHeight())) ;
     	
-    	//this may be able to be reduced
-    	if(maxP1.getX()>=minP2.getX() && maxP1.getY()>=minP2.getY() && maxP1.getX()<=maxP2.getX() && maxP1.getY()<=maxP2.getY()) {
-    		return true;
-    	}
-    	else if(minP1.getX()>=minP2.getX() && minP1.getY()>=minP2.getY() && minP1.getX()<=maxP2.getX() && minP1.getY()<=maxP2.getY()) {
-    		return true;
-    	}
-    	else if(minP1.getX()>=minP2.getX() && maxP1.getY()>=minP2.getY() && minP1.getX()<=maxP2.getX() && maxP1.getY()<=maxP2.getY()) {
-    		return true;
-    	}
-    	else if(maxP1.getX()>=minP2.getX() && minP1.getY()>=minP2.getY() && maxP1.getX()<=maxP2.getX() && minP1.getY()<=maxP2.getY()) {
+    	if (isPointInside(tl, r2) || isPointInside(br, r2) || isPointInside(tr, r2) || isPointInside(bl, r2)) {
     		return true;
     	}
     	
-    	else if(maxP2.getX()>=minP1.getX() && maxP2.getY()>=minP1.getY() && maxP2.getX()<=maxP1.getX() && maxP2.getY()<=maxP1.getY()) {
-    		return true;
-    	}
-    	else if(minP2.getX()>=minP1.getX() && minP2.getY()>=minP1.getY() && minP2.getX()<=maxP1.getX() && minP2.getY()<=maxP1.getY()) {
-    		return true;
-    	}
-    	else if(minP2.getX()>=minP1.getX() && maxP2.getY()>=minP1.getY() && minP2.getX()<=maxP1.getX() && maxP2.getY()<=maxP1.getY()) {
-    		return true;
-    	}
-    	else if(maxP2.getX()>=minP1.getX() && minP2.getY()>=minP1.getY() && maxP2.getX()<=maxP1.getX() && minP2.getY()<=maxP1.getY()) {
-    		return true;
-    	}
+    	//the following code will run if r2 inside r1
     	
+    	//top left, bottom right, top right, bottom left corners of r2
+    	tl = new Point2D(r2.getX(),r2.getY());
+    	br = tl.add(new Point2D(r2.getWidth(), r2.getHeight()));
+    	tr = tl.add(new Point2D(r2.getWidth(), 0));
+    	bl = tl.add(new Point2D(0, r2.getHeight())) ;
+
+    	
+    	return (isPointInside(tl, r1) || isPointInside(br, r1) || isPointInside(tr, r1) || isPointInside(bl, r1));
+    }
+    
+    /**
+     * Checks whether a point is inside a rectangle (inclusive of edges)
+     * @param p point to check
+     * @param r rectangle
+     * @return true if point is inside rectangle, false otherwise.
+     */
+    private static boolean isPointInside(Point2D p, Rectangle r) {
+    	//check point beyond top left corner of rectangle
+    	if(p.getX()>=r.getX() && p.getY()>=r.getY()) {
+    		//check point before bottom right corner of rectangle
+        	if(p.getX()<=(r.getX()+r.getWidth()) && p.getY()<=(r.getY()) + r.getHeight()) {
+        		System.out.println(p.toString()+" is inside "+r.toString());
+        		return true;
+        	}
+    	}
     	
     	return false;
     }
