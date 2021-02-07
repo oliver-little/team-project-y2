@@ -33,7 +33,15 @@ public class App extends Application {
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(250,250));
         //nge.addComponent(new RenderComponent(new RectRenderable(Color.DARKRED, 20, 20)));
-        nge.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "sprite.png"))));
+        //nge.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "sprite.png"))));
+
+        try {
+            spriteManager.loadSpriteSheet(imgPath + "spritesheet.png", 32, 32);
+            nge.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getSprite(imgPath + "spritesheet.png", 9, 9))));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         nge.addComponent(new PhysicsComponent(80f, -100f, -20f, 40f));
 
