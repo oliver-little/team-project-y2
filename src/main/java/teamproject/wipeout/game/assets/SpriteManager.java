@@ -57,6 +57,10 @@ public class SpriteManager {
 
         BufferedImage image = ImageIO.read(new File(path));
 
+        if (image.getWidth() % width != 0 || image.getHeight() % height != 0 ) {
+            throw new NumberFormatException("Sprite sheet dimensions do not divide evenly.");
+        }
+
         Image[][] subImage = new Image[image.getWidth()/width][image.getHeight()/height];
 
         for (int x = 0; x < image.getWidth(); x += width) {
