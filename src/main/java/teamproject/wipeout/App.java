@@ -11,8 +11,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -35,6 +37,7 @@ public class App extends Application {
         RenderSystem renderer = new RenderSystem(gameScene, canvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new MovementSystem(gameScene));
+        systemUpdater.addSystem(new CollisionSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
         
