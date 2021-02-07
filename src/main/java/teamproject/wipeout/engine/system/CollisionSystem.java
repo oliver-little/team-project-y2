@@ -162,7 +162,9 @@ public class CollisionSystem implements GameSystem {
     		return true;
     	}
     	
-    	//the following code will run if r2 inside r1
+    	//the following code will run to check r2 inside r1
+    	// can probably be simplified
+    	// if r2 completely inside r1, then we only need to check 1 point 
     	
     	//top left, bottom right, top right, bottom left corners of r2
     	tl = new Point2D(r2.getX(),r2.getY());
