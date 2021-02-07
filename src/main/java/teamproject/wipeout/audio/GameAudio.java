@@ -1,15 +1,13 @@
-package teamproject.wipeout.sound;
+package teamproject.wipeout.audio;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
-import java.io.File;  
-
 /**
  * Used for the game's background music.
  */
-public class GameSound {
+public class GameAudio {
 	
 	//private Media media;
     private MediaPlayer player;
@@ -17,10 +15,12 @@ public class GameSound {
     
     /**
      * This is a class used to implement the backing track (music).
-     * @param path  location of track/music file
+     * @param audioFileName	name of the audio file
      */
-    public GameSound(String path) {
-    	Media media = new Media(new File(path).toURI().toString());
+    public GameAudio(String audioFileName) {
+    	String filePath = this.getClass().getClassLoader().getResource("audio/" + audioFileName).toString(); // TODO: Handle null value -> throw exception
+
+    	Media media = new Media(filePath);
     	this.player = new MediaPlayer(media);
     	player.setOnEndOfMedia(new Runnable() { //ensures song loops continuously
     		public void run() {
