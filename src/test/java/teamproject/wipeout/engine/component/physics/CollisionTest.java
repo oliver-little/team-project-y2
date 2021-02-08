@@ -20,6 +20,18 @@ class CollisionTest
 		assertFalse(CollisionComponent.intersects(r1,r2));
 	}
 
+	@Test
+	void testCircleAndRectangleIntersect() {
+		Rectangle r1 = new Rectangle(0,0,10,10);
+		Circle c1 = new Circle(0,0,10);
+		assertTrue(CollisionComponent.intersects(c1,r1));
+		
+		r1 = new Rectangle(0,0,10,10);
+		c1 = new Circle(4,4,2);
+		//c1 inside r1
+		assertTrue(CollisionComponent.intersects(c1,r1));
+	}
+	
 	
 	@Test
 	void testRectanglesIntersects()

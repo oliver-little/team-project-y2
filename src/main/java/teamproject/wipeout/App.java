@@ -46,6 +46,7 @@ public class App extends Application {
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(250, 250));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
+        nge.addComponent(new CollisionComponent(new Rectangle(20,20)));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
@@ -83,21 +84,25 @@ public class App extends Application {
         platformBottom.addComponent(new Transform(50, 520));
         platformBottom.addComponent(new RectRenderComponent(Color.BLACK, 700, 50));
         platformBottom.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        platformBottom.addComponent(new CollisionComponent(new Rectangle(700,50)));
 
         GameEntity platformUp = gameScene.createEntity();
         platformUp.addComponent(new Transform(50, 30));
         platformUp.addComponent(new RectRenderComponent(Color.BLACK, 700, 50));
         platformUp.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        platformUp.addComponent(new CollisionComponent(new Rectangle(700,50)));
 
         GameEntity platformLeft = gameScene.createEntity();
         platformLeft.addComponent(new Transform(50, 80));
         platformLeft.addComponent(new RectRenderComponent(Color.BLACK, 50, 440));
         platformLeft.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        platformLeft.addComponent(new CollisionComponent(new Rectangle(50,440)));
 
         GameEntity platformRight = gameScene.createEntity();
         platformRight.addComponent(new Transform(700, 80));
         platformRight.addComponent(new RectRenderComponent(Color.BLACK, 50, 440));
         platformRight.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        platformRight.addComponent(new CollisionComponent(new Rectangle(50,440)));
 
         stage.setScene(scene);
         stage.show();

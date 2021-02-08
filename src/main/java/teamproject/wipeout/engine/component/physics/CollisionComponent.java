@@ -163,13 +163,69 @@ public class CollisionComponent implements GameComponent {
     public static boolean intersects(Circle c1, Circle c2) {
     	//intersect if the distance between their two centres is less than the sum of their radiuses
     	double radiusSum = c1.getRadius()+c2.getRadius();
-    	double distanceBetweenCentres = Math.sqrt(Math.pow(c1.getCenterX()-c2.getCenterX(), 2)+(Math.pow(c1.getCenterY()-c2.getCenterY(), 2)));
+    	Point2D centre1 = new Point2D(c1.getCenterX(), c1.getCenterY());
+    	Point2D centre2 = new Point2D(c2.getCenterX(), c2.getCenterY());
+    	double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
     	
     	if(distanceBetweenCentres <= radiusSum) {
     		return true;
     	}
     	
     	return false;
+    }
+    
+    /**
+     * Checks whether a circle and a rectangle collide
+     * @param c1 the circle
+     * @param r1 the rectangle
+     * @return true if the circle and rectangle intersect, false otherwise
+     */
+    public static boolean intersects(Circle c1, Rectangle r1) {
+    	//collide if distance between centre of circle and any corner of rectangle is less than
+    	// or equal to the radius of the circle
+    	// also collide if circle is completely inside the rectangle
+    	// this is when centre of circle is contained in the rectangle
+    	
+    	Point2D centre = new Point2D(c1.getCenterX(), c1.getCenterY());
+    	if(isPointInside(centre, r1)) {
+    		return true;
+    	}
+    	
+    	Point2D tl = new Point2D(r1.getX(),r1.getY());
+    	if (getDistanceBetweenTwoPoints(centre, tl) <= c1.getRadius()) {
+    		return true;
+    	}
+    	
+    	Point2D br = tl.add(new Point2D(r1.getWidth(), r1.getHeight()));
+    	if (getDistanceBetweenTwoPoints(centre, br) <= c1.getRadius()) {
+    		return true;
+    	}
+    	
+    	Point2D tr = tl.add(new Point2D(r1.getWidth(), 0));
+    	if (getDistanceBetweenTwoPoints(centre, tr) <= c1.getRadius()) {
+    		return true;
+    	}
+    	
+    	Point2D bl = tl.add(new Point2D(0, r1.getHeight())) ;
+    	if (getDistanceBetweenTwoPoints(centre, bl) <= c1.getRadius()) {
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
+     * Checks whether a circle and a rectangle collide
+     * @param r1 the rectangle
+     * @param c1 the circle
+     * @return true if the circle and rectangle intersect, false otherwise
+     */
+    public static boolean intersects(Rectangle r1, Circle c1) {
+    	return intersects(c1,r1);
+    }
+    
+    public static double getDistanceBetweenTwoPoints(Point2D p1, Point2D p2) {
+    	return Math.sqrt(Math.pow(p1.getX()-p2.getX(), 2)+(Math.pow(p1.getY()-p2.getY(), 2)));
     }
     
     /**
@@ -189,18 +245,14 @@ public class CollisionComponent implements GameComponent {
     		return true;
     	}
     	
-    	//the following code will run to check r2 inside r1
+    	// the following code will run to check r2 inside r1
     	// can probably be simplified
     	// if r2 completely inside r1, then we only need to check 1 point 
     	
     	//top left, bottom right, top right, bottom left corners of r2
     	tl = new Point2D(r2.getX(),r2.getY());
-    	br = tl.add(new Point2D(r2.getWidth(), r2.getHeight()));
-    	tr = tl.add(new Point2D(r2.getWidth(), 0));
-    	bl = tl.add(new Point2D(0, r2.getHeight())) ;
 
-    	
-    	return (isPointInside(tl, r1) || isPointInside(br, r1) || isPointInside(tr, r1) || isPointInside(bl, r1));
+    	return isPointInside(tl, r1);
     }
     
     /**
