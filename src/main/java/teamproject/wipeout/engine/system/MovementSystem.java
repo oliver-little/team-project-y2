@@ -23,8 +23,10 @@ public class MovementSystem implements GameSystem {
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
             MovementComponent m = entity.getComponent(MovementComponent.class);
-            m.velocity = m.velocity.add(m.acceleration.multiply(timeStep));
+            m.updateVelocity(timeStep);
             t.position = t.position.add(m.velocity.multiply(timeStep));
+            
+            m.updateFacingDirection();
         }
     }
 }
