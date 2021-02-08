@@ -15,8 +15,8 @@ import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.core.*;
 import teamproject.wipeout.engine.system.*;
-import teamproject.wipeout.input.InputHandler;
-import teamproject.wipeout.audio.GameAudio;
+import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.engine.audio.GameAudio;
 
 public class App extends Application {
 	
@@ -38,25 +38,25 @@ public class App extends Application {
         nge.addComponent(new Transform(250,250));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
 
-        PhysicsComponent ngePhysics = new PhysicsComponent(0f, 0f, 0f, 0f);
+        PhysicsComponent ngePhysics = new PhysicsComponent(0, 0, 0, 0);
         nge.addComponent(ngePhysics);
 
         InputHandler input = new InputHandler(scene);
         input.addKeyAction(KeyCode.LEFT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50, 0),
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(50, 0));
 
         input.addKeyAction(KeyCode.RIGHT,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(50f, 0f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50f, 0f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(50, 0),
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50, 0));
 
         input.addKeyAction(KeyCode.UP,
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0, 50),
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(0, 50));
 
         input.addKeyAction(KeyCode.DOWN,
-                () -> ngePhysics.velocity = ngePhysics.velocity.add(0f, 50f),
-                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0f, 50f));
+                () -> ngePhysics.velocity = ngePhysics.velocity.add(0, 50),
+                () -> ngePhysics.velocity = ngePhysics.velocity.subtract(0, 50));
 
         input.onMouseClick(MouseButton.PRIMARY,
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));

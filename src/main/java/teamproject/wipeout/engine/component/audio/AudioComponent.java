@@ -5,10 +5,10 @@ import javafx.scene.media.MediaPlayer;
 
 import teamproject.wipeout.engine.component.GameComponent;
 
-public class AudioComponent implements GameComponent {
+public final class AudioComponent implements GameComponent {
 
 	private Boolean _play; //set to True when the sound needs to be played
-	private Media media;
+	private final Media media;
 	private double volume;
 	
 	/**
@@ -21,7 +21,7 @@ public class AudioComponent implements GameComponent {
 
 		this.media = new Media(filePath);
 		this._play = false;
-		this.volume = 1.0f; //initially set to full volume
+		this.volume = 1.0; //initially set to full volume
 	}
 	   
 	public String getType()
@@ -33,7 +33,7 @@ public class AudioComponent implements GameComponent {
 	 * called by the AudioSystem to create a MediaPlayer and play sound.
 	 */
 	public void playSound() {
-		MediaPlayer player = new MediaPlayer(media);
+		MediaPlayer player = new MediaPlayer(media); // TODO: Maybe have only one MediaPlayer per AudioComponent -> if we need better performance later
 		player.setVolume(volume);
 		player.play();
 		_play = false; //switched back to false so the sound only plays once.

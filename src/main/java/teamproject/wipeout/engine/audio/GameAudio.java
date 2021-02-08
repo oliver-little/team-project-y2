@@ -1,4 +1,4 @@
-package teamproject.wipeout.audio;
+package teamproject.wipeout.engine.audio;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -7,10 +7,10 @@ import javafx.util.Duration;
 /**
  * Used for the game's background music.
  */
-public class GameAudio {
+public final class GameAudio {
 	
-    private MediaPlayer player;
-    private Boolean playing;
+    private final MediaPlayer player;
+    private Boolean _playing;
     
     /**
      * This is a class used to implement the backing track (music).
@@ -21,43 +21,46 @@ public class GameAudio {
 
     	Media media = new Media(filePath);
     	this.player = new MediaPlayer(media);
-    	player.setOnEndOfMedia(new Runnable() { //ensures song loops continuously
-    		public void run() {
-    			player.seek(Duration.ZERO); 
-    		}
-    	});
-    	playing = false;
+    	this.player.setOnEndOfMedia(() -> player.seek(Duration.ZERO)); //ensures the track loops continuously
+    	this._playing = false;
     }
     
     public void play() {
     	player.play();
-    	playing = true;
+    	_playing = true;
     }
     
     /**
-     * Method to switch between playing and pausing
+     * Method to switch between _playing and pausing
      */
     public void playPause() {
-	    if(playing) {	
+	    if(_playing) {
     		player.pause();
-	    	playing = false;
+	    	_playing = false;
 	    }else {
 	    	player.play();
-	    	playing = true;
+	    	_playing = true;
 	    }
     }
     
     public void stop() {
     	player.stop();
-    	playing = false;
+    	_playing = false;
     }
     
     /**
      * Method to set the volume.
-     * @param volume  double value between 0.0 (inaudible) and 1.0 (full volume).
+     * @param volume double value between 0.0 (inaudible) and 1.0 (full volume).
      */
     public void setVolume(double volume) {
-    	player.setVolume(volume);
+    	if (volume == 0.0) {
+    		player.setMute(true);
+		} else {
+    		if (player.isMute()) {
+				player.setMute(false);
+			}
+			player.setVolume(volume);
+		}
     }
     
     /**
@@ -69,6 +72,6 @@ public class GameAudio {
     }
     
     public boolean isPlaying() {
-    	return playing;
+    	return _playing;
     }
 }

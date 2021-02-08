@@ -17,6 +17,10 @@ public class PhysicsSystem implements GameSystem {
         this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, PhysicsComponent.class));
     }
 
+    public void cleanup() {
+        this._entityCollector.cleanup();
+    }
+
     public void accept(Double timeStep) {
         List<GameEntity> entities = this._entityCollector.getEntities();
 

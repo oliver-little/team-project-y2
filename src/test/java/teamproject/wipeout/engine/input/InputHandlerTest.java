@@ -1,4 +1,4 @@
-package teamproject.wipeout.input;
+package teamproject.wipeout.engine.input;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;

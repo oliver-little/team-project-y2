@@ -1,4 +1,4 @@
-package teamproject.wipeout.input;
+package teamproject.wipeout.engine.input;
 
 /**
  * InputKeyAction is an interface representing any action that will be triggered by a certain {@code KeyEvent}.
