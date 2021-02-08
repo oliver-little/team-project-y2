@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
+import teamproject.wipeout.engine.component.physics.FacingDirection;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
@@ -43,6 +44,7 @@ public class CollisionSystem implements GameSystem {
                         MovementComponent m2 = entities.get(j).getComponent(MovementComponent.class);
                         m2.velocity= new Point2D(0,0);
                         m2.acceleration = new Point2D(0,0);
+
                         
                         
                 	}

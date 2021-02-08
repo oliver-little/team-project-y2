@@ -5,9 +5,6 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 
 public class MovementComponent implements GameComponent {
-    public enum FacingDirection {
-        UP, DOWN, LEFT, RIGHT
-    }
     public Point2D velocity;
     public Point2D acceleration;
     public FacingDirection facingDirection;

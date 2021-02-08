@@ -82,27 +82,27 @@ public class App extends Application {
         //Wall
         GameEntity platformBottom = gameScene.createEntity();
         platformBottom.addComponent(new Transform(50, 520));
-        platformBottom.addComponent(new RectRenderComponent(Color.BLACK, 700, 50));
+        platformBottom.addComponent(new RectRenderComponent(Color.BLACK, 600, 50));
         platformBottom.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformBottom.addComponent(new CollisionComponent(new Rectangle(700,50)));
+        platformBottom.addComponent(new CollisionComponent(new Rectangle(600,50)));
 
         GameEntity platformUp = gameScene.createEntity();
         platformUp.addComponent(new Transform(50, 30));
-        platformUp.addComponent(new RectRenderComponent(Color.BLACK, 700, 50));
+        platformUp.addComponent(new RectRenderComponent(Color.RED, 600, 50));
         platformUp.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformUp.addComponent(new CollisionComponent(new Rectangle(700,50)));
+        platformUp.addComponent(new CollisionComponent(new Rectangle(600,50)));
 
         GameEntity platformLeft = gameScene.createEntity();
-        platformLeft.addComponent(new Transform(50, 80));
-        platformLeft.addComponent(new RectRenderComponent(Color.BLACK, 50, 440));
+        platformLeft.addComponent(new Transform(50, 100));
+        platformLeft.addComponent(new RectRenderComponent(Color.BLUE, 50, 400));
         platformLeft.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformLeft.addComponent(new CollisionComponent(new Rectangle(50,440)));
+        platformLeft.addComponent(new CollisionComponent(new Rectangle(50,400)));
 
         GameEntity platformRight = gameScene.createEntity();
         platformRight.addComponent(new Transform(700, 80));
-        platformRight.addComponent(new RectRenderComponent(Color.BLACK, 50, 440));
+        platformRight.addComponent(new RectRenderComponent(Color.GREEN, 50, 400));
         platformRight.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformRight.addComponent(new CollisionComponent(new Rectangle(50,440)));
+        platformRight.addComponent(new CollisionComponent(new Rectangle(50,400)));
 
         stage.setScene(scene);
         stage.show();
