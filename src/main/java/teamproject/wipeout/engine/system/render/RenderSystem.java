@@ -91,7 +91,7 @@ public class RenderSystem implements GameSystem {
         Point2D cameraPosBottomRight = cameraPos.add(width, height);
 
         // Clear the screen ready for rendering
-        this.gc.clearRect(0, 0, width, height);
+        this.gc.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
         List<GameEntity> entities = this.renderableEntityCollector.getEntities();
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
