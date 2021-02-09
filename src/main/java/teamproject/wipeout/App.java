@@ -11,11 +11,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
+import teamproject.wipeout.engine.component.physics.MassEnergyComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.render.CircleRenderComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.core.*;
@@ -47,6 +50,7 @@ public class App extends Application {
         nge.addComponent(new Transform(250, 250));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
         nge.addComponent(new CollisionComponent(new Rectangle(20,20)));
+        nge.addComponent(new MassEnergyComponent(10));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);

@@ -95,11 +95,11 @@ public class CollisionComponent implements GameComponent {
     	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		Rectangle r1 = addAbsolutePosition(t1.position, castToShape(bb1[i]));
+    		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
 
         	for(int j=0;j<bb2.length;j++) {
-        		Rectangle r2 = addAbsolutePosition(t2.position, castToShape(bb2[j]));
-            	if(intersects(r1,r2)) {
+        		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
+            	if(intersects(s1,s2)) {
             		return true;
             	}
         	}
@@ -108,23 +108,42 @@ public class CollisionComponent implements GameComponent {
     	return false;
 
     }
-    
+
     /**
-     * Converts a generic shape to specific
-     * @param <T>
-     * @param s shape to cast
-     * @return casted shape
+     * Intersects function for generic shapes that calls the appropriate intersects function
+     * @param s1 first shape
+     * @param s2 second shape
+     * @return true if the shapes collide, false otherwise
      */
-    // https://stackoverflow.com/a/450874
-    private static <T extends Shape> T castToShape(Shape s) {
-    	if(s.getClass()==Rectangle.class) {
-    		return (T) s;
-    	}
-    	else if(s.getClass()==Circle.class) {
-    		return (T) s;
-    	}
-    	return null;
+	public static boolean intersects(Shape s1, Shape s2) {
+		if(s1 instanceof Rectangle) {
+			Rectangle r1 = (Rectangle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return intersects(r1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return intersects(r1,c2);
+			}
+		}
+		else if(s1 instanceof Circle) {
+			Circle c1 = (Circle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return intersects(c1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return intersects(c1,c2);
+			}
+		}
+		
+		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
+		
+    	return false;
     }
+    
     
     /**
      * Takes an array of different shapes and returns just the rectangles
@@ -153,6 +172,25 @@ public class CollisionComponent implements GameComponent {
     						 r.getWidth(),
     						 r.getHeight());
     }
+    
+    /**
+     * Method that takes a generic shape and calls the correct function to add absolute position
+     * @param p absolute position
+     * @param shape generic shape
+     * @return shape at correct location
+     */
+    private static Shape addAbsolutePosition(Point2D p, Shape shape) {
+    	if(shape instanceof Rectangle) {
+    		return addAbsolutePosition(p, (Rectangle) shape);
+    	}
+    	else if(shape instanceof Circle) {
+    		return addAbsolutePosition(p, (Circle) shape);
+    	}
+    	
+    	System.out.print("addAbsolutePosition not implemented yet for "+ shape.getClass().toString());
+    	return null;
+    }
+    
     
     /**
      * Checks whether two circles intersect
