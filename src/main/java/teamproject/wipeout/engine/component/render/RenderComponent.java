@@ -11,9 +11,7 @@ public class RenderComponent implements GameComponent {
     private List<Renderable> renderables;
 
     public RenderComponent() {
-
-        renderables = new ArrayList<Renderable>();
-
+        this.renderables = new ArrayList<Renderable>();
     }
 
     /**
@@ -48,16 +46,57 @@ public class RenderComponent implements GameComponent {
     public void removeRenderable(Renderable renderableObj) {
         renderables.remove(renderableObj);
     }
+    
+    /**
+     * Returns the maximum width of this RenderComponent
+     * based on the width of all Renderables it stores
+     * 
+     * @return The width of this RenderComponent
+     */
+    public double getWidth() {
+        double width = 0;
+
+        for (Renderable r : renderables) {
+            double rWidth = r.getWidth();
+            
+            if (rWidth > width) {
+                width = rWidth;
+            }
+        }
+
+        return width;
+    }
+
+    /**
+     * Returns the maximum height of this RenderComponent
+     * based on the height of all Renderables it stores
+     * 
+     * @return The height of this RenderComponent
+     */
+    public double getHeight() {
+        double height = 0;
+
+        for (Renderable r : renderables) {
+            double rHeight = r.getHeight();
+            
+            if (rHeight > height) {
+                height = rHeight;
+            }
+        }
+
+        return height;
+    }
 
     /**
      * Calls render on all stored renderables.
      * @param gc Graphics context to render to the screen.
      * @param x X co-ordinate.
      * @param y Y co-ordinate.
+     * @param scale The scale to render at (1 for normal size)
      */
-    public void render(GraphicsContext gc, double x, double y) {
+    public void render(GraphicsContext gc, double x, double y, double scale) {
         for (Renderable r : renderables) {
-            r.render(gc, x, y);
+            r.render(gc, x, y, scale);
         }
     }
 
