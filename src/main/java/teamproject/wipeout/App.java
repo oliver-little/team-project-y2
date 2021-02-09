@@ -5,20 +5,28 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.PhysicsComponent;
-import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.core.*;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.audio.GameAudio;
+import teamproject.wipeout.engine.component.render.*;
+import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.core.*;
+import teamproject.wipeout.engine.system.*;
+import teamproject.wipeout.engine.system.render.RenderSystem;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 public class App extends Application {
+
+    public String imgPath = "./assets/";
 
     @Override
     public void start(Stage stage) {
@@ -34,10 +42,34 @@ public class App extends Application {
         systemUpdater.addSystem(new AudioSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
+
+        GameEntity camera = gameScene.createEntity();
+        camera.addComponent(new Transform(0, 0));
+        camera.addComponent(new CameraComponent(1));
+        camera.addComponent(new TagComponent("MainCamera"));
         
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(250,250));
-        nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
+
+
+        // Animated Sprite
+        SpriteManager spriteManager = new SpriteManager();
+
+        try {
+            spriteManager.loadSpriteSheet(imgPath + "spritesheet.png", 32, 32);
+            Image[][] spriteSheet = spriteManager.getSpriteSheet(imgPath + "spritesheet.png");
+            Image[] frames = new Image[spriteSheet.length];
+            for (int row = 0; row < spriteSheet.length; row++) {
+                frames[row] = spriteSheet[row][2];
+            }
+            
+            nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Input
 
         PhysicsComponent ngePhysics = new PhysicsComponent(0, 0, 0, 0);
         nge.addComponent(ngePhysics);
@@ -72,6 +104,7 @@ public class App extends Application {
 
         input.onKeyRelease(KeyCode.S, () -> ga.playPause()); //example - pressing the S key will switch between play and pause
         
+
         stage.setScene(scene);
         stage.show();
         gl.start();
