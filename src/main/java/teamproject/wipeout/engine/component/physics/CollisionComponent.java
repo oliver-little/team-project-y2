@@ -95,10 +95,14 @@ public class CollisionComponent implements GameComponent {
     	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
+    		//System.out.println("bb1["+i+"]: "+bb1[i].toString());
     		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
+    		//System.out.println("s1: "+s1.toString());
 
         	for(int j=0;j<bb2.length;j++) {
+        		//System.out.println("bb1["+j+"]: "+bb1[j].toString());
         		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
+        		//System.out.println("s2: "+s2.toString());
             	if(intersects(s1,s2)) {
             		return true;
             	}
@@ -116,6 +120,7 @@ public class CollisionComponent implements GameComponent {
      * @return true if the shapes collide, false otherwise
      */
 	public static boolean intersects(Shape s1, Shape s2) {
+		// info on downcasting: https://www.baeldung.com/java-type-casting
 		if(s1 instanceof Rectangle) {
 			Rectangle r1 = (Rectangle) s1;
 			if (s2 instanceof Rectangle) {
@@ -171,6 +176,12 @@ public class CollisionComponent implements GameComponent {
     						 r.getY()+p.getY(),
     						 r.getWidth(),
     						 r.getHeight());
+    }
+    
+    private static Circle addAbsolutePosition(Point2D p, Circle c) {
+    	return new Circle(c.getCenterX()+p.getX(),
+    					  c.getCenterY()+p.getY(),
+    					  c.getRadius());
     }
     
     /**

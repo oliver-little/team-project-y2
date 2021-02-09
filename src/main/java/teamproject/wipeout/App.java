@@ -47,9 +47,9 @@ public class App extends Application {
         //the square
 
         GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(250, 250));
+        nge.addComponent(new Transform(100, 100));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
-        nge.addComponent(new CollisionComponent(new Rectangle(20,20)));
+        nge.addComponent(new CollisionComponent(new Circle(10,10,10)));
         nge.addComponent(new MassEnergyComponent(10));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
@@ -76,37 +76,14 @@ public class App extends Application {
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));
         
         
-        // GameSound gs = new GameSound("src\\main\\java\\teamproject\\wipeout\\sound\\backingTrack.mp3");
-        // gs.play();
-        
-        // input.addKeyAction(KeyCode.S, 
-        // 		() -> gs.playPause(), 
-        // 		() -> {});
         
         //Wall
-        GameEntity platformBottom = gameScene.createEntity();
-        platformBottom.addComponent(new Transform(50, 520));
-        platformBottom.addComponent(new RectRenderComponent(Color.BLACK, 600, 50));
-        platformBottom.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformBottom.addComponent(new CollisionComponent(new Rectangle(600,50)));
+        GameEntity bigBall = gameScene.createEntity();
+        bigBall.addComponent(new Transform(50, 50));
+        bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
+        bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
 
-        GameEntity platformUp = gameScene.createEntity();
-        platformUp.addComponent(new Transform(50, 30));
-        platformUp.addComponent(new RectRenderComponent(Color.RED, 600, 50));
-        platformUp.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformUp.addComponent(new CollisionComponent(new Rectangle(600,50)));
-
-        GameEntity platformLeft = gameScene.createEntity();
-        platformLeft.addComponent(new Transform(50, 100));
-        platformLeft.addComponent(new RectRenderComponent(Color.BLUE, 50, 400));
-        platformLeft.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformLeft.addComponent(new CollisionComponent(new Rectangle(50,400)));
-
-        GameEntity platformRight = gameScene.createEntity();
-        platformRight.addComponent(new Transform(700, 80));
-        platformRight.addComponent(new RectRenderComponent(Color.GREEN, 50, 400));
-        platformRight.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        platformRight.addComponent(new CollisionComponent(new Rectangle(50,400)));
 
         stage.setScene(scene);
         stage.show();

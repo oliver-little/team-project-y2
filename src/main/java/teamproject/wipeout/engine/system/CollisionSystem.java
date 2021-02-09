@@ -34,6 +34,7 @@ public class CollisionSystem implements GameSystem {
             	if(i!=j) {
                 	if(CollisionComponent.collides(entities.get(i), entities.get(j))) {
                 		
+                		System.out.println("COLLISION");
                 		resolveCollision(entities.get(i), entities.get(j));                     
                         
                 	}
@@ -52,14 +53,16 @@ public class CollisionSystem implements GameSystem {
 		if(g1.hasComponent(MassEnergyComponent.class)) {
 			MassEnergyComponent me = g1.getComponent(MassEnergyComponent.class);
 			MovementComponent m = g1.getComponent(MovementComponent.class);
-			m.velocity = m.velocity.multiply(-1);
+			m.velocity = m.velocity.multiply(0);
+			
 		}
 		
 		if(g2.hasComponent(MassEnergyComponent.class)) {
 			MassEnergyComponent me = g2.getComponent(MassEnergyComponent.class);
 			MovementComponent m = g2.getComponent(MovementComponent.class);
-			m.velocity = m.velocity.multiply(-1);
+			m.velocity = m.velocity.multiply(0);
 		}
+		
 
         
     }
