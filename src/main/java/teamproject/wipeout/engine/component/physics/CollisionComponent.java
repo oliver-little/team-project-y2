@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.GameComponent;
@@ -112,6 +113,145 @@ public class CollisionComponent implements GameComponent {
     	return false;
 
     }
+    
+    /**
+     * Calculates the normal vectors of a line connecting 2 points
+     * @param p1 start point of line
+     * @param p2 end point of line
+     * @return normal vectors of the line connecting the 2 points provided
+     */
+    public Point2D[] getNormalsToLine(Point2D p1, Point2D p2) {
+    	double dx = p2.getX() - p1.getX();
+    	double dy = p2.getY() - p1.getY();
+    	
+    	Point2D normals[] = {new Point2D(-dy,dx),new Point2D(dy,-dx)};
+    	
+    	return normals;
+    }
+    
+    public static Point2D pointOfIntersection(Line l1, Line l2) {
+    	double gradient_l1 = calculateGradientOfLine(l1);    
+    	double yIntercept_l1 = calculateYInterceptOfLine(l1, gradient_l1);
+    	
+    	double gradient_l2 = calculateGradientOfLine(l2);
+    	double yIntercept_l2 = calculateYInterceptOfLine(l2, gradient_l2);
+    	
+    	
+    	if(Double.compare(gradient_l1, gradient_l2)==0) {
+    		if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
+    			//lines overlap
+    			//TODO return a point
+    			return null;
+    		}
+    		else {
+    			//lines are parallel but not overlapping
+    			return null;
+    		}
+    		
+    	}
+    	
+    	//calculate where lines meet
+    	double x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
+    	double y = gradient_l1*x + yIntercept_l1;
+    	
+    	//check point (x,y) lies on l1
+    	if(x<l1.getStartX()) {
+    		return null;
+    	}
+    	else if(x>l1.getEndX()) {
+    		return null;
+    	}
+    	else if(y<l1.getStartY()) {
+    		return null;
+    	}
+    	else if(x>l1.getEndY()) {
+    		return null;
+    	}
+    	
+    	//check point (x,y) lies on l2
+    	if(x<l2.getStartX()) {
+    		return null;
+    	}
+    	else if(x>l2.getEndX()) {
+    		return null;
+    	}
+    	else if(y<l2.getStartY()) {
+    		return null;
+    	}
+    	else if(x>l2.getEndY()) {
+    		return null;
+    	}
+
+    	return new Point2D(x,y);
+    }
+    
+    public static boolean intersects(Line l1, Line l2) {
+    	double gradient_l1 = calculateGradientOfLine(l1);    
+    	double yIntercept_l1 = calculateYInterceptOfLine(l1, gradient_l1);
+    	
+    	double gradient_l2 = calculateGradientOfLine(l2);
+    	double yIntercept_l2 = calculateYInterceptOfLine(l2, gradient_l2);
+    	
+    	
+    	if(Double.compare(gradient_l1, gradient_l2)==0) {
+    		if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
+    			//lines overlap
+    			System.out.println("lines overlap");
+    			return true;
+    		}
+    		else {
+    			//lines are parallel but not overlapping
+    			System.out.println("lines are parallel");
+    			return false;
+    		}
+    		
+    	}
+    	
+    	//calculate where lines meet
+    	double x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
+    	double y = gradient_l1*x + yIntercept_l1;
+    	
+    	Point2D p = new Point2D(x,y);
+    	System.out.println("Lines meet at "+p.toString());
+    	
+    	Point2D start1 = new Point2D(l1.getStartX(), l1.getStartY());
+    	Point2D end1 = new Point2D(l1.getEndX(), l1.getEndY());
+    	double lengthOfLine1 = getDistanceBetweenTwoPoints(start1, end1);
+    	
+    	
+    	if(getDistanceBetweenTwoPoints(p,start1)>lengthOfLine1 && getDistanceBetweenTwoPoints(p,end1)>lengthOfLine1) {
+    		//point not on l1
+    		return false;
+    	}
+    	
+    	Point2D start2 = new Point2D(l2.getStartX(), l2.getStartY());
+    	Point2D end2 = new Point2D(l2.getEndX(), l2.getEndY());
+    	double lengthOfLine2 = getDistanceBetweenTwoPoints(start2, end2);
+    	
+    	if(getDistanceBetweenTwoPoints(p,start2)>lengthOfLine2 && getDistanceBetweenTwoPoints(p,end2)>lengthOfLine2) {
+    		//point not on l2
+    		return false;
+    	}
+    	
+
+    	return true;
+    }
+    
+    public static double calculateGradientOfLine(Line l) {
+    	double dx = l.getEndX() - l.getStartX();
+    	//using Double.compare because of imprecision of floating point values
+    	if(Double.compare(dx, 0) == 0) {
+    		return 0;
+    	}
+    	double dy = l.getEndY() - l.getStartY();
+    	
+    	return dy/dx;
+    }
+    
+    public static double calculateYInterceptOfLine(Line l, double gradient) {
+    	return l.getStartY()-(gradient*l.getStartY());
+    }
+    
 
     /**
      * Intersects function for generic shapes that calls the appropriate intersects function

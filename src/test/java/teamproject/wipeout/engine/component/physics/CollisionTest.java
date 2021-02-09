@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.system.CollisionSystem;
 
@@ -78,5 +79,27 @@ class CollisionTest
 		Circle c1 = new Circle(0,0,10);
 		Circle c2 = new Circle(1,1,10);
 		assertTrue(CollisionComponent.intersects(c1, c2));
+	}
+	
+	@Test
+	void testLinesIntersect() {
+		Line l1 = new Line(0,0,10,10);
+		Line l2 = new Line(1,1,3,3);
+		assertTrue(CollisionComponent.intersects(l1, l2));
+		
+		l1 = new Line(1,2,5,3);
+		l2 = new Line(2,1,7,5);
+		assertTrue(CollisionComponent.intersects(l1, l2));
+		
+		l1 = new Line(1,2,8,6);
+		l2 = new Line(4,1,8,5);
+		assertFalse(CollisionComponent.intersects(l1, l2));
+		
+		
+		System.out.println("The test");
+		l1 = new Line(1,7,3,1);
+		l2 = new Line(1,2,3,6);
+		assertTrue(CollisionComponent.intersects(l1, l2));
+		assertEquals(new Point2D(2,4),CollisionComponent.pointOfIntersection(l1, l2));
 	}
 }
