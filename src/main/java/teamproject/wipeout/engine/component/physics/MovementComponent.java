@@ -23,12 +23,14 @@ public class MovementComponent implements GameComponent {
         this.velocity = velocity;
         this.acceleration = acceleration;
         this.facingDirection = FacingDirection.UP;
+        this.updateFacingDirection();
     }
 
     public MovementComponent(float xVelocity, float yVelocity, float xAcceleration, float yAcceleration) {
         this.velocity = new Point2D(xVelocity, yVelocity);
         this.acceleration = new Point2D(xAcceleration, yAcceleration);
         this.facingDirection = FacingDirection.UP;
+        this.updateFacingDirection();
     }
 
     /** Update the facing diection every timestep, based on velocity */
