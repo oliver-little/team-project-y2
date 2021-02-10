@@ -5,6 +5,7 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 
 public class MovementComponent implements GameComponent {
+    ///Facing direction necessary for changing the images later on
     public enum FacingDirection {
         UP, DOWN, LEFT, RIGHT
     }
@@ -30,6 +31,7 @@ public class MovementComponent implements GameComponent {
         this.facingDirection = FacingDirection.UP;
     }
 
+    /** Update the facing diection every timestep, based on velocity */
     public void updateFacingDirection() {
         double xVelocity = this.velocity.getX();
         double yVelocity = this.velocity.getY();
@@ -47,17 +49,26 @@ public class MovementComponent implements GameComponent {
         }
     }
 
+    /**
+     * Update the velociy based on accelaration
+     * @param timestep each timestep when the velocity should get updated
+     */
     public void updateVelocity(Double timestep){
         this.velocity = this.velocity.add(this.acceleration.multiply(timestep));
         this.decayVelocity(timestep);
         this.capVelocity();
     }
 
+    /**
+     *  Decay is helping us make the movement smoother
+     * @param timestep each timestep when the velocity should get updated
+     */
     public void decayVelocity(Double timestep){
         Double decay_rate = 1f -Math.min(timestep, 1f);
         this.velocity = this.velocity.multiply(decay_rate*0.95);
     }
 
+    /** Cap is making sure that the speed of the object won't become too long with time */
     public void capVelocity(){
         Double threshold = 25.0;
         Double xVelocity = this.velocity.getX();
