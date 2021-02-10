@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
+import teamproject.wipeout.util.InsertionSort;
 
 /**
  * System to render relevant GameEntities to the canvas
@@ -30,6 +31,8 @@ public class RenderSystem implements GameSystem {
     protected SignatureEntityCollector renderableEntityCollector;
     protected CameraEntityCollector cameraCollector;
 
+    private TransformYComparator yPosComparator;
+
     /** 
      * Creates a new instance of RenderSystem
      * 
@@ -39,6 +42,7 @@ public class RenderSystem implements GameSystem {
     public RenderSystem(GameScene scene, Canvas canvas) {
         this.renderableEntityCollector = new SignatureEntityCollector(scene, renderSignaturePattern);
         this.cameraCollector = new CameraEntityCollector(scene);
+        this.yPosComparator = new TransformYComparator();
 
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
@@ -93,6 +97,9 @@ public class RenderSystem implements GameSystem {
         // Clear the screen ready for rendering
         this.gc.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
         List<GameEntity> entities = this.renderableEntityCollector.getEntities();
+        
+        InsertionSort.sort(entities, yPosComparator);
+
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
             RenderComponent r = entity.getComponent(RenderComponent.class);

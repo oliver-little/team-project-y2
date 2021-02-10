@@ -47,13 +47,21 @@ public class App extends Application {
         camera.addComponent(new Transform(0, 0));
         camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
-        
-        GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(250,250));
-
 
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
+
+        GameEntity staticsprite = gameScene.createEntity();
+        staticsprite.addComponent(new Transform(275,250));
+        try {
+            staticsprite.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "sprite.png"))));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        GameEntity nge = gameScene.createEntity();
+        nge.addComponent(new Transform(250,250));
 
         try {
             spriteManager.loadSpriteSheet(imgPath + "spritesheet.png", 32, 32);
