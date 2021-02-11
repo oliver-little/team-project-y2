@@ -1,6 +1,7 @@
 package teamproject.wipeout;
 
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
@@ -24,17 +25,23 @@ import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
-public class App extends Application {
+public class App implements Controller {
 
     public String imgPath = "./assets/";
-
-    @Override
-    public void start(Stage stage) {
-        double windowWidth = 800;
+    private StackPane root;
+    private Canvas canvas;
+    private double windowWidth = 800;
+    private double windowHeight = 600;
+    
+    public void createContent() {
+    	/*
+    	double windowWidth = 800;
         double windowHeight = 600;
-        Canvas canvas = new Canvas(windowWidth, windowHeight);
-        Scene scene = new Scene(new StackPane(canvas), windowWidth, windowHeight);
-
+    	
+    	canvas = new Canvas(windowWidth, windowHeight);
+        //Scene scene = new Scene(new StackPane(canvas), windowWidth, windowHeight);
+        root = new StackPane(canvas);
+        */
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, canvas);
         SystemUpdater systemUpdater = new SystemUpdater();
@@ -74,7 +81,7 @@ public class App extends Application {
         PhysicsComponent ngePhysics = new PhysicsComponent(0, 0, 0, 0);
         nge.addComponent(ngePhysics);
 
-        InputHandler input = new InputHandler(scene);
+        InputHandler input = new InputHandler(root.getScene());
         input.addKeyAction(KeyCode.LEFT,
                 () -> ngePhysics.velocity = ngePhysics.velocity.subtract(50, 0),
                 () -> ngePhysics.velocity = ngePhysics.velocity.add(50, 0));
@@ -93,7 +100,7 @@ public class App extends Application {
 
         input.onMouseClick(MouseButton.PRIMARY,
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));
-
+        
         AudioComponent ngeSound = new AudioComponent("glassSmashing.mp3");
         nge.addComponent(ngeSound);
         
@@ -105,13 +112,18 @@ public class App extends Application {
         input.onKeyRelease(KeyCode.S, () -> ga.playPause()); //example - pressing the S key will switch between play and pause
         
 
-        stage.setScene(scene);
-        stage.show();
+        //stage.setScene(scene);
+        //stage.show();
         gl.start();
     }
-
-    public static void main(String[] args) {
-        launch();
-    }
+    
+	@Override
+	public Parent getContent()
+	{
+		canvas = new Canvas(windowWidth, windowHeight);
+        root = new StackPane(canvas);
+		return root;
+	}
+	
 
 }
