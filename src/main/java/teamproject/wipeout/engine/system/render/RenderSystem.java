@@ -3,6 +3,7 @@ package teamproject.wipeout.engine.system.render;
 import java.util.List;
 import java.util.Set;
 
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -72,6 +73,9 @@ public class RenderSystem implements GameSystem {
         double height = this.canvas.getHeight();
         double zoom = 1;
 
+        // Clear the screen ready for rendering
+        this.gc.clearRect(0, 0, width, height);
+
         GameEntity camera = this.cameraCollector.getMainCamera();
         // If the camera is present, apply various transforms
         if (camera != null) {
@@ -92,41 +96,24 @@ public class RenderSystem implements GameSystem {
             }
         }
 
-        Point2D cameraPosBottomRight = cameraPos.add(width, height);
+        BoundingBox cameraBox = new BoundingBox(cameraPos.getX(), cameraPos.getY(), width, height);
 
-        // Clear the screen ready for rendering
-        this.gc.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
+        // Get the list of renderable entities
         List<GameEntity> entities = this.renderableEntityCollector.getEntities();
         
+        // Sort it - use an insertion sort because insertion sort is fast for nearly sorted lists:
+        // On most frames this list will be sorted or very nearly sorted.
         InsertionSort.sort(entities, yPosComparator);
 
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
             RenderComponent r = entity.getComponent(RenderComponent.class);
 
-            Point2D entityTopLeft = t.position;
-            Point2D entityBottomRight = t.position.add(r.getWidth(), r.getHeight());
-            
             // Test if the entity is actually visible on the camera view
-            if (this.calculateBoxIntersects(cameraPos, cameraPosBottomRight, entityTopLeft, entityBottomRight)) {
+            if (cameraBox.intersects(t.position.getX(), t.position.getY(), r.getWidth(), r.getHeight())) {
                 // Render the entity, scaled according to the camera view
-                r.render(this.gc, entityTopLeft.getX() * zoom, entityTopLeft.getY() * zoom, zoom);
+                r.render(this.gc, t.position.getX() * zoom, t.position.getY() * zoom, zoom);
             }
         }
-    }
-
-    /**
-     * Calculates the intersection of two bounding boxes
-     * Used to calculate whether a given entity should be rendered to the screen
-     * based on whether it would actually be visible to the camera.
-     * 
-     * @param b1TL Top left coordinates of the first bounding box
-     * @param b1BR Bottom right coordinates of the first bounding box
-     * @param b2TL Top left coordinates of the second bounding box
-     * @param b2BR Bottom right coordinates of the second bounding box
-     * @return Whether the two boxes intersect
-     */
-    private boolean calculateBoxIntersects(Point2D b1TL, Point2D b1BR, Point2D b2TL, Point2D b2BR) {
-        return !(b2TL.getX() > b1BR.getX() || b2BR.getX() < b1TL.getX() || b2TL.getY() > b1BR.getY() || b2BR.getY() < b1TL.getY());
     }
 }
