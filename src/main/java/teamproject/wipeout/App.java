@@ -20,7 +20,6 @@ import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 
 public class App extends Application {
 

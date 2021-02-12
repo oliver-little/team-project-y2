@@ -1,6 +1,8 @@
 package teamproject.wipeout.game.assetmanagement.spritesheet;
 
 public class SpritesheetDescriptor {
+    public String fileType;
+    public String version;
     public String name;
     public SpriteSetDescriptor[] sprites;
 

@@ -1,0 +1,39 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "test",
+	"sprites": [
+		{
+			"name": "list-x",
+			"type": "sprite-list-x",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32,
+				"length": 10
+			}
+		},
+		{
+			"name": "list-y",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32,
+				"length": 10
+			}
+		},
+		{
+			"name": "single sprite",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		}
+	]
+}

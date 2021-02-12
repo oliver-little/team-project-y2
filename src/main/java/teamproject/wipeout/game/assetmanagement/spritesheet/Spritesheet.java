@@ -23,6 +23,8 @@ import com.google.gson.Gson;
  */
 public class Spritesheet {
 
+    public static final String SPRITESHEET_VERSION = "1.0.0";
+
     /**
      * Parses a spritesheet using a given JSON file and image
      * 
@@ -137,6 +139,14 @@ public class Spritesheet {
 
         Gson gson = new Gson();
         SpritesheetDescriptor spritesheetDescriptor = gson.fromJson(bufferedReader, SpritesheetDescriptor.class);
+
+        if (spritesheetDescriptor.fileType == null || spritesheetDescriptor.version == null || !spritesheetDescriptor.fileType.equals("SpritesheetDescriptor")) {
+            return null;
+        }
+
+        if (!spritesheetDescriptor.version.equals(Spritesheet.SPRITESHEET_VERSION)) {
+            System.out.println("Version of spritesheet descriptor is different to current version, unexpected behaviour may occur.");
+        }
 
         return spritesheetDescriptor;
     }

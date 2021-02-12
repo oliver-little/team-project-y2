@@ -1,0 +1,8 @@
+{
+	"wrongName" : "test",
+	"sprites": [
+		{
+			"invalidParam1" : "1"
+		}
+	]
+}
