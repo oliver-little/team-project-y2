@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.component;
+package teamproject.wipeout.engine.component.ai;
 
 public class AI {
 

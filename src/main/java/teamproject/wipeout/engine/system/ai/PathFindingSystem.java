@@ -1,8 +1,8 @@
-package teamproject.wipeout.engine.system;
+package teamproject.wipeout.engine.system.ai;
 
 import java.util.ArrayList;
 
-import teamproject.wipeout.engine.component.Node;
+import teamproject.wipeout.engine.component.ai.Node;
 
 public class PathFindingSystem {
     
