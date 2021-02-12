@@ -1,0 +1,27 @@
+{
+	"name": "crops",
+	"sprites": [
+		{
+			"name": "potato",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 64,
+				"length": 5
+			}
+		},
+		{
+			"name": "carrot",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 32,
+				"y": 0,
+				"width": 32,
+				"height": 64,
+				"length": 5
+			}
+		},
+	]
+}

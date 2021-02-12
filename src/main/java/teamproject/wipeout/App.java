@@ -18,11 +18,9 @@ import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.*;
-import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.core.*;
-import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 
 public class App extends Application {
 
@@ -64,13 +62,8 @@ public class App extends Application {
         nge.addComponent(new Transform(250,250));
 
         try {
-            spriteManager.loadSpriteSheet(imgPath + "spritesheet.png", 32, 32);
-            Image[][] spriteSheet = spriteManager.getSpriteSheet(imgPath + "spritesheet.png");
-            Image[] frames = new Image[spriteSheet.length];
-            for (int row = 0; row < spriteSheet.length; row++) {
-                frames[row] = spriteSheet[row][2];
-            }
-            
+            spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
+            Image[] frames = spriteManager.getSpriteSet("player", "walk");
             nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         }
         catch (Exception e) {
