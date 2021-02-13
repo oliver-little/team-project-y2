@@ -30,11 +30,11 @@ public class CollisionSystem implements GameSystem {
         List<GameEntity> entities = this._entityCollector.getEntities();
 
         for(int i=0; i < entities.size(); i++) {
-            for(int j=0; j < entities.size(); j++) {
+            for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
                 	Pair<Shape, Shape> p = null;
 					if((p  = CollisionComponent.collides(entities.get(i), entities.get(j)))!=null) {
-                		
+                		//System.out.println("Collision");
 						resolveCollision(entities.get(i),entities.get(j), p);
                                         
                 	}
@@ -46,6 +46,9 @@ public class CollisionSystem implements GameSystem {
     
     public void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
     	Point2D resolutionVector = CollisionComponent.getResolutionVector(p.first,p.second);
+    	if (resolutionVector==null) {
+    		return;
+    	}
     	
     	Transform t1 = g1.getComponent(Transform.class);
     	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);

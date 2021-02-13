@@ -26,8 +26,8 @@ public class RectRenderComponent implements GameComponent, Renderable {
 
     public void render(GraphicsContext gc, double x, double y) {
         gc.setFill(this.color);
-        //gc.fillRect(x, y, this.width, this.height);
-        gc.fillOval(x, y, this.width, this.height);
+        gc.fillRect(x, y, this.width, this.height);
+        //gc.fillOval(x, y, this.width, this.height);
     }
 
     public String getType() {

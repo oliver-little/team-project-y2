@@ -231,16 +231,18 @@ public class CollisionComponent implements GameComponent {
     	double gradient_l2 = calculateGradientOfLine(l2);
     	double yIntercept_l2 = calculateYInterceptOfLine(l2, gradient_l2);
     	
+    	//System.out.println("gradient l1: "+gradient_l1);
+    	//System.out.println("gradient l2: "+gradient_l2);
     	
     	if(Double.compare(gradient_l1, gradient_l2)==0) {
     		if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
     			//lines overlap
-    			System.out.println("lines overlap");
+    			//System.out.println("lines overlap");
     			return true;
     		}
     		else {
     			//lines are parallel but not overlapping
-    			System.out.println("lines are parallel");
+    			//System.out.println("lines are parallel");
     			return false;
     		}
     		
@@ -251,7 +253,7 @@ public class CollisionComponent implements GameComponent {
     	double y = gradient_l1*x + yIntercept_l1;
     	
     	Point2D p = new Point2D(x,y);
-    	System.out.println("Lines meet at "+p.toString());
+    	//System.out.println("Lines meet at "+p.toString());
     	
     	Point2D start1 = new Point2D(l1.getStartX(), l1.getStartY());
     	Point2D end1 = new Point2D(l1.getEndX(), l1.getEndY());
@@ -280,7 +282,7 @@ public class CollisionComponent implements GameComponent {
     	double dx = l.getEndX() - l.getStartX();
     	//using Double.compare because of imprecision of floating point values
     	if(Double.compare(dx, 0) == 0) {
-    		return 0;
+    		return Double.MAX_VALUE;
     	}
     	double dy = l.getEndY() - l.getStartY();
     	
@@ -432,6 +434,51 @@ public class CollisionComponent implements GameComponent {
     	
     	
     	return overlapVector;
+    }
+    
+    /**
+     * Calculates the overlap vector of two rectangles
+     * @param r1 first rectangle
+     * @param r2 second rectangle
+     * @return overlap vector of the two rectangles
+     */
+    public static Point2D getResolutionVector(Rectangle r1, Rectangle r2) {
+
+    	System.out.println("\nr1: "+r1.toString());
+    	System.out.println("r2: "+r2.toString());
+    	//check each side of rectangle
+    	Line t_r1 = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
+    	Line l_r2 = new Line(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
+    	System.out.println("t_r1: "+t_r1.toString());
+    	System.out.println("l_r2: "+l_r2.toString());
+    	if(intersects(t_r1, l_r2)) {
+    		System.out.println("first");
+    		Point2D tr_r1 = new Point2D(r1.getX()+r1.getWidth(),0);
+    		Point2D tl_r2 = new Point2D(r2.getX(),0);
+    		double overlap = getDistanceBetweenTwoPoints(tr_r1, tl_r2);
+    		Point2D tl_r1 = new Point2D(r1.getX(),0);
+    		Point2D tr_r2 = new Point2D(r2.getX()+r2.getWidth(),0);
+    		double overlap2 = getDistanceBetweenTwoPoints(tl_r1, tr_r2);
+    		//hacky way for now
+    		if (overlap>overlap2) {
+    			return new Point2D(overlap2,0);
+    		}
+    		return new Point2D(-overlap,0);
+    	}
+    	Line r_r2 = new Line(r2.getX()+r2.getWidth(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
+    	if(intersects(t_r1, r_r2)) {
+    		System.out.println("second");
+    		Point2D tl_r1 = new Point2D(r1.getX(),0);
+    		Point2D tr_r2 = new Point2D(r2.getX()+r2.getWidth(),0);
+    		double overlap = getDistanceBetweenTwoPoints(tl_r1, tr_r2);
+    		return new Point2D(overlap,0);
+    	}
+    	
+    	
+    	//check rectangle inside other rectangle
+    	
+    	
+    	return null;
     }
     
     /**

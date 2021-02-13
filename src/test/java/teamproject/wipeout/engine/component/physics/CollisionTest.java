@@ -87,6 +87,13 @@ class CollisionTest
 		Line l2 = new Line(1,1,3,3);
 		assertTrue(CollisionComponent.intersects(l1, l2));
 		
+		
+    	l1= new Line(3, 2, 6, 2);
+    	l2 = new Line(5, 3, 5, 0);
+    	assertTrue(CollisionComponent.intersects(l1, l2));
+    	assertEquals(new Point2D(5,2),CollisionComponent.pointOfIntersection(l1, l2));
+		
+		
 		l1 = new Line(1,2,5,3);
 		l2 = new Line(2,1,7,5);
 		assertTrue(CollisionComponent.intersects(l1, l2));
@@ -101,5 +108,8 @@ class CollisionTest
 		l2 = new Line(1,2,3,6);
 		assertTrue(CollisionComponent.intersects(l1, l2));
 		assertEquals(new Point2D(2,4),CollisionComponent.pointOfIntersection(l1, l2));
+		
+
+		
 	}
 }
