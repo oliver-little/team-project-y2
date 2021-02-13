@@ -46,6 +46,7 @@ public class Spritesheet {
                     int width = spriteSet.parameters.get("width");
                     int height = spriteSet.parameters.get("height");
                     sprites = new Image[] {Spritesheet.getSubImage(image, xStart, yStart, width, height)};
+                    break;
                 case "sprite-list-x":
                     sprites = Spritesheet.parseSpriteList(image, spriteSet.parameters, true);
                     break;

@@ -24,7 +24,7 @@ public class SpritesheetTest {
     void testParseValidSpritesheet() {
         SpritesheetDescriptor ss = null;
         try {
-            ss = Spritesheet.getSpritesheetFromJSON(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet.png").getAbsolutePath());
+            ss = Spritesheet.getSpritesheetFromJSON(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet-descriptor.json").getAbsolutePath());
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -43,11 +43,14 @@ public class SpritesheetTest {
 
         assertNotEquals(null, spritesheet);
 
-        assertEquals(true, Set.of("idle", "walk", "potion", "attack", "death").containsAll(spritesheet.keySet()));
+        assertEquals(true, Set.of("idle", "potion", "test").containsAll(spritesheet.keySet()));
 
-        for (Image[] images : spritesheet.values()) {
-            assertEquals(10, images.length);
-        }
+        assertEquals(10, spritesheet.get("idle").length);
+        assertEquals(10, spritesheet.get("potion").length);
+        assertEquals(1, spritesheet.get("test").length);
+        Image test = spritesheet.get("test")[0];
+        assertEquals(139, test.getWidth());
+        assertEquals(235, test.getHeight());
     }
 
     @Test
