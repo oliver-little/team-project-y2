@@ -1,5 +1,7 @@
 package teamproject.wipeout.engine.component.ai;
 
+//This class is currently not yet used, potentially useful for collisons, obsticles and boundaries for AI characters later on.
+
 public class AI {
 
     private double xMax;
