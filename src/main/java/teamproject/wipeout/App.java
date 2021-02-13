@@ -44,11 +44,23 @@ public class App extends Application {
         GameLoop gl = new GameLoop(systemUpdater, renderer);
         
         //the square
-
+        //Wall
+        GameEntity bigBall = gameScene.createEntity();
+        bigBall.addComponent(new Transform(200, 100));
+        bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
+        bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
+        
+        GameEntity bigBall2 = gameScene.createEntity();
+        bigBall2.addComponent(new Transform(200, 400));
+        bigBall2.addComponent(new RectRenderComponent(Color.GREEN, 50, 50));
+        bigBall2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        bigBall2.addComponent(new CollisionComponent(false, new Circle(25,25,25)));
+        
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(100, 100));
-        nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
-        nge.addComponent(new CollisionComponent(new Circle(10,10,10)));
+        nge.addComponent(new RectRenderComponent(Color.DARKRED, 50, 50));
+        nge.addComponent(new CollisionComponent(new Circle(25,25,25)));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
@@ -74,13 +86,7 @@ public class App extends Application {
                 (x, y) -> System.out.println("X: " + x +"\nY: " + y));
         
         
-        
-        //Wall
-        GameEntity bigBall = gameScene.createEntity();
-        bigBall.addComponent(new Transform(50, 50));
-        bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
-        bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall.addComponent(new CollisionComponent(false, new Circle(25,25,25)));
+      
 
 
         stage.setScene(scene);
