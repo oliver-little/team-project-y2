@@ -30,7 +30,10 @@ public class Spritesheet {
      * 
      * @param spriteSheetDescriptor A SpritesheetDescriptor object describing the sprites in the image
      * @param imagePath The path to the image to parse
-     * @return A map of spriteSet names (as described in the JSON file) to a list of images.
+     * @return A map of spriteSet names (as described in the JSON file) to a list of images
+     * @throws FileNotFoundException if the file path provided is invalid
+     * @throws IOException if loading the image fails
+     * @throws IllegalArgumentException if the spritesheetDescriptor is invalid
      */
     public static Map<String, Image[]> parseSpriteSheet(SpritesheetDescriptor spritesheetDescriptor, String imagePath) throws FileNotFoundException, IOException {
         BufferedImage image = ImageIO.read(new File(imagePath));
@@ -39,28 +42,26 @@ public class Spritesheet {
         
         for (SpriteSetDescriptor spriteSet : spritesheetDescriptor.sprites) {
             Image[] sprites = null;
+            int xStart = spriteSet.parameters.get("x");
+            int yStart = spriteSet.parameters.get("y");
+            int width = spriteSet.parameters.get("width");
+            int height = spriteSet.parameters.get("height");
+
             switch (spriteSet.type) {
                 case "sprite":
-                    int xStart = spriteSet.parameters.get("x");
-                    int yStart = spriteSet.parameters.get("y");
-                    int width = spriteSet.parameters.get("width");
-                    int height = spriteSet.parameters.get("height");
                     sprites = new Image[] {Spritesheet.getSubImage(image, xStart, yStart, width, height)};
                     break;
                 case "sprite-list-x":
-                    sprites = Spritesheet.parseSpriteList(image, spriteSet.parameters, true);
+                    sprites = Spritesheet.parseSpriteList(image, xStart, yStart, width, height, spriteSet.parameters.get("length"), true);
                     break;
                 case "sprite-list-y":
-                    sprites = Spritesheet.parseSpriteList(image, spriteSet.parameters, false);
+                    sprites = Spritesheet.parseSpriteList(image, xStart, yStart, width, height, spriteSet.parameters.get("length"), false);
                     break;
                 default:
-                    System.out.println("Invalid sprite set type: " + spriteSet.type);
-                    continue;
+                    throw new IllegalArgumentException("Invalid sprite set type: " + spriteSet.type);
             }   
-
-            if (sprites != null) {
-                spriteSets.put(spriteSet.name, sprites);
-            }
+            
+            spriteSets.put(spriteSet.name, sprites);
         }
 
         return spriteSets;
@@ -70,37 +71,25 @@ public class Spritesheet {
      * Parses a list of sprites from a spritesheet into a list of images
      * 
      * @param image The image to parse
-     * @param parameters A Map of string to integer containing x, y, width, height and length (number of images)
+     * @param xStart The x coordinate the first subimage starts at
+     * @param yStart The y coordinate the first subimage starts at
+     * @param width The width of each subimage
+     * @param height The height of each subimage
+     * @param length The number of subimages to get
      * @param incrementX Boolean determining whether to get images along the x axis (true) or the y axis (false)
      * @return An array of subimages
      */
-    public static Image[] parseSpriteList(BufferedImage image, Map<String, Integer> parameters, boolean incrementX) {
-        if (!(parameters.containsKey("x") && parameters.containsKey("y") && parameters.containsKey("width") && parameters.containsKey("height") && parameters.containsKey("length"))) {
-            return null;
-        }
-        
-        int xStart = parameters.get("x");
-        int yStart = parameters.get("y");
-        int width = parameters.get("width");
-        int height = parameters.get("height");
-        int length = parameters.get("length");
-
+    public static Image[] parseSpriteList(BufferedImage image, int xStart, int yStart, int width, int height, int length, boolean incrementX) {
         Image[] images = new Image[length];
 
         if (incrementX) {
             for (int i = 0; i < length; i++) {
                 images[i] = Spritesheet.getSubImage(image, xStart + width * i, yStart, width, height);
-                if (images[i] == null) {
-                    return null;
-                }
             }
         }
         else {
             for (int i = 0; i < length; i++) {
                 images[i] = Spritesheet.getSubImage(image, xStart, yStart + height * i, width, height);
-                if (images[i] == null) {
-                    return null;
-                }
             }
         }
 
@@ -114,11 +103,12 @@ public class Spritesheet {
      * @param yStart The y coordinate the subimage starts at
      * @param width The width of the subimage
      * @param height The height of the subimage
-     * @return The subimage (null if the subimage was invalid)
+     * @return The subimage
+     * @throws IllegalArgumentException if the subimage requested is invalid.
      */
     public static Image getSubImage(BufferedImage image, int xStart, int yStart, int width, int height) {
         if (xStart < 0 || yStart < 0 || xStart + width > image.getWidth() || yStart + height > image.getHeight()) {
-            return null;
+            throw new IllegalArgumentException("Invalid subimage parameters - Image width:" + image.getWidth() + ", image height:" + image.getHeight() + ", requested x, y, w, h: " + xStart + ", " + yStart + ", " + width + ", " + height);
         }
         
         WritableImage wr = new WritableImage(width, height);
@@ -137,7 +127,7 @@ public class Spritesheet {
      * 
      * @param filePath The path to the JSON file
      * @return The SpritesheetDescriptor object the JSON file describes
-     * @throws FileNotFoundException Thrown if the filepath is invalid or the contents of the file were invalid.
+     * @throws FileNotFoundException if the filepath is invalid or the contents of the file were invalid.
      */
     public static SpritesheetDescriptor getSpritesheetFromJSON(String filePath) throws FileNotFoundException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));

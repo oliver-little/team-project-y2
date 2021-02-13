@@ -2,18 +2,16 @@ package teamproject.wipeout.game.assetmanagement.spritesheet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
 import java.awt.image.BufferedImage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
-
-import org.junit.jupiter.api.Test;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
@@ -22,26 +20,10 @@ public class SpritesheetTest {
 
     @Test
     void testParseValidSpritesheet() {
-        SpritesheetDescriptor ss = null;
-        try {
-            ss = Spritesheet.getSpritesheetFromJSON(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet-descriptor.json").getAbsolutePath());
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        final SpritesheetDescriptor ss = assertDoesNotThrow(() -> Spritesheet.getSpritesheetFromJSON(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet-descriptor.json").getAbsolutePath()));
 
-        assertNotEquals(null, ss);
+        Map<String, Image[]> spritesheet = assertDoesNotThrow(() -> Spritesheet.parseSpriteSheet(ss, new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet.png").getAbsolutePath()));
 
-        Map<String, Image[]> spritesheet = null;
-        try {
-            spritesheet = Spritesheet.parseSpriteSheet(ss, new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet.png").getAbsolutePath());
-        }
-        catch (Exception e) {
-            // Exceptions should not occur so fail this test
-            assertEquals(true, false);
-        }
-
-        assertNotEquals(null, spritesheet);
 
         assertEquals(true, Set.of("idle", "potion", "test").containsAll(spritesheet.keySet()));
 
@@ -55,23 +37,9 @@ public class SpritesheetTest {
 
     @Test
     void testParseValidSpriteList() {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BufferedImage image = assertDoesNotThrow(()-> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
 
-        assertNotEquals(null, image);
-
-        HashMap<String, Integer> parameters = new HashMap<>();
-        parameters.put("x", 7);
-        parameters.put("y", 15);
-        parameters.put("width", 2);
-        parameters.put("height", 4);
-        parameters.put("length", 5);
-
-        Image[] images = Spritesheet.parseSpriteList(image, parameters, true);
+        Image[] images = Spritesheet.parseSpriteList(image, 7, 15, 2, 4, 5, true);
 
         assertEquals(2, images[0].getWidth());
         assertEquals(4, images[0].getHeight());
@@ -98,38 +66,14 @@ public class SpritesheetTest {
 
     @Test
     void testParseInvalidSpriteList() {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png"));
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
 
-        assertNotEquals(null, image);
-
-        HashMap<String, Integer> parameters = new HashMap<>();
-        parameters.put("x", 7);
-        parameters.put("y", 15);
-        parameters.put("width", 2);
-        parameters.put("length", 4);
-
-        Image[] images = Spritesheet.parseSpriteList(image, parameters, true);
-
-        assertEquals(null, images);
+        assertThrows(IllegalArgumentException.class, () -> Spritesheet.parseSpriteList(image, image.getHeight() - 20, 0, 20, 20, 4, true));
     }
 
     @Test
     void testGetValidSubimage() {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png"));
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        assertNotEquals(null, image);
+        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
 
         final int X = 1;
         final int Y = 13;
@@ -153,35 +97,14 @@ public class SpritesheetTest {
 
     @Test
     void testGetInvalidSubimage() {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png"));
-        } 
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        final BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
+        final int width = 8;
+        final int height = 8;
 
-        assertNotEquals(null, image);
-
-        int x = -1;
-        int y = 13;
-        int width = 8;
-        int height = 8;
-
-        Image subImage = Spritesheet.getSubImage(image, x, y, width, height);
-        assertEquals(null, subImage);
-        x = 1;
-        y = -1;
-        subImage = Spritesheet.getSubImage(image, x, y, width, height);
-        assertEquals(null, subImage);
-        y = 1;
-        x = image.getWidth() - 1;
-        subImage = Spritesheet.getSubImage(image, x, y, width, height);
-        assertEquals(null, subImage);
-        x = 0;
-        y = image.getHeight() - 1;
-        subImage = Spritesheet.getSubImage(image, x, y, width, height);
-        assertEquals(null, subImage);
+        assertThrows(IllegalArgumentException.class, () -> Spritesheet.getSubImage(image, -1, 1, width, height));
+        assertThrows(IllegalArgumentException.class, () -> Spritesheet.getSubImage(image, 1, -1, width, height));
+        assertThrows(IllegalArgumentException.class, () -> Spritesheet.getSubImage(image, image.getWidth() - 1, 1, width, height));
+        assertThrows(IllegalArgumentException.class, () -> Spritesheet.getSubImage(image, 1, image.getHeight() - 1, width, height));
     }
 
     @Test
