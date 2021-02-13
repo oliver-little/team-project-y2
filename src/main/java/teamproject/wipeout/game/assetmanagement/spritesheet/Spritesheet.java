@@ -33,7 +33,6 @@ public class Spritesheet {
      * @return A map of spriteSet names (as described in the JSON file) to a list of images.
      */
     public static Map<String, Image[]> parseSpriteSheet(SpritesheetDescriptor spritesheetDescriptor, String imagePath) throws FileNotFoundException, IOException {
-
         BufferedImage image = ImageIO.read(new File(imagePath));
 
         Map<String, Image[]> spriteSets = new HashMap<String, Image[]>();
@@ -75,6 +74,10 @@ public class Spritesheet {
      * @return An array of subimages
      */
     public static Image[] parseSpriteList(BufferedImage image, Map<String, Integer> parameters, boolean incrementX) {
+        if (!(parameters.containsKey("x") && parameters.containsKey("y") && parameters.containsKey("width") && parameters.containsKey("height") && parameters.containsKey("length"))) {
+            return null;
+        }
+        
         int xStart = parameters.get("x");
         int yStart = parameters.get("y");
         int width = parameters.get("width");
@@ -87,7 +90,7 @@ public class Spritesheet {
             for (int i = 0; i < length; i++) {
                 images[i] = Spritesheet.getSubImage(image, xStart + width * i, yStart, width, height);
                 if (images[i] == null) {
-                    System.out.println("Invalid subimage.");
+                    return null;
                 }
             }
         }
@@ -95,7 +98,7 @@ public class Spritesheet {
             for (int i = 0; i < length; i++) {
                 images[i] = Spritesheet.getSubImage(image, xStart, yStart + height * i, width, height);
                 if (images[i] == null) {
-                    System.out.println("Invalid subimage.");
+                    return null;
                 }
             }
         }
@@ -110,7 +113,7 @@ public class Spritesheet {
      * @param yStart The y coordinate the subimage starts at
      * @param width The width of the subimage
      * @param height The height of the subimage
-     * @return The subimage
+     * @return The subimage (null if the subimage was invalid)
      */
     public static Image getSubImage(BufferedImage image, int xStart, int yStart, int width, int height) {
         if (xStart < 0 || yStart < 0 || xStart + width > image.getWidth() || yStart + height > image.getHeight()) {
@@ -133,15 +136,15 @@ public class Spritesheet {
      * 
      * @param filePath The path to the JSON file
      * @return The SpritesheetDescriptor object the JSON file describes
+     * @throws FileNotFoundException Thrown if the filepath is invalid or the contents of the file were invalid.
      */
     public static SpritesheetDescriptor getSpritesheetFromJSON(String filePath) throws FileNotFoundException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
-
         Gson gson = new Gson();
         SpritesheetDescriptor spritesheetDescriptor = gson.fromJson(bufferedReader, SpritesheetDescriptor.class);
 
         if (spritesheetDescriptor.fileType == null || spritesheetDescriptor.version == null || !spritesheetDescriptor.fileType.equals("SpritesheetDescriptor")) {
-            return null;
+            throw new FileNotFoundException("Invalid file format.");
         }
 
         if (!spritesheetDescriptor.version.equals(Spritesheet.SPRITESHEET_VERSION)) {
