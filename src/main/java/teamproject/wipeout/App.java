@@ -63,15 +63,15 @@ public class App extends Application {
         
         
         systemUpdater.addSystem(new AudioSystem(gameScene));
-        AudioComponent ngeSound = new AudioComponent("glassSmashing.mp3");
+        AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
         nge.addComponent(ngeSound);
         
         input.onKeyRelease(KeyCode.D, () -> ngeSound.play()); //example - pressing the D key will trigger the sound
         
-        GameAudio gs = new GameAudio("backingTrack.mp3");
-        gs.play();
+        GameAudio ga = new GameAudio("backingTrack2.wav");
+        ga.play();
         
-        input.onKeyRelease(KeyCode.S, () -> gs.playPause()); //example - pressing the S key will switch between play and pause
+        input.onKeyRelease(KeyCode.S, () -> ga.stopStart()); //example - pressing the S key will switch between play and pause
         
         stage.setScene(scene);
         stage.show();
