@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @ExtendWith(ApplicationExtension.class)
 public class InputHandlerTest {
 
-    private final double stageWidth = 300.0;
+    /*private final double stageWidth = 300.0;
     private final double stageHeight = 100.0;
 
     private InputHandler inputHandler;
@@ -609,6 +609,6 @@ public class InputHandlerTest {
                 "onMouseDrag secondary isn't accurate.");
         Assertions.assertNull(secondaryButtonEndDrag.get(),
                 "onMouseDrag secondary end isn't accurate.");
-    }
+    }*/
 
 }

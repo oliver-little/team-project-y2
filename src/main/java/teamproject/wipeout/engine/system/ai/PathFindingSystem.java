@@ -1,8 +1,12 @@
 package teamproject.wipeout.engine.system.ai;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.ai.NavigationEdge;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 
 public class PathFindingSystem {
@@ -11,7 +15,7 @@ public class PathFindingSystem {
 
     public boolean destinationReached(NavigationSquare currentSquare, NavigationSquare goalSquare) {
 
-        if (currentSquare == goalSquare) {
+        if (currentSquare.equals(goalSquare)) {
             return true;
         }
         else {
@@ -27,30 +31,33 @@ public class PathFindingSystem {
 
     }
     
-    public ArrayList<NavigationSquare> findPath(NavigationSquare currentSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
+    public List<NavigationSquare> findPath(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
 
         Point2D midPoint;
 
-        ArrayList<Node> frontier = new ArrayList<>();
+        ArrayList<NavigationPath> frontier = new ArrayList<>();
 
-        ArrayList<NavigationSquare> visited = new ArrayList<>();
+        Set<NavigationSquare> visited = new HashSet<>();
 
         //Add initial node into the frontier.
-        Node initialNode = new Node(currentSquare, 0);
+        NavigationPath currentPath = new NavigationPath(List.of(startSquare), 0);
 
-        frontier.add(initialNode);
+        NavigationSquare currentSquare = currentPath.getPath().get(currentPath.getPath().size() - 1);
 
+        frontier.add(currentPath);
 
-        while (!destinationReached(currentSquare, goalSquare)) {
+        while (frontier.size() > 0 && !destinationReached(currentSquare, goalSquare)) {
+            frontier.remove(0);
 
             //Add the current square to the visited list.
             visited.add(currentSquare);
 
             //Find adjacent squares
             for (int i = 0; i < currentSquare.adjacentEdges.size(); i++) {
-                NavigationSquare adjacentSquare = (currentSquare.adjacentEdges.get(i)).adjacentSquare;
-                Point2D start = (currentSquare.adjacentEdges.get(i)).start;
-                Point2D end = (currentSquare.adjacentEdges.get(i)).end;
+                NavigationEdge edge = currentSquare.adjacentEdges.get(i);
+                NavigationSquare adjacentSquare = edge.adjacentSquare;
+                Point2D start = edge.start;
+                Point2D end = edge.end;
 
                 //Don't calculate mid-points for squares already visited.
                 if (visited.contains(adjacentSquare)) {
@@ -82,15 +89,19 @@ public class PathFindingSystem {
                 //Calculate total cost.
                 double totalCost = cost + heuristic;
 
-                //Create a node in our mesh to store total cost with location.
-                Node node = new Node(adjacentSquare, totalCost);
+                // Copy the list, add the next square, and create a new path object
+                List<NavigationSquare> listCopy = new ArrayList<>(currentPath.getPath());
+                listCopy.add(adjacentSquare);
+                NavigationPath node = new NavigationPath(listCopy, totalCost);
 
                 Boolean childExists = false;
 
                 //Check to see if child already exists in the frontier.
                 for (int j = 0; j < frontier.size(); j++) {
-                    if (adjacentSquare == (frontier.get(j)).getAdjacentSquare()) {
-                        if (totalCost <= (frontier.get(j)).getCost()) {
+                    NavigationPath frontierElement = frontier.get(j);
+                    
+                    if (adjacentSquare == frontierElement.getPath().get(frontierElement.getPath().size())) {
+                        if (totalCost <= frontierElement.getCost()) {
                             frontier.remove(j);
                             childExists = false;
                             break;
@@ -115,16 +126,16 @@ public class PathFindingSystem {
                 }            
             }
 
-            //Remove current node from frontier.
-            frontier.remove(0);
-
             //Select smallest child.
-            currentSquare = (frontier.get(0)).getAdjacentSquare();
+            currentPath = (frontier.get(0));
+            currentSquare = currentPath.getPath().get(currentPath.getPath().size());
         }
 
-        visited.add(currentSquare);
+        if (currentPath.getPath().get(currentPath.getPath().size()) != goalSquare) {
+            return null;
+        }
 
-        return visited;
+        return currentPath.getPath();
     }
 
     
