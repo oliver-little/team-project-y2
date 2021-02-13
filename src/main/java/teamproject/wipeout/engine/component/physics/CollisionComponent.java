@@ -93,9 +93,9 @@ public class CollisionComponent implements GameComponent {
      * Checks whether two game entities collide (whether any of one's bounding boxes overlaps with the other's)
      * @param g1 first game entity
      * @param g2 second game entity
-     * @return true if they collide, false otherwise
+     * @return pair of shapes from the two GameEntity's bounding boxes that collide
      */
-    public static boolean collides(GameEntity g1, GameEntity g2) {
+    public static Pair<Shape, Shape> collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
     	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
     	Shape bb1[] = c1.boundingBoxes;
@@ -105,69 +105,22 @@ public class CollisionComponent implements GameComponent {
     	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		//System.out.println("bb1["+i+"]: "+bb1[i].toString());
     		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
-    		//System.out.println("s1: "+s1.toString());
-
         	for(int j=0;j<bb2.length;j++) {
-        		//System.out.println("bb1["+j+"]: "+bb1[j].toString());
         		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
-        		//System.out.println("s2: "+s2.toString());
             	if(intersects(s1,s2)) {
-            		return true;
+            		return new Pair<Shape, Shape>(s1, s2);
             	}
         	}
     	}
     	
-    	return false;
-
-    }
-    
-    public static Point2D resolveCollision(GameEntity g1, GameEntity g2) {
-    	Transform t1 = g1.getComponent(Transform.class);
-    	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
-    	Shape bb1[] = c1.boundingBoxes;
-    	
-    	Transform t2 = g2.getComponent(Transform.class);
-    	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
-    	Shape bb2[] = c2.boundingBoxes;
-    	
-    	for(int i=0;i<bb1.length;i++) {
-    		//System.out.println("bb1["+i+"]: "+bb1[i].toString());
-    		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
-    		//System.out.println("s1: "+s1.toString());
-
-        	for(int j=0;j<bb2.length;j++) {
-        		//System.out.println("bb1["+j+"]: "+bb1[j].toString());
-        		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
-        		//System.out.println("s2: "+s2.toString());
-            	if(intersects(s1,s2)) {
-            		Point2D rv =  getResolutionVector(s1,s2);
-                	if(rv==null) {
-                		return null;
-                	}
-                	
-                	if(c1.isMoveable) {
-                    	if(c2.isMoveable) {
-                    		t1.position = t1.position.add(rv.multiply(0.5));
-                    		t2.position = t2.position.add(rv.multiply(-0.5));
-                    	}
-                    	else {
-                    		t1.position = t1.position.add(rv);
-                    	}
-                	}
-                	else if(c2.isMoveable) {
-                		t2.position = t2.position.add(rv.multiply(-1));
-                	}
-            	}
-        	}
-    	}
-    	
+    	//No pair of shapes from the boundng boxes collide
     	return null;
 
     }
     
-    private static Point2D getResolutionVector(Shape s1, Shape s2)
+    
+    public static Point2D getResolutionVector(Shape s1, Shape s2)
 	{
 		// info on downcasting: https://www.baeldung.com/java-type-casting
 		if(s1 instanceof Rectangle) {
@@ -453,6 +406,12 @@ public class CollisionComponent implements GameComponent {
     	return false;
     }
     
+    /**
+     * Calculates the overlap vector of two circles
+     * @param c1 first circle
+     * @param c2 second circle
+     * @return overlap vector of the two circles
+     */
     public static Point2D getResolutionVector(Circle c1, Circle c2) {
     	//intersect if the distance between their two centres is less than the sum of their radiuses
     	double radiusSum = c1.getRadius()+c2.getRadius();
