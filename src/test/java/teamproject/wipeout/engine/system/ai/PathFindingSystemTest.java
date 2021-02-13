@@ -24,7 +24,7 @@ public class PathFindingSystemTest {
         //shortestPath = pathFindingSystem.findPath();
     }
 
-    @Test
+    //@Test
     public void simpleDestinationReachedSameNavigationSquare() {
         Point2D topLeft = new Point2D(0,10);
         Point2D bottomRight = new Point2D(10,0);
@@ -42,7 +42,7 @@ public class PathFindingSystemTest {
         assertTrue(system.destinationReached(expected, actual));
     }
 
-    @Test
+    //@Test
     public void simpleDestinationReachedDifferentNavigationSquare() {
         Point2D topLeft = new Point2D(0,10);
         Point2D bottomRight = new Point2D(10,0);
