@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
 
+/**
+ * Stores a square that can be navigated by an AI. Stores the top left and bottom right co-ordinates, including edges which intersect adjacent squares.
+ */
 public class NavigationSquare {
     
     public Point2D topLeft;

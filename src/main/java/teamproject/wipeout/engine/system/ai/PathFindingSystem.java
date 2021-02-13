@@ -9,10 +9,20 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.ai.NavigationEdge;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 
+
+/**
+ * Calculates the optimal path through a mesh network of squares for an AI character to go from a start point to a goal location.
+ */
 public class PathFindingSystem {
 
     private static final float doubleCompare = 0.00001f;
 
+    /**
+     * Checks if the destination has been reached.
+     * @param currentSquare The square the AI character is currently in.
+     * @param goalSquare The square the AI character wants to go to.
+     * @return True if at destination, otherwise false.
+     */
     public boolean destinationReached(NavigationSquare currentSquare, NavigationSquare goalSquare) {
 
         if (currentSquare.equals(goalSquare)) {
@@ -23,6 +33,14 @@ public class PathFindingSystem {
         }
     }
 
+    /**
+     * Calculates the Euclidian distance between 2 points in a mesh or square.
+     * @param xPos The current x co-ordinate.
+     * @param yPos The current y co-ordinate.
+     * @param xGoal The goal x co-ordinate.
+     * @param yGoal The goal y co-ordinate.
+     * @return
+     */
     public double calculateEuclidianDistanceSquared(double xPos, double yPos, double xGoal, double yGoal) {
 
         double euclideanDistanceSquared = Math.pow((xPos - xGoal),2) + Math.pow((yPos - yGoal),2);
@@ -31,6 +49,16 @@ public class PathFindingSystem {
 
     }
     
+    /**
+     * Calculates the optimal route through a mesh of traversible squares. Uses the A-Star algorithm to perform shortest path analysis.
+     * @param startSquare The square the AI is starting in.
+     * @param xPos The starting x co-ordinate.
+     * @param yPos The starting y co-ordiante.
+     * @param goalSquare The goal square.
+     * @param xGoal The goal x co-ordinate.
+     * @param yGoal The goal y co-ordinate.
+     * @return Returns the optimal traversal path of squares to get from the current location to the desired destination.
+     */
     public List<NavigationSquare> findPath(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
 
         Point2D midPoint;

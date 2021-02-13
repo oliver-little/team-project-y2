@@ -3,14 +3,25 @@ package teamproject.wipeout.engine.component.ai;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Defines a navigable mesh which AI characters can traverse.
+ */
 public class NavigationMesh {
     
     public List<NavigationSquare> squares;
 
+
+    /**
+     * Creates an empty mesh with a blank arraylist of squares.
+     */
     private NavigationMesh() {
         squares = new ArrayList<NavigationSquare>();
     }
 
+    /**
+     * Creates a list of traversable squares.
+     * @param squares The list of traversable squares.
+     */
     private NavigationMesh(List<NavigationSquare> squares) {
         this.squares = squares;
     }
