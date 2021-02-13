@@ -22,7 +22,9 @@ public class CollisionComponent implements GameComponent {
 	 * x,y coords of rectangle represent offset from entities top left corner.
 	 * width and height of rectangle are the dimensions of the bounding box.
 	 */
-	public Shape boundingBoxes[]; 
+	public Shape boundingBoxes[];
+	
+	public boolean isMoveable = true;
 	
 	/*
 	public CollisionComponent(Shape[] boundingBoxes) {
@@ -33,6 +35,13 @@ public class CollisionComponent implements GameComponent {
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
 	public CollisionComponent(Shape... shapes) {
 		this.boundingBoxes = shapes;
+		this.isMoveable = true;
+	}
+	
+	//varargs constructor. See https://www.baeldung.com/java-varargs for info
+	public CollisionComponent(boolean isMoveable, Shape... shapes) {
+		this.boundingBoxes = shapes;
+		this.isMoveable = isMoveable;
 	}
 	
 	/**
@@ -114,7 +123,84 @@ public class CollisionComponent implements GameComponent {
 
     }
     
-    /**
+    public static Point2D resolveCollision(GameEntity g1, GameEntity g2) {
+    	Transform t1 = g1.getComponent(Transform.class);
+    	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
+    	Shape bb1[] = c1.boundingBoxes;
+    	
+    	Transform t2 = g2.getComponent(Transform.class);
+    	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
+    	Shape bb2[] = c2.boundingBoxes;
+    	
+    	for(int i=0;i<bb1.length;i++) {
+    		//System.out.println("bb1["+i+"]: "+bb1[i].toString());
+    		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
+    		//System.out.println("s1: "+s1.toString());
+
+        	for(int j=0;j<bb2.length;j++) {
+        		//System.out.println("bb1["+j+"]: "+bb1[j].toString());
+        		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
+        		//System.out.println("s2: "+s2.toString());
+            	if(intersects(s1,s2)) {
+            		Point2D rv =  getResolutionVector(s1,s2);
+                	if(rv==null) {
+                		return null;
+                	}
+                	
+                	if(c1.isMoveable) {
+                    	if(c2.isMoveable) {
+                    		t1.position = t1.position.add(rv.multiply(0.5));
+                    		t2.position = t2.position.add(rv.multiply(-0.5));
+                    	}
+                    	else {
+                    		t1.position = t1.position.add(rv);
+                    	}
+                	}
+                	else if(c2.isMoveable) {
+                		t2.position = t2.position.add(rv.multiply(-1));
+                	}
+            	}
+        	}
+    	}
+    	
+    	return null;
+
+    }
+    
+    private static Point2D getResolutionVector(Shape s1, Shape s2)
+	{
+		// info on downcasting: https://www.baeldung.com/java-type-casting
+		if(s1 instanceof Rectangle) {
+			Rectangle r1 = (Rectangle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return getResolutionVector(r1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return getResolutionVector(r1,c2);
+			}
+		}
+		else if(s1 instanceof Circle) {
+			Circle c1 = (Circle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return getResolutionVector(c1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				//System.out.println("calling it");
+				return getResolutionVector(c1,c2);
+			}
+		}
+		
+		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
+		
+    	return null;
+		
+	}
+
+	/**
      * Calculates the normal vectors of a line connecting 2 points
      * @param p1 start point of line
      * @param p2 end point of line
@@ -289,6 +375,7 @@ public class CollisionComponent implements GameComponent {
     	return false;
     }
     
+	
     
     /**
      * Takes an array of different shapes and returns just the rectangles
@@ -356,11 +443,36 @@ public class CollisionComponent implements GameComponent {
     	Point2D centre2 = new Point2D(c2.getCenterX(), c2.getCenterY());
     	double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
     	
+    	double overlap = radiusSum - distanceBetweenCentres;
+    	//System.out.println("overlap: "+overlap);
+    	
     	if(distanceBetweenCentres <= radiusSum) {
     		return true;
     	}
     	
     	return false;
+    }
+    
+    public static Point2D getResolutionVector(Circle c1, Circle c2) {
+    	//intersect if the distance between their two centres is less than the sum of their radiuses
+    	double radiusSum = c1.getRadius()+c2.getRadius();
+    	Point2D centre1 = new Point2D(c1.getCenterX(), c1.getCenterY());
+    	Point2D centre2 = new Point2D(c2.getCenterX(), c2.getCenterY());
+    	double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
+    	
+    	double overlap = radiusSum - distanceBetweenCentres;
+    	
+    	Point2D vectorBetweenCentres = centre1.subtract(centre2);
+    	double magnitude = vectorBetweenCentres.magnitude();
+    	Point2D overlapVector = new Point2D(0,0);
+    	
+    	if(magnitude!=0) {
+    		overlapVector = vectorBetweenCentres.multiply((overlap)/magnitude);
+    	}
+    	
+    	
+    	
+    	return overlapVector;
     }
     
     /**

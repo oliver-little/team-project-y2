@@ -16,7 +16,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
-import teamproject.wipeout.engine.component.physics.MassEnergyComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.CircleRenderComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
@@ -50,7 +49,6 @@ public class App extends Application {
         nge.addComponent(new Transform(100, 100));
         nge.addComponent(new RectRenderComponent(Color.DARKRED, 20, 20));
         nge.addComponent(new CollisionComponent(new Circle(10,10,10)));
-        nge.addComponent(new MassEnergyComponent(10));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
@@ -82,7 +80,7 @@ public class App extends Application {
         bigBall.addComponent(new Transform(50, 50));
         bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
         bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
+        bigBall.addComponent(new CollisionComponent(false, new Circle(25,25,25)));
 
 
         stage.setScene(scene);

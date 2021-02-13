@@ -13,7 +13,6 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.FacingDirection;
-import teamproject.wipeout.engine.component.physics.MassEnergyComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
@@ -34,8 +33,7 @@ public class CollisionSystem implements GameSystem {
             	if(i!=j) {
                 	if(CollisionComponent.collides(entities.get(i), entities.get(j))) {
                 		
-                		System.out.println("COLLISION");
-                		resolveCollision(entities.get(i), entities.get(j));                     
+                		CollisionComponent.resolveCollision(entities.get(i), entities.get(j));
                         
                 	}
             	}
@@ -44,28 +42,6 @@ public class CollisionSystem implements GameSystem {
         
     }
     
-    public void resolveCollision(GameEntity g1, GameEntity g2) {
-		//TODO make sure components behave correctly now we have detected the collision
-		//This is a quick hacky thing just to see if it works
-		//Only works because both components have a gravity and velocity component 
-		//at the moment a collision causes both objects to freeze
-		
-		if(g1.hasComponent(MassEnergyComponent.class)) {
-			MassEnergyComponent me = g1.getComponent(MassEnergyComponent.class);
-			MovementComponent m = g1.getComponent(MovementComponent.class);
-			m.velocity = m.velocity.multiply(0);
-			
-		}
-		
-		if(g2.hasComponent(MassEnergyComponent.class)) {
-			MassEnergyComponent me = g2.getComponent(MassEnergyComponent.class);
-			MovementComponent m = g2.getComponent(MovementComponent.class);
-			m.velocity = m.velocity.multiply(0);
-		}
-		
-
-        
-    }
     
 
 
