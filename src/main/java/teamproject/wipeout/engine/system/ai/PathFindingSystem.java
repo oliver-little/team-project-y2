@@ -138,6 +138,10 @@ public class PathFindingSystem {
                 }            
             }
 
+            if (frontier.size() == 0) {
+                throw new ArrayIndexOutOfBoundsException("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.");
+            }
+
             //Select smallest child.
             currentPath = (frontier.get(0));
             currentSquare = currentPath.getPath().get(currentPath.getPath().size()-1);

@@ -1,6 +1,7 @@
 package teamproject.wipeout.engine.system.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -473,5 +474,71 @@ public class PathFindingSystemTest {
         assertEquals(path.get(2),e);
         assertEquals(path.get(3),b);
         assertEquals(path.get(4),a);
+    }
+
+    @Test
+    public void testNoPathFinding() {
+        
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 10);
+        a.bottomRight = new Point2D(10, 0);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(20, 10);
+        b.bottomRight = new Point2D(30, 0);
+
+        List<NavigationSquare> navigationSquares = new ArrayList<>();
+
+        navigationSquares.add(a);
+        navigationSquares.add(b);
+
+        NavigationMesh.generateMesh(navigationSquares);
+
+        assertEquals(0, a.adjacentEdges.size());
+        assertEquals(0, b.adjacentEdges.size());  
+
+        //Find path through network
+        PathFindingSystem system = new PathFindingSystem();
+
+        Exception exception = assertThrows(Exception.class, () -> system.findPath(a, 5, 5, b, 25, 5));
+
+        assertEquals("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.", exception.getMessage());
+    }
+
+    @Test
+    public void testNoPathFinding2() {
+        
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 10);
+        a.bottomRight = new Point2D(10, 0);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(10, 10);
+        b.bottomRight = new Point2D(20, 0);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(30, 10);
+        c.bottomRight = new Point2D(40, 0);
+
+        List<NavigationSquare> navigationSquares = new ArrayList<>();
+
+        navigationSquares.add(a);
+        navigationSquares.add(b);
+        navigationSquares.add(c);
+
+        NavigationMesh.generateMesh(navigationSquares);
+
+        assertEquals(1, a.adjacentEdges.size());
+        assertEquals(1, b.adjacentEdges.size());
+        assertEquals(0, c.adjacentEdges.size());   
+
+        //Find path through network
+        PathFindingSystem system = new PathFindingSystem();
+
+        Exception exception = assertThrows(Exception.class, () -> system.findPath(a, 5, 5, c, 35, 5));
+
+        assertEquals("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.", exception.getMessage());
     }
 }
