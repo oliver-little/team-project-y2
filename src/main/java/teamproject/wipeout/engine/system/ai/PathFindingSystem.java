@@ -16,7 +16,7 @@ import teamproject.wipeout.engine.component.ai.NavigationSquare;
 public class PathFindingSystem {
 
     private static final float doubleCompare = 0.00001f;
-    
+
     /**
      * Calculates the Euclidian distance between 2 points in a mesh or square.
      * @param xPos The current x co-ordinate.
@@ -53,7 +53,7 @@ public class PathFindingSystem {
 
         //Add initial node into the frontier.
         NavigationPath currentPath = new NavigationPath(List.of(startSquare), 0);
-
+        
         NavigationSquare currentSquare = currentPath.getPath().get(currentPath.getPath().size() - 1);
 
         frontier.add(currentPath);
@@ -70,7 +70,7 @@ public class PathFindingSystem {
                 NavigationSquare adjacentSquare = edge.adjacentSquare;
                 Point2D start = edge.start;
                 Point2D end = edge.end;
-
+                
                 //Don't calculate mid-points for squares already visited.
                 if (visited.contains(adjacentSquare)) {
                     continue;
@@ -107,7 +107,7 @@ public class PathFindingSystem {
                 NavigationPath node = new NavigationPath(listCopy, totalCost);
 
                 Boolean childExists = false;
-
+                
                 //Check to see if child already exists in the frontier.
                 for (int j = 0; j < frontier.size(); j++) {
                     NavigationPath frontierElement = frontier.get(j);
