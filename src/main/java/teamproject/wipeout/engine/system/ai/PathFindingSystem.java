@@ -16,23 +16,7 @@ import teamproject.wipeout.engine.component.ai.NavigationSquare;
 public class PathFindingSystem {
 
     private static final float doubleCompare = 0.00001f;
-
-    /**
-     * Checks if the destination has been reached.
-     * @param currentSquare The square the AI character is currently in.
-     * @param goalSquare The square the AI character wants to go to.
-     * @return True if at destination, otherwise false.
-     */
-    public boolean destinationReached(NavigationSquare currentSquare, NavigationSquare goalSquare) {
-
-        if (currentSquare.equals(goalSquare)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
+    
     /**
      * Calculates the Euclidian distance between 2 points in a mesh or square.
      * @param xPos The current x co-ordinate.
@@ -74,7 +58,7 @@ public class PathFindingSystem {
 
         frontier.add(currentPath);
 
-        while (frontier.size() > 0 && !destinationReached(currentSquare, goalSquare)) {
+        while (frontier.size() > 0 && !currentSquare.equals(goalSquare)) {
             frontier.remove(0);
 
             //Add the current square to the visited list.

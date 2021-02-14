@@ -1,7 +1,6 @@
 package teamproject.wipeout.component.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +13,6 @@ import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationEdge;
 
 public class NavigationMeshTest {
-
-    // TODO: top bottom square generation
-    // big one with lots of complicated connections
 
     @Test
     public void testLeftRightSquareGeneration() {
@@ -34,7 +30,7 @@ public class NavigationMeshTest {
         navigationSquares.add(a);
         navigationSquares.add(b);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(1, b.adjacentEdges.size());  
@@ -66,7 +62,7 @@ public class NavigationMeshTest {
         navigationSquares.add(a);
         navigationSquares.add(b);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(1, b.adjacentEdges.size());  
@@ -103,7 +99,7 @@ public class NavigationMeshTest {
         navigationSquares.add(b);
         navigationSquares.add(c);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(2, a.adjacentEdges.size());
         assertEquals(2, b.adjacentEdges.size());
@@ -166,7 +162,7 @@ public class NavigationMeshTest {
         navigationSquares.add(c);
         navigationSquares.add(d);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(3, a.adjacentEdges.size());
         assertEquals(3, b.adjacentEdges.size());
@@ -260,7 +256,7 @@ public class NavigationMeshTest {
         navigationSquares.add(e);
         navigationSquares.add(f);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(3, a.adjacentEdges.size());
         assertEquals(4, b.adjacentEdges.size());
@@ -353,7 +349,7 @@ public class NavigationMeshTest {
         navigationSquares.add(b);
         navigationSquares.add(c);
 
-        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+        NavigationMesh.generateMesh(navigationSquares);
 
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(2, b.adjacentEdges.size());
