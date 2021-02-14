@@ -501,9 +501,9 @@ public class PathFindingSystemTest {
         //Find path through network
         PathFindingSystem system = new PathFindingSystem();
 
-        Exception exception = assertThrows(Exception.class, () -> system.findPath(a, 5, 5, b, 25, 5));
+        List<NavigationSquare> path = system.findPath(a, 5, 5, b, 25, 5);
 
-        assertEquals("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.", exception.getMessage());
+        assertEquals(path, null);
     }
 
     @Test
@@ -537,8 +537,8 @@ public class PathFindingSystemTest {
         //Find path through network
         PathFindingSystem system = new PathFindingSystem();
 
-        Exception exception = assertThrows(Exception.class, () -> system.findPath(a, 5, 5, c, 35, 5));
+        List<NavigationSquare> path = system.findPath(a, 5, 5, c, 35, 5);
 
-        assertEquals("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.", exception.getMessage());
+        assertEquals(path, null);
     }
 }

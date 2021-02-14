@@ -139,7 +139,7 @@ public class PathFindingSystem {
             }
 
             if (frontier.size() == 0) {
-                throw new ArrayIndexOutOfBoundsException("NO THROUGH ROUTE: Cannot calculate shorest path to destination due to current location and destination being disconnected.");
+                return null;
             }
 
             //Select smallest child.
