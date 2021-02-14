@@ -111,8 +111,7 @@ public class PathFindingSystem {
                 //Check to see if child already exists in the frontier.
                 for (int j = 0; j < frontier.size(); j++) {
                     NavigationPath frontierElement = frontier.get(j);
-                    
-                    if (adjacentSquare == frontierElement.getPath().get(frontierElement.getPath().size())) {
+                    if (adjacentSquare == frontierElement.getPath().get(frontierElement.getPath().size()-1)) {
                         if (totalCost <= frontierElement.getCost()) {
                             frontier.remove(j);
                             childExists = false;
@@ -126,24 +125,25 @@ public class PathFindingSystem {
 
                 //Add to frontier if not already in correct position sorted.
                 if (childExists == false) {
-                    for (int k = 0; k < frontier.size(); k++) {
+                    int k;
+                    for (k = 0; k < frontier.size(); k++) {
                         if (totalCost <= (frontier.get(k).getCost())) {
                             frontier.add(k, node);
                             break;
                         }
-                        else if (k == frontier.size() - 1) {
-                            frontier.add(node);
-                        }
+                    }
+                    if (k == frontier.size()) {
+                        frontier.add(node);
                     }
                 }            
             }
 
             //Select smallest child.
             currentPath = (frontier.get(0));
-            currentSquare = currentPath.getPath().get(currentPath.getPath().size());
+            currentSquare = currentPath.getPath().get(currentPath.getPath().size()-1);
         }
 
-        if (currentPath.getPath().get(currentPath.getPath().size()) != goalSquare) {
+        if (currentPath.getPath().get(currentPath.getPath().size()-1) != goalSquare) {
             return null;
         }
 
