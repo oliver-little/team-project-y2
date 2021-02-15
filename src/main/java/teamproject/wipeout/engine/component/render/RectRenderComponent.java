@@ -24,13 +24,24 @@ public class RectRenderComponent implements GameComponent, Renderable {
         this.height = height;
     }
 
-    public void render(GraphicsContext gc, double x, double y) {
+    public String getType() {
+        return "render-rect";
+    }
+
+    @Override
+    public double getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public double getHeight() {
+        return this.height;
+    }
+
+    @Override
+    public void render(GraphicsContext gc, double x, double y, double scale) {
         gc.setFill(this.color);
         gc.fillRect(x, y, this.width, this.height);
         //gc.fillOval(x, y, this.width, this.height);
-    }
-
-    public String getType() {
-        return "render-rect";
     }
 }

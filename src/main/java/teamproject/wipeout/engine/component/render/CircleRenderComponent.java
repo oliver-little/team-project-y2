@@ -32,4 +32,20 @@ public class CircleRenderComponent implements GameComponent, Renderable {
     public String getType() {
         return "render-circle";
     }
+
+    @Override
+    public double getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public double getHeight() {
+        return this.height;
+    }
+
+    @Override
+    public void render(GraphicsContext gc, double x, double y, double scale) {
+        gc.setFill(this.color);
+        gc.fillOval(x, y, this.width, this.height);
+    }
 }

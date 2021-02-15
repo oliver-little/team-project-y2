@@ -26,6 +26,12 @@ public class CollisionSystem implements GameSystem {
         this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, CollisionComponent.class));
     }
 
+	@Override
+	public void cleanup() {
+
+	}
+
+	@Override
     public void accept(Double timeStep) {
         List<GameEntity> entities = this._entityCollector.getEntities();
 
