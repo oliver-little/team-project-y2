@@ -5,6 +5,7 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 
 public class MovementComponent implements GameComponent {
+
     public Point2D velocity;
     public Point2D acceleration;
     public FacingDirection facingDirection;
@@ -19,14 +20,17 @@ public class MovementComponent implements GameComponent {
         this.velocity = velocity;
         this.acceleration = acceleration;
         this.facingDirection = FacingDirection.UP;
+        this.updateFacingDirection();
     }
 
     public MovementComponent(float xVelocity, float yVelocity, float xAcceleration, float yAcceleration) {
         this.velocity = new Point2D(xVelocity, yVelocity);
         this.acceleration = new Point2D(xAcceleration, yAcceleration);
         this.facingDirection = FacingDirection.UP;
+        this.updateFacingDirection();
     }
 
+    /** Update the facing diection every timestep, based on velocity */
     public void updateFacingDirection() {
         double xVelocity = this.velocity.getX();
         double yVelocity = this.velocity.getY();
@@ -44,17 +48,26 @@ public class MovementComponent implements GameComponent {
         }
     }
 
+    /**
+     * Update the velociy based on accelaration
+     * @param timestep each timestep when the velocity should get updated
+     */
     public void updateVelocity(Double timestep){
         this.velocity = this.velocity.add(this.acceleration.multiply(timestep));
         this.decayVelocity(timestep);
         this.capVelocity();
     }
 
+    /**
+     *  Decay is helping us make the movement smoother
+     * @param timestep each timestep when the velocity should get updated
+     */
     public void decayVelocity(Double timestep){
         Double decay_rate = 1f -Math.min(timestep, 1f);
         this.velocity = this.velocity.multiply(decay_rate*0.95);
     }
 
+    /** Cap is making sure that the speed of the object won't become too long with time */
     public void capVelocity(){
         Double threshold = 25.0;
         Double xVelocity = this.velocity.getX();
