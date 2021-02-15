@@ -70,26 +70,4 @@ public class NavigationSquare {
 
         return true;
     }
-
-    /**
-     * Removes a square from a pre-existing mesh and updates edges accordingly.
-     */
-    public void deleteSquare() {
-        for (int i = 0; i < adjacentEdges.size(); i++) {
-
-            NavigationEdge edge = adjacentEdges.get(i);
-            ArrayList<NavigationEdge> nextSquareEdges = edge.adjacentSquare.adjacentEdges;
-
-            for (int j = 0; j < nextSquareEdges.size(); j++) {
-                if (nextSquareEdges.get(j).adjacentSquare == this) {
-                    nextSquareEdges.remove(j);
-                    break;
-                }
-            }
-
-            adjacentEdges.remove(i);
-            i--;
-        }
-
-    }
 }

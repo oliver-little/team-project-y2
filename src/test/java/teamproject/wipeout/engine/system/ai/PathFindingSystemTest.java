@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.system.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -540,5 +539,128 @@ public class PathFindingSystemTest {
         List<NavigationSquare> path = system.findPath(a, 5, 5, c, 35, 5);
 
         assertEquals(path, null);
+    }
+
+    @Test
+    public void testAddSquarePathFinding() {
+        
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 20);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(30, 0);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(20, 20);
+        c.bottomRight = new Point2D(30, 10);
+
+        List<NavigationSquare> navigationSquares = new ArrayList<>();
+
+        navigationSquares.add(a);
+        navigationSquares.add(b);
+        navigationSquares.add(c);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+
+        assertEquals(1, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(1, c.adjacentEdges.size());   
+
+        //Find path through network
+        PathFindingSystem system = new PathFindingSystem();
+        
+        List<NavigationSquare> path = system.findPath(a, 5, 15, c, 25, 15);
+
+        assertEquals(3, path.size());
+
+        assertEquals(path.get(0),a);
+        assertEquals(path.get(1),b);
+        assertEquals(path.get(2),c);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(10, 20);
+        d.bottomRight = new Point2D(20, 10);
+
+        NavigationMesh.addSquare(navigationSquares, d);
+
+        assertEquals(4, navigationMesh.squares.size());
+
+        assertEquals(2, a.adjacentEdges.size());
+        assertEquals(3, b.adjacentEdges.size());
+        assertEquals(2, c.adjacentEdges.size());
+        assertEquals(3, d.adjacentEdges.size());
+
+        path = system.findPath(a, 5, 15, c, 25, 15);
+        
+        assertEquals(3, path.size());
+
+        assertEquals(path.get(0),a);
+        assertEquals(path.get(1),d);
+        assertEquals(path.get(2),c);
+    }
+
+    @Test
+    public void testRemoveSquarePathFinding() {
+        
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 20);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(30, 0);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(20, 20);
+        c.bottomRight = new Point2D(30, 10);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(10, 20);
+        d.bottomRight = new Point2D(20, 10);
+
+        List<NavigationSquare> navigationSquares = new ArrayList<>();
+
+        navigationSquares.add(a);
+        navigationSquares.add(b);
+        navigationSquares.add(c);
+        navigationSquares.add(d);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
+
+        assertEquals(2, a.adjacentEdges.size());
+        assertEquals(3, b.adjacentEdges.size());
+        assertEquals(2, c.adjacentEdges.size());
+        assertEquals(3, d.adjacentEdges.size()); 
+
+        //Find path through network
+        PathFindingSystem system = new PathFindingSystem();
+        
+        List<NavigationSquare> path = system.findPath(a, 5, 15, c, 25, 15);
+
+        assertEquals(3, path.size());
+
+        assertEquals(path.get(0),a);
+        assertEquals(path.get(1),d);
+        assertEquals(path.get(2),c);
+
+        NavigationMesh.removeSquare(navigationSquares, d);
+
+        assertEquals(3, navigationMesh.squares.size());
+
+        assertEquals(1, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(1, c.adjacentEdges.size());
+
+        path = system.findPath(a, 5, 15, c, 25, 15);
+        
+        assertEquals(3, path.size());
+
+        assertEquals(path.get(0),a);
+        assertEquals(path.get(1),b);
+        assertEquals(path.get(2),c);
     }
 }

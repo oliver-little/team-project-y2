@@ -45,8 +45,11 @@ public class NavigationMesh {
 
     /**
      * Removes a square from a pre-existing mesh and updates edges accordingly.
+     * @param squares The mesh (or list of squares) to remove the square from.
+     * @param square The square to be removed.
+     * @return The new mesh/list of squares.
      */
-    public void deleteSquare(NavigationSquare square) {
+    public static NavigationMesh removeSquare(List<NavigationSquare> squares, NavigationSquare square) {
         for (int i = 0; i < square.adjacentEdges.size(); i++) {
             NavigationEdge edge = square.adjacentEdges.get(i);
             ArrayList<NavigationEdge> nextSquareEdges = edge.adjacentSquare.adjacentEdges;
@@ -62,11 +65,27 @@ public class NavigationMesh {
             i--;
         }
 
+        int index = squares.indexOf(square);
+        if (index > -1) {
+            squares.remove(index);
+        }
+
+        return new NavigationMesh(squares);
     }
 
-    public void addSquare(List<NavigationSquare> squares, NavigationSquare square) {
+    /**
+     * Adds a square to a pre-existing mesh and updates edges accordingly.
+     * @param squares The mesh (or list of squares) to add the square to.
+     * @param square The square to be added to the msh.
+     * @return The new mesh/list of squares.
+     */
+    public static NavigationMesh addSquare(List<NavigationSquare> squares, NavigationSquare square) {
         for (int i = 0; i < squares.size(); i++) {
             square.createEdgesBetweenSquares(squares.get(i));
         }
+
+        squares.add(square);
+
+        return new NavigationMesh(squares);
     }
 }
