@@ -3,6 +3,7 @@ package teamproject.wipeout.engine.system.ai;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
@@ -47,22 +48,30 @@ public class PathFindingSystem {
 
         Point2D midPoint;
 
-        ArrayList<NavigationPath> frontier = new ArrayList<>();
+        PriorityQueue<NavigationPath> frontier = new PriorityQueue<>(new NavigationPathComparator());
 
         Set<NavigationSquare> visited = new HashSet<>();
 
-        //Add initial node into the frontier.
         NavigationPath currentPath = new NavigationPath(List.of(startSquare), 0);
-        
-        NavigationSquare currentSquare = currentPath.getPath().get(currentPath.getPath().size() - 1);
+        NavigationSquare currentSquare = startSquare;
 
+        //Add initial node into the frontier.
         frontier.add(currentPath);
 
         while (frontier.size() > 0 && !currentSquare.equals(goalSquare)) {
-            frontier.remove(0);
 
-            //Add the current square to the visited list.
-            visited.add(currentSquare);
+            //Select smallest child.
+            currentPath = frontier.remove();
+            currentSquare = currentPath.getPath().get(currentPath.getPath().size()-1);
+
+            // Check if we have already visited this square, continue if we have.
+            if (visited.contains(currentSquare)) {
+                continue;
+            }
+            else {
+                //Add the current square to the visited list.
+                visited.add(currentSquare);
+            }
 
             //Find adjacent squares
             for (int i = 0; i < currentSquare.adjacentEdges.size(); i++) {
@@ -106,45 +115,9 @@ public class PathFindingSystem {
                 listCopy.add(adjacentSquare);
                 NavigationPath node = new NavigationPath(listCopy, totalCost);
 
-                Boolean childExists = false;
-                
-                //Check to see if child already exists in the frontier.
-                for (int j = 0; j < frontier.size(); j++) {
-                    NavigationPath frontierElement = frontier.get(j);
-                    if (adjacentSquare == frontierElement.getPath().get(frontierElement.getPath().size()-1)) {
-                        if (totalCost <= frontierElement.getCost()) {
-                            frontier.remove(j);
-                            childExists = false;
-                            break;
-                        }
-                        else {
-                            childExists = true;
-                        }
-                    }
-                }
-
-                //Add to frontier if not already in correct position sorted.
-                if (childExists == false) {
-                    int k;
-                    for (k = 0; k < frontier.size(); k++) {
-                        if (totalCost <= (frontier.get(k).getCost())) {
-                            frontier.add(k, node);
-                            break;
-                        }
-                    }
-                    if (k == frontier.size()) {
-                        frontier.add(node);
-                    }
-                }            
+                // Add to frontier (this node may already exist).
+                frontier.add(node);     
             }
-
-            if (frontier.size() == 0) {
-                return null;
-            }
-
-            //Select smallest child.
-            currentPath = (frontier.get(0));
-            currentSquare = currentPath.getPath().get(currentPath.getPath().size()-1);
         }
 
         if (currentPath.getPath().get(currentPath.getPath().size()-1) != goalSquare) {

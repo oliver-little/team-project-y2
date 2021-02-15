@@ -88,4 +88,9 @@ public class NavigationSquare {
 
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "NavigationSquare - TL:" + topLeft.toString() + ", BR:" + bottomRight.toString();
+    }
 }

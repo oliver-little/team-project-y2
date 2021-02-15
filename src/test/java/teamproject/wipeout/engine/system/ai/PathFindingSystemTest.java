@@ -157,8 +157,10 @@ public class PathFindingSystemTest {
 
         assertEquals(3, path.size());
 
+        System.out.println(path);
+
         assertEquals(path.get(0),a);
-        assertEquals(path.get(1),b);
+        assertEquals(path.get(1),c);
         assertEquals(path.get(2),d);
     }
 

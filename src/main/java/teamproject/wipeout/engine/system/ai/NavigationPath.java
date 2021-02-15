@@ -46,5 +46,4 @@ public class NavigationPath {
     public double getCost() {
         return this.cost;
     }
-
 }
