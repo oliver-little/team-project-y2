@@ -55,12 +55,12 @@ public class App extends Application {
         bigBall2.addComponent(new Transform(200, 400));
         bigBall2.addComponent(new RectRenderComponent(Color.GREEN, 50, 50));
         bigBall2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall2.addComponent(new CollisionComponent(false, new Circle(25,25,25)));
+        bigBall2.addComponent(new CollisionComponent(false, new Rectangle(50,50)));
         
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(100, 100));
-        nge.addComponent(new RectRenderComponent(Color.DARKRED, 50, 50));
-        nge.addComponent(new CollisionComponent(new Rectangle(50,50)));
+        nge.addComponent(new RectRenderComponent(Color.DARKRED, 30, 30));
+        nge.addComponent(new CollisionComponent(new Rectangle(30,30)));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);

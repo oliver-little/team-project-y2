@@ -34,7 +34,7 @@ public class CollisionSystem implements GameSystem {
             	if(i!=j) {
                 	Pair<Shape, Shape> p = null;
 					if((p  = CollisionComponent.collides(entities.get(i), entities.get(j)))!=null) {
-                		//System.out.println("Collision");
+                		System.out.println("Collision");
 						resolveCollision(entities.get(i),entities.get(j), p);
                                         
                 	}
@@ -52,10 +52,12 @@ public class CollisionSystem implements GameSystem {
     	
     	Transform t1 = g1.getComponent(Transform.class);
     	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
+    	MovementComponent m1 = g1.getComponent(MovementComponent.class);
     	
     	Transform t2 = g2.getComponent(Transform.class);
     	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
-    	
+    	MovementComponent m2 = g2.getComponent(MovementComponent.class);
+    	    	
     	
     	if(c1.isMoveable) {
         	if(c2.isMoveable) {

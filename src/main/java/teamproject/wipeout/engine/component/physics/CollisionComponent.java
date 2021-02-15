@@ -159,7 +159,7 @@ public class CollisionComponent implements GameComponent {
      * @param p2 end point of line
      * @return normal vectors of the line connecting the 2 points provided
      */
-    public Point2D[] getNormalsToLine(Point2D p1, Point2D p2) {
+    public static Point2D[] getNormalsToLine(Point2D p1, Point2D p2) {
     	double dx = p2.getX() - p1.getX();
     	double dy = p2.getY() - p1.getY();
     	
@@ -443,12 +443,53 @@ public class CollisionComponent implements GameComponent {
      * @return overlap vector of the two rectangles
      */
     public static Point2D getResolutionVector(Rectangle r1, Rectangle r2) {
-
+    	//resolve in direction of least intersection
+    	double overlap = 0;
+    	double overlap2 = 0;
     	System.out.println("\nr1: "+r1.toString());
     	System.out.println("r2: "+r2.toString());
     	//check each side of rectangle
-    	Line t_r1 = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
-    	Line l_r2 = new Line(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
+    	Line top_r1 = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
+    	Line bottom_r1 = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
+    	Line left_r2 = new Line(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
+    	//1
+    	if(intersects(left_r2, top_r1) && intersects(left_r2, bottom_r1)) {
+    		System.out.println("first");
+    		//calculate 2 different intersections
+    		double i1 = getDistanceBetweenTwoPoints(new Point2D(r1.getX()+r1.getWidth(),0), new Point2D(r2.getX(),0));
+    		double i2 =  getDistanceBetweenTwoPoints(new Point2D(r1.getX(),0), new Point2D(r2.getX()+r2.getWidth(),0));
+    		if (i1<=i2) {
+    			overlap = -i1;
+    		}
+    		else {
+    			overlap = i2;
+    		}
+    		return new Point2D(overlap, 0);
+    	}
+    	Line top_r2 = new Line(r2.getX(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY());
+    	Line left_r1 = new Line(r1.getX(), r1.getY(), r1.getX(), r1.getY()+r1.getHeight());
+    	Line right_r1 = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
+    	//2
+    	if(intersects(top_r2, left_r1) && intersects(top_r2, right_r1)) {
+    		System.out.println("second");
+    		//calculate 2 different intersections
+    		double i1 = getDistanceBetweenTwoPoints(new Point2D(0,r1.getY()+r1.getHeight()), new Point2D(0,r2.getY()));
+    		double i2 = getDistanceBetweenTwoPoints(new Point2D(0,r1.getY()), new Point2D(0,r2.getY()+r2.getHeight()));
+    		if (i1<=i2) {
+    			overlap = -i1;
+    		}
+    		else {
+    			overlap = i2;
+    		}
+    		return new Point2D(overlap, 0);
+    	}
+    	
+    	System.out.println("none");
+    	return new Point2D(0, 0);
+
+    	
+    	
+    	/*
     	System.out.println("t_r1: "+t_r1.toString());
     	System.out.println("l_r2: "+l_r2.toString());
     	if(intersects(t_r1, l_r2)) {
@@ -473,12 +514,10 @@ public class CollisionComponent implements GameComponent {
     		double overlap = getDistanceBetweenTwoPoints(tl_r1, tr_r2);
     		return new Point2D(overlap,0);
     	}
-    	
+    	*/
     	
     	//check rectangle inside other rectangle
-    	
-    	
-    	return null;
+
     }
     
     /**

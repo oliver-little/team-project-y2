@@ -71,6 +71,18 @@ class CollisionTest
 		r2 = new Rectangle(10,0,4,10);
 		//collides at top right corner of r1
 		assertTrue(CollisionComponent.intersects(r1,r2));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(12,12,5,5);
+		//collides in middle of left side
+		assertTrue(CollisionComponent.intersects(r1,r2));
+		assertTrue(CollisionComponent.intersects(r2,r1));
+		
+		r1 = new Rectangle(10,10,10,10);
+		r2 = new Rectangle(18,12,5,5);
+		//collides in middle of right side
+		assertTrue(CollisionComponent.intersects(r1,r2));
+		assertTrue(CollisionComponent.intersects(r2,r1));
 	}
 	
 	
