@@ -44,48 +44,47 @@ public class NavigationMesh {
     }
 
     /**
-     * Removes a square from a pre-existing mesh and updates edges accordingly.
-     * @param squares The mesh (or list of squares) to remove the square from.
-     * @param square The square to be removed.
-     * @return The new mesh/list of squares.
-     */
-    public static NavigationMesh removeSquare(List<NavigationSquare> squares, NavigationSquare square) {
-        for (int i = 0; i < square.adjacentEdges.size(); i++) {
-            NavigationEdge edge = square.adjacentEdges.get(i);
-            ArrayList<NavigationEdge> nextSquareEdges = edge.adjacentSquare.adjacentEdges;
-
-            for (int j = 0; j < nextSquareEdges.size(); j++) {
-                if ((nextSquareEdges.get(j)).adjacentSquare == square) {
-                    nextSquareEdges.remove(j);
-                    break;
-                }
-            }
-
-            square.adjacentEdges.remove(i);
-            i--;
-        }
-
-        int index = squares.indexOf(square);
-        if (index > -1) {
-            squares.remove(index);
-        }
-
-        return new NavigationMesh(squares);
-    }
-
-    /**
      * Adds a square to a pre-existing mesh and updates edges accordingly.
-     * @param squares The mesh (or list of squares) to add the square to.
      * @param square The square to be added to the msh.
-     * @return The new mesh/list of squares.
+     * @return Whether the square was added successfully.
      */
-    public static NavigationMesh addSquare(List<NavigationSquare> squares, NavigationSquare square) {
+    public boolean addSquare( NavigationSquare square) {
+        if (squares.contains(square)) {
+            return false;
+        }
+
         for (int i = 0; i < squares.size(); i++) {
             square.createEdgesBetweenSquares(squares.get(i));
         }
 
         squares.add(square);
 
-        return new NavigationMesh(squares);
+        return true;
+    }
+
+    /**
+     * Removes a square from a pre-existing mesh and updates edges accordingly.
+     * @param square The square to be removed.
+     * @return Whether the square was removed successfully
+     */
+    public boolean removeSquare(NavigationSquare square) {
+        // Attempt to remove the square
+        int index = squares.indexOf(square);
+        if (index != -1) {
+            squares.remove(index);
+        }
+        else {
+            return false;
+        }
+
+        // For each edge, remove the edge in the opposite direction
+        for (int i = 0; i < square.adjacentEdges.size(); i++) {
+            NavigationEdge edge = square.adjacentEdges.get(i);
+            edge.adjacentSquare.removeEdge(square);
+        }
+
+        square.adjacentEdges.clear();
+
+        return true;
     }
 }

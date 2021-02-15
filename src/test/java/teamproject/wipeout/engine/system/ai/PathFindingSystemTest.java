@@ -584,7 +584,7 @@ public class PathFindingSystemTest {
         d.topLeft = new Point2D(10, 20);
         d.bottomRight = new Point2D(20, 10);
 
-        NavigationMesh.addSquare(navigationSquares, d);
+        assertEquals(true, navigationMesh.addSquare(d));
 
         assertEquals(4, navigationMesh.squares.size());
 
@@ -647,7 +647,7 @@ public class PathFindingSystemTest {
         assertEquals(path.get(1),d);
         assertEquals(path.get(2),c);
 
-        NavigationMesh.removeSquare(navigationSquares, d);
+        assertEquals(true, navigationMesh.removeSquare(d));
 
         assertEquals(3, navigationMesh.squares.size());
 

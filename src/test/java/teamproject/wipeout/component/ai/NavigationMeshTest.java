@@ -505,7 +505,7 @@ public class NavigationMeshTest {
         c.topLeft = new Point2D(0, 15);
         c.bottomRight = new Point2D(10, 10);
         
-        navigationMesh = NavigationMesh.addSquare(navigationSquares, c);
+        assertEquals(true, navigationMesh.addSquare(c));
 
         assertEquals(2, a.adjacentEdges.size());
         assertEquals(2, b.adjacentEdges.size());
@@ -572,11 +572,10 @@ public class NavigationMeshTest {
         assertEquals(2, b.adjacentEdges.size());
         assertEquals(2, c.adjacentEdges.size());
       
-        NavigationMesh.removeSquare(navigationSquares, b);
+        assertEquals(true, navigationMesh.removeSquare(b));
 
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(1, c.adjacentEdges.size());
-
 
         NavigationEdge aEdge = a.adjacentEdges.get(0);
         assertEquals(c, aEdge.adjacentSquare);   
@@ -628,7 +627,7 @@ public class NavigationMeshTest {
         e.topLeft = new Point2D(10, 20);
         e.bottomRight = new Point2D(20, 10);
         
-        NavigationMesh.addSquare(navigationSquares, e);
+        navigationMesh.addSquare(e);
 
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(1, b.adjacentEdges.size());
@@ -719,7 +718,7 @@ public class NavigationMeshTest {
         assertEquals(1, d.adjacentEdges.size());
         assertEquals(4, e.adjacentEdges.size());
         
-        NavigationMesh.removeSquare(navigationSquares, e);
+        assertEquals(true, navigationMesh.removeSquare(e));
 
         assertEquals(0, a.adjacentEdges.size());
         assertEquals(0, b.adjacentEdges.size());
@@ -748,7 +747,7 @@ public class NavigationMeshTest {
 
         assertEquals(0, a.adjacentEdges.size());
         
-        NavigationMesh.removeSquare(navigationSquares, b);
+        navigationMesh.removeSquare(b);
 
         assertEquals(0, a.adjacentEdges.size());
 
@@ -774,7 +773,7 @@ public class NavigationMeshTest {
 
         assertEquals(0, a.adjacentEdges.size());
         
-        NavigationMesh.addSquare(navigationSquares, b);
+        assertEquals(true, navigationMesh.addSquare(b));
 
         assertEquals(0, a.adjacentEdges.size());
         assertEquals(0, b.adjacentEdges.size());
