@@ -103,7 +103,7 @@
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.2.1</version>
 					<configuration>
-						<mainClass>teamproject.wipeout.App</mainClass>
+						<mainClass>teamproject.wipeout.Main</mainClass>
 					</configuration>
 				</plugin>
 				<!-- <plugin>

@@ -1,6 +1,7 @@
 package teamproject.wipeout;
 
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
@@ -28,21 +29,23 @@ import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 
-public class App extends Application {
+/**
+ * App is a class for containing the components for game play.
+ * It implements the Controller interface.
+ *
+ */
+public class App implements Controller {
 
     public String imgPath = "./assets/";
-
-    public static void main(String[] args) {
-        launch();
-    }
-
-    @Override
-    public void start(Stage stage) {
-        double windowWidth = 800;
-        double windowHeight = 600;
-        Canvas canvas = new Canvas(windowWidth, windowHeight);
-        Scene scene = new Scene(new StackPane(canvas), windowWidth, windowHeight);
-
+    private StackPane root;
+    private Canvas canvas;
+    private double windowWidth = 800;
+    private double windowHeight = 600;
+    
+    /**
+     * Creates the content to be rendered onto the canvas.
+     */
+    public void createContent() {
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, canvas);
         SystemUpdater systemUpdater = new SystemUpdater();
@@ -88,20 +91,18 @@ public class App extends Application {
 
         nge.addComponent(ngePhysics);
 
-        InputHandler input = new InputHandler(scene);
+        InputHandler input = new InputHandler(root.getScene());
 
 
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
         nge.addComponent(ngeSound);
 
         input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
-
+        
         GameAudio ga = new GameAudio("backingTrack2.wav");
         ga.play();
-
-        input.onKeyRelease(KeyCode.S, ga::stopStart); //example - pressing the S key will switch between play and pause
-
-
+        input.onKeyRelease(KeyCode.S, ga::stopStart); //example - pressing the S key will switch between stop and start
+        
         input.addKeyAction(KeyCode.LEFT,
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f),
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.add(500f, 0f));
@@ -120,10 +121,17 @@ public class App extends Application {
 
         input.onMouseClick(MouseButton.PRIMARY,
                 (x, y) -> System.out.println("X: " + x + "\nY: " + y));
-
-        stage.setScene(scene);
-        stage.show();
         gl.start();
     }
-
+    /**
+     * Gets the root node of this class.
+     * @return StackPane which contains the canvas.
+     */
+	@Override
+	public Parent getContent()
+	{
+		canvas = new Canvas(windowWidth, windowHeight);
+        root = new StackPane(canvas);
+		return root;
+	}
 }
