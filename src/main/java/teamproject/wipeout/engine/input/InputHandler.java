@@ -9,13 +9,13 @@ import javafx.scene.input.MouseEvent;
 import java.util.HashSet;
 
 /**
- * InputHandler is a final class for dealing with the keyboard and mouse input of a given {@code Scene}.
+ * InputHandler is a class for dealing with the keyboard and mouse input of a given {@code Scene}.
  * All input event listeners can be temporarily disabled.
  *
  * @see InputKeyAction
  * @see InputMouseAction
  */
-public final class InputHandler {
+public class InputHandler {
 
     private final Scene inputScene;
     private boolean disableInput;

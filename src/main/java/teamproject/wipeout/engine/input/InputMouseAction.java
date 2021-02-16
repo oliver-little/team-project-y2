@@ -1,7 +1,8 @@
 package teamproject.wipeout.engine.input;
 
 /**
- * InputMouseAction is an interface representing any action that will be triggered by a certain {@code MouseEvent}.
+ * InputMouseAction is a functional interface representing any action
+ * that will be triggered by a certain {@code MouseEvent}.
  * It is utilised by {@link InputHandler}.
  *
  * @see javafx.scene.input.MouseEvent
