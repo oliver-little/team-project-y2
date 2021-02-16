@@ -190,41 +190,56 @@ public class CollisionComponent implements GameComponent {
     	}
     	
     	//calculate where lines meet
-    	double x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
-    	double y = gradient_l1*x + yIntercept_l1;
+    	double x=0;
+    	double y=0;
+    	//System.out.println("yIntercept_l1: "+yIntercept_l1);
+    	//System.out.println("yIntercept_l2: "+yIntercept_l2);
+    	if(Double.compare(gradient_l1, Double.MAX_VALUE)==0) {
+    		x = l1.getStartX();
+    		y = gradient_l2*x + yIntercept_l2;
+    	}
+    	else if(Double.compare(gradient_l2, Double.MAX_VALUE)==0) {
+    		x = l2.getStartX();
+    		y = gradient_l1*x + yIntercept_l1;
+    	}
+    	else {
+    		x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
+    		y = gradient_l1*x + yIntercept_l1;
+    	}
     	
-    	//check point (x,y) lies on l1
-    	if(x<l1.getStartX()) {
-    		return null;
-    	}
-    	else if(x>l1.getEndX()) {
-    		return null;
-    	}
-    	else if(y<l1.getStartY()) {
-    		return null;
-    	}
-    	else if(x>l1.getEndY()) {
-    		return null;
-    	}
+    	Point2D p = new Point2D(x,y);
     	
-    	//check point (x,y) lies on l2
-    	if(x<l2.getStartX()) {
+    	//check point lies on l1 and l2
+    	if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
+    		System.out.println("not on at least one segment");
     		return null;
     	}
-    	else if(x>l2.getEndX()) {
-    		return null;
-    	}
-    	else if(y<l2.getStartY()) {
-    		return null;
-    	}
-    	else if(x>l2.getEndY()) {
-    		return null;
-    	}
+    	return p;
+    }
+    
+    public static boolean pointOnSegment(Point2D c, Line l) {
+    	//System.out.println("c: "+c.toString());
+    	//System.out.println("l: "+l.toString());
+    	
+    	Point2D ab = new Point2D(l.getEndX()-l.getStartX(), l.getEndY()-l.getStartY());
+    	Point2D ac = new Point2D(c.getX()-l.getStartX(), c.getY()-l.getStartY());    	
 
-    	return new Point2D(x,y);
+    	double k_ac = ab.dotProduct(ac);
+    	double k_ab = ab.dotProduct(ab);
+    	
+    	if(k_ac<0) {
+    		return false;
+    	}
+    	else if(k_ac>k_ab) {
+    		return false;
+    	}
+    	return true;
     }
     
     public static boolean intersects(Line l1, Line l2) {
+    	//System.out.println("l1: "+l1.toString());
+    	//System.out.println("l2: "+l2.toString());
+
     	double gradient_l1 = calculateGradientOfLine(l1);    
     	double yIntercept_l1 = calculateYInterceptOfLine(l1, gradient_l1);
     	
@@ -233,44 +248,48 @@ public class CollisionComponent implements GameComponent {
     	
     	//System.out.println("gradient l1: "+gradient_l1);
     	//System.out.println("gradient l2: "+gradient_l2);
+    	//System.out.println("yIntercept_l1: "+yIntercept_l1);
+    	//System.out.println("yIntercept_l2: "+yIntercept_l2);
     	
     	if(Double.compare(gradient_l1, gradient_l2)==0) {
     		if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
     			//lines overlap
-    			//System.out.println("lines overlap");
+    			System.out.println("lines overlap");
     			return true;
     		}
     		else {
     			//lines are parallel but not overlapping
-    			//System.out.println("lines are parallel");
+    			System.out.println("lines are parallel");
     			return false;
     		}
     		
     	}
     	
+    	
     	//calculate where lines meet
-    	double x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
-    	double y = gradient_l1*x + yIntercept_l1;
+    	double x=0;
+    	double y=0;
+    	if(Double.compare(gradient_l1, Double.MAX_VALUE)==0) {
+    		x = l1.getStartX();
+    		y = gradient_l2*x + yIntercept_l2;
+    	}
+    	else if(Double.compare(gradient_l2, Double.MAX_VALUE)==0) {
+    		x = l2.getStartX();
+    		y = gradient_l1*x + yIntercept_l1;
+    	}
+    	else {
+    		x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
+    		y = gradient_l1*x + yIntercept_l1;
+    	}
+    	
     	
     	Point2D p = new Point2D(x,y);
     	//System.out.println("Lines meet at "+p.toString());
     	
-    	Point2D start1 = new Point2D(l1.getStartX(), l1.getStartY());
-    	Point2D end1 = new Point2D(l1.getEndX(), l1.getEndY());
-    	double lengthOfLine1 = getDistanceBetweenTwoPoints(start1, end1);
     	
-    	
-    	if(getDistanceBetweenTwoPoints(p,start1)>lengthOfLine1 && getDistanceBetweenTwoPoints(p,end1)>lengthOfLine1) {
-    		//point not on l1
-    		return false;
-    	}
-    	
-    	Point2D start2 = new Point2D(l2.getStartX(), l2.getStartY());
-    	Point2D end2 = new Point2D(l2.getEndX(), l2.getEndY());
-    	double lengthOfLine2 = getDistanceBetweenTwoPoints(start2, end2);
-    	
-    	if(getDistanceBetweenTwoPoints(p,start2)>lengthOfLine2 && getDistanceBetweenTwoPoints(p,end2)>lengthOfLine2) {
-    		//point not on l2
+    	//check point lies on l1 and l2
+    	if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
+    		//System.out.println("not on at least one segment");
     		return false;
     	}
     	
@@ -290,7 +309,7 @@ public class CollisionComponent implements GameComponent {
     }
     
     public static double calculateYInterceptOfLine(Line l, double gradient) {
-    	return l.getStartY()-(gradient*l.getStartY());
+    	return l.getStartY()-(gradient*l.getStartX());
     }
     
 
@@ -444,80 +463,86 @@ public class CollisionComponent implements GameComponent {
      */
     public static Point2D getResolutionVector(Rectangle r1, Rectangle r2) {
     	//resolve in direction of least intersection
-    	double overlap = 0;
-    	double overlap2 = 0;
-    	System.out.println("\nr1: "+r1.toString());
-    	System.out.println("r2: "+r2.toString());
+    	double overlap = Double.MAX_VALUE;
+    	Point2D p = new Point2D(0,0);
     	//check each side of rectangle
     	Line top_r1 = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
     	Line bottom_r1 = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
     	Line left_r2 = new Line(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
-    	//1
-    	if(intersects(left_r2, top_r1) && intersects(left_r2, bottom_r1)) {
-    		System.out.println("first");
+    	Line right_r1 = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
+    	Line top_r2 = new Line(r2.getX(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY());
+    	Line bottom_r2 = new Line(r2.getX(), r2.getY()+r2.getHeight(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
+    	Line left_r1 = new Line(r1.getX(), r1.getY(), r1.getX(), r1.getY()+r1.getHeight());
+    	Line right_r2 = new Line(r2.getX()+r2.getWidth(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
+
+    	if((intersects(left_r2, top_r1) && intersects(left_r2, bottom_r1)) ||
+    		(intersects(left_r1, top_r2) && intersects(left_r1, bottom_r2))|| 
+    		(intersects(right_r2, top_r1) && intersects(right_r2, bottom_r1))||
+    		(intersects(right_r2, top_r1) && intersects(right_r2, bottom_r1))||
+    		(intersects(right_r1, top_r2) && intersects(right_r1, bottom_r2))||//beyond here is common to both
+    		(intersects(bottom_r1, left_r2) && intersects(right_r1, top_r2))||
+    		(intersects(bottom_r2, left_r1) && intersects(right_r2, top_r1))||
+    		(intersects(top_r1, left_r2) && intersects(right_r1, bottom_r2))||
+    		(intersects(top_r2, left_r1) && intersects(right_r2, bottom_r1))
+    		) {
     		//calculate 2 different intersections
     		double i1 = getDistanceBetweenTwoPoints(new Point2D(r1.getX()+r1.getWidth(),0), new Point2D(r2.getX(),0));
     		double i2 =  getDistanceBetweenTwoPoints(new Point2D(r1.getX(),0), new Point2D(r2.getX()+r2.getWidth(),0));
-    		if (i1<=i2) {
+    		if (absoluteValue(overlap)>i1){
     			overlap = -i1;
+    			p = new Point2D(overlap,0);
     		}
-    		else {
+    		if(absoluteValue(overlap)>i2) {
     			overlap = i2;
+    			p = new Point2D(overlap,0);
     		}
-    		return new Point2D(overlap, 0);
+  
     	}
-    	Line top_r2 = new Line(r2.getX(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY());
-    	Line left_r1 = new Line(r1.getX(), r1.getY(), r1.getX(), r1.getY()+r1.getHeight());
-    	Line right_r1 = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
-    	//2
-    	if(intersects(top_r2, left_r1) && intersects(top_r2, right_r1)) {
-    		System.out.println("second");
+    	if((intersects(top_r2, left_r1) && intersects(top_r2, right_r1)) ||
+    		(intersects(top_r1, left_r2) && intersects(top_r1, right_r2))||
+    		(intersects(bottom_r1, left_r2) && intersects(bottom_r1, right_r2))||
+    		(intersects(bottom_r2, left_r1) && intersects(bottom_r2, right_r1))||//beyond here is common to both
+    		(intersects(bottom_r1, left_r2) && intersects(right_r1, top_r2))||
+    		(intersects(bottom_r2, left_r1) && intersects(right_r2, top_r1))||
+    		(intersects(top_r1, left_r2) && intersects(right_r1, bottom_r2))||
+    		(intersects(top_r2, left_r1) && intersects(right_r2, bottom_r1))
+    		) {
     		//calculate 2 different intersections
     		double i1 = getDistanceBetweenTwoPoints(new Point2D(0,r1.getY()+r1.getHeight()), new Point2D(0,r2.getY()));
     		double i2 = getDistanceBetweenTwoPoints(new Point2D(0,r1.getY()), new Point2D(0,r2.getY()+r2.getHeight()));
-    		if (i1<=i2) {
+    		if (absoluteValue(overlap)>i1){
     			overlap = -i1;
+    			p = new Point2D(0,overlap);
     		}
-    		else {
+    		if(absoluteValue(overlap)>i2) {
     			overlap = i2;
+    			p = new Point2D(0,overlap);
     		}
-    		return new Point2D(overlap, 0);
+    		
+
     	}
-    	
-    	System.out.println("none");
-    	return new Point2D(0, 0);
+
 
     	
+    	//if none overlap, no need to resolve
+    	if(Double.compare(overlap, Double.MAX_VALUE)==0) {
+    		p = new Point2D(0,0);
+    	}
     	
-    	/*
-    	System.out.println("t_r1: "+t_r1.toString());
-    	System.out.println("l_r2: "+l_r2.toString());
-    	if(intersects(t_r1, l_r2)) {
-    		System.out.println("first");
-    		Point2D tr_r1 = new Point2D(r1.getX()+r1.getWidth(),0);
-    		Point2D tl_r2 = new Point2D(r2.getX(),0);
-    		double overlap = getDistanceBetweenTwoPoints(tr_r1, tl_r2);
-    		Point2D tl_r1 = new Point2D(r1.getX(),0);
-    		Point2D tr_r2 = new Point2D(r2.getX()+r2.getWidth(),0);
-    		double overlap2 = getDistanceBetweenTwoPoints(tl_r1, tr_r2);
-    		//hacky way for now
-    		if (overlap>overlap2) {
-    			return new Point2D(overlap2,0);
-    		}
-    		return new Point2D(-overlap,0);
-    	}
-    	Line r_r2 = new Line(r2.getX()+r2.getWidth(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
-    	if(intersects(t_r1, r_r2)) {
-    		System.out.println("second");
-    		Point2D tl_r1 = new Point2D(r1.getX(),0);
-    		Point2D tr_r2 = new Point2D(r2.getX()+r2.getWidth(),0);
-    		double overlap = getDistanceBetweenTwoPoints(tl_r1, tr_r2);
-    		return new Point2D(overlap,0);
-    	}
-    	*/
+    	return p;
+
+    	
+    
     	
     	//check rectangle inside other rectangle
 
+    }
+    
+    public static double absoluteValue(double x) {
+    	if(x<0) {
+    		return x*-1;
+    	}
+    	return x;
     }
     
     /**

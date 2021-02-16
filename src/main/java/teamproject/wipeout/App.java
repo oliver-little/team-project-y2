@@ -46,21 +46,21 @@ public class App extends Application {
         //the square
         //Wall
         GameEntity bigBall = gameScene.createEntity();
-        bigBall.addComponent(new Transform(200, 100));
+        bigBall.addComponent(new Transform(25, 125));
         bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
         bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall.addComponent(new CollisionComponent(new Rectangle(50,50)));
+        bigBall.addComponent(new CollisionComponent(false, new Rectangle(50,50)));
         
         GameEntity bigBall2 = gameScene.createEntity();
-        bigBall2.addComponent(new Transform(200, 400));
-        bigBall2.addComponent(new RectRenderComponent(Color.GREEN, 50, 50));
+        bigBall2.addComponent(new Transform(230, 100));
+        bigBall2.addComponent(new RectRenderComponent(Color.GREEN, 100, 100));
         bigBall2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall2.addComponent(new CollisionComponent(false, new Rectangle(50,50)));
+        bigBall2.addComponent(new CollisionComponent(false, new Rectangle(100,100)));
         
         GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(100, 100));
-        nge.addComponent(new RectRenderComponent(Color.DARKRED, 30, 30));
-        nge.addComponent(new CollisionComponent(new Rectangle(30,30)));
+        nge.addComponent(new Transform(100, 110));
+        nge.addComponent(new RectRenderComponent(Color.DARKRED, 75, 75));
+        nge.addComponent(new CollisionComponent(new Rectangle(75,75)));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);

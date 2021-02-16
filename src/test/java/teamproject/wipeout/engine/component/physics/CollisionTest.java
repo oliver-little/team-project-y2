@@ -105,7 +105,6 @@ class CollisionTest
 		Line l2 = new Line(1,1,3,3);
 		assertTrue(CollisionComponent.intersects(l1, l2));
 		
-		
     	l1= new Line(3, 2, 6, 2);
     	l2 = new Line(5, 3, 5, 0);
     	assertTrue(CollisionComponent.intersects(l1, l2));
@@ -116,6 +115,7 @@ class CollisionTest
 		l2 = new Line(2,1,7,5);
 		assertTrue(CollisionComponent.intersects(l1, l2));
 		
+		System.out.println("the test");
 		l1 = new Line(1,2,8,6);
 		l2 = new Line(4,1,8,5);
 		assertFalse(CollisionComponent.intersects(l1, l2));
@@ -129,5 +129,20 @@ class CollisionTest
 		
 
 		
+	}
+	
+	@Test
+	void testPointOnSegment() {
+		Point2D p = new Point2D(0,0);
+		Line l = new Line(0,0,10,10);
+		assertTrue(CollisionComponent.pointOnSegment(p, l));
+		
+		p = new Point2D(1,1);
+		l = new Line(0,0,10,10);
+		assertTrue(CollisionComponent.pointOnSegment(p, l));
+		
+		p = new Point2D(10,10);
+		l = new Line(0,0,10,10);
+		assertTrue(CollisionComponent.pointOnSegment(p, l));
 	}
 }
