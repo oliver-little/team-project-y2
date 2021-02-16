@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.audio.GameAudio;
@@ -95,12 +94,12 @@ public class App extends Application {
         AudioComponent ngeSound = new AudioComponent("glassSmashing.mp3");
         nge.addComponent(ngeSound);
 
-        input.onKeyRelease(KeyCode.D, () -> ngeSound.play()); //example - pressing the D key will trigger the sound
+        input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
 
         GameAudio ga = new GameAudio("backingTrack.mp3");
         ga.play();
 
-        input.onKeyRelease(KeyCode.S, () -> ga.playPause()); //example - pressing the S key will switch between play and pause
+        input.onKeyRelease(KeyCode.S, ga::play); //example - pressing the S key will switch between play and pause
 
 
         input.addKeyAction(KeyCode.LEFT,

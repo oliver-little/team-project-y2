@@ -14,7 +14,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import teamproject.wipeout.engine.component.GameComponent;
 
-public final class AudioComponent implements GameComponent {
+public class AudioComponent implements GameComponent {
 
 	private Boolean play; //set to True when the sound needs to be played
     private String fileName;
