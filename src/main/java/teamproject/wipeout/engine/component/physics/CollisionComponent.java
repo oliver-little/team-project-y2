@@ -597,8 +597,15 @@ public class CollisionComponent implements GameComponent {
     	
     	//top left, bottom right, top right, bottom left corners of r2
     	tl = new Point2D(r2.getX(),r2.getY());
-
-    	return isPointInside(tl, r1);
+    	br = tl.add(new Point2D(r2.getWidth(), r2.getHeight()));
+    	tr = tl.add(new Point2D(r2.getWidth(), 0));
+    	bl = tl.add(new Point2D(0, r2.getHeight())) ;
+    	
+    	if (isPointInside(tl, r1) || isPointInside(br, r1) || isPointInside(tr, r1) || isPointInside(bl, r1)) {
+    		return true;
+    	}
+    	
+    	return false;
     }
     
     /**

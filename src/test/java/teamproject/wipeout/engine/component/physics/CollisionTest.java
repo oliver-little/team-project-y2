@@ -83,6 +83,12 @@ class CollisionTest
 		//collides in middle of right side
 		assertTrue(CollisionComponent.intersects(r1,r2));
 		assertTrue(CollisionComponent.intersects(r2,r1));
+		
+		r1 = new Rectangle(212,100,50,50);
+		r2 = new Rectangle(200,110,30,30);
+		//collides in middle of right side
+		assertTrue(CollisionComponent.intersects(r1,r2));
+		assertTrue(CollisionComponent.intersects(r2,r1));
 	}
 	
 	
