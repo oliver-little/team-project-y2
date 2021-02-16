@@ -25,6 +25,11 @@ import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
+/**
+ * App is a class for containing the components for game play.
+ * It implements the Controller interface.
+ *
+ */
 public class App implements Controller {
 
     public String imgPath = "./assets/";
@@ -33,15 +38,10 @@ public class App implements Controller {
     private double windowWidth = 800;
     private double windowHeight = 600;
     
+    /**
+     * Creates the content to be rendered onto the canvas.
+     */
     public void createContent() {
-    	/*
-    	double windowWidth = 800;
-        double windowHeight = 600;
-    	
-    	canvas = new Canvas(windowWidth, windowHeight);
-        //Scene scene = new Scene(new StackPane(canvas), windowWidth, windowHeight);
-        root = new StackPane(canvas);
-        */
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, canvas);
         SystemUpdater systemUpdater = new SystemUpdater();
@@ -110,13 +110,14 @@ public class App implements Controller {
         ga.play();
 
         input.onKeyRelease(KeyCode.S, () -> ga.playPause()); //example - pressing the S key will switch between play and pause
-        
 
-        //stage.setScene(scene);
-        //stage.show();
         gl.start();
     }
     
+    /**
+     * Gets the root node of this class.
+     * @return StackPane which contains the canvas.
+     */
 	@Override
 	public Parent getContent()
 	{
@@ -124,6 +125,4 @@ public class App implements Controller {
         root = new StackPane(canvas);
 		return root;
 	}
-	
-
 }
