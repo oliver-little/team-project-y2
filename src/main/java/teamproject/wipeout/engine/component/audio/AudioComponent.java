@@ -1,27 +1,35 @@
 package teamproject.wipeout.engine.component.audio;
 
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
+import java.io.File;
+import java.io.IOException;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 import teamproject.wipeout.engine.component.GameComponent;
 
 public final class AudioComponent implements GameComponent {
 
-	private Boolean _play; //set to True when the sound needs to be played
-	private final Media media;
-	private double volume;
+	private Boolean play; //set to True when the sound needs to be played
+    private String fileName;
+    private AudioInputStream audioStream;
+    private double volume;
 	
 	/**
 	 * This is a component class for adding sound effects to entities.
-	 * The AudioSystem checks the boolean attribute {@link #_play} to decide if the sound needs to play.
+	 * The AudioSystem checks the boolean attribute {@link #play} to decide if the sound needs to play.
 	 * @param audioFileName	name of the audio file
 	 */
 	public AudioComponent(String audioFileName) {
-		String filePath = this.getClass().getClassLoader().getResource("audio/" + audioFileName).toString(); // TODO: Handle null value -> throw exception
-
-		this.media = new Media(filePath);
-		this._play = false;
-		this.volume = 1.0; //initially set to full volume
+		fileName = audioFileName;
+    	volume = 1.0f;
+    	play = false;
 	}
 	   
 	public String getType()
@@ -30,29 +38,45 @@ public final class AudioComponent implements GameComponent {
 	}
 	
 	/**
-	 * called by the AudioSystem to create a MediaPlayer and play sound.
+	 * called by the AudioSystem to play sound.
 	 */
 	public void playSound() {
-		MediaPlayer player = new MediaPlayer(media); // TODO: Maybe have only one MediaPlayer per AudioComponent -> if we need better performance later
-		player.setVolume(volume);
-		player.play();
-		_play = false; //switched back to false so the sound only plays once.
+		try
+		{
+			//System.out.println(new File(".").getAbsolutePath());
+			File audioFile = new File("./src/main/resources/audio/" + fileName); //file read each time to allow for the same sounds to overlap - possibly inefficient
+    		audioStream = AudioSystem.getAudioInputStream(audioFile); 
+    		AudioFormat format = audioStream.getFormat();			  
+    		DataLine.Info info = new DataLine.Info(Clip.class, format);
+			Clip audioClip = (Clip) AudioSystem.getLine(info);
+			audioClip.open(audioStream);
+			audioClip.start();
+			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
+			float dB = (float) (Math.log(volume) / Math.log(10.0) * 20.0);
+	        gainControl.setValue(dB);
+		}
+		catch (LineUnavailableException | IOException | UnsupportedAudioFileException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	play = false;
 	}
 	
 	/**
 	 * called by any class when it wants the sound to play.
 	 */
 	public void play() {
-		_play = true; //sets the Boolean attribute to true which SoundSystem will pick up on.
+		play = true; //sets the Boolean attribute to true which SoundSystem will pick up on.
 	}
 	
 	public boolean toPlay() {
-		return _play; //used to see if the sound needs to be played.
+		return play; //used to see if the sound needs to be played.
 	}
 	
 	/**
      * Method to set the volume, done by AudioSystem.
-     * @param volume  double value between 0.0 (inaudible) and 1.0 (full volume).
+     * @param volume double value between 0.0 (inaudible) and 1.0 (full volume).
      */
     public void setVolume(double volume) {
     	this.volume = volume;

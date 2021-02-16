@@ -10,7 +10,7 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
 public class AudioSystem implements GameSystem {
 
-	protected SignatureEntityCollector _entityCollector;
+	protected SignatureEntityCollector entityCollector;
 	private double spotEffectsVolume;
 	
 	/**
@@ -18,7 +18,7 @@ public class AudioSystem implements GameSystem {
 	 * @param e  Scene which is searched for entities with AudioComponents
 	 */
     public AudioSystem(GameScene e) {
-        this._entityCollector = new SignatureEntityCollector(e, Set.of(AudioComponent.class)); //collects entities with AudioComponents
+        this.entityCollector = new SignatureEntityCollector(e, Set.of(AudioComponent.class)); //collects entities with AudioComponents
         this.spotEffectsVolume = 1.0; //initialised to full volume
     }
 
@@ -26,7 +26,7 @@ public class AudioSystem implements GameSystem {
 	 * Removes AudioComponent observer and stops all AudioComponents.
 	 */
 	public void cleanup() {
-		this._entityCollector.cleanup();
+		this.entityCollector.cleanup();
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class AudioSystem implements GameSystem {
 			return;
 		}
 
-		List<GameEntity> entities = this._entityCollector.getEntities();
+		List<GameEntity> entities = this.entityCollector.getEntities();
 		for (GameEntity entity : entities) { //iterates through all entities with AudioComponents
 			AudioComponent s = entity.getComponent(AudioComponent.class);
 			if (s.toPlay()) {

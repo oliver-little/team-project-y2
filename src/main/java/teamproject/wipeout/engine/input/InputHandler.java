@@ -9,16 +9,16 @@ import javafx.scene.input.MouseEvent;
 import java.util.HashSet;
 
 /**
- * InputHandler is a final class for dealing with the keyboard and mouse input of a given {@code Scene}.
+ * InputHandler is a class for dealing with the keyboard and mouse input of a given {@code Scene}.
  * All input event listeners can be temporarily disabled.
  *
  * @see InputKeyAction
  * @see InputMouseAction
  */
-public final class InputHandler {
+public class InputHandler {
 
     private final Scene inputScene;
-    private boolean _disableInput;
+    private boolean disableInput;
 
     // Set of keys that are being pressed at a certain point in time.
     // Used to prevent repeated performKeyAction calls.
@@ -26,10 +26,10 @@ public final class InputHandler {
 
     // Control variable used to track mouse dragging.
     // Prevents all mouse click actions while the mouse is being dragged.
-    private MouseButton _isDragging;
+    private MouseButton isDragging;
 
     // Workaround for onMouseClick being called after the onMouseDrag.releaseAction is called.
-    private boolean _onMouseClickExists;
+    private boolean onMouseClickExists;
 
     /**
      * Default InputHandler initializer.
@@ -38,32 +38,32 @@ public final class InputHandler {
      */
     public InputHandler(Scene scene) {
         this.inputScene = scene;
-        this._disableInput = false;
+        this.disableInput = false;
 
         this.performingKeyActions = new HashSet<KeyCode>();
-        this._isDragging = null;
+        this.isDragging = null;
 
-        this._onMouseClickExists = false;
+        this.onMouseClickExists = false;
     }
 
     /**
-     * {@code _disableInput} variable getter.
+     * {@code disableInput} variable getter.
      *
-     * @return boolean value of the {@code _disableInput} variable.
+     * @return boolean value of the {@code disableInput} variable.
      */
     public boolean getDisableInput() {
-        return this._disableInput;
+        return this.disableInput;
     }
 
     /**
-     * {@code _disableInput} variable setter
-     * @param disabled New value of the {@code _disableInput} variable.
+     * {@code disableInput} variable setter
+     * @param disabled New value of the {@code disableInput} variable.
      */
     public void setDisableInput(boolean disabled) {
-        this._disableInput = disabled;
+        this.disableInput = disabled;
         if (disabled) {
             this.performingKeyActions.clear();
-            this._isDragging = null;
+            this.isDragging = null;
         }
     }
 
@@ -79,7 +79,7 @@ public final class InputHandler {
         // Register inputScene's listener
         this.inputScene.addEventFilter(KeyEvent.KEY_PRESSED, (pressedKey) -> {
             // Do nothing when input is disabled.
-            if (this._disableInput) {
+            if (this.disableInput) {
                 return;
             }
 
@@ -109,7 +109,7 @@ public final class InputHandler {
         // Register inputScene's listener
         this.inputScene.addEventFilter(KeyEvent.KEY_RELEASED, (releasedKey) -> {
             // Do nothing when input is disabled.
-            if (this._disableInput) {
+            if (this.disableInput) {
                 return;
             }
 
@@ -150,30 +150,30 @@ public final class InputHandler {
      */
     public void onMouseClick(MouseButton button,
                              InputMouseAction action) {
-        this._onMouseClickExists = true;
+        this.onMouseClickExists = true;
         // Register inputScene's listener
         this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
             // Do nothing when input is disabled.
-            if (this._disableInput) {
+            if (this.disableInput) {
                 return;
             }
 
             MouseButton mouseButton = mouseClick.getButton();
 
-            if (this._isDragging != null) {
+            if (this.isDragging != null) {
                 // MOUSE_CLICKED is called even after MOUSE_RELEASED in the onMouseDrag method
-                // so to not call both, _isDragging is set to null in this method rather than onMouseDrag.
+                // so to not call both, isDragging is set to null in this method rather than onMouseDrag.
                 // onMouseDrag ended if the clicked (= released) mouse button is equal to the mouse button pressed
                 // while the mouse was dragged. Do something if the clicked (= released) mouse button is equal
                 // to the mouse button which is being listened to.
-                if (mouseButton == button && this._isDragging == mouseButton) {
-                    this._isDragging = null;
+                if (mouseButton == button && this.isDragging == mouseButton) {
+                    this.isDragging = null;
                 }
                 // Otherwise ignore other mouse button clicks while the mouse is dragged.
                 return;
             }
 
-            // Do something if the _isDragging is null and when the clicked (= released) mouse button is equal
+            // Do something if the isDragging is null and when the clicked (= released) mouse button is equal
             // to the mouse button which is being listened to.
             if (mouseButton == button) {
                 action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
@@ -201,7 +201,7 @@ public final class InputHandler {
         // Register inputScene's listener which covers start of the mouse drag and the dragging itself.
         this.inputScene.addEventFilter(MouseEvent.MOUSE_DRAGGED, (mouseClick) -> {
             // Do nothing when input is disabled.
-            if (this._disableInput) {
+            if (this.disableInput) {
                 return;
             }
 
@@ -210,9 +210,9 @@ public final class InputHandler {
                 double mouseClickX = mouseClick.getSceneX();
                 double mouseClickY = mouseClick.getSceneY();
 
-                if (this._isDragging == null) {
+                if (this.isDragging == null) {
                     // Mouse drag start
-                    this._isDragging = button;
+                    this.isDragging = button;
                     pressAction.performMouseClickAction(mouseClickX, mouseClickY);
                 } else {
                     // Mouse drag happening
@@ -224,21 +224,21 @@ public final class InputHandler {
         // Register inputScene's listener which covers end of the mouse drag.
         this.inputScene.addEventFilter(MouseEvent.MOUSE_RELEASED, (mouseRelease) -> {
             // Do nothing when input is disabled.
-            if (this._disableInput) {
+            if (this.disableInput) {
                 return;
             }
 
             // Do something when the released mouse button is equal to both:
             // 1. the mouse button which is being listened to
             // and 2. the button that is being pressed during mouse dragging.
-            if (mouseRelease.getButton() == button && this._isDragging == mouseRelease.getButton()) {
+            if (mouseRelease.getButton() == button && this.isDragging == mouseRelease.getButton()) {
                 // Mouse drag end
                 releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY());
 
                 // If no onMouseClick listener exists (= onMouseClick won't be called after this method)
-                // then set _isDragging to null
-                if (!this._onMouseClickExists) {
-                    this._isDragging = null;
+                // then set isDragging to null
+                if (!this.onMouseClickExists) {
+                    this.isDragging = null;
                 }
             }
         });
