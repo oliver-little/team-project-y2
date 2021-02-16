@@ -21,9 +21,6 @@ public class MovementSystem implements GameSystem {
         this._entityCollector.cleanup();
     }
 
-    public void cleanup() {
-        this._entityCollector.cleanup();
-    }
 
     public void accept(Double timeStep) {
         List<GameEntity> entities = this._entityCollector.getEntities();
