@@ -49,13 +49,13 @@ public class App extends Application {
         bigBall.addComponent(new Transform(25, 125));
         bigBall.addComponent(new RectRenderComponent(Color.BLACK, 50, 50));
         bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall.addComponent(new CollisionComponent(false, new Rectangle(50,50)));
+        bigBall.addComponent(new CollisionComponent(new Rectangle(50,50)));
         
         GameEntity bigBall2 = gameScene.createEntity();
         bigBall2.addComponent(new Transform(230, 100));
         bigBall2.addComponent(new RectRenderComponent(Color.GREEN, 100, 100));
         bigBall2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        bigBall2.addComponent(new CollisionComponent(false, new Rectangle(100,100)));
+        bigBall2.addComponent(new CollisionComponent(new Rectangle(100,100)));
         
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(100, 110));
