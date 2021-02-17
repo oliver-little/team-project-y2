@@ -67,7 +67,7 @@ public class App implements Controller {
         staticsprite.addComponent(new Transform(275, 250));
         try {
             staticsprite.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "sprite.png"))));
-            staticsprite.addComponent(new CollisionComponent(false, new Rectangle(50,50)));
+            staticsprite.addComponent(new CollisionComponent(false, new Rectangle(34,33)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -77,7 +77,7 @@ public class App implements Controller {
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
-        nge.addComponent(new CollisionComponent(new Rectangle(50, 50)));
+        nge.addComponent(new CollisionComponent(new Rectangle(34, 33)));
 
         try {
             spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
