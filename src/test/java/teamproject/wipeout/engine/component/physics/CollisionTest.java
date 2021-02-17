@@ -83,6 +83,12 @@ class CollisionTest
 		//collides in middle of right side
 		assertTrue(CollisionComponent.intersects(r1,r2));
 		assertTrue(CollisionComponent.intersects(r2,r1));
+		
+		r1 = new Rectangle(212,100,50,50);
+		r2 = new Rectangle(200,110,30,30);
+		//collides in middle of right side
+		assertTrue(CollisionComponent.intersects(r1,r2));
+		assertTrue(CollisionComponent.intersects(r2,r1));
 	}
 	
 	
@@ -91,37 +97,5 @@ class CollisionTest
 		Circle c1 = new Circle(0,0,10);
 		Circle c2 = new Circle(1,1,10);
 		assertTrue(CollisionComponent.intersects(c1, c2));
-	}
-	
-	@Test
-	void testLinesIntersect() {
-		Line l1 = new Line(0,0,10,10);
-		Line l2 = new Line(1,1,3,3);
-		assertTrue(CollisionComponent.intersects(l1, l2));
-		
-		
-    	l1= new Line(3, 2, 6, 2);
-    	l2 = new Line(5, 3, 5, 0);
-    	assertTrue(CollisionComponent.intersects(l1, l2));
-    	assertEquals(new Point2D(5,2),CollisionComponent.pointOfIntersection(l1, l2));
-		
-		
-		l1 = new Line(1,2,5,3);
-		l2 = new Line(2,1,7,5);
-		assertTrue(CollisionComponent.intersects(l1, l2));
-		
-		l1 = new Line(1,2,8,6);
-		l2 = new Line(4,1,8,5);
-		assertFalse(CollisionComponent.intersects(l1, l2));
-		
-		
-		System.out.println("The test");
-		l1 = new Line(1,7,3,1);
-		l2 = new Line(1,2,3,6);
-		assertTrue(CollisionComponent.intersects(l1, l2));
-		assertEquals(new Point2D(2,4),CollisionComponent.pointOfIntersection(l1, l2));
-		
-
-		
 	}
 }
