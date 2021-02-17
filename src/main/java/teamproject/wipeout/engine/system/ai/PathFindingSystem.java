@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.ai.NavigationEdge;
+import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 
 
@@ -44,7 +45,7 @@ public class PathFindingSystem {
      * @param yGoal The goal y co-ordinate.
      * @return Returns the optimal traversal path of squares to get from the current location to the desired destination.
      */
-    public List<NavigationSquare> findPath(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
+    public List<NavigationSquare> findPathThroughSquares(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
 
         Point2D midPoint;
 
@@ -127,5 +128,111 @@ public class PathFindingSystem {
         return currentPath.getPath();
     }
 
-    
+
+    public List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
+        if (squarePath == null || squarePath.size() == 0) {
+            return null;
+        }
+        else if (squarePath.size() == 1) {
+            NavigationSquare square = squarePath.get(0);
+            if(square.contains(startPoint) && square.contains(endPoint)) {
+                return List.of(startPoint, endPoint); 
+            }
+            else {
+                return null;
+            }
+        }
+
+        // Get a list of line segments that the path must cross
+        NavigationEdge[] edges = new NavigationEdge[squarePath.size()];
+
+        List<Point2D> output = new ArrayList<Point2D>();
+
+        // Collect the correct edges along the path
+        for (int i = 0; i < squarePath.size() - 1; i++) {
+            NavigationSquare square = squarePath.get(i);
+            boolean foundEdge = false;
+            for (NavigationEdge edge : square.adjacentEdges) {
+                if (edge.adjacentSquare == squarePath.get(i+1)) {
+                    edges[i] = edge;
+                    foundEdge = true;
+                    break;
+                }
+            }
+            if (!foundEdge) {
+                return null;
+            }
+        }
+
+        // In order to simplify the code inside the for loop, add a fake navigation edge at the end point
+        edges[squarePath.size() - 1] = new NavigationEdge(endPoint, endPoint, null);
+
+        FunnelData funnel = new FunnelData(startPoint, edges[0]);
+
+        Point2D newPoint = Point2D.ZERO;
+        Point2D newVector = Point2D.ZERO;
+        double newAngle = 0;
+        // Use cross product to work out if two vectors overlap
+        double newCrossProduct = 0;
+
+        // Iterate over all edges until destination found
+        for (int i = 1; i < edges.length; i++) {
+            // Parse left point
+            if (funnel.startIsLeft) {
+                newPoint = edges[i].start;
+            }
+            else {
+                newPoint = edges[i].end;
+            }
+
+            newVector = newPoint.add(funnel.negApex);
+
+            // Calculate angle between vectors
+            newAngle = newVector.angle(funnel.rightVector);
+            // Calculate cross product between vectors swapped (to get sign the right way round)
+            newCrossProduct = newVector.crossProduct(funnel.rightVector).getZ();
+            // Crossed over, move apex
+            if (newCrossProduct < 0) {
+                output.add(funnel.apex);
+                funnel.setData(funnel.right, edges[i]);
+            }
+            else if (newAngle < funnel.angle) {
+                funnel.setLeft(newPoint);
+            }
+
+            // Parse right point
+            if (funnel.startIsLeft) {
+                newPoint = edges[i].end;
+            }
+            else {
+                newPoint = edges[i].start;
+            }
+
+            newVector = newPoint.add(funnel.negApex);
+            newAngle = funnel.leftVector.angle(newVector);
+            newCrossProduct = funnel.leftVector.crossProduct(newVector).getZ();
+            // Crossed over, move apex
+            if (newCrossProduct < 0) {
+                output.add(funnel.apex);
+                funnel.setData(funnel.left, edges[i]);
+            }
+            else if (newAngle < funnel.angle) {
+                funnel.setRight(newPoint);
+            }
+        }
+
+        // Once the algorithm completes, add the final apex and the endPoint to complete the path
+        output.add(funnel.apex);
+        output.add(endPoint);
+
+        return output;
+    }
+
+    public List<Point2D> findPath(Point2D start, Point2D end, NavigationSquare startSquare, NavigationSquare endSquare) {
+        return null;
+    }
+
+    public List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
+        return null;
+    }
 }

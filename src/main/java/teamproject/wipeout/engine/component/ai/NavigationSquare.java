@@ -69,15 +69,15 @@ public class NavigationSquare {
             start = new Point2D(Math.max(this.topLeft.getX(), other.topLeft.getX()), other.topLeft.getY());
             end = new Point2D(Math.min(this.bottomRight.getX(), other.bottomRight.getX()), other.topLeft.getY());
         }
-        else if ((Math.abs(this.topLeft.getX() - other.bottomRight.getX()) < doubleCompare) && (this.topLeft.getY() > other.bottomRight.getY()) && (this.bottomRight.getY() < other.topLeft.getY())){
-            //Calculate start and end for two mesh squares that are adjacent with the left of a and the right of b.
-            start = new Point2D(this.topLeft.getX(), Math.min(this.topLeft.getY(), other.topLeft.getY()));
-            end = new Point2D(this.topLeft.getX(), Math.max(this.bottomRight.getY(), other.bottomRight.getY()));
+        else if ((Math.abs(this.bottomRight.getX() - other.topLeft.getX()) < doubleCompare) && (this.topLeft.getY() < other.bottomRight.getY()) && (this.bottomRight.getY() > other.topLeft.getY())){
+            //Calculate start and end for two mesh squares that are adjacent with the right of a and the left of b.
+            start = new Point2D(this.bottomRight.getX(), Math.max(this.topLeft.getY(), other.topLeft.getY()));
+            end = new Point2D(this.bottomRight.getX(), Math.min(this.bottomRight.getY(), other.bottomRight.getY()));
         }
-        else if ((Math.abs(this.bottomRight.getX() - other.topLeft.getX()) < doubleCompare) && (this.topLeft.getY() > other.bottomRight.getY()) && (this.bottomRight.getY() < other.topLeft.getY())) {
-            //Calculate start and end for two mesh squares that are adjacent with the left of b and the right of a.
-            start = new Point2D(other.topLeft.getX(), Math.min(this.topLeft.getY(), other.topLeft.getY()));
-            end = new Point2D(other.topLeft.getX(), Math.max(this.bottomRight.getY(), other.bottomRight.getY()));
+        else if ((Math.abs(this.topLeft.getX() - other.bottomRight.getX()) < doubleCompare) && (this.topLeft.getY() < other.bottomRight.getY()) && (this.bottomRight.getY() > other.topLeft.getY())) {
+            //Calculate start and end for two mesh squares that are adjacent with the right of b and the left of a.
+            start = new Point2D(other.bottomRight.getX(), Math.min(this.topLeft.getY(), other.topLeft.getY()));
+            end = new Point2D(other.bottomRight.getX(), Math.max(this.bottomRight.getY(), other.bottomRight.getY()));
         }
         else {
             return false;
@@ -87,6 +87,10 @@ public class NavigationSquare {
         this.addEdge(new NavigationEdge(start, end, other));
 
         return true;
+    }
+
+    public boolean contains(Point2D position) {
+        return this.topLeft.getX() <= position.getX() && position.getX() <= this.bottomRight.getX() && this.topLeft.getY() <= position.getY() && position.getY() <= this.bottomRight.getY();
     }
 
     @Override
