@@ -7,7 +7,11 @@ import javafx.scene.shape.Rectangle;
 
 public class GeometryUtil
 {
-
+	/**
+	 * Calculates the gradient of a line
+	 * @param l the line
+	 * @return the gradient of the line. Double.MAX_VALUE if line is vertical. 0 if line is horizontal.
+	 */
     public static double calculateGradient(Line l) {
     	double dx = l.getEndX() - l.getStartX();
     	//using Double.compare because of imprecision of floating point values
@@ -19,71 +23,31 @@ public class GeometryUtil
     	return dy/dx;
     }
     
+    /**
+     * Calculates the y intercept of a line with a known gradient.
+     * @param l the line
+     * @param gradient gradient of the line l
+     * @return the y intercept of the line
+     */
     public static double calculateYIntercept(Line l, double gradient) {
     	return l.getStartY()-(gradient*l.getStartX());
     }
+    
+    /**
+     * Calculates the y intercept of a line
+     * @param l the line
+     * @return the y intercept of the line
+     */
+    public static double calculateYIntercept(Line l) {
+    	return calculateYIntercept(l, calculateGradient(l));
+    }
 	
-	public static boolean intersects(Line l1, Line l2) {
-		//System.out.println("l1: "+l1.toString());
-		//System.out.println("l2: "+l2.toString());
-	
-		double gradient_l1 = calculateGradient(l1);    
-		double yIntercept_l1 = calculateYIntercept(l1, gradient_l1);
-		
-		double gradient_l2 = calculateGradient(l2);
-		double yIntercept_l2 = calculateYIntercept(l2, gradient_l2);
-		
-		//System.out.println("gradient l1: "+gradient_l1);
-		//System.out.println("gradient l2: "+gradient_l2);
-		//System.out.println("yIntercept_l1: "+yIntercept_l1);
-		//System.out.println("yIntercept_l2: "+yIntercept_l2);
-		
-		if(Double.compare(gradient_l1, gradient_l2)==0) {
-			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
-				//lines overlap
-				System.out.println("lines overlap");
-				return true;
-			}
-			else {
-				//lines are parallel but not overlapping
-				System.out.println("lines are parallel");
-				return false;
-			}
-			
-		}
-		
-		
-		//calculate where lines meet
-		double x=0;
-		double y=0;
-		if(Double.compare(gradient_l1, Double.MAX_VALUE)==0) {
-			x = l1.getStartX();
-			y = gradient_l2*x + yIntercept_l2;
-		}
-		else if(Double.compare(gradient_l2, Double.MAX_VALUE)==0) {
-			x = l2.getStartX();
-			y = gradient_l1*x + yIntercept_l1;
-		}
-		else {
-			x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
-			y = gradient_l1*x + yIntercept_l1;
-		}
-		
-		
-		Point2D p = new Point2D(x,y);
-		//System.out.println("Lines meet at "+p.toString());
-		
-		
-		//check point lies on l1 and l2
-		if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
-			//System.out.println("not on at least one segment");
-			return false;
-		}
-		
-	
-		return true;
-	}
-	
+    /**
+     * Finds the point of intersection of two lines if they meet
+     * @param l1 the first line
+     * @param l2 the second line
+     * @return the point of intersection if they meet, otherwise null.
+     */
 	public static Point2D pointOfIntersection(Line l1, Line l2) {
 		double gradient_l1 = calculateGradient(l1);    
 		double yIntercept_l1 = calculateYIntercept(l1, gradient_l1);
@@ -91,12 +55,24 @@ public class GeometryUtil
 		double gradient_l2 = calculateGradient(l2);
 		double yIntercept_l2 = calculateYIntercept(l2, gradient_l2);
 		
+		//System.out.println("gradient_l1: "+gradient_l1);
+		//System.out.println("gradient_l2: "+gradient_l2);
 		
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
 			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
 				//lines overlap
-				//TODO return a point
+				//TODO make sure point is on both lines
+				Point2D p = new Point2D(l1.getStartX(), l1.getStartY());
+				if(pointOnSegment(p, l2)) {
+					return p;
+				}
+				p = new Point2D(l2.getStartX(), l2.getStartY());
+				if (pointOnSegment(p, l2)){
+					return p;
+				}
+				//otherwise segments do not meet
 				return null;
+				
 			}
 			else {
 				//lines are parallel but not overlapping
@@ -108,8 +84,6 @@ public class GeometryUtil
 		//calculate where lines meet
 		double x=0;
 		double y=0;
-		//System.out.println("yIntercept_l1: "+yIntercept_l1);
-		//System.out.println("yIntercept_l2: "+yIntercept_l2);
 		if(Double.compare(gradient_l1, Double.MAX_VALUE)==0) {
 			x = l1.getStartX();
 			y = gradient_l2*x + yIntercept_l2;
@@ -127,7 +101,7 @@ public class GeometryUtil
 		
 		//check point lies on l1 and l2
 		if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
-			System.out.println("not on at least one segment");
+			//System.out.println("not on at least one segment");
 			return null;
 		}
 		return p;
@@ -177,7 +151,15 @@ public class GeometryUtil
     	return Math.sqrt(Math.pow(p1.getX()-p2.getX(), 2)+(Math.pow(p1.getY()-p2.getY(), 2)));
     }
     
-    /**
+    public static boolean intersects(Line l1, Line l2) {
+		if(pointOfIntersection(l1,l2)==null) {
+			return false;
+		}
+		
+		return true;
+	}
+
+	/**
      * Checks whether a circle and a rectangle collide
      * @param c1 the circle
      * @param r1 the rectangle

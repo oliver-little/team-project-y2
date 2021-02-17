@@ -13,6 +13,85 @@ class GeometryUtilTest
 {
 
 	@Test
+	void testCalculateGradient() {
+		Line l = new Line(0,0,10,0);
+		assertEquals(0, GeometryUtil.calculateGradient(l));
+		
+		l = new Line(0,0,0,10);
+		assertEquals(Double.MAX_VALUE, GeometryUtil.calculateGradient(l));
+		
+		l = new Line(0,0,10,10);
+		assertEquals(1, GeometryUtil.calculateGradient(l));
+		
+		l = new Line(1,1,5,2);
+		assertEquals(0.25, GeometryUtil.calculateGradient(l));
+		
+		l = new Line(1,1,2,6);
+		assertEquals(5, GeometryUtil.calculateGradient(l));
+		
+	}
+	
+	@Test
+	void testCalculateYIntercept() {
+		Line l = new Line(0,0,10,0);
+		assertEquals(0, GeometryUtil.calculateYIntercept(l));
+		
+		//l = new Line(0,0,0,10);
+		//the above line does not intercept with the y axis
+		
+		
+		l = new Line(0,0,10,10);
+		assertEquals(0, GeometryUtil.calculateYIntercept(l));
+		
+		l = new Line(1,1,5,2);
+		assertEquals(0.75, GeometryUtil.calculateYIntercept(l));
+		
+		l = new Line(1,1,2,6);
+		assertEquals(-4, GeometryUtil.calculateYIntercept(l));
+		
+	}
+	
+	@Test
+	void testPointOfIntersection() {
+		//horizontal lines that dont meet
+		Line l1 = new Line(0,0,10,0);
+		Line l2 = new Line(0,10,10,10);
+		assertNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		//horizontal lines that dont meet
+		l1 = new Line(0,0,10,0);
+		l2 = new Line(20,0,10,0);
+		assertNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		//overlapping lines
+		l1 = new Line(0,0,10,10);
+		l2 = new Line(0,0,5,5);
+		//not null test because there are infinite points of intersection on overlapping lines
+		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		//overlapping lines - l2 inside l1
+		l1 = new Line(0,0,10,10);
+		l2 = new Line(1,1,5,5);
+		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		//overlapping lines - l1 inside l2
+		l1 = new Line(5,5,10,10);
+		l2 = new Line(1,1,20,20);
+		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		//overlapping lines - segments not meet
+		l1 = new Line(0,0,10,10);
+		l2 = new Line(11,11,20,20);
+		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		
+		
+		l1 = new Line(0,0,1,1);
+		l2 = new Line(0,1,1,0);
+		assertEquals(new Point2D(0.5,0.5), GeometryUtil.pointOfIntersection(l1, l2));
+		
+	}
+	
+	@Test
 	void testRectanglesNotIntersects()
 	{
 		Rectangle r1 = new Rectangle(0,0,10,10);
