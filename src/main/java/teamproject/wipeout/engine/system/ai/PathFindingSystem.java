@@ -129,6 +129,14 @@ public class PathFindingSystem {
     }
 
 
+    /**
+     * Given a start and end position, and a path of squares through that start and end point, calculates the shortest route through that set of squares.
+     * 
+     * @param startPoint The start position
+     * @param endPoint The end position
+     * @param squarePath The set of squares to pass through
+     * @return A list of points to traverse to follow the shortest path through the squares
+     */
     public List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
         if (squarePath == null || squarePath.size() == 0) {
             return null;
@@ -228,11 +236,54 @@ public class PathFindingSystem {
         return output;
     }
 
+    /**
+     * Finds a path from a start position and square to an end position and square.
+     * @param start The start position
+     * @param end The end position
+     * @param startSquare The square to start in (start position must be inside this square)
+     * @param endSquare The square to finish in (end position must be inside this square)
+     * @return The list of points to traverse through to get from the start to end position
+     */
     public List<Point2D> findPath(Point2D start, Point2D end, NavigationSquare startSquare, NavigationSquare endSquare) {
-        return null;
+        List<NavigationSquare> squarePath = findPathThroughSquares(startSquare, start.getX(), start.getY(), endSquare, end.getX(), end.getY());
+        if (squarePath == null) {
+            return null;
+        }
+
+        return findStringPullPath(start, end, squarePath);
     }
 
+    /**
+     * Finds a path from a start position and end position through a NavigationMesh
+     * 
+     * @param start The start position
+     * @param end The end position
+     * @param mesh The NavigationMesh to traverse through. (start and end position must be on this mesh)
+     * @return The list of points to traverse through to get from the start to end position.
+     */
     public List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
-        return null;
+        NavigationSquare startSquare = null;
+        NavigationSquare endSquare = null;
+
+        for (NavigationSquare square : mesh.squares) {
+            if (startSquare == null && square.contains(start)) {
+                startSquare = square;
+                if (endSquare != null) {
+                    break;
+                }
+            }
+            if (endSquare == null && square.contains(end)) {
+                endSquare = square;
+                if (startSquare != null) {
+                    break;
+                }
+            }
+        }
+
+        if (startSquare == null || endSquare == null) {
+            return null;
+        }
+
+        return findPath(start, end, startSquare, endSquare);
     }
 }
