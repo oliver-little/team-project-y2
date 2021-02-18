@@ -20,7 +20,14 @@ public class GeometryUtil
     	}
     	double dy = l.getEndY() - l.getStartY();
     	
-    	return dy/dx;
+    	double gradient = dy/dx;
+    	
+    	//stop -0 ever from being returned
+    	if(Math.abs(gradient)==0) {
+    		return 0;
+    	}
+    	
+    	return gradient;
     }
     
     /**
@@ -55,8 +62,10 @@ public class GeometryUtil
 		double gradient_l2 = calculateGradient(l2);
 		double yIntercept_l2 = calculateYIntercept(l2, gradient_l2);
 		
-		//System.out.println("gradient_l1: "+gradient_l1);
-		//System.out.println("gradient_l2: "+gradient_l2);
+		System.out.println("gradient_l1: "+gradient_l1);
+		System.out.println("gradient_l2: "+gradient_l2);
+		System.out.println("yIntercept_l1: "+yIntercept_l1);
+		System.out.println("yIntercept_l2: "+yIntercept_l2);
 		
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
 			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
@@ -67,7 +76,7 @@ public class GeometryUtil
 					return p;
 				}
 				p = new Point2D(l2.getStartX(), l2.getStartY());
-				if (pointOnSegment(p, l2)){
+				if (pointOnSegment(p, l1)){
 					return p;
 				}
 				//otherwise segments do not meet
@@ -107,6 +116,12 @@ public class GeometryUtil
 		return p;
 	}
 	
+	/**
+	 * Checks whether a point lies on a segment
+	 * @param c the point
+	 * @param l the segment
+	 * @return true if the point lies on the segment, false otherwise.
+	 */
     public static boolean pointOnSegment(Point2D c, Line l) {
     	//https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/#:~:text=The%20cross%20product%20of%20A,t%20belongs%20on%20the%20segment.
     	Point2D ab = new Point2D(l.getEndX()-l.getStartX(), l.getEndY()-l.getStartY());
@@ -147,10 +162,22 @@ public class GeometryUtil
     	return false;
     }
 
+    /**
+     * Calculates the distance between two points
+     * @param p1 first point
+     * @param p2 second point
+     * @return the distance between the two points
+     */
     public static double getDistanceBetweenTwoPoints(Point2D p1, Point2D p2) {
     	return Math.sqrt(Math.pow(p1.getX()-p2.getX(), 2)+(Math.pow(p1.getY()-p2.getY(), 2)));
     }
     
+    /**
+     * Checks whether two lines intersect
+     * @param l1 first line
+     * @param l2 second line
+     * @return true if the lines intersect, false otherwise.
+     */
     public static boolean intersects(Line l1, Line l2) {
 		if(pointOfIntersection(l1,l2)==null) {
 			return false;
@@ -244,18 +271,34 @@ public class GeometryUtil
     }
     
     /**
-     * Calculates the normal vectors of a line connecting 2 points
+     * Calculates a unit normal vector of a line connecting 2 points
      * @param p1 start point of line
      * @param p2 end point of line
-     * @return normal vectors of the line connecting the 2 points provided
+     * @return a unit normal vector of the line connecting the 2 points provided
      */
-    public static Point2D[] getNormalsToLine(Point2D p1, Point2D p2) {
+    public static Point2D calculateUnitNormal(Point2D p1, Point2D p2) {
     	double dx = p2.getX() - p1.getX();
     	double dy = p2.getY() - p1.getY();
     	
-    	Point2D normals[] = {new Point2D(-dy,dx),new Point2D(dy,-dx)};
+    	Point2D normal = new Point2D(-dy,dx);
+    	//other normal:
+    	//Point2D normal2 = new Point2D(dy,-dx);
     	
-    	return normals;
+    	double magnitude = normal.magnitude();
+    	if (Double.compare(magnitude, 0)!=0) {
+    		normal = normal.multiply(1/magnitude);
+    	}
+        	
+    	return normal;
+    }
+    
+    /**
+     * Calculates a unit normal vector of the line
+     * @param l the line
+     * @return a unit normal vector of the line
+     */
+    public static Point2D calculateUnitNormal(Line l) {
+    	return calculateUnitNormal(new Point2D(l.getStartX(), l.getStartY()),new Point2D(l.getEndX(), l.getEndY()));
     }
 
 	/**
