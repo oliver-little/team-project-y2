@@ -22,6 +22,11 @@ public class NavigationSquare {
         adjacentEdges = new ArrayList<>();
     }
 
+    public NavigationSquare(Point2D topLeft, Point2D bottomRight) {
+        this.topLeft = topLeft;
+        this.bottomRight = bottomRight;
+    }
+
     /**
      * Adds a given navigation edge to the list of edges, if it does not already exist.
      * @param edge The edge to add
@@ -76,8 +81,8 @@ public class NavigationSquare {
         }
         else if ((Math.abs(this.topLeft.getX() - other.bottomRight.getX()) < doubleCompare) && (this.topLeft.getY() < other.bottomRight.getY()) && (this.bottomRight.getY() > other.topLeft.getY())) {
             //Calculate start and end for two mesh squares that are adjacent with the right of b and the left of a.
-            start = new Point2D(other.bottomRight.getX(), Math.min(this.topLeft.getY(), other.topLeft.getY()));
-            end = new Point2D(other.bottomRight.getX(), Math.max(this.bottomRight.getY(), other.bottomRight.getY()));
+            start = new Point2D(other.bottomRight.getX(), Math.max(this.topLeft.getY(), other.topLeft.getY()));
+            end = new Point2D(other.bottomRight.getX(), Math.min(this.bottomRight.getY(), other.bottomRight.getY()));
         }
         else {
             return false;

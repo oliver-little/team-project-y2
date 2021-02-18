@@ -18,12 +18,12 @@ public class NavigationMeshTest {
     public void test2CornerAdjacentSquares() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 20);
-        b.bottomRight = new Point2D(20, 10);
+        b.topLeft = new Point2D(10, 10);
+        b.bottomRight = new Point2D(20, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -42,12 +42,12 @@ public class NavigationMeshTest {
     public void test2SidePerfectlyAdjacentSquares() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 10);
-        b.bottomRight = new Point2D(20, 0);
+        b.topLeft = new Point2D(10, 0);
+        b.bottomRight = new Point2D(20, 10);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -61,13 +61,13 @@ public class NavigationMeshTest {
 
         NavigationEdge aEdge = a.adjacentEdges.get(0);
         assertEquals(b, aEdge.adjacentSquare);   
-        assertEquals(new Point2D(10, 10), aEdge.start);
-        assertEquals(new Point2D(10, 0), aEdge.end);
+        assertEquals(new Point2D(10, 0), aEdge.start);
+        assertEquals(new Point2D(10, 10), aEdge.end);
 
         NavigationEdge bEdge = b.adjacentEdges.get(0);
         assertEquals(a, bEdge.adjacentSquare);
-        assertEquals(new Point2D(10, 10), bEdge.start);
-        assertEquals(new Point2D(10, 0), bEdge.end);
+        assertEquals(new Point2D(10, 0), bEdge.start);
+        assertEquals(new Point2D(10, 10), bEdge.end);
         
         assertEquals(2, navigationMesh.squares.size());
     }
@@ -76,12 +76,12 @@ public class NavigationMeshTest {
     public void test2TopPerfectlyAdjacentSquares() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(0, 20);
-        b.bottomRight = new Point2D(10, 10);
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -110,12 +110,12 @@ public class NavigationMeshTest {
     public void testLeftRightSquareGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 15);
-        b.bottomRight = new Point2D(20, 5);
+        b.topLeft = new Point2D(10, 5);
+        b.bottomRight = new Point2D(20, 15);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -129,13 +129,13 @@ public class NavigationMeshTest {
         
         NavigationEdge aEdge = a.adjacentEdges.get(0);
         assertEquals(b, aEdge.adjacentSquare);   
-        assertEquals(new Point2D(10, 10), aEdge.start);
-        assertEquals(new Point2D(10, 5), aEdge.end);
+        assertEquals(new Point2D(10, 5), aEdge.start);
+        assertEquals(new Point2D(10, 10), aEdge.end);
 
         NavigationEdge bEdge = b.adjacentEdges.get(0);
         assertEquals(a, bEdge.adjacentSquare);
-        assertEquals(new Point2D(10, 10), bEdge.start);
-        assertEquals(new Point2D(10, 5), bEdge.end);
+        assertEquals(new Point2D(10, 5), bEdge.start);
+        assertEquals(new Point2D(10, 10), bEdge.end);
         
         assertEquals(2, navigationMesh.squares.size());
     }
@@ -144,12 +144,12 @@ public class NavigationMeshTest {
     public void testTopDownSquareGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(5, 20);
-        b.bottomRight = new Point2D(15, 10);
+        b.topLeft = new Point2D(5, 10);
+        b.bottomRight = new Point2D(15, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -178,16 +178,16 @@ public class NavigationMeshTest {
     public void testThreeSquareGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 5);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 5);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(5, 10);
-        b.bottomRight = new Point2D(15, 5);
+        b.topLeft = new Point2D(5, 5);
+        b.bottomRight = new Point2D(15, 10);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(10, 5);
-        c.bottomRight = new Point2D(20, 0);
+        c.topLeft = new Point2D(10, 0);
+        c.bottomRight = new Point2D(20, 5);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -208,8 +208,8 @@ public class NavigationMeshTest {
 
         NavigationEdge aEdge1 = a.adjacentEdges.get(1);
         assertEquals(c, aEdge1.adjacentSquare);   
-        assertEquals(new Point2D(10, 5), aEdge1.start);
-        assertEquals(new Point2D(10, 0), aEdge1.end);
+        assertEquals(new Point2D(10, 0), aEdge1.start);
+        assertEquals(new Point2D(10, 5), aEdge1.end);
 
         NavigationEdge bEdge0 = b.adjacentEdges.get(0);
         assertEquals(a, bEdge0.adjacentSquare);
@@ -223,8 +223,8 @@ public class NavigationMeshTest {
         
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(a, cEdge0.adjacentSquare);
-        assertEquals(new Point2D(10, 5), cEdge0.start);
-        assertEquals(new Point2D(10, 0), cEdge0.end);
+        assertEquals(new Point2D(10, 0), cEdge0.start);
+        assertEquals(new Point2D(10, 5), cEdge0.end);
         
         NavigationEdge cEdge1 = c.adjacentEdges.get(1);
         assertEquals(b, cEdge1.adjacentSquare);
@@ -238,20 +238,20 @@ public class NavigationMeshTest {
     public void testMultipleSquareGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(5, 5);
-        a.bottomRight = new Point2D(15, 0);
+        a.topLeft = new Point2D(5, 0);
+        a.bottomRight = new Point2D(15, 5);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 10);
-        b.bottomRight = new Point2D(20, 5);
+        b.topLeft = new Point2D(10, 5);
+        b.bottomRight = new Point2D(20, 10);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(15, 5);
-        c.bottomRight = new Point2D(20, 0);
+        c.topLeft = new Point2D(15, 0);
+        c.bottomRight = new Point2D(20, 5);
 
         NavigationSquare d = new NavigationSquare();
-        d.topLeft = new Point2D(0, 10);
-        d.bottomRight = new Point2D(10, 5);
+        d.topLeft = new Point2D(0, 5);
+        d.bottomRight = new Point2D(10, 10);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -274,8 +274,8 @@ public class NavigationMeshTest {
 
         NavigationEdge aEdge1 = a.adjacentEdges.get(1);
         assertEquals(c, aEdge1.adjacentSquare);   
-        assertEquals(new Point2D(15, 5), aEdge1.start);
-        assertEquals(new Point2D(15, 0), aEdge1.end);
+        assertEquals(new Point2D(15, 0), aEdge1.start);
+        assertEquals(new Point2D(15, 5), aEdge1.end);
 
         NavigationEdge aEdge2 = a.adjacentEdges.get(2);
         assertEquals(d, aEdge2.adjacentSquare);   
@@ -294,13 +294,13 @@ public class NavigationMeshTest {
 
         NavigationEdge bEdge2 = b.adjacentEdges.get(2);
         assertEquals(d, bEdge2.adjacentSquare);
-        assertEquals(new Point2D(10, 10), bEdge2.start);
-        assertEquals(new Point2D(10, 5), bEdge2.end);
+        assertEquals(new Point2D(10, 5), bEdge2.start);
+        assertEquals(new Point2D(10, 10), bEdge2.end);
 
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(a, cEdge0.adjacentSquare);
-        assertEquals(new Point2D(15, 5), cEdge0.start);
-        assertEquals(new Point2D(15, 0), cEdge0.end);
+        assertEquals(new Point2D(15, 0), cEdge0.start);
+        assertEquals(new Point2D(15, 5), cEdge0.end);
         
         NavigationEdge cEdge1 = c.adjacentEdges.get(1);
         assertEquals(b, cEdge1.adjacentSquare);
@@ -314,8 +314,8 @@ public class NavigationMeshTest {
         
         NavigationEdge dEdge1 = d.adjacentEdges.get(1);
         assertEquals(b, dEdge1.adjacentSquare);
-        assertEquals(new Point2D(10, 10), dEdge1.start);
-        assertEquals(new Point2D(10, 5), dEdge1.end);
+        assertEquals(new Point2D(10, 5), dEdge1.start);
+        assertEquals(new Point2D(10, 10), dEdge1.end);
 
         assertEquals(4, navigationMesh.squares.size());
     }
@@ -324,28 +324,28 @@ public class NavigationMeshTest {
     public void testOffSquareGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(5, 5);
-        a.bottomRight = new Point2D(15, 0);
+        a.topLeft = new Point2D(5, 0);
+        a.bottomRight = new Point2D(15, 5);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 10);
-        b.bottomRight = new Point2D(20, 5);
+        b.topLeft = new Point2D(10, 5);
+        b.bottomRight = new Point2D(20, 10);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(15, 5);
-        c.bottomRight = new Point2D(20, 0);
+        c.topLeft = new Point2D(15, 0);
+        c.bottomRight = new Point2D(20, 5);
 
         NavigationSquare d = new NavigationSquare();
-        d.topLeft = new Point2D(0, 10);
-        d.bottomRight = new Point2D(10, 5);
+        d.topLeft = new Point2D(0, 5);
+        d.bottomRight = new Point2D(10, 10);
 
         NavigationSquare e = new NavigationSquare();
-        e.topLeft = new Point2D(5, 15);
-        e.bottomRight = new Point2D(15, 10);
+        e.topLeft = new Point2D(5, 10);
+        e.bottomRight = new Point2D(15, 15);
 
         NavigationSquare f = new NavigationSquare();
-        f.topLeft = new Point2D(30, 15);
-        f.bottomRight = new Point2D(40, 0);
+        f.topLeft = new Point2D(30, 0);
+        f.bottomRight = new Point2D(40, 15);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -372,8 +372,8 @@ public class NavigationMeshTest {
 
         NavigationEdge aEdge1 = a.adjacentEdges.get(1);
         assertEquals(c, aEdge1.adjacentSquare);   
-        assertEquals(new Point2D(15, 5), aEdge1.start);
-        assertEquals(new Point2D(15, 0), aEdge1.end);
+        assertEquals(new Point2D(15, 0), aEdge1.start);
+        assertEquals(new Point2D(15, 5), aEdge1.end);
 
         NavigationEdge aEdge2 = a.adjacentEdges.get(2);
         assertEquals(d, aEdge2.adjacentSquare);   
@@ -392,8 +392,8 @@ public class NavigationMeshTest {
 
         NavigationEdge bEdge2 = b.adjacentEdges.get(2);
         assertEquals(d, bEdge2.adjacentSquare);
-        assertEquals(new Point2D(10, 10), bEdge2.start);
-        assertEquals(new Point2D(10, 5), bEdge2.end);
+        assertEquals(new Point2D(10, 5), bEdge2.start);
+        assertEquals(new Point2D(10, 10), bEdge2.end);
 
         NavigationEdge bEdge3 = b.adjacentEdges.get(3);
         assertEquals(e, bEdge3.adjacentSquare);
@@ -402,8 +402,8 @@ public class NavigationMeshTest {
 
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(a, cEdge0.adjacentSquare);
-        assertEquals(new Point2D(15, 5), cEdge0.start);
-        assertEquals(new Point2D(15, 0), cEdge0.end);
+        assertEquals(new Point2D(15, 0), cEdge0.start);
+        assertEquals(new Point2D(15, 5), cEdge0.end);
         
         NavigationEdge cEdge1 = c.adjacentEdges.get(1);
         assertEquals(b, cEdge1.adjacentSquare);
@@ -417,8 +417,8 @@ public class NavigationMeshTest {
         
         NavigationEdge dEdge1 = d.adjacentEdges.get(1);
         assertEquals(b, dEdge1.adjacentSquare);
-        assertEquals(new Point2D(10, 10), dEdge1.start);
-        assertEquals(new Point2D(10, 5), dEdge1.end);
+        assertEquals(new Point2D(10, 5), dEdge1.start);
+        assertEquals(new Point2D(10, 10), dEdge1.end);
 
         NavigationEdge dEdge2 = d.adjacentEdges.get(2);
         assertEquals(e, dEdge2.adjacentSquare);
@@ -434,16 +434,16 @@ public class NavigationMeshTest {
     public void testVerticalAxisGeneration() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(0, 20);
-        b.bottomRight = new Point2D(10, 10);
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(10, 20);
-        c.bottomRight = new Point2D(20, 15);
+        c.topLeft = new Point2D(10, 15);
+        c.bottomRight = new Point2D(20, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -464,8 +464,8 @@ public class NavigationMeshTest {
 
         NavigationEdge bEdge0 = b.adjacentEdges.get(1);
         assertEquals(c, bEdge0.adjacentSquare);
-        assertEquals(new Point2D(10, 20), bEdge0.start);
-        assertEquals(new Point2D(10, 15), bEdge0.end);
+        assertEquals(new Point2D(10, 15), bEdge0.start);
+        assertEquals(new Point2D(10, 20), bEdge0.end);
         
         NavigationEdge bEdge1 = b.adjacentEdges.get(0);
         assertEquals(a, bEdge1.adjacentSquare);
@@ -474,8 +474,8 @@ public class NavigationMeshTest {
         
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(b, cEdge0.adjacentSquare);
-        assertEquals(new Point2D(10, 20), cEdge0.start);
-        assertEquals(new Point2D(10, 15), cEdge0.end);
+        assertEquals(new Point2D(10, 15), cEdge0.start);
+        assertEquals(new Point2D(10, 20), cEdge0.end);
 
         assertEquals(3, navigationMesh.squares.size());
     }
@@ -484,12 +484,12 @@ public class NavigationMeshTest {
     public void testAddingSquareToMesh() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 15);
-        b.bottomRight = new Point2D(20, 5);
+        b.topLeft = new Point2D(10, 5);
+        b.bottomRight = new Point2D(20, 15);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -502,8 +502,8 @@ public class NavigationMeshTest {
         assertEquals(1, b.adjacentEdges.size());
         
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(0, 15);
-        c.bottomRight = new Point2D(10, 10);
+        c.topLeft = new Point2D(0, 10);
+        c.bottomRight = new Point2D(10, 15);
         
         assertEquals(true, navigationMesh.addSquare(c));
 
@@ -514,8 +514,8 @@ public class NavigationMeshTest {
 
         NavigationEdge aEdge0 = a.adjacentEdges.get(0);
         assertEquals(b, aEdge0.adjacentSquare);   
-        assertEquals(new Point2D(10, 10), aEdge0.start);
-        assertEquals(new Point2D(10, 5), aEdge0.end);
+        assertEquals(new Point2D(10, 5), aEdge0.start);
+        assertEquals(new Point2D(10, 10), aEdge0.end);
 
         NavigationEdge aEdge1 = a.adjacentEdges.get(1);
         assertEquals(c, aEdge1.adjacentSquare);   
@@ -524,13 +524,13 @@ public class NavigationMeshTest {
 
         NavigationEdge bEdge0 = b.adjacentEdges.get(0);
         assertEquals(a, bEdge0.adjacentSquare);
-        assertEquals(new Point2D(10, 10), bEdge0.start);
-        assertEquals(new Point2D(10, 5), bEdge0.end);
+        assertEquals(new Point2D(10, 5), bEdge0.start);
+        assertEquals(new Point2D(10, 10), bEdge0.end);
 
         NavigationEdge bEdge1 = b.adjacentEdges.get(1);
         assertEquals(c, bEdge1.adjacentSquare);
-        assertEquals(new Point2D(10, 15), bEdge1.start);
-        assertEquals(new Point2D(10, 10), bEdge1.end);
+        assertEquals(new Point2D(10, 10), bEdge1.start);
+        assertEquals(new Point2D(10, 15), bEdge1.end);
 
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(a, cEdge0.adjacentSquare);
@@ -539,8 +539,8 @@ public class NavigationMeshTest {
 
         NavigationEdge cEdge1 = c.adjacentEdges.get(1);
         assertEquals(b, cEdge1.adjacentSquare);
-        assertEquals(new Point2D(10, 15), cEdge1.start);
-        assertEquals(new Point2D(10, 10), cEdge1.end);
+        assertEquals(new Point2D(10, 10), cEdge1.start);
+        assertEquals(new Point2D(10, 15), cEdge1.end);
 
         assertEquals(3, navigationMesh.squares.size());
     }
@@ -549,16 +549,16 @@ public class NavigationMeshTest {
     public void testRemovingSquareFromMesh() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 15);
-        b.bottomRight = new Point2D(20, 5);
+        b.topLeft = new Point2D(10, 5);
+        b.bottomRight = new Point2D(20, 15);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(0, 15);
-        c.bottomRight = new Point2D(10, 10);
+        c.topLeft = new Point2D(0, 10);
+        c.bottomRight = new Point2D(10, 15);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -594,20 +594,20 @@ public class NavigationMeshTest {
     public void testComplexAddingSquareToMesh() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(10, 30);
-        a.bottomRight = new Point2D(20, 20);
+        a.topLeft = new Point2D(10, 20);
+        a.bottomRight = new Point2D(20, 30);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(0, 20);
-        b.bottomRight = new Point2D(10, 10);
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(10, 10);
-        c.bottomRight = new Point2D(20, 0);
+        c.topLeft = new Point2D(10, 0);
+        c.bottomRight = new Point2D(20, 10);
 
         NavigationSquare d = new NavigationSquare();
-        d.topLeft = new Point2D(20, 20);
-        d.bottomRight = new Point2D(30, 10);
+        d.topLeft = new Point2D(20, 10);
+        d.bottomRight = new Point2D(30, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -624,8 +624,8 @@ public class NavigationMeshTest {
         assertEquals(0, d.adjacentEdges.size());
         
         NavigationSquare e = new NavigationSquare();
-        e.topLeft = new Point2D(10, 20);
-        e.bottomRight = new Point2D(20, 10);
+        e.topLeft = new Point2D(10, 10);
+        e.bottomRight = new Point2D(20, 20);
         
         navigationMesh.addSquare(e);
 
@@ -643,8 +643,8 @@ public class NavigationMeshTest {
 
         NavigationEdge bEdge0 = b.adjacentEdges.get(0);
         assertEquals(e, bEdge0.adjacentSquare);
-        assertEquals(new Point2D(10, 20), bEdge0.start);
-        assertEquals(new Point2D(10, 10), bEdge0.end);
+        assertEquals(new Point2D(10, 10), bEdge0.start);
+        assertEquals(new Point2D(10, 20), bEdge0.end);
 
         NavigationEdge cEdge0 = c.adjacentEdges.get(0);
         assertEquals(e, cEdge0.adjacentSquare);
@@ -653,8 +653,8 @@ public class NavigationMeshTest {
 
         NavigationEdge dEdge0 = d.adjacentEdges.get(0);
         assertEquals(e, dEdge0.adjacentSquare);
-        assertEquals(new Point2D(20, 20), dEdge0.start);
-        assertEquals(new Point2D(20, 10), dEdge0.end);
+        assertEquals(new Point2D(20, 10), dEdge0.start);
+        assertEquals(new Point2D(20, 20), dEdge0.end);
 
         NavigationEdge eEdge0 = e.adjacentEdges.get(0);
         assertEquals(a, eEdge0.adjacentSquare);   
@@ -663,8 +663,8 @@ public class NavigationMeshTest {
 
         NavigationEdge eEdge1 = e.adjacentEdges.get(1);
         assertEquals(b, eEdge1.adjacentSquare);
-        assertEquals(new Point2D(10, 20), eEdge1.start);
-        assertEquals(new Point2D(10, 10), eEdge1.end);
+        assertEquals(new Point2D(10, 10), eEdge1.start);
+        assertEquals(new Point2D(10, 20), eEdge1.end);
 
         NavigationEdge eEdge2 = e.adjacentEdges.get(2);
         assertEquals(c, eEdge2.adjacentSquare);
@@ -673,8 +673,8 @@ public class NavigationMeshTest {
 
         NavigationEdge eEdge3 = e.adjacentEdges.get(3);
         assertEquals(d, eEdge3.adjacentSquare);
-        assertEquals(new Point2D(20, 20), eEdge3.start);
-        assertEquals(new Point2D(20, 10), eEdge3.end);
+        assertEquals(new Point2D(20, 10), eEdge3.start);
+        assertEquals(new Point2D(20, 20), eEdge3.end);
 
         assertEquals(5, navigationMesh.squares.size());
     }
@@ -683,24 +683,24 @@ public class NavigationMeshTest {
     public void testComplexRemoveSquareToMesh() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(10, 30);
-        a.bottomRight = new Point2D(20, 20);
+        a.topLeft = new Point2D(10, 20);
+        a.bottomRight = new Point2D(20, 30);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(0, 20);
-        b.bottomRight = new Point2D(10, 10);
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
 
         NavigationSquare c = new NavigationSquare();
-        c.topLeft = new Point2D(10, 10);
-        c.bottomRight = new Point2D(20, 0);
+        c.topLeft = new Point2D(10, 0);
+        c.bottomRight = new Point2D(20, 10);
 
         NavigationSquare d = new NavigationSquare();
-        d.topLeft = new Point2D(20, 20);
-        d.bottomRight = new Point2D(30, 10);
+        d.topLeft = new Point2D(20, 10);
+        d.bottomRight = new Point2D(30, 20);
 
         NavigationSquare e = new NavigationSquare();
-        e.topLeft = new Point2D(10, 20);
-        e.bottomRight = new Point2D(20, 10);
+        e.topLeft = new Point2D(10, 10);
+        e.bottomRight = new Point2D(20, 20);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -742,8 +742,8 @@ public class NavigationMeshTest {
         NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(0, 20);
-        b.bottomRight = new Point2D(10, 10);
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
 
         assertEquals(0, a.adjacentEdges.size());
         
@@ -758,8 +758,8 @@ public class NavigationMeshTest {
     public void testAddSquareThatAlreadyExists() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(10, 30);
-        a.bottomRight = new Point2D(20, 20);
+        a.topLeft = new Point2D(10, 20);
+        a.bottomRight = new Point2D(20, 30);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 
@@ -768,8 +768,8 @@ public class NavigationMeshTest {
         NavigationMesh navigationMesh = NavigationMesh.generateMesh(navigationSquares);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(10, 30);
-        b.bottomRight = new Point2D(20, 20);
+        b.topLeft = new Point2D(10, 20);
+        b.bottomRight = new Point2D(20, 30);
 
         assertEquals(0, a.adjacentEdges.size());
         
@@ -785,12 +785,12 @@ public class NavigationMeshTest {
     public void testOverlappingSquares() {
         
         NavigationSquare a = new NavigationSquare();
-        a.topLeft = new Point2D(0, 10);
-        a.bottomRight = new Point2D(10, 0);
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
 
         NavigationSquare b = new NavigationSquare();
-        b.topLeft = new Point2D(5, 15);
-        b.bottomRight = new Point2D(15, 5);
+        b.topLeft = new Point2D(5, 5);
+        b.bottomRight = new Point2D(15, 15);
 
         List<NavigationSquare> navigationSquares = new ArrayList<>();
 

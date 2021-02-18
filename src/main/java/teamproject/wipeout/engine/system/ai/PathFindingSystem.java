@@ -138,6 +138,7 @@ public class PathFindingSystem {
      * @return A list of points to traverse to follow the shortest path through the squares
      */
     public List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
+        // Test for invalid cases
         if (squarePath == null || squarePath.size() == 0) {
             return null;
         }
@@ -172,10 +173,17 @@ public class PathFindingSystem {
             }
         }
 
-        // In order to simplify the code inside the for loop, add a fake navigation edge at the end point
-        edges[squarePath.size() - 1] = new NavigationEdge(endPoint, endPoint, null);
+        // Check for if start point is directly on top of one of the first edge's points, and skip the first edge if so
+        // If the start point is on top of one of the first edge's points, this causes a path that is not the shortest path to be found.
+        int startEdge = 0;
+        if (startPoint.equals(edges[0].start) || startPoint.equals(edges[0].end)) {
+            startEdge = 1;
+        }
 
-        FunnelData funnel = new FunnelData(startPoint, edges[0]);
+        // In order to simplify the code inside the for loop, add a fake navigation edge at the end point
+        edges[squarePath.size() - 1] = new NavigationEdge(endPoint, endPoint, new NavigationSquare(endPoint, endPoint));
+
+        FunnelData funnel = new FunnelData(startPoint, edges[startEdge]);
 
         Point2D newPoint = Point2D.ZERO;
         Point2D newVector = Point2D.ZERO;
@@ -184,7 +192,7 @@ public class PathFindingSystem {
         double newCrossProduct = 0;
 
         // Iterate over all edges until destination found
-        for (int i = 1; i < edges.length; i++) {
+        for (int i = startEdge + 1; i < edges.length; i++) {
             // Parse left point
             if (funnel.startIsLeft) {
                 newPoint = edges[i].start;
@@ -203,8 +211,9 @@ public class PathFindingSystem {
             if (newCrossProduct < 0) {
                 output.add(funnel.apex);
                 funnel.setData(funnel.right, edges[i]);
+                continue;
             }
-            else if (newAngle < funnel.angle) {
+            else if (newAngle <= funnel.angle) {
                 funnel.setLeft(newPoint);
             }
 
@@ -223,8 +232,9 @@ public class PathFindingSystem {
             if (newCrossProduct < 0) {
                 output.add(funnel.apex);
                 funnel.setData(funnel.left, edges[i]);
+                continue;
             }
-            else if (newAngle < funnel.angle) {
+            else if (newAngle <= funnel.angle) {
                 funnel.setRight(newPoint);
             }
         }
@@ -246,6 +256,7 @@ public class PathFindingSystem {
      */
     public List<Point2D> findPath(Point2D start, Point2D end, NavigationSquare startSquare, NavigationSquare endSquare) {
         List<NavigationSquare> squarePath = findPathThroughSquares(startSquare, start.getX(), start.getY(), endSquare, end.getX(), end.getY());
+        
         if (squarePath == null) {
             return null;
         }

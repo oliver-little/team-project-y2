@@ -787,7 +787,7 @@ public class PathFindingSystemTest {
         Point2D start = new Point2D(9, 9);
         Point2D end = new Point2D(21, 9);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, navigationMesh.squares);
+        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c));
 
         assertNotEquals(null, nodes);
 
@@ -796,5 +796,264 @@ public class PathFindingSystemTest {
         assertEquals(new Point2D(10, 3), nodes.get(1));
         assertEquals(new Point2D(20, 3), nodes.get(2));
         assertEquals(end, nodes.get(3));
+
+        start = new Point2D(21, 9);
+        end = new Point2D(9, 9);
+
+        nodes = system.findStringPullPath(start, end, List.of(c, b, a));
+
+        assertNotEquals(null, nodes);
+
+        assertEquals(4, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(20, 3), nodes.get(1));
+        assertEquals(new Point2D(10, 3), nodes.get(2));
+        assertEquals(end, nodes.get(3));
+    }
+
+    @Test
+    public void testFullCircleShortestPath() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(-20, 10);
+        b.bottomRight = new Point2D(5, 20);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(-25, 0);
+        c.bottomRight = new Point2D(-15, 10);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(-20, -10);
+        d.bottomRight = new Point2D(5, 0);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c, d));
+
+        assertEquals(2, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(2, c.adjacentEdges.size());
+        assertEquals(2, d.adjacentEdges.size());
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        Point2D start = new Point2D(5, 5);
+
+        List<Point2D> nodes = system.findStringPullPath(start, start, List.of(a, b, c, d, a));
+
+        assertNotEquals(null, nodes);
+
+        assertEquals(6, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(0, 10), nodes.get(1));
+        assertEquals(new Point2D(-15, 10), nodes.get(2));
+        assertEquals(new Point2D(-15, 0), nodes.get(3));
+        assertEquals(new Point2D(0, 0), nodes.get(4));
+        assertEquals(start, nodes.get(5));
+    }
+
+    @Test
+    public void testWideSquareShortestPath() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(10, 0);
+        b.bottomRight = new Point2D(20, 100);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(20, 0);
+        c.bottomRight = new Point2D(30, 10);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c));
+
+        assertEquals(1, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(1, c.adjacentEdges.size());
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        Point2D start = new Point2D(0, 0);
+        Point2D end = new Point2D(30, 0);
+
+        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c));
+
+        assertNotEquals(null, nodes);
+
+        assertEquals(2, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(end, nodes.get(1));
+    }
+
+    @Test
+    public void testStraightPathAcrossManySquares() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 20);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(10, 10);
+        b.bottomRight = new Point2D(20, 30);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(20, 20);
+        c.bottomRight = new Point2D(30, 40);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(30, 30);
+        d.bottomRight = new Point2D(40, 50);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c, d));
+
+        assertEquals(1, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(2, c.adjacentEdges.size());
+        assertEquals(1, d.adjacentEdges.size());
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        Point2D start = new Point2D(9, 18);
+        Point2D end = new Point2D(31, 32);
+
+        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c, d));
+
+        assertNotEquals(null, nodes);
+
+        assertEquals(2, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(end, nodes.get(1));
+    }
+
+    @Test
+    public void testInvalidSquarePath() {
+        Point2D start = new Point2D(0, 0);
+        Point2D end = new Point2D(0, 1);
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        List<Point2D> nodes = system.findStringPullPath(start, end, new ArrayList<>());
+        assertEquals(null, nodes);
+
+        nodes = system.findStringPullPath(start, end, null);
+        assertEquals(null, nodes);
+
+        nodes = system.findStringPullPath(start, end, List.of(new NavigationSquare(new Point2D(5, 5), new Point2D(10, 10))));
+        assertEquals(null, nodes);
+    }
+
+    @Test
+    public void testFindFullPath() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(-20, 10);
+        b.bottomRight = new Point2D(5, 20);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(-25, 0);
+        c.bottomRight = new Point2D(-15, 10);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(-20, -10);
+        d.bottomRight = new Point2D(5, 0);
+
+        NavigationSquare e = new NavigationSquare();
+        e.topLeft = new Point2D(-35, -9);
+        e.bottomRight = new Point2D(-25, 1);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c, d, e));
+
+        assertEquals(2, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(3, c.adjacentEdges.size());
+        assertEquals(2, d.adjacentEdges.size());
+        assertEquals(1, e.adjacentEdges.size());
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        Point2D start = new Point2D(0, 0);
+        Point2D end = new Point2D(0, 1);
+
+        List<Point2D> nodes = system.findPath(start, end, navigationMesh);
+
+        assertNotEquals(null, nodes);
+        assertEquals(2, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(end, nodes.get(1));
+
+        end = new Point2D(-20, 5);
+
+        nodes = system.findPath(start, end, navigationMesh);
+
+        assertNotEquals(null, nodes);
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(-15, 0), nodes.get(1));
+        assertEquals(end, nodes.get(2));
+
+        end = new Point2D(-30, -5);
+
+        nodes = system.findPath(start, end, navigationMesh);
+
+        assertNotEquals(null, nodes);
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(-25, 0), nodes.get(1));
+        assertEquals(end, nodes.get(2));
+    }
+
+    @Test
+    public void findInvalidFullPath() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(-20, 10);
+        b.bottomRight = new Point2D(5, 20);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(-25, 0);
+        c.bottomRight = new Point2D(-15, 10);
+
+        NavigationSquare d = new NavigationSquare();
+        d.topLeft = new Point2D(-20, -10);
+        d.bottomRight = new Point2D(5, 0);
+
+        NavigationSquare e = new NavigationSquare();
+        e.topLeft = new Point2D(-35, -9);
+        e.bottomRight = new Point2D(-26, 1);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c, d, e));
+
+        assertEquals(2, a.adjacentEdges.size());
+        assertEquals(2, b.adjacentEdges.size());
+        assertEquals(2, c.adjacentEdges.size());
+        assertEquals(2, d.adjacentEdges.size());
+        assertEquals(0, e.adjacentEdges.size());
+
+        // Find shortest path
+        PathFindingSystem system = new PathFindingSystem();
+
+        Point2D start = new Point2D(0, 0);
+        Point2D end = new Point2D(-30, -5);
+
+        List<Point2D> nodes = system.findPath(start, end, navigationMesh);
+
+        assertEquals(null, nodes);
     }
 }
