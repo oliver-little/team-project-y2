@@ -245,29 +245,31 @@ public class GeometryUtil
     	// this is when centre of circle is contained in the rectangle
     	
     	Point2D centre = new Point2D(c1.getCenterX(), c1.getCenterY());
-    	if(isPointInside(centre, r1)) {
+    	
+    	Line top = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
+    	double distance = calculateDistanceBetweenPointAndLine(centre, top);
+    	if(distance>=c1.getRadius()) {
     		return true;
     	}
     	
-    	Point2D tl = new Point2D(r1.getX(),r1.getY());
-    	if (getDistanceBetweenTwoPoints(centre, tl) <= c1.getRadius()) {
+    	Line bottom = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
+       	distance = calculateDistanceBetweenPointAndLine(centre, bottom);
+    	if(distance>=c1.getRadius()) {
     		return true;
     	}
     	
-    	Point2D br = tl.add(new Point2D(r1.getWidth(), r1.getHeight()));
-    	if (getDistanceBetweenTwoPoints(centre, br) <= c1.getRadius()) {
+    	Line left = new Line(r1.getX(), r1.getY(), r1.getX(),r1.getY()+r1.getHeight());
+       	distance = calculateDistanceBetweenPointAndLine(centre, left);
+    	if(distance>=c1.getRadius()) {
     		return true;
     	}
     	
-    	Point2D tr = tl.add(new Point2D(r1.getWidth(), 0));
-    	if (getDistanceBetweenTwoPoints(centre, tr) <= c1.getRadius()) {
+    	Line right = new Line(r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
+       	distance = calculateDistanceBetweenPointAndLine(centre, right);
+    	if(distance>=c1.getRadius()) {
     		return true;
     	}
     	
-    	Point2D bl = tl.add(new Point2D(0, r1.getHeight())) ;
-    	if (getDistanceBetweenTwoPoints(centre, bl) <= c1.getRadius()) {
-    		return true;
-    	}
     	
     	return false;
     }
