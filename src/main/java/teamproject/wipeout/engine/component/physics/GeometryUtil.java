@@ -63,10 +63,10 @@ public class GeometryUtil
 		double gradient_l2 = calculateGradient(l2);
 		double yIntercept_l2 = calculateYIntercept(l2, gradient_l2);
 		
-		System.out.println("gradient_l1: "+gradient_l1);
-		System.out.println("gradient_l2: "+gradient_l2);
-		System.out.println("yIntercept_l1: "+yIntercept_l1);
-		System.out.println("yIntercept_l2: "+yIntercept_l2);
+		//System.out.println("gradient_l1: "+gradient_l1);
+		//System.out.println("gradient_l2: "+gradient_l2);
+		//System.out.println("yIntercept_l1: "+yIntercept_l1);
+		//System.out.println("yIntercept_l2: "+yIntercept_l2);
 
 		
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
@@ -109,10 +109,10 @@ public class GeometryUtil
 		}
 		
 		Point2D p = new Point2D(x,y);
-		System.out.println("point : "+p.toString());
+		//System.out.println("point : "+p.toString());
 		//check point lies on l1 and l2
 		if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
-			System.out.println("not on at least one segment");
+			//System.out.println("not on at least one segment");
 			return null;
 		}
 		return p;
@@ -126,7 +126,7 @@ public class GeometryUtil
 	 */
     public static boolean pointOnSegment(Point2D p, Line l) {
     	double m = calculateGradient(l);
-    	System.out.println("m: "+m);
+    	//System.out.println("m: "+m);
     	if(Double.compare(m, Double.MAX_VALUE)==0) {
     		//x=i
     		if(Double.compare(p.getX(), l.getStartX())==0) {
@@ -139,14 +139,14 @@ public class GeometryUtil
     	
     	double c = calculateYIntercept(l,m);
     	
-    	System.out.println("y: "+p.getY());
-    	System.out.println("mx+c: "+(m*p.getX()+c));
+    	//System.out.println("y: "+p.getY());
+    	//System.out.println("mx+c: "+(m*p.getX()+c));
     	
     	double THRESHOLD=0.000001;
     	//y = mx + c
     	double y_new = m*p.getX()+c;
     	if(Double.compare(Math.abs(y_new-p.getY()), THRESHOLD)>0) {
-    		System.out.println("not on line");
+    		//System.out.println("not on line");
     		return false;
     	}
     	//on line
@@ -178,7 +178,6 @@ public class GeometryUtil
                  }  
         	}
     	}
-    	System.out.println("nope");
     	return false;
     }
     
@@ -227,7 +226,6 @@ public class GeometryUtil
 		if(pointOfIntersection(l1,l2)==null) {
 			return false;
 		}
-		System.out.println("poi: "+pointOfIntersection(l1,l2).toString());
 		
 		return true;
 	}
@@ -238,12 +236,7 @@ public class GeometryUtil
      * @param r1 the rectangle
      * @return true if the circle and rectangle intersect, false otherwise
      */
-    public static boolean intersects(Circle c1, Rectangle r1) {
-    	//collide if distance between centre of circle and any corner of rectangle is less than
-    	// or equal to the radius of the circle
-    	// also collide if circle is completely inside the rectangle
-    	// this is when centre of circle is contained in the rectangle
-    	
+    public static boolean intersects(Circle c1, Rectangle r1) {    	
     	Point2D centre = new Point2D(c1.getCenterX(), c1.getCenterY());
     	
     	Line top = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
@@ -270,6 +263,15 @@ public class GeometryUtil
     		return true;
     	}
     	
+    	//circle inside rectangle
+    	if(isPointInside(centre, r1)) {
+    		return true;
+    	}
+    	
+    	//also if rectangle inside circle
+    	if(isPointInside(new Point2D(r1.getX(),r1.getY()), c1)) {
+    		return true;
+    	}
     	
     	return false;
     }
@@ -364,6 +366,20 @@ public class GeometryUtil
         	}
     	}
     	
+    	return false;
+    }
+    
+    /**
+     * Checks whether a point is inside a circle
+     * @param p the point
+     * @param c the circle
+     * @return true if the point is inside, false otherwise
+     */
+    public static boolean isPointInside(Point2D p, Circle c) {
+    	double distance = getDistanceBetweenTwoPoints(p,new Point2D(c.getCenterX(),c.getCenterY()));
+    	if(distance<=c.getRadius()) {
+    		return true;
+    	}
     	return false;
     }
     
