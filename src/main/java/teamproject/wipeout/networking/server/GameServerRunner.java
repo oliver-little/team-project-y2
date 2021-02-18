@@ -1,5 +1,7 @@
 package teamproject.wipeout.networking.server;
 
+import javafx.geometry.Point2D;
+
 import java.io.*;
 import java.util.List;
 
@@ -32,7 +34,9 @@ public class GameServerRunner {
 
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String classpath = System.getProperty("java.class.path");
+        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String classpath = ownClasspath + ":" + javafxGraphicsClasspath;
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);

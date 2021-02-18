@@ -31,13 +31,13 @@ public class MovementSystem implements GameSystem {
             m.updateVelocity(timeStep);
             t.position = t.position.add(m.velocity.multiply(timeStep));
 
+            m.updateFacingDirection();
+
             // Update PlayerState's position if the entity has one
             PlayerStateComponent playerStateComponent = entity.getComponent(PlayerStateComponent.class);
             if (playerStateComponent != null) {
                 playerStateComponent.playerState.setPosition(t.position);
             }
-
-            m.updateFacingDirection();
         }
     }
 }
