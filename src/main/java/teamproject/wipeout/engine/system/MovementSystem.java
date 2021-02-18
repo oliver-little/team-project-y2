@@ -8,19 +8,19 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
 
 public class MovementSystem implements GameSystem {
     
     protected SignatureEntityCollector _entityCollector;
 
     public MovementSystem(GameScene e) {
-        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, MovementComponent.class));
+        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, PhysicsComponent.class));
     }
 
     public void cleanup() {
         this._entityCollector.cleanup();
     }
-
 
     public void accept(Double timeStep) {
         List<GameEntity> entities = this._entityCollector.getEntities();
@@ -30,7 +30,13 @@ public class MovementSystem implements GameSystem {
             MovementComponent m = entity.getComponent(MovementComponent.class);
             m.updateVelocity(timeStep);
             t.position = t.position.add(m.velocity.multiply(timeStep));
-            
+
+            // Update PlayerState's position if the entity has one
+            PlayerStateComponent playerStateComponent = entity.getComponent(PlayerStateComponent.class);
+            if (playerStateComponent != null) {
+                playerStateComponent.playerState.setPosition(t.position);
+            }
+
             m.updateFacingDirection();
         }
     }

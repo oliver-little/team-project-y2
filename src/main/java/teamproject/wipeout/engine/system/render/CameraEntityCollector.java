@@ -46,7 +46,7 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
             case "COMPONENT_REMOVED":
                 this._removeComponent(entity);
                 break;
-            case "ENTITY_DELETED":
+            case "ENTITY_REMOVED":
                 this._removeEntity(entity);
                 break;
             default:

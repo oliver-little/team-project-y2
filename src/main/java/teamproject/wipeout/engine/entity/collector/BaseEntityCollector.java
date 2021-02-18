@@ -29,7 +29,7 @@ public abstract class BaseEntityCollector implements EntityCollector {
             case "COMPONENT_REMOVED":
                 this._removeComponent(entity);
                 break;
-            case "ENTITY_DELETED":
+            case "ENTITY_REMOVED":
                 this._removeEntity(entity);
                 break;
             default:
