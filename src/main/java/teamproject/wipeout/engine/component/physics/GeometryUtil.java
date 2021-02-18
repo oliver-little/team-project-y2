@@ -1,6 +1,7 @@
 package teamproject.wipeout.engine.component.physics;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -66,6 +67,7 @@ public class GeometryUtil
 		System.out.println("gradient_l2: "+gradient_l2);
 		System.out.println("yIntercept_l1: "+yIntercept_l1);
 		System.out.println("yIntercept_l2: "+yIntercept_l2);
+
 		
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
 			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
@@ -107,10 +109,10 @@ public class GeometryUtil
 		}
 		
 		Point2D p = new Point2D(x,y);
-		
+		System.out.println("point : "+p.toString());
 		//check point lies on l1 and l2
 		if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
-			//System.out.println("not on at least one segment");
+			System.out.println("not on at least one segment");
 			return null;
 		}
 		return p;
@@ -118,26 +120,69 @@ public class GeometryUtil
 	
 	/**
 	 * Checks whether a point lies on a segment
-	 * @param c the point
+	 * @param p the point
 	 * @param l the segment
 	 * @return true if the point lies on the segment, false otherwise.
 	 */
-    public static boolean pointOnSegment(Point2D c, Line l) {
-    	//https://lucidar.me/en/mathematics/check-if-a-point-belongs-on-a-line-segment/#:~:text=The%20cross%20product%20of%20A,t%20belongs%20on%20the%20segment.
-    	Point2D ab = new Point2D(l.getEndX()-l.getStartX(), l.getEndY()-l.getStartY());
-    	Point2D ac = new Point2D(c.getX()-l.getStartX(), c.getY()-l.getStartY());    	
-
-    	double k_ac = ab.dotProduct(ac);
-    	double k_ab = ab.dotProduct(ab);
+    public static boolean pointOnSegment(Point2D p, Line l) {
+    	double m = calculateGradient(l);
+    	System.out.println("m: "+m);
+    	if(Double.compare(m, Double.MAX_VALUE)==0) {
+    		//x=i
+    		if(Double.compare(p.getX(), l.getStartX())==0) {
+    			return true;
+    		}
+    		else {
+    			return false;
+    		}
+    	}
     	
-    	if(k_ac<0) {
+    	double c = calculateYIntercept(l,m);
+    	
+    	System.out.println("y: "+p.getY());
+    	System.out.println("mx+c: "+(m*p.getX()+c));
+    	
+    	double THRESHOLD=0.000001;
+    	//y = mx + c
+    	double y_new = m*p.getX()+c;
+    	if(Double.compare(Math.abs(y_new-p.getY()), THRESHOLD)>0) {
+    		System.out.println("not on line");
     		return false;
     	}
-    	else if(k_ac>k_ab) {
-    		return false;
+    	//on line
+    	if(l.getStartX()<=l.getEndX()) {
+        	if(l.getStartY()<=l.getEndY()) {
+            	if(p.getX()>=l.getStartX() && p.getY()>=l.getStartY() &&
+            	   p.getX()<=l.getEndX() && p.getY()<=l.getEndY()) {
+            		return true;
+            	}    		
+        	}
+        	else {
+            	if(p.getX()>=l.getStartX() && p.getY()<=l.getStartY() &&
+            	   p.getX()<=l.getEndX() && p.getY()>=l.getEndY()) {
+            		return true;
+                 }  
+        	}
     	}
-    	return true;
+    	else {
+        	if(l.getStartY()<=l.getEndY()) {
+            	if(p.getX()<=l.getStartX() && p.getY()>=l.getStartY() &&
+            	   p.getX()>=l.getEndX() && p.getY()<=l.getEndY()) {
+            		return true;
+            	}    		
+        	}
+        	else {
+            	if(p.getX()<=l.getStartX() && p.getY()<=l.getStartY() &&
+            	   p.getX()>=l.getEndX() && p.getY()>=l.getEndY()) {
+            		return true;
+                 }  
+        	}
+    	}
+    	System.out.println("nope");
+    	return false;
     }
+    
+
     
     /**
      * Checks whether two circles intersect
@@ -182,6 +227,7 @@ public class GeometryUtil
 		if(pointOfIntersection(l1,l2)==null) {
 			return false;
 		}
+		System.out.println("poi: "+pointOfIntersection(l1,l2).toString());
 		
 		return true;
 	}
@@ -419,6 +465,44 @@ public class GeometryUtil
 		//check rectangle inside other rectangle
 	
 	}
+	
+	/**
+	 * Calculates the shortest distance between a point and a line
+	 * @param p the point
+	 * @param l the line
+	 * @return the shortest distance between the point and the line
+	 */
+	public static double calculateDistanceBetweenPointAndLine(Point2D p, Line l) {
+		
+		if(pointOnSegment(p,l)) {
+			return 0;
+		}
+		
+		Point2D normal = calculateUnitNormal(l);
+		Point2D ac = calculateVector(new Point2D(l.getStartX(), l.getStartY()), p);
+		
+		double ad_magnitude = ac.dotProduct(normal);
+		
+		double distance = Math.sqrt(Math.pow(ac.magnitude(), 2)-Math.pow(ad_magnitude, 2));
+		
+		Point2D bc = calculateVector(new Point2D(l.getEndX(), l.getEndY()), p);
+		
+		//because line is a segment, shortest distance could be from point to end point
+		// not necessarily perpendicular
+		if(ac.magnitude()<distance) {
+			distance = ac.magnitude();
+		}
+		if(bc.magnitude()<distance) {
+			distance = bc.magnitude();
+		}
+			
+		return distance;
+	}
+	
+	public static Point2D calculateVector(Point2D p1, Point2D p2) {
+		return p2.subtract(p1);
+	}
+	
 }
 
 
