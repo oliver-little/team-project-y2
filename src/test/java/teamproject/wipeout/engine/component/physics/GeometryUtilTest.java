@@ -2,7 +2,6 @@ package teamproject.wipeout.engine.component.physics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
