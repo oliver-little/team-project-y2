@@ -15,7 +15,7 @@ public class MovementSystem implements GameSystem {
     protected SignatureEntityCollector _entityCollector;
 
     public MovementSystem(GameScene e) {
-        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, PhysicsComponent.class));
+        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, MovementComponent.class));
     }
 
     public void cleanup() {
