@@ -205,14 +205,14 @@ public class CollisionComponent implements GameComponent {
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;
-				//return GeometryUtil.getResolutionVector(r1,c2);
+				return GeometryUtil.getResolutionVector(r1,c2);
 			}
 		}
 		else if(s1 instanceof Circle) {
 			Circle c1 = (Circle) s1;
 			if (s2 instanceof Rectangle) {
 				Rectangle r2 = (Rectangle) s2;
-				//return GeometryUtil.getResolutionVector(c1,r2);
+				return GeometryUtil.getResolutionVector(r2, c1);
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;

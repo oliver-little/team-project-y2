@@ -121,6 +121,11 @@ class GeometryUtilTest
 		p = new Point2D(1,0);
 		l = new Line(0,0,10,10);
 		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		
+		System.out.println("the test");
+		l = new Line(1, 3, 1, 1);
+		p = new Point2D(1,4);
+		assertFalse(GeometryUtil.pointOnSegment(p, l));
 	}
 	
 	@Test
@@ -288,10 +293,25 @@ class GeometryUtilTest
 		Point2D p = new Point2D(1,1);
 		assertEquals(0, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l));
 		
-		System.out.println("the test");
 		l = new Line(0,0,10,10);
 		p = new Point2D(1,0);
-		assertEquals(Math.sqrt(Math.pow(0.5, 2)*2), GeometryUtil.calculateDistanceBetweenPointAndLine(p, l));
+		assertTrue(GeometryUtil.approxEquals(Math.sqrt(Math.pow(0.5, 2)*2), GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(5, 5, 5, 10);
+		p = new Point2D(3,6);
+		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(0, 0, 0, 10);
+		p = new Point2D(2,6);
+		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(1, 3, 1, 1);
+		p = new Point2D(5,4);
+		double actual = GeometryUtil.calculateDistanceBetweenPointAndLine(p, l);
+		assertTrue(GeometryUtil.approxEquals(Math.sqrt(17), actual));
+		
+		
+
 	}
 	
 

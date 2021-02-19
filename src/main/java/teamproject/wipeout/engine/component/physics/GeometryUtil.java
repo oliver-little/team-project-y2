@@ -129,26 +129,25 @@ public class GeometryUtil
     	//System.out.println("m: "+m);
     	if(Double.compare(m, Double.MAX_VALUE)==0) {
     		//x=i
-    		if(Double.compare(p.getX(), l.getStartX())==0) {
-    			return true;
-    		}
-    		else {
+    		if(Double.compare(p.getX(), l.getStartX())!=0) {
     			return false;
     		}
+    		
+    	}
+    	else {
+        	double c = calculateYIntercept(l,m);
+        	
+        	//System.out.println("y: "+p.getY());
+        	//System.out.println("mx+c: "+(m*p.getX()+c));
+        
+        	//y = mx + c
+        	double y_new = m*p.getX()+c;
+        	if(!approxEquals(y_new, p.getY())) {
+        		//System.out.println("not on line");
+        		return false;
+        	}
     	}
     	
-    	double c = calculateYIntercept(l,m);
-    	
-    	//System.out.println("y: "+p.getY());
-    	//System.out.println("mx+c: "+(m*p.getX()+c));
-    	
-    	double THRESHOLD=0.000001;
-    	//y = mx + c
-    	double y_new = m*p.getX()+c;
-    	if(Double.compare(Math.abs(y_new-p.getY()), THRESHOLD)>0) {
-    		//System.out.println("not on line");
-    		return false;
-    	}
     	//on line
     	if(l.getStartX()<=l.getEndX()) {
         	if(l.getStartY()<=l.getEndY()) {
@@ -239,40 +238,52 @@ public class GeometryUtil
     public static boolean intersects(Circle c1, Rectangle r1) {    	
     	Point2D centre = new Point2D(c1.getCenterX(), c1.getCenterY());
     	
+    	//System.out.println("centre: "+centre);
+    	
     	Line top = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
     	double distance = calculateDistanceBetweenPointAndLine(centre, top);
-    	if(distance>=c1.getRadius()) {
+    	if(distance<=c1.getRadius()) {
+    		//System.out.println(" 1 distance: "+distance);
+    		//System.out.println("top: "+top.toString());
     		return true;
     	}
     	
     	Line bottom = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, bottom);
-    	if(distance>=c1.getRadius()) {
+    	if(distance<=c1.getRadius()) {
+    		//System.out.println(" 2 distance: "+distance);
     		return true;
     	}
     	
     	Line left = new Line(r1.getX(), r1.getY(), r1.getX(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, left);
-    	if(distance>=c1.getRadius()) {
+    	if(distance<=c1.getRadius()) {
+    		//System.out.println(" 3 distance: "+distance);
     		return true;
     	}
     	
     	Line right = new Line(r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, right);
-    	if(distance>=c1.getRadius()) {
+    	if(distance<=c1.getRadius()) {
+    		//System.out.println(" 4 distance: "+distance);
     		return true;
     	}
     	
+    	//System.out.println("not colliding with line");
+    	
     	//circle inside rectangle
     	if(isPointInside(centre, r1)) {
+    		//System.out.println(" circle inside rectangle ");
     		return true;
     	}
     	
     	//also if rectangle inside circle
     	if(isPointInside(new Point2D(r1.getX(),r1.getY()), c1)) {
+    		//System.out.println(" rectangle inside circle");
     		return true;
     	}
     	
+    	//System.out.println(" no collision");
     	return false;
     }
     
@@ -484,6 +495,43 @@ public class GeometryUtil
 	
 	}
 	
+	public static Point2D getResolutionVector(Rectangle r,Circle c) {
+		double overlap = Double.MAX_VALUE;
+		Point2D p = new Point2D(0,0);
+		Point2D centre = new Point2D(c.getCenterX(), c.getCenterY());
+		Line top = new Line(r.getX(), r.getY(), r.getX()+r.getWidth(), r.getY());
+		Line bottom = new Line(r.getX(), r.getY()+r.getHeight(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
+		Line right = new Line(r.getX()+r.getWidth(), r.getY(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
+		Line left = new Line(r.getX(), r.getY(), r.getX(), r.getY()+r.getHeight());
+	
+		double minDistance = Double.MAX_VALUE;
+		double distanceToTop = calculateDistanceBetweenPointAndLine(centre, top)-c.getRadius();
+		if(distanceToTop<minDistance) {
+			minDistance=distanceToTop;
+			p = new Point2D(0,minDistance);
+		}
+		double distanceToBottom = calculateDistanceBetweenPointAndLine(centre, bottom)-c.getRadius();
+		if(distanceToBottom<minDistance) {
+			minDistance=distanceToBottom;
+			p = new Point2D(0,-minDistance);
+		}
+		double distanceToLeft = calculateDistanceBetweenPointAndLine(centre, left)-c.getRadius();
+		if(distanceToLeft<minDistance) {
+			minDistance=distanceToLeft;
+			p = new Point2D(minDistance,0);
+		}
+		double distanceToRight = calculateDistanceBetweenPointAndLine(centre, right)-c.getRadius();
+		if(distanceToRight<minDistance) {
+			minDistance=distanceToRight;
+			p = new Point2D(-minDistance,0);			
+		}
+				
+		
+		System.out.println("overlap: "+p.toString());
+		
+		return p;
+	}
+	
 	/**
 	 * Calculates the shortest distance between a point and a line
 	 * @param p the point
@@ -499,18 +547,27 @@ public class GeometryUtil
 		Point2D normal = calculateUnitNormal(l);
 		Point2D ac = calculateVector(new Point2D(l.getStartX(), l.getStartY()), p);
 		
-		double ad_magnitude = ac.dotProduct(normal);
+		double distance = ac.dotProduct(normal);
+		//System.out.println("distance: "+distance);
+		Point2D d = p.add(normal.multiply(-distance));
+		//System.out.println("d: "+d.toString());
 		
-		double distance = Math.sqrt(Math.pow(ac.magnitude(), 2)-Math.pow(ad_magnitude, 2));
+		distance = Math.abs(distance);
+		//check closest point is on segment
+		if(pointOnSegment(d,l)) {
+			//System.out.println("point on segment");
+			return distance;
+		}
 		
+		//if not, closest point is either start or end of segment
 		Point2D bc = calculateVector(new Point2D(l.getEndX(), l.getEndY()), p);
 		
+		
 		//because line is a segment, shortest distance could be from point to end point
-		// not necessarily perpendicular
-		if(ac.magnitude()<distance) {
+		if(ac.magnitude()<bc.magnitude()) {
 			distance = ac.magnitude();
 		}
-		if(bc.magnitude()<distance) {
+		else {
 			distance = bc.magnitude();
 		}
 			
@@ -521,6 +578,21 @@ public class GeometryUtil
 		return p2.subtract(p1);
 	}
 	
+	/**
+	 * Check if two doubles are approximately equal
+	 * @param x
+	 * @param y
+	 * @return true if the doubles are approximately equal.
+	 */
+	public static boolean approxEquals(double x, double y) {
+		double THRESHOLD = 0.000001;
+    	if(Double.compare(Math.abs(x-y), THRESHOLD)>0) {
+    		return false;
+    	}
+    	return true;
+	}
 }
+
+
 
 
