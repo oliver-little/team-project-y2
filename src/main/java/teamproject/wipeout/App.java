@@ -86,8 +86,19 @@ public class App implements Controller {
         rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
         rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
         
+        
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
+        
+        GameEntity staticsprite = gameScene.createEntity();
+        staticsprite.addComponent(new Transform(500, 200));
+        try {
+            staticsprite.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "face.png"))));
+            staticsprite.addComponent(new CollisionComponent(new Rectangle(100,100)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(250, 250));
@@ -112,7 +123,7 @@ public class App implements Controller {
 
 
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
-        nge.addComponent(ngeSound);
+        //nge.addComponent(ngeSound);
 
         input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
         
