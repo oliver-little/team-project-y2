@@ -11,7 +11,6 @@ import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Pair;
-import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.FacingDirection;
 import teamproject.wipeout.engine.core.GameScene;
