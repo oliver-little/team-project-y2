@@ -262,7 +262,7 @@ public class GeometryUtil
     		return true;
     	}
     	
-    	Line right = new Line(r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
+    	Line right = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, right);
     	if(distance<=c1.getRadius()) {
     		//System.out.println(" 4 distance: "+distance);
@@ -287,15 +287,6 @@ public class GeometryUtil
     	return false;
     }
     
-    /**
-     * Checks whether a circle and a rectangle collide
-     * @param r1 the rectangle
-     * @param c1 the circle
-     * @return true if the circle and rectangle intersect, false otherwise
-     */
-    public static boolean intersects(Rectangle r1, Circle c1) {
-    	return intersects(c1,r1);
-    }
     
     /**
      * Checks whether two rectangles intersect

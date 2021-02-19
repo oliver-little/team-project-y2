@@ -174,7 +174,7 @@ public class CollisionComponent implements GameComponent {
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;
-				return GeometryUtil.intersects(r1,c2);
+				return GeometryUtil.intersects(c2,r1);
 			}
 		}
 		else if(s1 instanceof Circle) {
