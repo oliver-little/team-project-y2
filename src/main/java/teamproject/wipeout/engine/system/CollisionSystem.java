@@ -5,15 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Pair;
-import teamproject.wipeout.engine.component.render.RectRenderComponent;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
-import teamproject.wipeout.engine.component.physics.FacingDirection;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;

@@ -1,4 +1,4 @@
-package teamproject.wipeout.component.ai;
+package teamproject.wipeout.engine.component.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,9 +8,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.ai.NavigationSquare;
-import teamproject.wipeout.engine.component.ai.NavigationMesh;
-import teamproject.wipeout.engine.component.ai.NavigationEdge;
 
 public class NavigationMeshTest {
 

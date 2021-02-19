@@ -4,11 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import javafx.geometry.Point2D;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import teamproject.wipeout.engine.system.CollisionSystem;
 
 class CollisionTest
 {
