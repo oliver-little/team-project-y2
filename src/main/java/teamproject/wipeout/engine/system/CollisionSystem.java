@@ -17,6 +17,10 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
+/**
+ * System that checks and resolves collisions between entities with the collision component
+ *
+ */
 public class CollisionSystem implements GameSystem {
     
     protected SignatureEntityCollector _entityCollector;

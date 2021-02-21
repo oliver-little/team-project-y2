@@ -12,6 +12,11 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;
 
+/**
+ * Component that, when added to an entity, will resolve collisions between other entities with this component.
+ * Has a boolean flag isMoveable that indicates whether an entity should be affected by collisions.
+ *  Made up of an array of shapes that act as the collision boundaries.
+ */
 public class CollisionComponent implements GameComponent {
 
 	//each rectangle with attributes x, y, width, height
@@ -24,6 +29,9 @@ public class CollisionComponent implements GameComponent {
 	 */
 	public Shape boundingBoxes[];
 	
+	/**
+	 * Boolean flag that indicates whether this entity should be affected by collisions
+	 */
 	public boolean isMoveable = true;
 	
 	/*

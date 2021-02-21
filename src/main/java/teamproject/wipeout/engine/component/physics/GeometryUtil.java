@@ -5,7 +5,10 @@ import javafx.geometry.Point3D;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-
+/**
+ * Class containing functions related to geometry in 2D space
+ *
+ */
 public class GeometryUtil
 {
 	/**
