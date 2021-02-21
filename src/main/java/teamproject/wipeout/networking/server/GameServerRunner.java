@@ -28,7 +28,7 @@ public class GameServerRunner {
     // Running a child process: https://www.programmersought.com/article/95206092506/ (source)
     public void startServer(String serverName) throws ServerRunningException, IOException {
         // Only one game server can be running
-        if (this.isActive()) {
+        if (this.serverProcess != null) {
             throw new ServerRunningException(this.serverName + " - server is already running!");
         }
 
@@ -36,7 +36,7 @@ public class GameServerRunner {
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String classpath = ownClasspath + ":" + javafxGraphicsClasspath;
+        String classpath = ownClasspath + this.getClasspathSeparator() + javafxGraphicsClasspath;
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);
@@ -74,12 +74,27 @@ public class GameServerRunner {
     }
 
     /**
-     * {@code isActive} variable getter
+     * {@code isActive}  WRONG REWRITE DOCS
      *
      * @return {@code true} if the {@link GameServer} is active. <br> Otherwise {@code false}.
      */
-    public boolean isActive() {
-        return this.serverProcess != null;
+    public boolean isServerActive() {
+        if (this.processWriter == null) {
+            return false;
+        }
+
+        try {
+            this.processWriter.write(ProcessMessage.CONFIRMATION.rawValue + '\n');
+            this.processWriter.flush();
+
+            String confirmation = this.processReader.readLine();
+            if (confirmation.equals(ProcessMessage.CONFIRMATION.rawValue)) {
+                return true;
+            }
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -140,6 +155,18 @@ public class GameServerRunner {
         } catch (InterruptedException exception) {
             exception.printStackTrace();
         }
+    }
+
+
+    /**
+     * Method which distinguishes which OS is the app running on (Win or UNIX-based)
+     * and returns suitable classpath separator for the particular OS.
+     *
+     * @return {@code char} classpath separator suitable for the current OS
+     */
+    protected char getClasspathSeparator() {
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
+        return isWindows ? ';' : ':';
     }
 
 }

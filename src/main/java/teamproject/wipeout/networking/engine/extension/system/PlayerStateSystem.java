@@ -8,7 +8,6 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 import teamproject.wipeout.game.logic.PlayerState;
 import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
 
 import java.io.IOException;

@@ -90,10 +90,6 @@ public class ServerDiscovery {
 
         ArrayList<NetworkInterface> multicastInterfaces = ServerDiscovery.getNetworkInterfaces();
 
-        // Construct packet which will be used to receive multicast packets (packet contains server name and address)
-        byte[] nameBytes = new byte[128]; // TODO: Server name limited in length?
-        DatagramPacket packet = new DatagramPacket(nameBytes, nameBytes.length);
-
         this.multicastSocket = new MulticastSocket(GameServer.HANDSHAKE_PORT);
 
         // Start receiving multicasts for all suitable interfaces
@@ -101,7 +97,15 @@ public class ServerDiscovery {
             this.multicastSocket.joinGroup(this.searchGroup, networkInterface);
         }
 
+        this.receiveMulticasts();
+    }
+
+    private void receiveMulticasts() {
         new UtilityThread(() -> {
+            // Construct packet which will be used to receive multicast packets (packet contains server name and address)
+            byte[] nameBytes = new byte[128]; // TODO: Server name limited in length?
+            DatagramPacket packet = new DatagramPacket(nameBytes, nameBytes.length);
+
             try {
                 while (this.isActive.get()) {
                     multicastSocket.receive(packet);

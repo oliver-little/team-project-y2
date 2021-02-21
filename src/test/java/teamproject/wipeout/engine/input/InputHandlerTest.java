@@ -9,7 +9,6 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
@@ -25,8 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(ApplicationExtension.class)
 public class InputHandlerTest {
-
-    /*private final double stageWidth = 300.0;
+    /*
+    private final double stageWidth = 300.0;
     private final double stageHeight = 100.0;
 
     private InputHandler inputHandler;
@@ -50,7 +49,6 @@ public class InputHandlerTest {
     // "robot" test method argument will be supplied by the test runner for all tests.
 
     @RepeatedTest(3)
-    @DisplayName("onKeyPress")
     void testKeyPress(FxRobot robot) {
         AtomicBoolean letterKeyPressed = new AtomicBoolean(false);
         AtomicBoolean numberKeyPressed = new AtomicBoolean(false);
@@ -70,7 +68,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onKeyRelease")
     void testKeyRelease(FxRobot robot) {
         AtomicBoolean letterKeyReleased = new AtomicBoolean(false);
         AtomicBoolean numberKeyReleased = new AtomicBoolean(false);
@@ -93,7 +90,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("addKeyAction")
     void testKeyAction(FxRobot robot) {
         AtomicInteger letterKeyPressed = new AtomicInteger(0);
         AtomicInteger numberKeyPressed = new AtomicInteger(0);
@@ -135,7 +131,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseClick within stage bounds")
     void testMouseClickWithinStage(FxRobot robot) {
         AtomicReference<Point2D> primaryButtonClicked = new AtomicReference<>(null);
         AtomicReference<Point2D> middleButtonClicked = new AtomicReference<>(null);
@@ -169,7 +164,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseClick outside stage bounds")
     void testMouseClickOutsideStage(FxRobot robot) {
         AtomicBoolean primaryButtonClicked = new AtomicBoolean(false);
         AtomicBoolean middleButtonClicked = new AtomicBoolean(false);
@@ -196,7 +190,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseDrag within stage bounds")
     void testMouseDragWithinStage(FxRobot robot) {
         AtomicReference<Point2D> primaryButtonStartDrag = new AtomicReference<>(null);
         AtomicReference<Point2D> secondaryButtonStartDrag = new AtomicReference<>(null);
@@ -243,7 +236,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseDrag outside stage bounds")
     void testMouseDragOutsideStage(FxRobot robot) {
         AtomicReference<Point2D> primaryButtonStartDrag = new AtomicReference<>(null);
         AtomicReference<Point2D> secondaryButtonStartDrag = new AtomicReference<>(null);
@@ -289,7 +281,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("onMouseDrag with onMouseClick")
     void testMouseInputCombined(FxRobot robot) {
         AtomicInteger primaryButtonClickCount = new AtomicInteger(0);
         AtomicInteger middleButtonClickCount = new AtomicInteger(0);
@@ -374,7 +365,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("Testing all input methods together")
     void testInputs(FxRobot robot) {
         AtomicInteger keyPressACount = new AtomicInteger(0);
         AtomicInteger keyReleaseACount = new AtomicInteger(0);
@@ -490,7 +480,6 @@ public class InputHandlerTest {
     }
 
     @RepeatedTest(3)
-    @DisplayName("Testing all input methods but disabled")
     void testInputsDisabled(FxRobot robot) {
         inputHandler.setDisableInput(true);
         Assertions.assertTrue(inputHandler.getDisableInput(), "Input wasn't disabled.");
@@ -609,6 +598,6 @@ public class InputHandlerTest {
                 "onMouseDrag secondary isn't accurate.");
         Assertions.assertNull(secondaryButtonEndDrag.get(),
                 "onMouseDrag secondary end isn't accurate.");
-    }*/
-
+    }
+    */
 }

@@ -46,7 +46,7 @@ class GameClientTest {
     }
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         this.gameClient = null;
     }
 
@@ -70,14 +70,12 @@ class GameClientTest {
                     "The client is not active despite opening a connection.");
 
             PlayerState dummyPlayerState = new PlayerState("DummyID", Point2D.ZERO);
-
             this.gameServer.updateClients(new GameUpdate(dummyPlayerState));
             this.gameServer.updateClients(new GameUpdate(this.clientPlayerState));
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
             ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
-
             Assertions.assertEquals(2, states.size());
             Assertions.assertTrue(states.contains(dummyPlayerState));
 

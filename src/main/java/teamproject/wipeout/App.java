@@ -124,7 +124,7 @@ public class App implements Controller {
         
         GameAudio ga = new GameAudio("backingTrack2.wav");
         ga.play();
-        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the S key will switch between stop and start
+        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
         
         input.addKeyAction(KeyCode.LEFT,
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f),
@@ -146,7 +146,7 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.S, () -> {
             try {
-                if (this.server.isActive()) {
+                if (this.server.isServerActive()) {
                     this.server.stopServer();
                 } else {
                     this.server.startServer("ServerName");

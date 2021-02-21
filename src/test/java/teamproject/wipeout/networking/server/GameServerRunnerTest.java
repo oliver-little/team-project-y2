@@ -11,6 +11,7 @@ class GameServerRunnerTest {
 
     private static final String SERVER_NAME = "TestServer#101";
     private static final String OTHER_SERVER_NAME = "OtherServer#0";
+    private static final int CATCHUP_TIME = 10;
 
     private GameServerRunner runner;
 
@@ -28,7 +29,7 @@ class GameServerRunnerTest {
     @RepeatedTest(5)
     void testStartingServer() {
         Assertions.assertNull(this.runner.getServerName());
-        Assertions.assertFalse(this.runner.isActive());
+        Assertions.assertFalse(this.runner.isServerActive());
 
         boolean exceptionThrown = false;
 
@@ -36,7 +37,7 @@ class GameServerRunnerTest {
             this.runner.startServer(SERVER_NAME);
 
             Assertions.assertEquals(SERVER_NAME, this.runner.getServerName());
-            Assertions.assertTrue(this.runner.isActive());
+            Assertions.assertTrue(this.runner.isServerActive());
 
             this.runner.startServer(OTHER_SERVER_NAME);
             Assertions.assertNotEquals(OTHER_SERVER_NAME, this.runner.getServerName());
@@ -54,7 +55,7 @@ class GameServerRunnerTest {
     void testStartingAndStoppingGame() {
         try {
             this.runner.startServer(SERVER_NAME);
-            Assertions.assertTrue(this.runner.isActive());
+            Assertions.assertTrue(this.runner.isServerActive());
 
             this.runner.startGame();
 
@@ -70,19 +71,15 @@ class GameServerRunnerTest {
     }
 
     @RepeatedTest(5)
-    void testStoppingAndStartingNewServer() {
-        try {
+    void testStoppingAndStartingNewServer() throws ServerRunningException, IOException, InterruptedException {
             this.runner.startServer(SERVER_NAME);
-            Assertions.assertTrue(this.runner.isActive());
+            Thread.sleep(CATCHUP_TIME); // so that server has time to start up in the child process
+            Assertions.assertTrue(this.runner.isServerActive());
 
             this.runner.stopServer();
-            Assertions.assertFalse(this.runner.isActive());
+            Assertions.assertFalse(this.runner.isServerActive());
 
             this.runner.startServer(OTHER_SERVER_NAME);
             Assertions.assertEquals(OTHER_SERVER_NAME, this.runner.getServerName());
-
-        } catch (IOException | ServerRunningException exception) {
-            Assertions.fail(exception.getMessage());
-        }
     }
 }

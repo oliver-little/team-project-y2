@@ -113,20 +113,17 @@ public class GameClientHandler {
                     }
 
                 } catch (EOFException theEnd) {
-                    try {
-                        this.closeConnection(false);
-                    } catch (IOException closeException) {
-                        closeException.printStackTrace();
-                    }
+                    // The client had a "hard disconnect" (= did not send a disconnect signal)
                     break;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (!this.clientSocket.isClosed()) {
-                        exception.printStackTrace();
-
                         try {
                             this.in.reset();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+
+                        } catch (IOException resetException) {
+                            exception.printStackTrace();
+                            resetException.printStackTrace();
+                            break;
                         }
                     } else {
                         break;

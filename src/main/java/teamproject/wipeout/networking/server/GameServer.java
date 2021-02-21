@@ -97,18 +97,8 @@ public class GameServer {
             return;
         }
         this.isSearching.set(true);
-
         this.searchSocket = new DatagramSocket();
-
-        // Construct packet which will be multicasted (packet contains server name and address)
-        byte[] nameBytes = this.name.getBytes();
-        DatagramPacket packet = new DatagramPacket(
-                nameBytes, nameBytes.length,
-                InetAddress.getByName(HANDSHAKE_GROUP),
-                HANDSHAKE_PORT
-        );
-
-        this.startMulticasting(packet);
+        this.startMulticasting();
     }
 
     /**
@@ -227,6 +217,10 @@ public class GameServer {
                         continue;
                     }
                     switch (message) {
+                        case CONFIRMATION:
+                            writer.write(ProcessMessage.CONFIRMATION.rawValue + '\n');
+                            writer.flush();
+                            break;
                         case START_GAME:
                             server.startNewGame();
                             writer.write(message.rawValue + ProcessMessage.CONFIRMATION.rawValue + '\n');
@@ -340,14 +334,20 @@ public class GameServer {
     }
 
     /**
-     * Broadcasts the given packet via the given socket on a separate {@link UtilityThread} thread.
-     *
-     * @param packet       {@link DatagramPacket} to be multicasted
+     * Multicasts a packet via {@code this.searchSocket} on a separate {@link UtilityThread} thread.
      */
-    private void startMulticasting(DatagramPacket packet) {
+    private void startMulticasting() {
         new UtilityThread(() -> {
             while (this.isSearching.get()) {
                 try {
+                    // Construct packet which will be multicasted (packet contains server name and address)
+                    byte[] nameBytes = this.name.getBytes();
+                    DatagramPacket packet = new DatagramPacket(
+                            nameBytes, nameBytes.length,
+                            InetAddress.getByName(HANDSHAKE_GROUP),
+                            HANDSHAKE_PORT
+                    );
+
                     this.searchSocket.send(packet);
                     Thread.sleep(MULTICAST_DELAY); // == sends the packet each 0.5 second
                 } catch (IOException | InterruptedException exception) {

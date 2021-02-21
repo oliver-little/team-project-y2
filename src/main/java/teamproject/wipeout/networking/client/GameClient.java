@@ -185,9 +185,19 @@ public class GameClient {
 
                 } catch (OptionalDataException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
+                } catch (EOFException ignore) {
+                    // The server had a "hard disconnect" (= did not send a disconnect signal)
+                    break;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (this.isActive.get()) {
-                        exception.printStackTrace();
+                        try {
+                            this.in.reset();
+
+                        } catch (IOException resetException) {
+                            exception.printStackTrace();
+                            resetException.printStackTrace();
+                            break;
+                        }
                     } else {
                         break;
                     }

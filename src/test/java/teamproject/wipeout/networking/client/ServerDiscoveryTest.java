@@ -99,10 +99,13 @@ class ServerDiscoveryTest {
                 "ServerDiscovery is active despite the fact that it has not started searching.");
         try {
             this.serverDiscovery.startLookingForServers();
+
+            Thread.sleep(50);
+
             Assertions.assertTrue(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is not active despite the fact that it started searching.");
 
-        } catch (IOException exception) {
+        } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
     }
