@@ -27,7 +27,7 @@ public class CollisionSystem implements GameSystem {
 
 	@Override
 	public void cleanup() {
-
+		this._entityCollector.cleanup();
 	}
 
 	@Override

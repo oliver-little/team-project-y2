@@ -487,6 +487,7 @@ public class GeometryUtil
 	}
 	
 	public static Point2D getResolutionVector(Rectangle r,Circle c) {
+		//ISSUE: collision with corner of rectangle will cause sudden movement
 		double overlap = Double.MAX_VALUE;
 		Point2D p = new Point2D(0,0);
 		Point2D centre = new Point2D(c.getCenterX(), c.getCenterY());

@@ -106,7 +106,7 @@ public class App implements Controller {
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
-        nge.addComponent(new CollisionComponent(new Rectangle(34, 33)));
+        nge.addComponent(new CollisionComponent(new Rectangle(5, 0, 24, 33)));
 
         try {
             spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
