@@ -17,9 +17,13 @@ class ResourceLoaderTest {
     @Test
     void testSuccessfulGetMethod() {
         try {
-            File file = ResourceLoader.get(ResourceType.UI, "t_empty.png");
+            File file1 = ResourceLoader.get(ResourceType.UI, "t_empty.png");
 
-            Assertions.assertNotNull(file, "File is null despite existing");
+            Assertions.assertNotNull(file1, "File 1 is null despite existing");
+
+            File file2 = ResourceLoader.get(ResourceType.UI, "subfolder/t_nextEmpty.json");
+
+            Assertions.assertNotNull(file2, "File 2 is null despite existing");
 
         } catch (FileNotFoundException exception) {
             Assertions.fail(exception.getMessage());
@@ -29,6 +33,7 @@ class ResourceLoaderTest {
     @Test
     void testUnsuccessfulGetMethod() {
         Assertions.assertThrows(FileNotFoundException.class, () -> ResourceLoader.get(ResourceType.UI, "invalidPath"));
+        Assertions.assertThrows(FileNotFoundException.class, () -> ResourceLoader.get(ResourceType.UI, "test/t_empty.png"));
         Assertions.assertThrows(FileNotFoundException.class, () -> ResourceLoader.get(ResourceType.AUDIO, "t_empty.png"));
     }
 
