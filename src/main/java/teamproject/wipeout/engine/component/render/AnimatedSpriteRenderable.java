@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 public class AnimatedSpriteRenderable implements Renderable {
 
     public Point2D offset;
+    public Point2D spriteScale;
     
     protected Image[] frames;
     protected int framesPerSecond;
@@ -29,6 +30,7 @@ public class AnimatedSpriteRenderable implements Renderable {
         this.setFPS(framesPerSecond);
 
         this.offset = Point2D.ZERO;
+        this.spriteScale = null;
 
         this.lastFrameTime = System.nanoTime() / 1000000000.0;
     }
@@ -43,6 +45,33 @@ public class AnimatedSpriteRenderable implements Renderable {
     public AnimatedSpriteRenderable(Image[] frames, int framesPerSecond, Point2D offset) {
         this(frames, framesPerSecond);
         this.offset = offset;
+    }
+
+    /**
+     * Creates a new instance of AnimatedSpriteRenderable
+     * 
+     * @param frames The images to display, in order
+     * @param framesPerSecond The number of images to display per second
+     * @param scale The scale to display the images at
+     */
+    public AnimatedSpriteRenderable(Image[] frames, int framesPerSecond, double scale) {
+        this(frames, framesPerSecond);
+
+        this.spriteScale = new Point2D(scale, scale);
+    }
+
+    /**
+     * Creates a new instance of AnimatedSpriteRenderable
+     * 
+     * @param frames The images to display, in order
+     * @param framesPerSecond The number of images to display per second
+     * @param scaleX The scale to display the image width at
+     * @param scaleY The scale to display the image height at
+     */
+    public AnimatedSpriteRenderable(Image[] frames, int framesPerSecond, double scaleX, double scaleY) {
+        this(frames, framesPerSecond);
+
+        this.spriteScale = new Point2D(scaleX, scaleY);
     }
 
     /**
@@ -75,11 +104,11 @@ public class AnimatedSpriteRenderable implements Renderable {
     }
 
     public double getWidth() {
-        return this.frames[this.currentFrame].getWidth();
+        return this.frames[this.currentFrame].getWidth() * this.spriteScale.getX();
     }
 
     public double getHeight() {
-        return this.frames[this.currentFrame].getHeight();
+        return this.frames[this.currentFrame].getHeight() * this.spriteScale.getY();
     }
 
     public void render(GraphicsContext gc, double x, double y, double scale) {
@@ -93,11 +122,7 @@ public class AnimatedSpriteRenderable implements Renderable {
         }
 
         Image sprite = this.frames[this.currentFrame];
-        if (scale != 1) {
-            gc.drawImage(sprite, x + offset.getX() * scale, y + offset.getY() * scale, sprite.getWidth() * scale, sprite.getHeight() * scale);
-        }
-        else {
-            gc.drawImage(sprite, x + offset.getX(), y + offset.getY());
-        }
+
+        gc.drawImage(sprite, (x + offset.getX()) * scale, (y + offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
     }
 }

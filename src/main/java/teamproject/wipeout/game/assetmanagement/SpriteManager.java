@@ -83,10 +83,10 @@ public class SpriteManager {
      * @throws IOException Thrown when there is an error loading the image
      */
     public void loadSpriteSheet(String JSONPath, String imagePath) throws FileNotFoundException, IOException {
-
         SpritesheetDescriptor descriptor = Spritesheet.getSpritesheetFromJSON(JSONPath);
-        Map<String, Image[]> spriteSets = Spritesheet.parseSpriteSheet(descriptor, imagePath);
-
-        spriteSheetCache.put(descriptor.name, spriteSets);     
+        if (!spriteSheetCache.containsKey(descriptor.name)) {
+            Map<String, Image[]> spriteSets = Spritesheet.parseSpriteSheet(descriptor, imagePath);
+            spriteSheetCache.put(descriptor.name, spriteSets);  
+        }   
     }
 }
