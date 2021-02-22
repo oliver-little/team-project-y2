@@ -30,7 +30,7 @@ public class AnimatedSpriteRenderable implements Renderable {
         this.setFPS(framesPerSecond);
 
         this.offset = Point2D.ZERO;
-        this.spriteScale = null;
+        this.spriteScale = new Point2D(1, 1);
 
         this.lastFrameTime = System.nanoTime() / 1000000000.0;
     }
@@ -45,6 +45,7 @@ public class AnimatedSpriteRenderable implements Renderable {
     public AnimatedSpriteRenderable(Image[] frames, int framesPerSecond, Point2D offset) {
         this(frames, framesPerSecond);
         this.offset = offset;
+        this.spriteScale = new Point2D(1, 1);
     }
 
     /**

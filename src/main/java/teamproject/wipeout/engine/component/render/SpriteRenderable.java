@@ -21,7 +21,7 @@ public class SpriteRenderable implements Renderable {
     public SpriteRenderable(Image sprite) {
         this.sprite = sprite;
         this.offset = Point2D.ZERO;
-        this.spriteScale = null;
+        this.spriteScale = new Point2D(1, 1);
     }
 
     /**
@@ -33,7 +33,7 @@ public class SpriteRenderable implements Renderable {
     public SpriteRenderable(Image sprite, Point2D offset) {
         this.sprite = sprite;
         this.offset = offset;
-        this.spriteScale = null;
+        this.spriteScale = new Point2D(1, 1);
     }
 
     /**
