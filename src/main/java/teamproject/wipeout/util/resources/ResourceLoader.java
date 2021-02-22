@@ -2,6 +2,8 @@ package teamproject.wipeout.util.resources;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 
 /**
  * {@code ResourceLoader} creates a layer of abstraction between your code and obtaining file resources.
@@ -37,7 +39,7 @@ public class ResourceLoader {
      */
     public static File get(ResourceType resourceType, String resourcePath) throws FileNotFoundException {
         ResourceLoader.checkPaths(resourcePath);
-        return ResourceLoader.createFile(targetPath + resourceType.path + resourcePath);
+        return ResourceLoader.createFile(ResourceLoader.targetPath + resourceType.path + resourcePath);
     }
 
     /**
@@ -51,7 +53,7 @@ public class ResourceLoader {
             throw new FileNotFoundException("Resource path cannot be empty");
         }
         if (ResourceLoader.targetPath.isBlank()) {
-            throw new FileNotFoundException("Could not find target path: \"" + resourcePath + '\"');
+            throw new FileNotFoundException("Could not find target path: \"" + ResourceLoader.targetPath + '\"');
         }
     }
 
@@ -64,9 +66,10 @@ public class ResourceLoader {
      * @throws FileNotFoundException Thrown when the file does not exist at the given path
      */
     protected static File createFile(String absolutePath) throws FileNotFoundException {
-        File resourceFile = new File(absolutePath);
+        String sanitazedAbsolutePath = URLDecoder.decode(absolutePath, Charset.defaultCharset());
+        File resourceFile = new File(sanitazedAbsolutePath);
         if (!resourceFile.exists()) {
-            throw new FileNotFoundException("Could not find: \"" + absolutePath + '\"');
+            throw new FileNotFoundException("Could not find: \"" + sanitazedAbsolutePath + '\"');
         }
         return resourceFile;
     }

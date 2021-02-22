@@ -21,9 +21,21 @@ class ResourceLoaderTest {
 
             Assertions.assertNotNull(file1, "File 1 is null despite existing");
 
-            File file2 = ResourceLoader.get(ResourceType.UI, "subfolder/t_nextEmpty.json");
+            File file2 = ResourceLoader.get(ResourceType.UI, "sub   folder/t_nextEmpty.json");
 
             Assertions.assertNotNull(file2, "File 2 is null despite existing");
+
+        } catch (FileNotFoundException exception) {
+            Assertions.fail(exception.getMessage());
+        }
+    }
+
+    @Test
+    void testWindowsPathGetMethod() {
+        try {
+            File file = ResourceLoader.get(ResourceType.UI, "sub%20%20%20folder/t_nextEmpty.json");
+
+            Assertions.assertNotNull(file, "File is null despite existing");
 
         } catch (FileNotFoundException exception) {
             Assertions.fail(exception.getMessage());
