@@ -42,9 +42,9 @@ public class SpriteManager {
         if (imageCache.containsKey(imagePath)) {
             return imageCache.get(imagePath);
         }
-        FileInputStream file = new FileInputStream(ResourceLoader.get(ResourceType.ASSET, imagePath));
+        FileInputStream fileStream = new FileInputStream(ResourceLoader.get(ResourceType.ASSET, imagePath));
 
-        Image image = new Image(file);
+        Image image = new Image(fileStream);
 
         imageCache.put(imagePath, image);
 
@@ -77,8 +77,8 @@ public class SpriteManager {
     /**
      * Loads a given spritesheet into the cache using its JSON descriptor file and the image itself
      * 
-     * @param JSONPath The path to the JSON descriptor file for this spritesheet
-     * @param imagePath The path to the image containing this spritesheet
+     * @param JSONPath The relative path inside /resources/assets/ to the JSON descriptor file for this spritesheet
+     * @param imagePath The relative path inside /resources/assets/ to the image containing this spritesheet
      * @throws FileNotFoundException Thrown if one or more of the file paths is invalid
      * @throws IOException Thrown when there is an error loading the image
      */
