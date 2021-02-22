@@ -22,6 +22,9 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.beans.binding.Bindings;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
@@ -70,19 +73,17 @@ public class StartMenu implements Controller{
      */
     private void addBackground() {
         ImageView imageView;
-		try
-		{
-			imageView = new ImageView(new Image(new FileInputStream("src\\main\\resources\\background.png")));
+		try {
+		    FileInputStream imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
+			imageView = new ImageView(new Image(imgFile));
 			imageView.setFitWidth(WIDTH);
 	        imageView.setFitHeight(HEIGHT);
 
 	        root.getChildren().add(imageView);
+
+		} catch (FileNotFoundException exception) {
+            exception.printStackTrace();
 		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-        
     }
 
     /**

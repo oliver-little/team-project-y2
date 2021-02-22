@@ -17,6 +17,8 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
 import com.google.gson.Gson;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
 /**
  * Provides utilities for parsing a spritesheet into its contained images using a descriptor JSON file.
@@ -28,15 +30,16 @@ public class Spritesheet {
     /**
      * Parses a spritesheet using a given JSON file and image
      * 
-     * @param spriteSheetDescriptor A SpritesheetDescriptor object describing the sprites in the image
-     * @param imagePath The path to the image to parse
+     * @param spritesheetDescriptor A SpritesheetDescriptor object describing the sprites in the image
+     * @param imagePath The relative path to the image to be parsed inside /resources/assets/
      * @return A map of spriteSet names (as described in the JSON file) to a list of images
      * @throws FileNotFoundException if the file path provided is invalid
      * @throws IOException if loading the image fails
      * @throws IllegalArgumentException if the spritesheetDescriptor is invalid
      */
     public static Map<String, Image[]> parseSpriteSheet(SpritesheetDescriptor spritesheetDescriptor, String imagePath) throws FileNotFoundException, IOException {
-        BufferedImage image = ImageIO.read(new File(imagePath));
+        File imageFile = ResourceLoader.get(ResourceType.ASSET, imagePath);
+        BufferedImage image = ImageIO.read(imageFile);
 
         Map<String, Image[]> spriteSets = new HashMap<String, Image[]>();
         
@@ -125,12 +128,13 @@ public class Spritesheet {
     /**
      * Creates a SpritesheetDescriptor from a JSON file
      * 
-     * @param filePath The path to the JSON file
+     * @param JSONPath The relative path to the JSON file inside /resources/assets/
      * @return The SpritesheetDescriptor object the JSON file describes
      * @throws FileNotFoundException if the filepath is invalid or the contents of the file were invalid.
      */
-    public static SpritesheetDescriptor getSpritesheetFromJSON(String filePath) throws FileNotFoundException {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
+    public static SpritesheetDescriptor getSpritesheetFromJSON(String JSONPath) throws FileNotFoundException {
+        File JSONFile = ResourceLoader.get(ResourceType.ASSET, JSONPath);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(JSONFile));
         Gson gson = new Gson();
         SpritesheetDescriptor spritesheetDescriptor = gson.fromJson(bufferedReader, SpritesheetDescriptor.class);
 

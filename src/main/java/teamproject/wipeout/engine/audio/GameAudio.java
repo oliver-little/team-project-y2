@@ -1,5 +1,8 @@
 package teamproject.wipeout.engine.audio;
 
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -26,7 +29,7 @@ public class GameAudio {
     
     /**
      * This is a class used to implement the backing track (music).
-     * @param audioFileName	name of the audio file
+     * @param audioFileName	name of the audio file inside /resources/audio/
      */
     public GameAudio(String audioFileName) {
     	fileName = audioFileName;
@@ -38,7 +41,7 @@ public class GameAudio {
     public void play() {
     	try
 		{
-    		File audioFile = new File("./src/main/resources/audio/" + fileName);
+    		File audioFile = ResourceLoader.get(ResourceType.AUDIO, fileName);
     		audioStream = AudioSystem.getAudioInputStream(audioFile);
 			AudioFormat format = audioStream.getFormat();
 	    	DataLine.Info info = new DataLine.Info(Clip.class, format);

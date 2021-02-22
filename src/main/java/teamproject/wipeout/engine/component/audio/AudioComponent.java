@@ -13,6 +13,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 
 import teamproject.wipeout.engine.component.GameComponent;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
 public class AudioComponent implements GameComponent {
 
@@ -24,7 +26,7 @@ public class AudioComponent implements GameComponent {
 	/**
 	 * This is a component class for adding sound effects to entities.
 	 * The AudioSystem checks the boolean attribute {@link #play} to decide if the sound needs to play.
-	 * @param audioFileName	name of the audio file
+	 * @param audioFileName	name of the audio file inside /resources/audio/
 	 */
 	public AudioComponent(String audioFileName) {
 		fileName = audioFileName;
@@ -41,10 +43,8 @@ public class AudioComponent implements GameComponent {
 	 * called by the AudioSystem to play sound.
 	 */
 	public void playSound() {
-		try
-		{
-			//System.out.println(new File(".").getAbsolutePath());
-			File audioFile = new File("./src/main/resources/audio/" + fileName); //file read each time to allow for the same sounds to overlap - possibly inefficient
+		try {
+			File audioFile = ResourceLoader.get(ResourceType.AUDIO, fileName); //file read each time to allow for the same sounds to overlap - possibly inefficient
     		audioStream = AudioSystem.getAudioInputStream(audioFile); 
     		AudioFormat format = audioStream.getFormat();			  
     		DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -54,9 +54,7 @@ public class AudioComponent implements GameComponent {
 			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
 			float dB = (float) (Math.log(volume) / Math.log(10.0) * 20.0);
 	        gainControl.setValue(dB);
-		}
-		catch (LineUnavailableException | IOException | UnsupportedAudioFileException e)
-		{
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

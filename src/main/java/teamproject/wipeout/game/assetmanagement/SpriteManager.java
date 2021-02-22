@@ -9,6 +9,8 @@ import java.util.Map;
 import javafx.scene.image.Image;
 import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpritesheetDescriptor;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
 /**
  * Provides a cache for storing a single instance of images and spritesheets
@@ -29,24 +31,24 @@ public class SpriteManager {
     }
 
     /**
-     * Gets an image from a file path - 
+     * Gets an image from a relative file path -
      * if the image already exists in the cache, it will not be loaded again.
      * 
-     * @param path The path to the image file
+     * @param imagePath The relative path to the image file inside /resources/assets/
      * @return The image
      * @throws FileNotFoundException Thrown if the path does not point to a valid file
      */
-    public Image getImage(String path) throws FileNotFoundException {
-        if (imageCache.containsKey(path)) {
-            return imageCache.get(path);
-        }       
-            FileInputStream file = new FileInputStream(path);
+    public Image getImage(String imagePath) throws FileNotFoundException {
+        if (imageCache.containsKey(imagePath)) {
+            return imageCache.get(imagePath);
+        }
+        FileInputStream file = new FileInputStream(ResourceLoader.get(ResourceType.ASSET, imagePath));
 
-            Image image = new Image(file);
-    
-            imageCache.put(path,image);
-    
-            return image;
+        Image image = new Image(file);
+
+        imageCache.put(imagePath, image);
+
+        return image;
     } 
 
     /**

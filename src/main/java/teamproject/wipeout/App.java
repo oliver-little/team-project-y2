@@ -47,7 +47,6 @@ import java.util.UUID;
  */
 public class App implements Controller {
 
-    public String imgPath = "./assets/";
     private StackPane root;
     private Canvas canvas;
     private double windowWidth = 800;
@@ -85,7 +84,7 @@ public class App implements Controller {
                     GameEntity spriteEntity = gameScene.createEntity();
                     spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
                     try {
-                        spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
+                        spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
                         Image[] frames = spriteManager.getSpriteSet("player", "walk");
                         spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
                         spriteEntity.addComponent(new CollisionComponent(new Rectangle(34,33)));
@@ -107,7 +106,7 @@ public class App implements Controller {
         nge.addComponent(new PlayerStateComponent(playerState));
 
         try {
-            spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
+            spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
             nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         } catch (Exception e) {

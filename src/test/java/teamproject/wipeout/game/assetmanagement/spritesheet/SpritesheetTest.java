@@ -2,11 +2,11 @@ package teamproject.wipeout.game.assetmanagement.spritesheet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.Set;
@@ -15,14 +15,21 @@ import javax.imageio.ImageIO;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
 public class SpritesheetTest {
 
+    @BeforeAll
+    static void setup() {
+        ResourceLoader.setTargetClass(SpritesheetTest.class);
+    }
+
     @Test
     void testParseValidSpritesheet() {
-        final SpritesheetDescriptor ss = assertDoesNotThrow(() -> Spritesheet.getSpritesheetFromJSON(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet-descriptor.json").getAbsolutePath()));
+        final SpritesheetDescriptor ss = assertDoesNotThrow(() -> Spritesheet.getSpritesheetFromJSON("t_spritesheet-descriptor.json"));
 
-        Map<String, Image[]> spritesheet = assertDoesNotThrow(() -> Spritesheet.parseSpriteSheet(ss, new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/spritesheet.png").getAbsolutePath()));
+        Map<String, Image[]> spritesheet = assertDoesNotThrow(() -> Spritesheet.parseSpriteSheet(ss, "t_spritesheet.png"));
 
 
         assertEquals(true, Set.of("idle", "potion", "test").containsAll(spritesheet.keySet()));
@@ -37,7 +44,7 @@ public class SpritesheetTest {
 
     @Test
     void testParseValidSpriteList() {
-        BufferedImage image = assertDoesNotThrow(()-> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
+        BufferedImage image = assertDoesNotThrow(()-> ImageIO.read(ResourceLoader.get(ResourceType.ASSET, "t_sprite.png")));
 
         Image[] images = Spritesheet.parseSpriteList(image, 7, 15, 2, 4, 5, true);
 
@@ -66,14 +73,14 @@ public class SpritesheetTest {
 
     @Test
     void testParseInvalidSpriteList() {
-        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
+        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(ResourceLoader.get(ResourceType.ASSET, "t_sprite.png")));
 
         assertThrows(IllegalArgumentException.class, () -> Spritesheet.parseSpriteList(image, image.getHeight() - 20, 0, 20, 20, 4, true));
     }
 
     @Test
     void testGetValidSubimage() {
-        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
+        BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(ResourceLoader.get(ResourceType.ASSET, "t_sprite.png")));
 
         final int X = 1;
         final int Y = 13;
@@ -97,7 +104,7 @@ public class SpritesheetTest {
 
     @Test
     void testGetInvalidSubimage() {
-        final BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/sprite.png")));
+        final BufferedImage image = assertDoesNotThrow(() -> ImageIO.read(ResourceLoader.get(ResourceType.ASSET, "t_sprite.png")));
         final int width = 8;
         final int height = 8;
 
@@ -111,8 +118,7 @@ public class SpritesheetTest {
     void testGetValidSpritesheet() {
         SpritesheetDescriptor s = null;
         try {
-            File f = new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/valid-descriptor.json");
-            s = Spritesheet.getSpritesheetFromJSON(f.getAbsolutePath());
+            s = Spritesheet.getSpritesheetFromJSON("t_valid-descriptor.json");
         } 
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -137,9 +143,7 @@ public class SpritesheetTest {
 
     @Test
     void testGetInvalidSpritesheet() {
-        final File f = new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/invalid-filepath.json");
-        assertThrows(FileNotFoundException.class, () -> Spritesheet.getSpritesheetFromJSON(f.getAbsolutePath()));
-        final File g = new File("./src/test/java/teamproject/wipeout/game/assetmanagement/spritesheet/resources/invalid-descriptor.json");
-        assertThrows(FileNotFoundException.class, () -> Spritesheet.getSpritesheetFromJSON(g.getAbsolutePath()));
+        assertThrows(FileNotFoundException.class, () -> Spritesheet.getSpritesheetFromJSON("t_invalid-filepath.json"));
+        assertThrows(FileNotFoundException.class, () -> Spritesheet.getSpritesheetFromJSON("t_invalid-descriptor.json"));
     }
 }

@@ -16,7 +16,7 @@ public enum ProcessMessage implements Serializable {
 
     public final String rawValue;
 
-    ProcessMessage(String message) {
+    private ProcessMessage(String message) {
         this.rawValue = message;
     }
 
