@@ -104,7 +104,7 @@ public class PlayerStateSystem implements GameSystem {
                     }
                 } else {
                     playerState.updatePositionFrom(serverPlayerState);
-                    transform.position = serverPlayerState.getPosition();
+                    transform.setPosition(serverPlayerState.getPosition());
                 }
             }
         }

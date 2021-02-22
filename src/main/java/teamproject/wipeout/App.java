@@ -73,7 +73,7 @@ public class App implements Controller {
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
         GameEntity camera = gameScene.createEntity();
-        camera.addComponent(new Transform(0, 0));
+        camera.addComponent(new Transform(0, 0, camera));
         camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
@@ -83,7 +83,7 @@ public class App implements Controller {
         this.playerStateSystem = new PlayerStateSystem(gameScene,
                 (pState) -> {
                     GameEntity spriteEntity = gameScene.createEntity();
-                    spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
+                    spriteEntity.addComponent(new Transform(pState.getPosition(), 0, spriteEntity));
                     try {
                         spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");
                         Image[] frames = spriteManager.getSpriteSet("player", "walk");
@@ -98,7 +98,7 @@ public class App implements Controller {
 
 
         GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(250, 250));
+        nge.addComponent(new Transform(250, 250, nge));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);

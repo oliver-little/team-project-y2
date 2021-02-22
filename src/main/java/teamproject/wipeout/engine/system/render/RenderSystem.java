@@ -83,7 +83,7 @@ public class RenderSystem implements GameSystem {
             CameraComponent cameraData = camera.getComponent(CameraComponent.class);
             zoom = cameraData.zoom;
 
-            cameraPos = cameraTransform.position;
+            cameraPos = cameraTransform.getWorldPosition();
 
             if (cameraPos.getX() != 0 || cameraPos.getY() != 0) {
                 this.gc.translate(-cameraPos.getX() * zoom, -cameraPos.getY() * zoom);
@@ -110,9 +110,10 @@ public class RenderSystem implements GameSystem {
             RenderComponent r = entity.getComponent(RenderComponent.class);
 
             // Test if the entity is actually visible on the camera view
-            if (cameraBox.intersects(t.position.getX(), t.position.getY(), r.getWidth(), r.getHeight())) {
+            Point2D tWorldPosition = t.getWorldPosition();
+            if (cameraBox.intersects(tWorldPosition.getX(), tWorldPosition.getY(), r.getWidth(), r.getHeight())) {
                 // Render the entity, scaled according to the camera view
-                r.render(this.gc, t.position.getX() * zoom, t.position.getY() * zoom, zoom);
+                r.render(this.gc, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
             }
         }
     }
