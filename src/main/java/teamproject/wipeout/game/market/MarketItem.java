@@ -4,13 +4,11 @@ import teamproject.wipeout.game.item.Item.ItemType;
 
 public class MarketItem {
     
-    public Integer id;
-    public ItemType itemType;
-    public Integer quantity;
-    public float defaultBuyPrice;
-    public float defaultSellPrice;
-    public float currentBuyPrice;
-    public float currentSellPrice;
+    private Integer id;
+    private ItemType itemType;
+    private Integer quantity;
+    private float currentBuyPrice;
+    private float currentSellPrice;
 
     public static final Integer INITIAL_STOCK = 50;
 
@@ -25,8 +23,6 @@ public class MarketItem {
     public MarketItem(Integer id, ItemType itemType, float defaultBuyPrice, float defaultSellPrice) {
         this.id = id;
         this.itemType = itemType;
-        this.defaultBuyPrice = defaultBuyPrice;
-        this.defaultSellPrice = defaultSellPrice;
         this.currentBuyPrice = defaultBuyPrice;
         this.currentSellPrice = defaultSellPrice;
 
@@ -39,6 +35,50 @@ public class MarketItem {
         else {
             throw new IllegalArgumentException("An item had an invalid type when constructing the market database.");
         }
+    }
+
+    public Integer getID() {
+        return this.id;
+    }
+
+    public ItemType getItemType() {
+        return this.itemType;
+    }
+
+    public Integer getQuantity() {
+        return this.quantity;
+    }
+
+    public void incrementQuantity(Integer i) {
+        this.quantity += i;
+    }
+
+    public void decrementQuantity(Integer i) {
+        this.quantity -= i;
+    }
+
+    public float getcurrentBuyPrice() {
+        return this.currentBuyPrice;
+    }
+
+    public void incrementCurrentBuyPrice(float i) {
+        this.currentBuyPrice += i;
+    }
+
+    public void decrementCurrentBuyPrice(float i) {
+        this.currentBuyPrice -= i;
+    }
+
+    public float getcurrentSellPrice() {
+        return this.currentSellPrice;
+    }
+
+    public void incrementCurrentSellPrice(float i) {
+        this.currentSellPrice += i;
+    }
+
+    public void decrementCurrentSellPrice(float i) {
+        this.currentSellPrice -= i;
     }
 
 }
