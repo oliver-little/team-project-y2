@@ -4,6 +4,7 @@ import java.util.Map;
 
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.Item.ItemType;
 
 /**
  * Defines the market in which players can buy and sell goods for. The market also regulates the quantites and prices of the goods for sale.
@@ -22,6 +23,8 @@ public class Market {
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
      */
     public Market() {
+        //TODO Add sabotage and task support.
+        //TODO Link with systems to reduce quantities over time.
         try {
             itemsForSale = ItemStore.getItemFileFromJSON("items.JSON");
         } 
@@ -39,46 +42,67 @@ public class Market {
     
     /**
      * This function is run when a player purchases an item from the market.
-     * @param ID The item ID they want to buy.
-     * @param Quantity The quantity of the item they want to buy.
+     * @param id The item ID they want to buy.
+     * @param quantity The quantity of the item they want to buy.
      * @return True if the items were bought successfully, otherwise false.
      */
-    public boolean buy (Integer ID, int Quantity) {
+    public boolean buyItem (Integer id, int quantity) {
 
-        //TODO Needs functionality to add/remove money from the user's account & add/remove the items from their inventories.
-        if (!stockDatabase.containsKey(ID)) {
+        if (!stockDatabase.containsKey(id)) {
             System.out.println("The requested item is not for sale.");
+            return false;
         }
-        else if (hasMinBreached(ID, Quantity)) {
+        else if (hasMinBreached(id, quantity)) {
             System.out.println("The market hasn't got enough stock for that purchase.");
             return false;
         }
-        
-        return false;
+
+        if (stockDatabase.get(id).getItemType() == ItemType.CONSTRUCTABLE || stockDatabase.get(id).getItemType() == ItemType.USABLE) {
+            //TODO Add to inventory and remove money here.
+            return true;
+        }
+
+        //TODO Add a check that the player has enough money to buy the item & has enough inventory space.
+        //TODO Add to inventory and remove money here.
+
+        stockDatabase.get(id).decrementQuantity(quantity);
+        stockDatabase.get(id).updatePrices();
+
+        return true;
     }
 
     /**
      * This function is run when a player sells an item from the market.
-     * @param ID The item ID they want to sell.
-     * @param Quantity The quantity of the item they want to sell.
+     * @param id The item ID they want to sell.
+     * @param quantity The quantity of the item they want to sell.
      * @return True if the items were sold successfully, otherwise false.
      */
-    public boolean sell (Integer ID, int Quantity) {
+    public boolean sellItem (Integer id, int quantity) {
 
-        //TODO Needs functionality to add/remove money from the user's account & add/remove the items from their inventories.
-        if (!stockDatabase.containsKey(ID)) {
+        if (!stockDatabase.containsKey(id)) {
             System.out.println("The requested item is not for sale.");
+            return false;
         }
-        else if (hasMaxBreached(ID, Quantity)) {
+        else if (hasMaxBreached(id, quantity)) {
             System.out.println("The market hasn't got enough capacity for that sale.");
             return false;
         }
 
-        return false;
+        if (stockDatabase.get(id).getItemType() == ItemType.CONSTRUCTABLE || stockDatabase.get(id).getItemType() == ItemType.USABLE) {
+            System.out.println("Cannot sell constructable or usable item types.");
+            return false;
+        }
+
+        //TODO Remove from inventory and add money here.
+
+        stockDatabase.get(id).incrementQuantity(quantity);
+        stockDatabase.get(id).updatePrices();
+
+        return true;
     }
 
-    private boolean hasMaxBreached (Integer ID, int Quantity) {
-        if ((stockDatabase.get(ID).getQuantity()) + Quantity > MAXMARKETCAPACITY) {
+    private boolean hasMaxBreached (Integer id, int quantity) {
+        if ((stockDatabase.get(id).getQuantity()) + quantity > MAXMARKETCAPACITY) {
             return true;
         }
         else {
@@ -86,8 +110,8 @@ public class Market {
         }
     }
 
-    private boolean hasMinBreached (Integer ID, int Quantity) {
-        if ((stockDatabase.get(ID).getQuantity()) - Quantity < MINMARKETCAPACITY) {
+    private boolean hasMinBreached (Integer id, int quantity) {
+        if ((stockDatabase.get(id).getQuantity()) - quantity < MINMARKETCAPACITY) {
             return true;
         }
         else {

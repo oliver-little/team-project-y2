@@ -7,6 +7,8 @@ public class MarketItem {
     private Integer id;
     private ItemType itemType;
     private Integer quantity;
+    private float defaultBuyPrice;
+    private float defaultSellPrice;
     private float currentBuyPrice;
     private float currentSellPrice;
 
@@ -23,6 +25,8 @@ public class MarketItem {
     public MarketItem(Integer id, ItemType itemType, float defaultBuyPrice, float defaultSellPrice) {
         this.id = id;
         this.itemType = itemType;
+        this.defaultBuyPrice = defaultBuyPrice;
+        this.defaultSellPrice = defaultSellPrice;
         this.currentBuyPrice = defaultBuyPrice;
         this.currentSellPrice = defaultSellPrice;
 
@@ -57,28 +61,26 @@ public class MarketItem {
         this.quantity -= i;
     }
 
-    public float getcurrentBuyPrice() {
+    public float getCurrentBuyPrice() {
         return this.currentBuyPrice;
     }
 
-    public void incrementCurrentBuyPrice(float i) {
-        this.currentBuyPrice += i;
-    }
-
-    public void decrementCurrentBuyPrice(float i) {
-        this.currentBuyPrice -= i;
-    }
-
-    public float getcurrentSellPrice() {
+    public float getCurrentSellPrice() {
         return this.currentSellPrice;
     }
 
-    public void incrementCurrentSellPrice(float i) {
-        this.currentSellPrice += i;
-    }
+    /**
+     * Called when an item is bought/sold from the market. Updates the prices of the item based on a depreciation factor.
+     */
+    public void updatePrices() {
 
-    public void decrementCurrentSellPrice(float i) {
-        this.currentSellPrice -= i;
-    }
+        float depreciationFactor = (INITIAL_STOCK / this.quantity);
 
+        float newBuyPrice =  depreciationFactor * this.defaultBuyPrice;
+        float newSellPrice = depreciationFactor * this.defaultSellPrice;
+
+        this.currentBuyPrice = newBuyPrice;
+        this.currentSellPrice = newSellPrice;
+
+    }
 }
