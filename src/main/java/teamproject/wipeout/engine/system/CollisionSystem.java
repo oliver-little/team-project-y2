@@ -63,15 +63,15 @@ public class CollisionSystem implements GameSystem {
     	
     	if(c1.isMoveable) {
         	if(c2.isMoveable) {
-        		t1.position = t1.position.add(resolutionVector.multiply(0.5));
-        		t2.position = t2.position.add(resolutionVector.multiply(-0.5));
+        		t1.setPosition(t1.getPosition().add(resolutionVector.multiply(0.5)));
+        		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-0.5)));
         	}
         	else {
-        		t1.position = t1.position.add(resolutionVector);
+        		t1.setPosition(t1.getPosition().add(resolutionVector));
         	}
     	}
     	else if(c2.isMoveable) {
-    		t2.position = t2.position.add(resolutionVector.multiply(-1));
+    		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-1)));
     	}
     }
     
