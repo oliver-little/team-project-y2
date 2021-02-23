@@ -1,7 +1,7 @@
 package teamproject.wipeout.util.resources;
 
 public enum ResourceType {
-    UI("ui/"), ASSET("assets/"), AUDIO("audio/");
+    UI("ui/"), ASSET("sprites/"), AUDIO("audio/"), ITEM("items/");
 
     public final String path;
 

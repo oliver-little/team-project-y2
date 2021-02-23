@@ -1,0 +1,26 @@
+{
+	"fileType": "ItemFile",
+	"version": "1.0.0",
+	"items": [
+		{
+			"id" : 1,
+            "itemType" : "NONE",
+            "name" : "Tomato",
+			"spriteSheetName" : "items",
+            "spriteSetName" : "tomato",
+            "maxStackSize" : 99,
+            "defaultBuy" : 0.20,
+            "defaultSell" : 0.10
+		},
+        {
+			"id" : 2,
+            "itemType" : "NONE",
+            "name": "Lettuce",
+			"spriteSheetName" : "",
+            "spriteSetName" : "",
+            "maxStackSize" : 99,
+            "defaultBuy" : 0.50,
+            "defaultSell" : 0.25
+		}
+	]
+}
