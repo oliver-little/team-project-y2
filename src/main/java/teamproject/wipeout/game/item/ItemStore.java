@@ -20,7 +20,7 @@ public class ItemStore {
      * Creates an ItemFile from an Item JSON file
      * 
      * @param JSONPath The relative path to the JSON file inside /resources/items/
-     * @return The ItemFile object the JSON file describes
+     * @return A map containing the item id mapped to the item.
      * @throws FileNotFoundException if the filepath is invalid or the contents of the file were invalid.
      */
     public static Map<Integer, Item> getItemFileFromJSON(String JSONPath) throws FileNotFoundException {

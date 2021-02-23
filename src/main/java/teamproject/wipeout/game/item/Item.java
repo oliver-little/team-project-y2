@@ -1,5 +1,9 @@
 package teamproject.wipeout.game.item;
 
+
+/**
+ * Defines an obtainable item in game.
+ */
 public class Item {
     
     public enum ItemType {
