@@ -32,10 +32,10 @@ public class GameEntity {
      */
     public GameEntity(GameScene scene) {
         this.uuid = UUID.randomUUID().toString();
-        this.setScene(scene);
         this.componentMap = new HashMap<Class<?>, GameComponent>();
         this.parent = null;
         this.children = new ArrayList<>();
+        this.setScene(scene);
     }
 
     /**
@@ -53,7 +53,9 @@ public class GameEntity {
      * @param scene The new scene
      */
     public void setScene(GameScene scene) {
-        this.scene.entityChangeEvent.emit(new EntityChangeEvent("ENTITY_REMOVED", this));
+        if (this.scene != null) {
+            this.scene.entityChangeEvent.emit(new EntityChangeEvent("ENTITY_REMOVED", this));
+        }
         this.scene = scene;
         this.scene.entityChangeEvent.emit(new EntityChangeEvent("COMPONENT_ADDED", this));
     }

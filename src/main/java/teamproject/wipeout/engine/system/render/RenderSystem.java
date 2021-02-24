@@ -84,7 +84,7 @@ public class RenderSystem implements GameSystem {
             zoom = cameraData.zoom;
 
             cameraPos = cameraTransform.getWorldPosition();
-
+            
             if (cameraPos.getX() != 0 || cameraPos.getY() != 0) {
                 this.gc.translate(-cameraPos.getX() * zoom, -cameraPos.getY() * zoom);
             }

@@ -25,23 +25,27 @@ public class Transform implements GameComponent {
      */
     public Transform(GameEntity entity) {
         this.position = Point2D.ZERO;
+        this.worldPositionDirty = true;
         this.rotation = 0;
         this.setEntity(entity);
     }
 
     public Transform(double x, double y, GameEntity entity) {
         this.position = new Point2D(x, y);
+        this.worldPositionDirty = true;
         this.setEntity(entity);
     }
 
     public Transform(Point2D position, double rotation, GameEntity entity) {
         this.position = position;
+        this.worldPositionDirty = true;
         this.rotation = rotation;
         this.setEntity(entity);
     }
 
     public Transform(double x, double y, double rotation, GameEntity entity) {
         this.position = new Point2D(x, y);
+        this.worldPositionDirty = true;
         this.rotation = rotation;
         this.setEntity(entity);
     }
