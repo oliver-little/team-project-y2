@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.market;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import teamproject.wipeout.game.item.Item;
@@ -11,13 +12,9 @@ import teamproject.wipeout.game.item.Item.ItemType;
  */
 public class Market {
 
-    public Map<Integer, Item> itemsForSale;
+    public static Map<Integer, Item> itemsForSale;
 
-    public Map<Integer, MarketItem> stockDatabase;
-
-    public static final Integer MAXMARKETCAPACITY = 500;
-
-    public static final Integer MINMARKETCAPACITY = 0;
+    public static Map<Integer, MarketItem> stockDatabase;
     
     /**
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
@@ -25,6 +22,11 @@ public class Market {
     public Market() {
         //TODO Add sabotage and task support.
         //TODO Link with systems to reduce quantities over time.
+
+        itemsForSale = new HashMap<>();
+
+        stockDatabase = new HashMap<>();
+
         try {
             itemsForSale = ItemStore.getItemFileFromJSON("items.JSON");
         } 
@@ -32,8 +34,7 @@ public class Market {
             System.out.println("An error occured while loading the market database: " + e);
         }
 
-        for (int i = 0; i < itemsForSale.size(); i++) {
-            Item item = itemsForSale.get(i);
+        for (Item item : itemsForSale.values()) {
             MarketItem marketItem = new MarketItem(item.id, item.itemType, item.defaultBuy, item.defaultSell);
             stockDatabase.put(item.id, marketItem);
         }
@@ -50,10 +51,6 @@ public class Market {
 
         if (!stockDatabase.containsKey(id)) {
             System.out.println("The requested item is not for sale.");
-            return false;
-        }
-        else if (hasMinBreached(id, quantity)) {
-            System.out.println("The market hasn't got enough stock for that purchase.");
             return false;
         }
 
@@ -83,11 +80,7 @@ public class Market {
             System.out.println("The requested item is not for sale.");
             return false;
         }
-        else if (hasMaxBreached(id, quantity)) {
-            System.out.println("The market hasn't got enough capacity for that sale.");
-            return false;
-        }
-
+ 
         if (stockDatabase.get(id).getItemType() == ItemType.CONSTRUCTABLE || stockDatabase.get(id).getItemType() == ItemType.USABLE) {
             System.out.println("Cannot sell constructable or usable item types.");
             return false;
@@ -99,23 +92,5 @@ public class Market {
         stockDatabase.get(id).updatePrices();
 
         return true;
-    }
-
-    private boolean hasMaxBreached (Integer id, int quantity) {
-        if ((stockDatabase.get(id).getQuantity()) + quantity > MAXMARKETCAPACITY) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    private boolean hasMinBreached (Integer id, int quantity) {
-        if ((stockDatabase.get(id).getQuantity()) - quantity < MINMARKETCAPACITY) {
-            return true;
-        }
-        else {
-            return false;
-        }
     }
 }

@@ -6,11 +6,11 @@
 			"id" : 1,
             "itemType" : "NONE",
             "name" : "Tomato",
-			"spriteSheetName" : "items",
-            "spriteSetName" : "tomato",
+			"spriteSheetName" : "",
+            "spriteSetName" : "",
             "maxStackSize" : 99,
-            "defaultBuy" : 0.20,
-            "defaultSell" : 0.10
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
 		},
         {
 			"id" : 2,

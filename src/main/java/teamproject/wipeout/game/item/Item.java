@@ -19,7 +19,7 @@ public class Item {
     public String spriteSheetName;
     public String spriteSetName;
     public Integer maxStackSize;
-    public float defaultBuy;
-    public float defaultSell;
+    public double defaultBuy;
+    public double defaultSell;
     
 }

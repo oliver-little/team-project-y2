@@ -6,15 +6,21 @@ public class MarketItem {
     
     private Integer id;
     private ItemType itemType;
-    private Integer quantity;
-    private float defaultBuyPrice;
-    private float defaultSellPrice;
-    private float currentBuyPrice;
-    private float currentSellPrice;
+    private double quantity;
+    private double defaultBuyPrice;
+    private double defaultSellPrice;
+    private double currentBuyPrice;
+    private double currentSellPrice;
 
-    public static final Integer INITIAL_STOCK = 50;
+    public static final Integer INITIAL_STOCK = 0;
 
     public static final Integer INFINITY = Integer.MAX_VALUE;
+
+    public static final Integer DAMPINGFACTOR = 1;
+
+    public static final Integer MAXMARKETCAPACITY = 89;
+
+    public static final Integer MINMARKETCAPACITY = -89;
 
     /**
      * Default constructor to create a market item - this contains only the relevant information for the market.
@@ -22,7 +28,7 @@ public class MarketItem {
      * @param defaultBuyPrice The initial buy price of the item at the start of the game.
      * @param defaultSellPrice The initial sell price of the item at the start of the game.
      */
-    public MarketItem(Integer id, ItemType itemType, float defaultBuyPrice, float defaultSellPrice) {
+    public MarketItem(Integer id, ItemType itemType, double defaultBuyPrice, double defaultSellPrice) {
         this.id = id;
         this.itemType = itemType;
         this.defaultBuyPrice = defaultBuyPrice;
@@ -49,7 +55,7 @@ public class MarketItem {
         return this.itemType;
     }
 
-    public Integer getQuantity() {
+    public double getQuantity() {
         return this.quantity;
     }
 
@@ -61,26 +67,68 @@ public class MarketItem {
         this.quantity -= i;
     }
 
-    public float getCurrentBuyPrice() {
+    public double getCurrentBuyPrice() {
         return this.currentBuyPrice;
     }
 
-    public float getCurrentSellPrice() {
+    public double getCurrentSellPrice() {
         return this.currentSellPrice;
     }
 
     /**
-     * Called when an item is bought/sold from the market. Updates the prices of the item based on a depreciation factor.
+     * Called when an item is bought/sold from the market. Updates the prices of the item based on the tangent function.
      */
     public void updatePrices() {
 
-        float depreciationFactor = (INITIAL_STOCK / this.quantity);
+        double costQuantity = this.quantity;
 
-        float newBuyPrice =  depreciationFactor * this.defaultBuyPrice;
-        float newSellPrice = depreciationFactor * this.defaultSellPrice;
+        if (hasMaxBreached()) {
+            costQuantity = MAXMARKETCAPACITY;
+        }
+        else if (hasMinBreached()) {
+            costQuantity = MINMARKETCAPACITY;
+        }
+        
+        double newBuyPrice =  DAMPINGFACTOR * (Math.tan(Math.toRadians(-costQuantity))) + this.defaultBuyPrice;
+        double newSellPrice = DAMPINGFACTOR * (Math.tan(Math.toRadians(-costQuantity))) + this.defaultSellPrice;
+        
+        if (newBuyPrice < this.defaultSellPrice) {
+            this.currentBuyPrice = defaultSellPrice;
+        }
+        else if (newBuyPrice < 0) {
+            this.currentBuyPrice = 0.01;
+        }
+        else {
+            this.currentBuyPrice = newBuyPrice;
+        }
 
-        this.currentBuyPrice = newBuyPrice;
-        this.currentSellPrice = newSellPrice;
 
+        if (newSellPrice > this.defaultBuyPrice) {
+            this.currentSellPrice = defaultBuyPrice;
+        }
+        else if (newSellPrice < 0) {
+            this.currentSellPrice = 0.01;
+        }
+        else {
+            this.currentSellPrice = newSellPrice;
+        }
+    }
+
+    private boolean hasMaxBreached() {
+        if (this.quantity > MAXMARKETCAPACITY) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean hasMinBreached() {
+        if (this.quantity < MINMARKETCAPACITY) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
