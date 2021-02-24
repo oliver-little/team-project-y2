@@ -104,9 +104,9 @@ public class CollisionComponent implements GameComponent {
     	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
-    		Shape s1 = addAbsolutePosition(t1.position, bb1[i]);
+    		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1[i]);
         	for(int j=0;j<bb2.length;j++) {
-        		Shape s2 = addAbsolutePosition(t2.position, bb2[j]);
+        		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2[j]);
             	if(intersects(s1,s2)) {
             		return new Pair<Shape, Shape>(s1, s2);
             	}
