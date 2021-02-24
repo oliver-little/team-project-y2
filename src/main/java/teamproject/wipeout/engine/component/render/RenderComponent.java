@@ -103,6 +103,4 @@ public class RenderComponent implements GameComponent {
     public String getType() {
         return "render";
     }
-
-
 }

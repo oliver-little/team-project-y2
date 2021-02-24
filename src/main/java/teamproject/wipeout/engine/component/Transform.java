@@ -6,7 +6,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 /**
  * Represents a position and rotation in physical space
  */
-public class Transform implements GameComponent {
+public class Transform implements EntityAwareGameComponent {
 
     // The entity this Transform is attached to
     private GameEntity entity;
@@ -23,35 +23,35 @@ public class Transform implements GameComponent {
      * 
      * @param entity The entity this transform is part of
      */
-    public Transform(GameEntity entity) {
+    public Transform() {
         this.position = Point2D.ZERO;
         this.worldPositionDirty = true;
         this.rotation = 0;
-        this.setEntity(entity);
     }
 
-    public Transform(double x, double y, GameEntity entity) {
+    public Transform(double x, double y) {
         this.position = new Point2D(x, y);
         this.worldPositionDirty = true;
-        this.setEntity(entity);
     }
 
-    public Transform(Point2D position, double rotation, GameEntity entity) {
+    public Transform(Point2D position, double rotation) {
         this.position = position;
         this.worldPositionDirty = true;
         this.rotation = rotation;
-        this.setEntity(entity);
     }
 
-    public Transform(double x, double y, double rotation, GameEntity entity) {
+    public Transform(double x, double y, double rotation) {
         this.position = new Point2D(x, y);
         this.worldPositionDirty = true;
         this.rotation = rotation;
-        this.setEntity(entity);
     }
 
     public String getType() {
         return "transform";
+    }
+
+    public GameEntity getEntity() {
+        return this.entity;
     }
 
     /**

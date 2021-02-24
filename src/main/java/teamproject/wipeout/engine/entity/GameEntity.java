@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import teamproject.wipeout.engine.component.EntityAwareGameComponent;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.entity.event.EntityChangeEvent;
 import teamproject.wipeout.engine.core.GameScene;
@@ -70,7 +71,7 @@ public class GameEntity {
     }
 
     /**
-     * Gets this entity's parent
+     * Gets this entity's parent GameEntity
      * 
      * @return The parent GameEntity
      */
@@ -84,12 +85,19 @@ public class GameEntity {
      * @param newParent The new parent entity 
      */
     public void setParent(GameEntity newParent) {
+        if (newParent == this) {
+            return;
+        }
+
         if (this.parent != null) {
             this.parent.removeChild(this);
         }
 
         this.parent = newParent;
-        this.parent.addChild(this);
+
+        if (this.parent != null) {
+            this.parent.addChild(this);
+        }
     }
 
     /**
@@ -162,6 +170,11 @@ public class GameEntity {
     public <T extends GameComponent> boolean addComponent(T component) {
         if (!this.componentMap.containsKey(component.getClass())) {
             this.componentMap.put(component.getClass(), component);
+
+            if (component instanceof EntityAwareGameComponent) {
+                EntityAwareGameComponent c = (EntityAwareGameComponent) component;
+                c.setEntity(this);
+            }
 
             this.scene.entityChangeEvent.emit(new EntityChangeEvent("COMPONENT_ADDED", this));
 
