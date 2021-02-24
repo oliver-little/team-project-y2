@@ -4,50 +4,39 @@ import teamproject.wipeout.game.item.Item.ItemType;
 
 public class MarketItem {
     
-    private Integer id;
+    private int id;
     private ItemType itemType;
-    private double quantity;
+    private double quantityDeviation;
     private double defaultBuyPrice;
     private double defaultSellPrice;
     private double currentBuyPrice;
     private double currentSellPrice;
 
-    public static final Integer INITIAL_STOCK = 0;
+    public static final int INITIAL_QUANTITY_DEVIATION = 0;
 
-    public static final Integer INFINITY = Integer.MAX_VALUE;
+    public static final double GLOBALDAMPINGFACTOR = 2;
 
-    public static final Integer DAMPINGFACTOR = 1;
+    public static final double LOCALDAMPINGFACTOR = 0.05;
 
-    public static final Integer MAXMARKETCAPACITY = 89;
-
-    public static final Integer MINMARKETCAPACITY = -89;
 
     /**
      * Default constructor to create a market item - this contains only the relevant information for the market.
      * @param id The ID of the item to add to the market.
+     * @param itemType The type of the item.
      * @param defaultBuyPrice The initial buy price of the item at the start of the game.
      * @param defaultSellPrice The initial sell price of the item at the start of the game.
      */
-    public MarketItem(Integer id, ItemType itemType, double defaultBuyPrice, double defaultSellPrice) {
+    public MarketItem(int id, ItemType itemType, double defaultBuyPrice, double defaultSellPrice) {
         this.id = id;
         this.itemType = itemType;
+        this.quantityDeviation = INITIAL_QUANTITY_DEVIATION;
         this.defaultBuyPrice = defaultBuyPrice;
         this.defaultSellPrice = defaultSellPrice;
         this.currentBuyPrice = defaultBuyPrice;
         this.currentSellPrice = defaultSellPrice;
-
-        if (itemType == ItemType.PLANTABLE || itemType == ItemType.NONE) {
-            this.quantity = INITIAL_STOCK;
-        }
-        else if (itemType == ItemType.CONSTRUCTABLE || itemType == ItemType.USABLE) {
-            this.quantity = INFINITY;
-        }
-        else {
-            throw new IllegalArgumentException("An item had an invalid type when constructing the market database.");
-        }
     }
 
-    public Integer getID() {
+    public int getID() {
         return this.id;
     }
 
@@ -55,16 +44,26 @@ public class MarketItem {
         return this.itemType;
     }
 
-    public double getQuantity() {
-        return this.quantity;
+    public double getQuantityDeviation() {
+        return this.quantityDeviation;
     }
 
-    public void incrementQuantity(Integer i) {
-        this.quantity += i;
+    public void incrementQuantityDeviation(int i) {
+        this.quantityDeviation += i;
+        updatePrices();
     }
 
-    public void decrementQuantity(Integer i) {
-        this.quantity -= i;
+    public void decrementQuantityDeviation(int i) {
+        this.quantityDeviation -= i;
+        updatePrices();
+    }
+
+    public double getDefaultBuyPrice() {
+        return this.defaultBuyPrice;
+    }
+
+    public double getDefaultSellPrice() {
+        return this.defaultSellPrice;
     }
 
     public double getCurrentBuyPrice() {
@@ -76,59 +75,31 @@ public class MarketItem {
     }
 
     /**
-     * Called when an item is bought/sold from the market. Updates the prices of the item based on the tangent function.
+     * Called when an item is bought/sold from the market. Updates the prices of the item based on the hyperbolic sine function.
      */
-    public void updatePrices() {
+    private void updatePrices() {
+      
+        double newCostDeviation = costFunction(this.quantityDeviation);
 
-        double costQuantity = this.quantity;
+        this.currentBuyPrice = newCostDeviation + defaultBuyPrice;
+        this.currentSellPrice = newCostDeviation + defaultSellPrice;
 
-        if (hasMaxBreached()) {
-            costQuantity = MAXMARKETCAPACITY;
-        }
-        else if (hasMinBreached()) {
-            costQuantity = MINMARKETCAPACITY;
-        }
-        
-        double newBuyPrice =  DAMPINGFACTOR * (Math.tan(Math.toRadians(-costQuantity))) + this.defaultBuyPrice;
-        double newSellPrice = DAMPINGFACTOR * (Math.tan(Math.toRadians(-costQuantity))) + this.defaultSellPrice;
-        
-        if (newBuyPrice < this.defaultSellPrice) {
-            this.currentBuyPrice = defaultSellPrice;
-        }
-        else if (newBuyPrice < 0) {
+        if (currentBuyPrice <= 0.01) {
             this.currentBuyPrice = 0.01;
         }
-        else {
-            this.currentBuyPrice = newBuyPrice;
-        }
-
-
-        if (newSellPrice > this.defaultBuyPrice) {
-            this.currentSellPrice = defaultBuyPrice;
-        }
-        else if (newSellPrice < 0) {
+        if (currentSellPrice <= 0.01) {
             this.currentSellPrice = 0.01;
         }
-        else {
-            this.currentSellPrice = newSellPrice;
-        }
+        
     }
 
-    private boolean hasMaxBreached() {
-        if (this.quantity > MAXMARKETCAPACITY) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+    /**
+     * Calculates the cost deviation based on the hyperbolic sine function.
+     */
+    public static double costFunction(double x) {
 
-    private boolean hasMinBreached() {
-        if (this.quantity < MINMARKETCAPACITY) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        double exponent = LOCALDAMPINGFACTOR * x;
+
+        return (Math.exp(exponent) - Math.exp(-exponent))/GLOBALDAMPINGFACTOR;
     }
 }
