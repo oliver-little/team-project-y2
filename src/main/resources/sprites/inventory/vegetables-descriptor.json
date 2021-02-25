@@ -1,0 +1,157 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "inventory-vegetables",
+	"sprites": [
+		{
+			"name": "yellow-pepper",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "tomato",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "hot-pepper",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "pickle",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "onion",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "potato",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "carrot",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "broccoli",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "garlic",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 64,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "sweet-potato",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 64,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "aubergine",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 64,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "beetroot",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 64,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "pumpkin",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 96,
+				"width": 64,
+				"height": 64
+			}
+		},
+		{
+			"name": "lettuce",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 96,
+				"width": 64,
+				"height": 64
+			}
+		},
+		{
+			"name": "cauliflower",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 160,
+				"width": 64,
+				"height": 64
+			}
+		}
+	]
+}

@@ -6,8 +6,8 @@
 			"id" : 1,
             "itemType" : "NONE",
             "name" : "Tomato",
-			"spriteSheetName" : "",
-            "spriteSetName" : "",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "tomato",
             "maxStackSize" : 99,
             "defaultBuy" : 2.00,
             "defaultSell" : 1.00
@@ -16,8 +16,8 @@
 			"id" : 2,
             "itemType" : "NONE",
             "name": "Lettuce",
-			"spriteSheetName" : "",
-            "spriteSetName" : "",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "lettuce",
             "maxStackSize" : 99,
             "defaultBuy" : 0.50,
             "defaultSell" : 0.25
