@@ -34,7 +34,7 @@ import java.util.List;
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
  * It implements the Controller Interface.
  */
-public class StartMenu implements Controller{
+public class StartMenu implements Controller {
 	
 	private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
