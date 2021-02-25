@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.system.render;
 
 import java.util.List;
-import java.util.Set;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
@@ -12,7 +11,6 @@ import teamproject.wipeout.engine.component.*;
 import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 import teamproject.wipeout.util.InsertionSort;
 
@@ -32,7 +30,7 @@ public class RenderSystem implements GameSystem {
     protected RendererEntityCollector renderableEntityCollector;
     protected CameraEntityCollector cameraCollector;
 
-    private TransformYComparator yPosComparator;
+    private TransformComparator yPosComparator;
     private Point2D lastCameraPos;
     private double lastZoom;
 
@@ -47,7 +45,7 @@ public class RenderSystem implements GameSystem {
     public RenderSystem(GameScene scene, Canvas staticCanvas, Canvas dynamicCanvas) {
         this.renderableEntityCollector = new RendererEntityCollector(scene);
         this.cameraCollector = new CameraEntityCollector(scene);
-        this.yPosComparator = new TransformYComparator();
+        this.yPosComparator = new TransformComparator();
 
         this.staticCanvas = staticCanvas;
         this.staticGC = staticCanvas.getGraphicsContext2D();

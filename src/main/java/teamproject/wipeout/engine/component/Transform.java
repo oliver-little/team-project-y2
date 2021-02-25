@@ -17,6 +17,7 @@ public class Transform implements EntityAwareGameComponent {
     private Point2D worldPosition;
     private double rotation;
     private boolean worldPositionDirty;
+    private int zPosition;
 
     /**
      * Creates a new instance of Transform with default parameters
@@ -25,23 +26,48 @@ public class Transform implements EntityAwareGameComponent {
      */
     public Transform() {
         this.position = Point2D.ZERO;
+        this.zPosition = 0;
         this.worldPositionDirty = true;
         this.rotation = 0;
     }
 
     public Transform(double x, double y) {
         this.position = new Point2D(x, y);
+        this.zPosition = 0;
         this.worldPositionDirty = true;
     }
 
+    public Transform(double x, double y, int z) {
+        this.position = new Point2D(x, y);
+        this.zPosition = z;
+        this.worldPositionDirty = true;
+    }
+
+
     public Transform(Point2D position, double rotation) {
         this.position = position;
+        this.worldPositionDirty = true;
+        this.rotation = rotation;
+        this.zPosition = 0;
+    }
+
+    public Transform(Point2D position, double rotation, int z) {
+        this.position = position;
+        this.zPosition = z;
         this.worldPositionDirty = true;
         this.rotation = rotation;
     }
 
     public Transform(double x, double y, double rotation) {
         this.position = new Point2D(x, y);
+        this.zPosition = 0;
+        this.worldPositionDirty = true;
+        this.rotation = rotation;
+    }
+
+    public Transform(double x, double y, double rotation, int z) {
+        this.position = new Point2D(x, y);
+        this.zPosition = z;
         this.worldPositionDirty = true;
         this.rotation = rotation;
     }
@@ -118,6 +144,24 @@ public class Transform implements EntityAwareGameComponent {
         this.lastParent = this.entity.getParent();
 
         return this.worldPosition;
+    }
+
+    /**
+     * Gets the z position of this transform 
+     * 
+     * @return The z position
+     */
+    public int getZPosition() {
+        return this.zPosition;
+    }
+
+    /**
+     * Sets a new z position for this transform
+     * 
+     * @param z The new z position
+     */
+    public void setZPosition(int z) {
+        this.zPosition = z;
     }
 
     /**

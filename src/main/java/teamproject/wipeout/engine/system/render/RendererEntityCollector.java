@@ -58,7 +58,7 @@ public class RendererEntityCollector extends BaseEntityCollector {
     
 
     private boolean _testComponent(GameEntity entity) {
-        for (Class<? extends GameComponent> componentClass : this.signature) {
+        for (Class<? extends GameComponent> componentClass : signature) {
             if (!entity.hasComponent(componentClass)) {
                 return false;
             }
