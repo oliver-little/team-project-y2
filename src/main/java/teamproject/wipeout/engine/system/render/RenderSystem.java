@@ -20,38 +20,47 @@ import teamproject.wipeout.util.InsertionSort;
  * System to render relevant GameEntities to the canvas
  */
 public class RenderSystem implements GameSystem {
-    
-    public static final Set<Class<? extends GameComponent>> renderSignaturePattern = Set.of(Transform.class, RenderComponent.class);
-
     private Affine identityTransform;
 
-    protected Canvas canvas;
+    protected Canvas dynamicCanvas;
+    protected Canvas staticCanvas;
 
-    protected GraphicsContext gc;
+    protected GraphicsContext dynamicGC;
+    protected GraphicsContext staticGC;
+    protected boolean renderStatic = false;
 
-    protected SignatureEntityCollector renderableEntityCollector;
+    protected RendererEntityCollector renderableEntityCollector;
     protected CameraEntityCollector cameraCollector;
 
     private TransformYComparator yPosComparator;
+    private Point2D lastCameraPos;
+    private double lastZoom;
+
+    private static final double DOUBLE_COMPARE = 0.00001f;
 
     /** 
      * Creates a new instance of RenderSystem
      * 
      * @param scene The GameScene this System is part of
-     * @param canvas The canvas this RenderSystem should draw to
+     * @param dynamicCanvas The canvas this RenderSystem should draw to
      */
-    public RenderSystem(GameScene scene, Canvas canvas) {
-        this.renderableEntityCollector = new SignatureEntityCollector(scene, renderSignaturePattern);
+    public RenderSystem(GameScene scene, Canvas staticCanvas, Canvas dynamicCanvas) {
+        this.renderableEntityCollector = new RendererEntityCollector(scene);
         this.cameraCollector = new CameraEntityCollector(scene);
         this.yPosComparator = new TransformYComparator();
 
-        this.canvas = canvas;
-        this.gc = canvas.getGraphicsContext2D();
+        this.staticCanvas = staticCanvas;
+        this.staticGC = staticCanvas.getGraphicsContext2D();
+        this.dynamicCanvas = dynamicCanvas;
+        this.dynamicGC = dynamicCanvas.getGraphicsContext2D();
 
         // Disable antialiasing to get pixel perfect sprites
-        this.gc.setImageSmoothing(false);
+        this.dynamicGC.setImageSmoothing(false);
+        this.staticGC.setImageSmoothing(false);
 
         this.identityTransform = new Affine();
+        this.lastCameraPos = Point2D.ZERO;
+        this.lastZoom = 0;
     }
 
 
@@ -67,15 +76,15 @@ public class RenderSystem implements GameSystem {
      */
     public void accept(Double timeStep) {
         // Reset the GraphicsContext back to the origin
-        this.gc.setTransform(this.identityTransform);
+        this.dynamicGC.setTransform(this.identityTransform);
         
         Point2D cameraPos = Point2D.ZERO;
-        double width = this.canvas.getWidth();
-        double height = this.canvas.getHeight();
+        double width = this.dynamicCanvas.getWidth();
+        double height = this.dynamicCanvas.getHeight();
         double zoom = 1;
 
         // Clear the screen ready for rendering
-        this.gc.clearRect(0, 0, width, height);
+        this.dynamicGC.clearRect(0, 0, width, height);
 
         GameEntity camera = this.cameraCollector.getMainCamera();
         // If the camera is present, apply various transforms
@@ -87,13 +96,22 @@ public class RenderSystem implements GameSystem {
             cameraPos = cameraTransform.getWorldPosition();
             
             if (cameraPos.getX() != 0 || cameraPos.getY() != 0) {
-                this.gc.translate(-cameraPos.getX() * zoom, -cameraPos.getY() * zoom);
+                this.dynamicGC.translate(-cameraPos.getX() * zoom, -cameraPos.getY() * zoom);
             }
 
             if (Double.compare(zoom, 1f) != 0 && zoom > 0) {
                 // Scale the camera's virtual size by the zoom amount
                 width /= zoom;
                 height /= zoom;
+            }
+
+            if (!cameraPos.equals(lastCameraPos) || Double.compare(zoom, lastZoom) > DOUBLE_COMPARE) {
+                lastZoom = zoom;
+                lastCameraPos = cameraPos;
+                this.staticGC.clearRect(0, 0, width, height);
+                // Copy in the now calculated transform
+                this.staticGC.setTransform(this.dynamicGC.getTransform());
+                this.renderStatic = true;
             }
         }
 
@@ -114,8 +132,31 @@ public class RenderSystem implements GameSystem {
             Point2D tWorldPosition = t.getWorldPosition();
             if (cameraBox.intersects(tWorldPosition.getX(), tWorldPosition.getY(), r.getWidth(), r.getHeight())) {
                 // Render the entity, scaled according to the camera view
-                r.render(this.gc, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
+                r.render(this.dynamicGC, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
             }
+        }
+
+        // Renderable static entities if needed
+        if (this.renderStatic) {
+            this.renderStatic = false;
+            // Get the list of renderable entities
+            entities = this.renderableEntityCollector.getStaticEntities();
+        
+            // Sort it - use an insertion sort because insertion sort is fast for nearly sorted lists:
+            // On most frames this list will be sorted or very nearly sorted.
+            InsertionSort.sort(entities, yPosComparator);
+
+            for (GameEntity entity : entities) {
+                Transform t = entity.getComponent(Transform.class);
+                RenderComponent r = entity.getComponent(RenderComponent.class);
+
+                // Test if the entity is actually visible on the camera view
+                Point2D tWorldPosition = t.getWorldPosition();
+                if (cameraBox.intersects(tWorldPosition.getX(), tWorldPosition.getY(), r.getWidth(), r.getHeight())) {
+                    // Render the entity, scaled according to the camera view
+                    r.render(this.staticGC, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
+            }
+        }
         }
     }
 }

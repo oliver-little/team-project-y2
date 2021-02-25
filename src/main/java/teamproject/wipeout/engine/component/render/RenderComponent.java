@@ -7,10 +7,18 @@ import javafx.scene.canvas.GraphicsContext;
 import teamproject.wipeout.engine.component.GameComponent;
 
 public class RenderComponent implements GameComponent {
+
+    private boolean isStatic;
     
     private List<Renderable> renderables;
 
     public RenderComponent() {
+        this.isStatic = false;
+        this.renderables = new ArrayList<Renderable>();
+    }
+
+    public RenderComponent(boolean isStatic) {
+        this.isStatic = isStatic;
         this.renderables = new ArrayList<Renderable>();
     }
 
@@ -19,7 +27,17 @@ public class RenderComponent implements GameComponent {
      * @param newRenderables An arbitrary number of renderable objects.
      */
     public RenderComponent(Renderable... newRenderables) {
+        this.isStatic = false;
         renderables = List.of(newRenderables);
+    }
+
+    public RenderComponent(boolean isStatic, Renderable... newRenderables) {
+        this.isStatic = isStatic;
+        renderables = List.of(newRenderables);
+    }
+
+    public boolean isStatic() {
+        return this.isStatic;
     }
 
     /**

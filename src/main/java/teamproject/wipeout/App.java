@@ -48,7 +48,8 @@ import java.util.UUID;
 public class App implements Controller {
 
     private StackPane root;
-    private Canvas canvas;
+    private Canvas dynamicCanvas;
+    private Canvas staticCanvas;
     private double windowWidth = 800;
     private double windowHeight = 600;
 
@@ -63,7 +64,7 @@ public class App implements Controller {
      */
     public void createContent() {
         GameScene gameScene = new GameScene();
-        RenderSystem renderer = new RenderSystem(gameScene, canvas);
+        RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new MovementSystem(gameScene));
@@ -221,8 +222,9 @@ public class App implements Controller {
 	@Override
 	public Parent getContent()
 	{
-		canvas = new Canvas(windowWidth, windowHeight);
-        root = new StackPane(canvas);
+		dynamicCanvas = new Canvas(windowWidth, windowHeight);
+        staticCanvas = new Canvas(windowWidth, windowHeight);
+        root = new StackPane(dynamicCanvas, staticCanvas);
 		return root;
 	}
 }
