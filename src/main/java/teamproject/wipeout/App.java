@@ -6,6 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -15,11 +16,14 @@ import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.AudioSystem;
 import teamproject.wipeout.engine.system.CollisionSystem;
@@ -112,7 +116,25 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
+        GameEntity potato = gameScene.createEntity();
+        potato.addComponent(new Transform (10, 10));
+        try {
+            spriteManager.loadSpriteSheet("crops-descriptor.json", "crops.png");
+            Image[] frames = spriteManager.getSpriteSet("crops", "potato");
+            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        InventoryEntity[] inventorySlots = new InventoryEntity[10];
+        
+        for(int i = 0; i < 10; i++) {
+	        InventoryEntity inventory = new InventoryEntity(gameScene, 20 + (75*i), 500);
+	        inventorySlots[i] = inventory;
+	        gameScene.entities.add(inventory);
+        }
+        
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -141,6 +163,7 @@ public class App implements Controller {
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f),
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f));
 
+        
         gl.start();
 
         input.onKeyRelease(KeyCode.S, () -> {
