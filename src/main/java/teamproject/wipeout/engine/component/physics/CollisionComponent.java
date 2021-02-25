@@ -11,6 +11,11 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;
 
+/**
+ * Component that, when added to an entity, will resolve collisions between other entities with this component.
+ * Has a boolean flag isMoveable that indicates whether an entity should be affected by collisions.
+ *  Made up of an array of shapes that act as the collision boundaries.
+ */
 public class CollisionComponent implements GameComponent {
 
 	//each rectangle with attributes x, y, width, height
@@ -23,6 +28,9 @@ public class CollisionComponent implements GameComponent {
 	 */
 	public Shape boundingBoxes[];
 	
+	/**
+	 * Boolean flag that indicates whether this entity should be affected by collisions
+	 */
 	public boolean isMoveable = true;
 	
 	/*
@@ -173,7 +181,7 @@ public class CollisionComponent implements GameComponent {
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;
-				return GeometryUtil.intersects(r1,c2);
+				return GeometryUtil.intersects(c2,r1);
 			}
 		}
 		else if(s1 instanceof Circle) {
@@ -204,14 +212,14 @@ public class CollisionComponent implements GameComponent {
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;
-				//return GeometryUtil.getResolutionVector(r1,c2);
+				return GeometryUtil.getResolutionVector(r1,c2);
 			}
 		}
 		else if(s1 instanceof Circle) {
 			Circle c1 = (Circle) s1;
 			if (s2 instanceof Rectangle) {
 				Rectangle r2 = (Rectangle) s2;
-				//return GeometryUtil.getResolutionVector(c1,r2);
+				return GeometryUtil.getResolutionVector(r2, c1);
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;

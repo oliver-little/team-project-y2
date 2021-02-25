@@ -54,7 +54,8 @@ public class RenderSystem implements GameSystem {
         this.identityTransform = new Affine();
     }
 
-    public void cleanup() {
+
+	public void cleanup() {
         this.cameraCollector.cleanup();
         this.renderableEntityCollector.cleanup();
     }
