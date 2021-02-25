@@ -10,12 +10,10 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.game.InventoryData;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 public class InventoryEntity extends GameEntity {
 	
-	public InventoryData data;
 	public Transform transform;
 	public Point2D size;
 	
