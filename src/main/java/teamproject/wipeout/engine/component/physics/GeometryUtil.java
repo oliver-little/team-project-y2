@@ -522,7 +522,7 @@ public class GeometryUtil
 		}
 				
 		
-		System.out.println("overlap: "+p.toString());
+		//System.out.println("overlap: "+p.toString());
 		
 		return p;
 	}

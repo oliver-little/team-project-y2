@@ -68,7 +68,7 @@ public class App implements Controller {
         //bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
         //bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
 
-        /*
+        
         GameEntity rec = gameScene.createEntity();
         rec.addComponent(new Transform(100, 125));
         rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
@@ -86,7 +86,7 @@ public class App implements Controller {
         rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
         rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
         rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
-        */
+        
         
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
