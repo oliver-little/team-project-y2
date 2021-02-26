@@ -1,4 +1,4 @@
-package main.java.teamproject.wipeout.game.player;
+package teamproject.wipeout.game.player;
 
 import java.util.HashMap;
 

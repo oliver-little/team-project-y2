@@ -115,7 +115,7 @@ public class App implements Controller {
         
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
-        potato.addComponent(new CollisionComponent(false, true, new Rectangle(10, 10)));
+        potato.addComponent(new CollisionComponent(true, true, new Rectangle(10, 10)));
 
         try {
             spriteManager.loadSpriteSheet("crops-descriptor.json", "crops.png");
