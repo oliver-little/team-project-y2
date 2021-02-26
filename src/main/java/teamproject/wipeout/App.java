@@ -16,7 +16,8 @@ import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.physics.CollisionComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameLoop;
@@ -73,19 +74,22 @@ public class App implements Controller {
         rec.addComponent(new Transform(100, 125));
         rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
         rec.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec.addComponent(new CollisionComponent(new Rectangle(40,60)));
+        rec.addComponent(new HitboxComponent(new Rectangle(40,60)));
+        rec.addComponent(new CollisionResolutionComponent());
         
         GameEntity rec2 = gameScene.createEntity();
         rec2.addComponent(new Transform(200, 70));
         rec2.addComponent(new RenderComponent(new RectRenderable(Color.RED, 100, 20)));
         rec2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec2.addComponent(new CollisionComponent(new Rectangle(100,20)));
+        rec2.addComponent(new HitboxComponent(new Rectangle(100,20)));
+        rec2.addComponent(new CollisionResolutionComponent());
         
         GameEntity rec3 = gameScene.createEntity();
         rec3.addComponent(new Transform(300, 300));
         rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
         rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
+        rec3.addComponent(new HitboxComponent(new Rectangle(150,150)));
+        rec3.addComponent(new CollisionResolutionComponent(false));
         
         
         // Animated Sprite
@@ -95,7 +99,8 @@ public class App implements Controller {
         staticsprite.addComponent(new Transform(500, 200));
         try {
             staticsprite.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getImage(imgPath + "face.png"))));
-            staticsprite.addComponent(new CollisionComponent(new Circle(50,50,50)));
+            staticsprite.addComponent(new HitboxComponent(new Circle(50,50,50)));
+            staticsprite.addComponent(new CollisionResolutionComponent());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,7 +111,8 @@ public class App implements Controller {
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
-        nge.addComponent(new CollisionComponent(new Rectangle(5, 0, 24, 33)));
+        nge.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
+        nge.addComponent(new CollisionResolutionComponent());
 
         try {
             spriteManager.loadSpriteSheet(imgPath + "spritesheet-descriptor.json", imgPath + "spritesheet.png");

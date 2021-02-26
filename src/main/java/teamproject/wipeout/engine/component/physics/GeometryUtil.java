@@ -5,6 +5,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 /**
  * Class containing functions related to geometry in 2D space
  *
@@ -585,6 +586,75 @@ public class GeometryUtil
     		return false;
     	}
     	return true;
+	}
+	
+	/**
+	 * Intersects function for generic shapes that calls the appropriate intersects function
+	 * @param s1 first shape
+	 * @param s2 second shape
+	 * @return true if the shapes collide, false otherwise
+	 */
+	public static boolean intersects(Shape s1, Shape s2) {
+		// info on downcasting: https://www.baeldung.com/java-type-casting
+		if(s1 instanceof Rectangle) {
+			Rectangle r1 = (Rectangle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return GeometryUtil.intersects(r1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return GeometryUtil.intersects(c2,r1);
+			}
+		}
+		else if(s1 instanceof Circle) {
+			Circle c1 = (Circle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return GeometryUtil.intersects(c1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return GeometryUtil.intersects(c1,c2);
+			}
+		}
+		
+		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
+		
+		return false;
+	}
+
+	public static Point2D getResolutionVector(Shape s1, Shape s2)
+	{
+		// info on downcasting: https://www.baeldung.com/java-type-casting
+		if(s1 instanceof Rectangle) {
+			Rectangle r1 = (Rectangle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return GeometryUtil.getResolutionVector(r1,r2);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				return GeometryUtil.getResolutionVector(r1,c2);
+			}
+		}
+		else if(s1 instanceof Circle) {
+			Circle c1 = (Circle) s1;
+			if (s2 instanceof Rectangle) {
+				Rectangle r2 = (Rectangle) s2;
+				return GeometryUtil.getResolutionVector(r2, c1);
+			}
+			else if(s2 instanceof Circle) {
+				Circle c2 = (Circle) s2;
+				//System.out.println("calling it");
+				return GeometryUtil.getResolutionVector(c1,c2);
+			}
+		}
+		
+		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
+		
+		return null;
+		
 	}
 }
 
