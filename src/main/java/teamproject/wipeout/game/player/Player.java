@@ -1,15 +1,28 @@
+package main.java.teamproject.wipeout.game.player;
+
 import java.util.HashMap;
 
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.Item;
 
-public class Player{
+public class Player extends GameEntity {
     public Integer playerID;
     public String playerName;
     public String spriteSheetName;
     public Integer money;
 
     private HashMap<Integer, Integer> inventory = new HashMap<>();
+
+    /**
+     * Creates a new instance of GameEntity
+     *
+     * @param scene The GameScene this entity is part of
+     */
+    public Player(GameScene scene) {
+        super(scene);
+    }
 
 
     public void pickupItem(Integer itemID) {

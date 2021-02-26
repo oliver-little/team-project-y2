@@ -32,8 +32,17 @@ public class CollisionSystem implements GameSystem {
         List<GameEntity> entities = this._entityCollector.getEntities();
 
         for(int i=0; i < entities.size(); i++) {
+			CollisionComponent ci = entities.get(i).getComponent(CollisionComponent.class);
+			if (ci.walkableOn){
+				continue;
+			}
+
             for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
+					CollisionComponent cj = entities.get(j).getComponent(CollisionComponent.class);
+					if (cj.walkableOn){
+						continue;
+					}
                 	Pair<Shape, Shape> p = null;
 					if((p  = CollisionComponent.collides(entities.get(i), entities.get(j)))!=null) {
                 		//System.out.println("Collision");

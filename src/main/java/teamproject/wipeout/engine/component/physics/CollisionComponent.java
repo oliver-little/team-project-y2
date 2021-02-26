@@ -24,6 +24,8 @@ public class CollisionComponent implements GameComponent {
 	public Shape boundingBoxes[];
 	
 	public boolean isMoveable = true;
+
+	public boolean walkableOn = false;
 	
 	/*
 	public CollisionComponent(Shape[] boundingBoxes) {
@@ -41,6 +43,13 @@ public class CollisionComponent implements GameComponent {
 	public CollisionComponent(boolean isMoveable, Shape... shapes) {
 		this.boundingBoxes = shapes;
 		this.isMoveable = isMoveable;
+	}
+
+	//varargs constructor. See https://www.baeldung.com/java-varargs for info
+	public CollisionComponent(boolean isMoveable, boolean walkableOn, Shape... shapes) {
+		this.boundingBoxes = shapes;
+		this.isMoveable = isMoveable;
+		this.walkableOn = walkableOn;
 	}
 	
 	/**
