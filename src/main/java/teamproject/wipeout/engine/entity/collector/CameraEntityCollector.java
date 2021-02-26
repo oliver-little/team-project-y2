@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.system.render;
+package teamproject.wipeout.engine.entity.collector;
 
 import teamproject.wipeout.engine.component.*;
 import teamproject.wipeout.engine.component.render.CameraComponent;

@@ -1,7 +1,5 @@
 package teamproject.wipeout.engine.system;
 
-import java.util.function.Function;
-
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.component.UIComponent;
@@ -9,7 +7,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.FunctionalEntityCollector;
 
-public class UISystem {
+public class UISystem implements EventSystem {
 
     private FunctionalEntityCollector collector;
     private StackPane root;
@@ -17,6 +15,10 @@ public class UISystem {
     public UISystem(GameScene scene, StackPane root) {
         this.root = root;
         this.collector = new FunctionalEntityCollector(scene, (entity) -> this.getNodeFromEntity(entity), null, null);
+    }
+    
+    public void cleanup() {
+        this.collector.cleanup();
     }
 
     public StackPane getUIRoot() {
