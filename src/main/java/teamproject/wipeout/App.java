@@ -7,7 +7,6 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
