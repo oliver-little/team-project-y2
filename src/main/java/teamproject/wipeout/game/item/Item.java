@@ -5,7 +5,12 @@ package teamproject.wipeout.game.item;
  * Defines an obtainable item in game.
  */
 public class Item {
-    
+
+    public Item(String name, Integer id) {
+        this.name = name;
+        this.id = id;
+    }
+
     public enum ItemType {
         PLANTABLE, //Seeds - items that can be placed and grown in the ground.
         USABLE, //For future implementation of tools which can be used.

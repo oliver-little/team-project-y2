@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -16,7 +13,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
  * Has a boolean flag isMoveable that indicates whether an entity should be affected by collisions.
  *  Made up of an array of shapes that act as the collision boundaries.
  */
-public class CollisionComponent implements GameComponent {
+public class HitboxComponent implements GameComponent {
 
 	//each rectangle with attributes x, y, width, height
 	// x = horizontal offset from top left corner
@@ -34,31 +31,27 @@ public class CollisionComponent implements GameComponent {
 	public boolean isMoveable = true;
 
 	public boolean walkableOn = false;
+
 	
-	/*
-	public CollisionComponent(Shape[] boundingBoxes) {
-		this.boundingBoxes=boundingBoxes;
-	}
-	*/
 	
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
-	public CollisionComponent(Shape... shapes) {
+	public HitboxComponent(Shape... shapes) {
 		this.boundingBoxes = shapes;
-		this.isMoveable = true;
 	}
 	
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
-	public CollisionComponent(boolean isMoveable, Shape... shapes) {
+	public HitboxComponent(boolean isMoveable, Shape... shapes) {
 		this.boundingBoxes = shapes;
 		this.isMoveable = isMoveable;
 	}
 
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
-	public CollisionComponent(boolean isMoveable, boolean walkableOn, Shape... shapes) {
+	public HitboxComponent(boolean isMoveable, boolean walkableOn, Shape... shapes) {
 		this.boundingBoxes = shapes;
 		this.isMoveable = isMoveable;
 		this.walkableOn = walkableOn;
 	}
+
 	
 	/**
 	 * Adds new bounding boxes to the bounding box array
@@ -99,7 +92,7 @@ public class CollisionComponent implements GameComponent {
 	}
 	
     public String getType() {
-        return "collision";
+        return "hitbox";
     }
     
     
@@ -113,18 +106,18 @@ public class CollisionComponent implements GameComponent {
      */
     public static Pair<Shape, Shape> collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
-    	CollisionComponent c1 = g1.getComponent(CollisionComponent.class);
+    	HitboxComponent c1 = g1.getComponent(HitboxComponent.class);
     	Shape bb1[] = c1.boundingBoxes;
     	
     	Transform t2 = g2.getComponent(Transform.class);
-    	CollisionComponent c2 = g2.getComponent(CollisionComponent.class);
+    	HitboxComponent c2 = g2.getComponent(HitboxComponent.class);
     	Shape bb2[] = c2.boundingBoxes;
     	
     	for(int i=0;i<bb1.length;i++) {
     		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1[i]);
         	for(int j=0;j<bb2.length;j++) {
         		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2[j]);
-            	if(intersects(s1,s2)) {
+            	if(GeometryUtil.intersects(s1,s2)) {
             		return new Pair<Shape, Shape>(s1, s2);
             	}
         	}
@@ -133,6 +126,19 @@ public class CollisionComponent implements GameComponent {
     	//No pair of shapes from the boundng boxes collide
     	return null;
 
+    }
+    
+    /**
+     * Checks whether two game entities collide
+     * @param g1
+     * @param g2
+     * @return true if entities collide, false otherwise
+     */
+    public static boolean checkCollides(GameEntity g1, GameEntity g2) {
+    	if(collides(g1,g2)==null) {
+    		return false;
+    	}
+    	return true;
     }
     
       
@@ -151,8 +157,8 @@ public class CollisionComponent implements GameComponent {
     }
     
     private static Circle addAbsolutePosition(Point2D p, Circle c) {
-    	return new Circle(c.getCenterX()+p.getX(),
-    					  c.getCenterY()+p.getY(),
+    	return new Circle(c.getCentreX()+p.getX(),
+    					  c.getCentreY()+p.getY(),
     					  c.getRadius());
     }
     
@@ -174,74 +180,6 @@ public class CollisionComponent implements GameComponent {
     	return null;
     }
 
-	/**
-	 * Intersects function for generic shapes that calls the appropriate intersects function
-	 * @param s1 first shape
-	 * @param s2 second shape
-	 * @return true if the shapes collide, false otherwise
-	 */
-	public static boolean intersects(Shape s1, Shape s2) {
-		// info on downcasting: https://www.baeldung.com/java-type-casting
-		if(s1 instanceof Rectangle) {
-			Rectangle r1 = (Rectangle) s1;
-			if (s2 instanceof Rectangle) {
-				Rectangle r2 = (Rectangle) s2;
-				return GeometryUtil.intersects(r1,r2);
-			}
-			else if(s2 instanceof Circle) {
-				Circle c2 = (Circle) s2;
-				return GeometryUtil.intersects(c2,r1);
-			}
-		}
-		else if(s1 instanceof Circle) {
-			Circle c1 = (Circle) s1;
-			if (s2 instanceof Rectangle) {
-				Rectangle r2 = (Rectangle) s2;
-				return GeometryUtil.intersects(c1,r2);
-			}
-			else if(s2 instanceof Circle) {
-				Circle c2 = (Circle) s2;
-				return GeometryUtil.intersects(c1,c2);
-			}
-		}
-		
-		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
-		
-		return false;
-	}
-
-	public static Point2D getResolutionVector(Shape s1, Shape s2)
-	{
-		// info on downcasting: https://www.baeldung.com/java-type-casting
-		if(s1 instanceof Rectangle) {
-			Rectangle r1 = (Rectangle) s1;
-			if (s2 instanceof Rectangle) {
-				Rectangle r2 = (Rectangle) s2;
-				return GeometryUtil.getResolutionVector(r1,r2);
-			}
-			else if(s2 instanceof Circle) {
-				Circle c2 = (Circle) s2;
-				return GeometryUtil.getResolutionVector(r1,c2);
-			}
-		}
-		else if(s1 instanceof Circle) {
-			Circle c1 = (Circle) s1;
-			if (s2 instanceof Rectangle) {
-				Rectangle r2 = (Rectangle) s2;
-				return GeometryUtil.getResolutionVector(r2, c1);
-			}
-			else if(s2 instanceof Circle) {
-				Circle c2 = (Circle) s2;
-				//System.out.println("calling it");
-				return GeometryUtil.getResolutionVector(c1,c2);
-			}
-		}
-		
-		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
-		
-		return null;
-		
-	}
    
     
 }

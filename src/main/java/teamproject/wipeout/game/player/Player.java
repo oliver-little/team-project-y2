@@ -1,7 +1,11 @@
 package teamproject.wipeout.game.player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import teamproject.wipeout.engine.component.ItemComponent;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -25,9 +29,12 @@ public class Player extends GameEntity {
     }
 
 
-    public void pickupItem(Integer itemID) {
+    // Adds an item to inventory
+    public void pickupItem(Item item) {
+        Integer itemID = item.id;
         inventory.putIfAbsent(itemID, 0);
         inventory.put(itemID, inventory.get(itemID) + 1);
+        System.out.println("Picked up " + item.name);
     }
 
     public boolean useItem(Integer itemID) {
@@ -47,5 +54,27 @@ public class Player extends GameEntity {
 
     public HashMap<Integer, Integer> getInventory() {
         return inventory;
+    }
+
+    // Scan all entities for items the player is standing over, and pick them up, and delete them from the map
+    public void pickup(List<GameEntity> entities){
+        List<GameEntity> removedItems = new ArrayList<>();
+        for (GameEntity ge: entities){
+            // Check if entity is an item
+            if (ge.hasComponent(ItemComponent.class)){
+                if(HitboxComponent.checkCollides(this, ge)) {
+                    ItemComponent item = ge.getComponent(ItemComponent.class);
+                    this.pickupItem(item.item);
+                    removedItems.add(ge);
+                }
+            }
+        }
+        //cleanup
+        for (GameEntity ge: removedItems) {
+            entities.remove(ge);
+            ge.destroy();
+        }
+
+        System.out.println("Inventory itemID to count:" + this.getInventory().toString());
     }
 }

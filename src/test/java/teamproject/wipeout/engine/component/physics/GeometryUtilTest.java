@@ -4,126 +4,123 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 
 class GeometryUtilTest
 {
 
 	@Test
 	void testCalculateGradient() {
-		Line l = new Line(0,0,10,0);
-		assertEquals(0, GeometryUtil.calculateGradient(l));
+		Segment l = new Segment(0,0,10,0);
+		assertEquals(0, l.calculateGradient());
 		
-		l = new Line(0,0,0,10);
-		assertEquals(Double.MAX_VALUE, GeometryUtil.calculateGradient(l));
+		l = new Segment(0,0,0,10);
+		assertEquals(Double.MAX_VALUE, l.calculateGradient());
 		
-		l = new Line(0,0,10,10);
-		assertEquals(1, GeometryUtil.calculateGradient(l));
+		l = new Segment(0,0,10,10);
+		assertEquals(1, l.calculateGradient());
 		
-		l = new Line(1,1,5,2);
-		assertEquals(0.25, GeometryUtil.calculateGradient(l));
+		l = new Segment(1,1,5,2);
+		assertEquals(0.25, l.calculateGradient());
 		
-		l = new Line(1,1,2,6);
-		assertEquals(5, GeometryUtil.calculateGradient(l));
+		l = new Segment(1,1,2,6);
+		assertEquals(5, l.calculateGradient());
 		
 		//same lines but flipped start and end
-		l = new Line(5,5,8,9);
-		Line l2 = new Line(8,9,5,5);
-		assertEquals(GeometryUtil.calculateGradient(l), GeometryUtil.calculateGradient(l2));
+		l = new Segment(5,5,8,9);
+		Segment l2 = new Segment(8,9,5,5);
+		assertEquals(l.calculateGradient(), l2.calculateGradient());
 		
-		l = new Line(20,0,10,0);
-		assertEquals(0, GeometryUtil.calculateGradient(l));
+		l = new Segment(20,0,10,0);
+		assertEquals(0, l.calculateGradient());
 		
 	}
 	
 	@Test
 	void testCalculateYIntercept() {
-		Line l = new Line(0,0,10,0);
-		assertEquals(0, GeometryUtil.calculateYIntercept(l));
+		Segment l = new Segment(0,0,10,0);
+		assertEquals(0, l.calculateYIntercept());
 		
-		//l = new Line(0,0,0,10);
+		//l = new Segment(0,0,0,10);
 		//the above line does not intercept with the y axis
 		
 		
-		l = new Line(0,0,10,10);
-		assertEquals(0, GeometryUtil.calculateYIntercept(l));
+		l = new Segment(0,0,10,10);
+		assertEquals(0, l.calculateYIntercept());
 		
-		l = new Line(1,1,5,2);
-		assertEquals(0.75, GeometryUtil.calculateYIntercept(l));
+		l = new Segment(1,1,5,2);
+		assertEquals(0.75, l.calculateYIntercept());
 		
-		l = new Line(1,1,2,6);
-		assertEquals(-4, GeometryUtil.calculateYIntercept(l));
+		l = new Segment(1,1,2,6);
+		assertEquals(-4, l.calculateYIntercept());
 		
 	}
 	
 	@Test
 	void testPointOfIntersection() {
 		//horizontal lines that dont meet
-		Line l1 = new Line(0,0,10,0);
-		Line l2 = new Line(0,10,10,10);
-		assertNull(GeometryUtil.pointOfIntersection(l1, l2));
+		Segment l1 = new Segment(0,0,10,0);
+		Segment l2 = new Segment(0,10,10,10);
+		assertNull(l1.pointOfIntersection(l2));
 		
 		//horizontal lines that dont meet
-		l1 = new Line(0,0,10,0);
-		l2 = new Line(20,0,10,0);
-		assertNull(GeometryUtil.pointOfIntersection(l1, l2));
+		l1 = new Segment(0,0,10,0);
+		l2 = new Segment(20,0,10,0);
+		assertNull(l1.pointOfIntersection(l2));
 		
 		//overlapping lines
-		l1 = new Line(0,0,10,10);
-		l2 = new Line(0,0,5,5);
+		l1 = new Segment(0,0,10,10);
+		l2 = new Segment(0,0,5,5);
 		//not null test because there are infinite points of intersection on overlapping lines
-		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		assertNotNull(l1.pointOfIntersection(l2));
 		
 		//overlapping lines - l2 inside l1
-		l1 = new Line(0,0,10,10);
-		l2 = new Line(1,1,5,5);
-		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		l1 = new Segment(0,0,10,10);
+		l2 = new Segment(1,1,5,5);
+		assertNotNull(l1.pointOfIntersection(l2));
 		
 		//overlapping lines - l1 inside l2
-		l1 = new Line(5,5,10,10);
-		l2 = new Line(1,1,20,20);
-		assertNotNull(GeometryUtil.pointOfIntersection(l1, l2));
+		l1 = new Segment(5,5,10,10);
+		l2 = new Segment(1,1,20,20);
+		assertNotNull(l1.pointOfIntersection(l2));
 		
 		//overlapping lines - segments not meet
-		l1 = new Line(0,0,10,10);
-		l2 = new Line(11,11,20,20);
-		assertNull(GeometryUtil.pointOfIntersection(l1, l2));
+		l1 = new Segment(0,0,10,10);
+		l2 = new Segment(11,11,20,20);
+		assertNull(l1.pointOfIntersection(l2));
 		
 		
-		l1 = new Line(0,0,1,1);
-		l2 = new Line(0,1,1,0);
-		assertEquals(new Point2D(0.5,0.5), GeometryUtil.pointOfIntersection(l1, l2));
+		l1 = new Segment(0,0,1,1);
+		l2 = new Segment(0,1,1,0);
+		assertEquals(new Point2D(0.5,0.5), l1.pointOfIntersection(l2));
 		
 	}
 	
 	@Test
-	void testPointOnSegment() {
+	void testContains() {
 		Point2D p = new Point2D(0,0);
-		Line l = new Line(0,0,10,10);
-		assertTrue(GeometryUtil.pointOnSegment(p, l));
+		Segment l = new Segment(0,0,10,10);
+		assertTrue(l.contains(p));
 		
 		p = new Point2D(1,1);
-		l = new Line(0,0,10,10);
-		assertTrue(GeometryUtil.pointOnSegment(p, l));
+		l = new Segment(0,0,10,10);
+		assertTrue(l.contains(p));
 		
 		p = new Point2D(10,10);
-		l = new Line(0,0,10,10);
-		assertTrue(GeometryUtil.pointOnSegment(p, l));
+		l = new Segment(0,0,10,10);
+		assertTrue(l.contains(p));
 		
 		p = new Point2D(11,11);
-		l = new Line(0,0,10,10);
-		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		l = new Segment(0,0,10,10);
+		assertFalse(l.contains(p));
 		
 		p = new Point2D(1,0);
-		l = new Line(0,0,10,10);
-		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		l = new Segment(0,0,10,10);
+		assertFalse(l.contains(p));
 		
 		System.out.println("the test");
-		l = new Line(1, 3, 1, 1);
+		l = new Segment(1, 3, 1, 1);
 		p = new Point2D(1,4);
-		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		assertFalse(l.contains(p));
 	}
 	
 	@Test
@@ -238,43 +235,43 @@ class GeometryUtilTest
 	
 	
 	@Test
-	void testLinesIntersect() {
-		Line l1 = new Line(0,0,10,10);
-		Line l2 = new Line(1,1,3,3);
+	void testSegmentsIntersect() {
+		Segment l1 = new Segment(0,0,10,10);
+		Segment l2 = new Segment(1,1,3,3);
 		assertTrue(GeometryUtil.intersects(l1, l2));
 		
-    	l1= new Line(3, 2, 6, 2);
-    	l2 = new Line(5, 3, 5, 0);
+    	l1= new Segment(3, 2, 6, 2);
+    	l2 = new Segment(5, 3, 5, 0);
     	assertTrue(GeometryUtil.intersects(l1, l2));
-    	assertEquals(new Point2D(5,2),GeometryUtil.pointOfIntersection(l1, l2));
+    	assertEquals(new Point2D(5,2),l1.pointOfIntersection(l2));
 		
     	System.out.println("\nthe test");
-		l1 = new Line(1,2,5,3);
-		l2 = new Line(2,1,7,5);
+		l1 = new Segment(1,2,5,3);
+		l2 = new Segment(2,1,7,5);
 		assertTrue(GeometryUtil.intersects(l1, l2));
 		
-		l1 = new Line(1,2,8,6);
-		l2 = new Line(4,1,8,5);
+		l1 = new Segment(1,2,8,6);
+		l2 = new Segment(4,1,8,5);
 		assertFalse(GeometryUtil.intersects(l1, l2));
 		
 		
-		l1 = new Line(1,7,3,1);
-		l2 = new Line(1,2,3,6);
+		l1 = new Segment(1,7,3,1);
+		l2 = new Segment(1,2,3,6);
 		assertTrue(GeometryUtil.intersects(l1, l2));
-		assertEquals(new Point2D(2,4),GeometryUtil.pointOfIntersection(l1, l2));
+		assertEquals(new Point2D(2,4),l1.pointOfIntersection(l2));
 		
 	}
 	
 	@Test
 	void testCalculateUnitNormal() {
-		Line l = new Line(0,0,0,10);
+		Segment l = new Segment(0,0,0,10);
 		Point2D n1 = new Point2D(1,0);
 		Point2D n2 = new Point2D(-1,0);
 		Point2D actual = GeometryUtil.calculateUnitNormal(l);
 		System.out.println(actual.toString());
 		assertTrue(actual.equals(n1) || actual.equals(n2));
 		
-		l = new Line(0,0,10,10);
+		l = new Segment(0,0,10,10);
 		n1 = new Point2D(-1,1);
 		n1 = n1.multiply(1/Math.sqrt(2));
 		n2 = new Point2D(1,-1);
@@ -285,25 +282,25 @@ class GeometryUtilTest
 	}
 	
 	@Test
-	void testCalculateDistanceBetweenPointAndLine() {
+	void testCalculateDistanceBetweenPointAndSegment() {
 		//point on line
-		Line l = new Line(0,0,10,10);
+		Segment l = new Segment(0,0,10,10);
 		Point2D p = new Point2D(1,1);
 		assertEquals(0, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l));
 		
-		l = new Line(0,0,10,10);
+		l = new Segment(0,0,10,10);
 		p = new Point2D(1,0);
 		assertTrue(GeometryUtil.approxEquals(Math.sqrt(Math.pow(0.5, 2)*2), GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
 		
-		l = new Line(5, 5, 5, 10);
+		l = new Segment(5, 5, 5, 10);
 		p = new Point2D(3,6);
 		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
 		
-		l = new Line(0, 0, 0, 10);
+		l = new Segment(0, 0, 0, 10);
 		p = new Point2D(2,6);
 		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
 		
-		l = new Line(1, 3, 1, 1);
+		l = new Segment(1, 3, 1, 1);
 		p = new Point2D(5,4);
 		double actual = GeometryUtil.calculateDistanceBetweenPointAndLine(p, l);
 		assertTrue(GeometryUtil.approxEquals(Math.sqrt(17), actual));

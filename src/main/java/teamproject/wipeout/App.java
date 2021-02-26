@@ -7,14 +7,17 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import teamproject.wipeout.engine.audio.GameAudio;
+import teamproject.wipeout.engine.component.ItemComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.physics.CollisionComponent;
+import teamproject.wipeout.engine.component.physics.Circle;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
@@ -27,7 +30,9 @@ import teamproject.wipeout.engine.system.CollisionSystem;
 import teamproject.wipeout.engine.system.MovementSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.logic.PlayerState;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.ServerDiscovery;
 import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
@@ -38,6 +43,8 @@ import teamproject.wipeout.networking.server.ServerRunningException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -49,7 +56,8 @@ import java.util.UUID;
 public class App implements Controller {
 
     private StackPane root;
-    private Canvas canvas;
+    private Canvas dynamicCanvas;
+    private Canvas staticCanvas;
     private double windowWidth = 800;
     private double windowHeight = 600;
 
@@ -64,7 +72,7 @@ public class App implements Controller {
      */
     public void createContent() {
         GameScene gameScene = new GameScene();
-        RenderSystem renderer = new RenderSystem(gameScene, canvas);
+        RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new MovementSystem(gameScene));
@@ -88,19 +96,22 @@ public class App implements Controller {
         rec.addComponent(new Transform(100, 125));
         rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
         rec.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec.addComponent(new CollisionComponent(new Rectangle(40,60)));
+        rec.addComponent(new HitboxComponent(new Rectangle(40,60)));
+        rec.addComponent(new CollisionResolutionComponent());
         
         GameEntity rec2 = gameScene.createEntity();
         rec2.addComponent(new Transform(200, 70));
         rec2.addComponent(new RenderComponent(new RectRenderable(Color.RED, 100, 20)));
         rec2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec2.addComponent(new CollisionComponent(new Rectangle(100,20)));
+        rec2.addComponent(new HitboxComponent(new Rectangle(100,20)));
+        rec2.addComponent(new CollisionResolutionComponent());
         
         GameEntity rec3 = gameScene.createEntity();
         rec3.addComponent(new Transform(300, 300));
         rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
         rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
+        rec3.addComponent(new HitboxComponent(new Rectangle(150,150)));
+        rec3.addComponent(new CollisionResolutionComponent(false));
         
         
         // Animated Sprite
@@ -114,7 +125,8 @@ public class App implements Controller {
                         spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
                         Image[] frames = spriteManager.getSpriteSet("player", "walk");
                         spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-                        spriteEntity.addComponent(new CollisionComponent(new Rectangle(34,33)));
+                        spriteEntity.addComponent(new HitboxComponent(new Rectangle(34,33)));
+                        spriteEntity.addComponent(new CollisionResolutionComponent());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -122,33 +134,47 @@ public class App implements Controller {
                 });
         systemUpdater.addSystem(this.playerStateSystem);
 
-
-        GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(250, 250));
+        Player player = gameScene.createPlayer();
+        player.addComponent(new Transform(250, 250));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
-        nge.addComponent(ngePhysics);
-        nge.addComponent(new CollisionComponent(new Rectangle(34, 33)));
-        PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
-        nge.addComponent(new PlayerStateComponent(playerState));
+        player.addComponent(ngePhysics);
 
+        PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
+        player.addComponent(new PlayerStateComponent(playerState));
+        player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
+        player.addComponent(new CollisionResolutionComponent());
 
         try {
             spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
-            nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            player.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
+        List<GameEntity> itemList = new ArrayList<>();
+
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
-        potato.addComponent(new CollisionComponent(true, true, new Rectangle(10, 10)));
+        potato.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 10, 10)));
+        Item potatoItem = new Item("potato", 1);
+        potato.addComponent(new ItemComponent(potatoItem));
+        itemList.add(potato);
+
+        GameEntity potato2 = gameScene.createEntity();
+        potato2.addComponent(new Transform (200, 300));
+        potato2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 200, 300)));
+        Item potatoItem2 = new Item("potato", 1);
+        potato2.addComponent(new ItemComponent(potatoItem));
+        itemList.add(potato2);
 
         try {
             spriteManager.loadSpriteSheet("crops-descriptor.json", "crops.png");
             Image[] frames = spriteManager.getSpriteSet("crops", "potato");
-            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
+            potato2.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,6 +194,7 @@ public class App implements Controller {
         
         GameAudio ga = new GameAudio("backingTrack2.wav");
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
+
         
         input.addKeyAction(KeyCode.LEFT,
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f),
@@ -184,6 +211,10 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DOWN,
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f),
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f));
+
+        input.addKeyAction(KeyCode.X,
+                () -> player.pickup(itemList),
+                () -> System.out.println(""));
 
         
         gl.start();
@@ -241,8 +272,9 @@ public class App implements Controller {
 	@Override
 	public Parent getContent()
 	{
-		canvas = new Canvas(windowWidth, windowHeight);
-        root = new StackPane(canvas);
+		dynamicCanvas = new Canvas(windowWidth, windowHeight);
+        staticCanvas = new Canvas(windowWidth, windowHeight);
+        root = new StackPane(dynamicCanvas, staticCanvas);
 		return root;
 	}
 }

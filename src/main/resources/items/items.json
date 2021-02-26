@@ -6,8 +6,8 @@
 			"id" : 1,
             "itemType" : "NONE",
             "name" : "Tomato",
-			"spriteSheetName" : "",
-            "spriteSetName" : "",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "tomato",
             "maxStackSize" : 99,
             "defaultBuy" : 2.00,
             "defaultSell" : 1.00
@@ -16,11 +16,141 @@
 			"id" : 2,
             "itemType" : "NONE",
             "name": "Lettuce",
-			"spriteSheetName" : "",
-            "spriteSetName" : "",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "lettuce",
             "maxStackSize" : 99,
-            "defaultBuy" : 0.50,
-            "defaultSell" : 0.25
+            "defaultBuy" : 5.00,
+            "defaultSell" : 2.50
+		},
+        {
+			"id" : 3,
+            "itemType" : "NONE",
+            "name": "Yellow Pepper",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "yellow-pepper",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 4,
+            "itemType" : "NONE",
+            "name": "Hot Pepper",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "hot-pepper",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 5,
+            "itemType" : "NONE",
+            "name": "Pickle",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "pickle",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 6,
+            "itemType" : "NONE",
+            "name": "Onion",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "onion",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 7,
+            "itemType" : "NONE",
+            "name": "Potato",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "potato",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 8,
+            "itemType" : "NONE",
+            "name": "Carrot",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "carrot",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 9,
+            "itemType" : "NONE",
+            "name": "Broccoli",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "broccoli",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 10,
+            "itemType" : "NONE",
+            "name": "Garlic",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "garlic",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 11,
+            "itemType" : "NONE",
+            "name": "Sweet Potato",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "sweet-potato",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 12,
+            "itemType" : "NONE",
+            "name": "Aubergine",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "aubergine",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 13,
+            "itemType" : "NONE",
+            "name": "Beetroot",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "beetroot",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 14,
+            "itemType" : "NONE",
+            "name": "Pumpkin",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "pumpkin",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 15,
+            "itemType" : "NONE",
+            "name": "Cauliflower",
+			"spriteSheetName" : "inventory-vegetables",
+            "spriteSetName" : "cauliflower",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
 		}
 	]
 }
