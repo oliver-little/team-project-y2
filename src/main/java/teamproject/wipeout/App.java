@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -76,6 +77,32 @@ public class App implements Controller {
         camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
+        //GameEntity bigBall = gameScene.createEntity();
+        //bigBall.addComponent(new Transform(25, 125));
+        //bigBall.addComponent(new CircleRenderComponent(Color.BLACK, 50, 50));
+        //bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        //bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
+
+        
+        GameEntity rec = gameScene.createEntity();
+        rec.addComponent(new Transform(100, 125));
+        rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
+        rec.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec.addComponent(new CollisionComponent(new Rectangle(40,60)));
+        
+        GameEntity rec2 = gameScene.createEntity();
+        rec2.addComponent(new Transform(200, 70));
+        rec2.addComponent(new RenderComponent(new RectRenderable(Color.RED, 100, 20)));
+        rec2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec2.addComponent(new CollisionComponent(new Rectangle(100,20)));
+        
+        GameEntity rec3 = gameScene.createEntity();
+        rec3.addComponent(new Transform(300, 300));
+        rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
+        rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
+        
+        
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
 
@@ -104,6 +131,7 @@ public class App implements Controller {
         nge.addComponent(new CollisionComponent(new Rectangle(34, 33)));
         PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
         nge.addComponent(new PlayerStateComponent(playerState));
+
 
         try {
             spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
@@ -137,7 +165,7 @@ public class App implements Controller {
         InputHandler input = new InputHandler(root.getScene());
 
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
-        nge.addComponent(ngeSound);
+        //nge.addComponent(ngeSound);
 
         input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
         
