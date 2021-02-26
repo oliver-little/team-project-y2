@@ -166,7 +166,7 @@ public class App implements Controller {
         potato2.addComponent(new Transform (200, 300));
         potato2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 200, 300)));
         Item potatoItem2 = new Item("potato", 1);
-        potato2.addComponent(new ItemComponent(potatoItem));
+        potato2.addComponent(new ItemComponent(potatoItem2));
         itemList.add(potato2);
 
         try {
