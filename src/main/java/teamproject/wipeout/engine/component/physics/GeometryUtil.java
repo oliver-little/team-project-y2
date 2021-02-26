@@ -1,191 +1,13 @@
 package teamproject.wipeout.engine.component.physics;
 
 import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 /**
  * Class containing functions related to geometry in 2D space
  *
  */
 public class GeometryUtil
 {
-	/**
-	 * Calculates the gradient of a line
-	 * @param l the line
-	 * @return the gradient of the line. Double.MAX_VALUE if line is vertical. 0 if line is horizontal.
-	 */
-    public static double calculateGradient(Line l) {
-    	double dx = l.getEndX() - l.getStartX();
-    	//using Double.compare because of imprecision of floating point values
-    	if(Double.compare(dx, 0) == 0) {
-    		return Double.MAX_VALUE;
-    	}
-    	double dy = l.getEndY() - l.getStartY();
-    	
-    	double gradient = dy/dx;
-    	
-    	//stop -0 ever from being returned
-    	if(Math.abs(gradient)==0) {
-    		return 0;
-    	}
-    	
-    	return gradient;
-    }
-    
-    /**
-     * Calculates the y intercept of a line with a known gradient.
-     * @param l the line
-     * @param gradient gradient of the line l
-     * @return the y intercept of the line
-     */
-    public static double calculateYIntercept(Line l, double gradient) {
-    	return l.getStartY()-(gradient*l.getStartX());
-    }
-    
-    /**
-     * Calculates the y intercept of a line
-     * @param l the line
-     * @return the y intercept of the line
-     */
-    public static double calculateYIntercept(Line l) {
-    	return calculateYIntercept(l, calculateGradient(l));
-    }
-	
-    /**
-     * Finds the point of intersection of two lines if they meet
-     * @param l1 the first line
-     * @param l2 the second line
-     * @return the point of intersection if they meet, otherwise null.
-     */
-	public static Point2D pointOfIntersection(Line l1, Line l2) {
-		double gradient_l1 = calculateGradient(l1);    
-		double yIntercept_l1 = calculateYIntercept(l1, gradient_l1);
-		
-		double gradient_l2 = calculateGradient(l2);
-		double yIntercept_l2 = calculateYIntercept(l2, gradient_l2);
-		
-		//System.out.println("gradient_l1: "+gradient_l1);
-		//System.out.println("gradient_l2: "+gradient_l2);
-		//System.out.println("yIntercept_l1: "+yIntercept_l1);
-		//System.out.println("yIntercept_l2: "+yIntercept_l2);
-
-		
-		if(Double.compare(gradient_l1, gradient_l2)==0) {
-			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
-				//lines overlap
-				//TODO make sure point is on both lines
-				Point2D p = new Point2D(l1.getStartX(), l1.getStartY());
-				if(pointOnSegment(p, l2)) {
-					return p;
-				}
-				p = new Point2D(l2.getStartX(), l2.getStartY());
-				if (pointOnSegment(p, l1)){
-					return p;
-				}
-				//otherwise segments do not meet
-				return null;
-				
-			}
-			else {
-				//lines are parallel but not overlapping
-				return null;
-			}
-			
-		}
-		
-		//calculate where lines meet
-		double x=0;
-		double y=0;
-		if(Double.compare(gradient_l1, Double.MAX_VALUE)==0) {
-			x = l1.getStartX();
-			y = gradient_l2*x + yIntercept_l2;
-		}
-		else if(Double.compare(gradient_l2, Double.MAX_VALUE)==0) {
-			x = l2.getStartX();
-			y = gradient_l1*x + yIntercept_l1;
-		}
-		else {
-			x = (yIntercept_l2-yIntercept_l1)/(gradient_l1-gradient_l2);
-			y = gradient_l1*x + yIntercept_l1;
-		}
-		
-		Point2D p = new Point2D(x,y);
-		//System.out.println("point : "+p.toString());
-		//check point lies on l1 and l2
-		if(!pointOnSegment(p, l1) || !pointOnSegment(p, l2)) {
-			//System.out.println("not on at least one segment");
-			return null;
-		}
-		return p;
-	}
-	
-	/**
-	 * Checks whether a point lies on a segment
-	 * @param p the point
-	 * @param l the segment
-	 * @return true if the point lies on the segment, false otherwise.
-	 */
-    public static boolean pointOnSegment(Point2D p, Line l) {
-    	double m = calculateGradient(l);
-    	//System.out.println("m: "+m);
-    	if(Double.compare(m, Double.MAX_VALUE)==0) {
-    		//x=i
-    		if(Double.compare(p.getX(), l.getStartX())!=0) {
-    			return false;
-    		}
-    		
-    	}
-    	else {
-        	double c = calculateYIntercept(l,m);
-        	
-        	//System.out.println("y: "+p.getY());
-        	//System.out.println("mx+c: "+(m*p.getX()+c));
-        
-        	//y = mx + c
-        	double y_new = m*p.getX()+c;
-        	if(!approxEquals(y_new, p.getY())) {
-        		//System.out.println("not on line");
-        		return false;
-        	}
-    	}
-    	
-    	//on line
-    	if(l.getStartX()<=l.getEndX()) {
-        	if(l.getStartY()<=l.getEndY()) {
-            	if(p.getX()>=l.getStartX() && p.getY()>=l.getStartY() &&
-            	   p.getX()<=l.getEndX() && p.getY()<=l.getEndY()) {
-            		return true;
-            	}    		
-        	}
-        	else {
-            	if(p.getX()>=l.getStartX() && p.getY()<=l.getStartY() &&
-            	   p.getX()<=l.getEndX() && p.getY()>=l.getEndY()) {
-            		return true;
-                 }  
-        	}
-    	}
-    	else {
-        	if(l.getStartY()<=l.getEndY()) {
-            	if(p.getX()<=l.getStartX() && p.getY()>=l.getStartY() &&
-            	   p.getX()>=l.getEndX() && p.getY()<=l.getEndY()) {
-            		return true;
-            	}    		
-        	}
-        	else {
-            	if(p.getX()<=l.getStartX() && p.getY()<=l.getStartY() &&
-            	   p.getX()>=l.getEndX() && p.getY()>=l.getEndY()) {
-            		return true;
-                 }  
-        	}
-    	}
-    	return false;
-    }
-    
-
-    
+	    
     /**
      * Checks whether two circles intersect
      * @param c1 first circle
@@ -195,8 +17,8 @@ public class GeometryUtil
     public static boolean intersects(Circle c1, Circle c2) {
     	//intersect if the distance between their two centres is less than the sum of their radiuses
     	double radiusSum = c1.getRadius()+c2.getRadius();
-    	Point2D centre1 = new Point2D(c1.getCenterX(), c1.getCenterY());
-    	Point2D centre2 = new Point2D(c2.getCenterX(), c2.getCenterY());
+    	Point2D centre1 = new Point2D(c1.getCentreX(), c1.getCentreY());
+    	Point2D centre2 = new Point2D(c2.getCentreX(), c2.getCentreY());
     	double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
     	
     	double overlap = radiusSum - distanceBetweenCentres;
@@ -225,8 +47,8 @@ public class GeometryUtil
      * @param l2 second line
      * @return true if the lines intersect, false otherwise.
      */
-    public static boolean intersects(Line l1, Line l2) {
-		if(pointOfIntersection(l1,l2)==null) {
+    public static boolean intersects(Segment l1, Segment l2) {
+		if(l1.pointOfIntersection(l2)==null) {
 			return false;
 		}
 		
@@ -240,11 +62,11 @@ public class GeometryUtil
      * @return true if the circle and rectangle intersect, false otherwise
      */
     public static boolean intersects(Circle c1, Rectangle r1) {    	
-    	Point2D centre = new Point2D(c1.getCenterX(), c1.getCenterY());
+    	Point2D centre = new Point2D(c1.getCentreX(), c1.getCentreY());
     	
     	//System.out.println("centre: "+centre);
     	
-    	Line top = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
+    	Segment top = new Segment(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
     	double distance = calculateDistanceBetweenPointAndLine(centre, top);
     	if(distance<=c1.getRadius()) {
     		//System.out.println(" 1 distance: "+distance);
@@ -252,21 +74,21 @@ public class GeometryUtil
     		return true;
     	}
     	
-    	Line bottom = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
+    	Segment bottom = new Segment(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, bottom);
     	if(distance<=c1.getRadius()) {
     		//System.out.println(" 2 distance: "+distance);
     		return true;
     	}
     	
-    	Line left = new Line(r1.getX(), r1.getY(), r1.getX(),r1.getY()+r1.getHeight());
+    	Segment left = new Segment(r1.getX(), r1.getY(), r1.getX(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, left);
     	if(distance<=c1.getRadius()) {
     		//System.out.println(" 3 distance: "+distance);
     		return true;
     	}
     	
-    	Line right = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
+    	Segment right = new Segment(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, right);
     	if(distance<=c1.getRadius()) {
     		//System.out.println(" 4 distance: "+distance);
@@ -276,13 +98,13 @@ public class GeometryUtil
     	//System.out.println("not colliding with line");
     	
     	//circle inside rectangle
-    	if(isPointInside(centre, r1)) {
+    	if(r1.contains(centre)) {
     		//System.out.println(" circle inside rectangle ");
     		return true;
     	}
     	
     	//also if rectangle inside circle
-    	if(isPointInside(new Point2D(r1.getX(),r1.getY()), c1)) {
+    	if(c1.contains(new Point2D(r1.getX(),r1.getY()))) {
     		//System.out.println(" rectangle inside circle");
     		return true;
     	}
@@ -305,7 +127,7 @@ public class GeometryUtil
     	Point2D tr = tl.add(new Point2D(r1.getWidth(), 0));
     	Point2D bl = tl.add(new Point2D(0, r1.getHeight())) ;
     	
-    	if (isPointInside(tl, r2) || isPointInside(br, r2) || isPointInside(tr, r2) || isPointInside(bl, r2)) {
+    	if (r2.contains(tl) || r2.contains(br) || r2.contains(tr) || r2.contains(bl)) {
     		return true;
     	}
     	
@@ -319,7 +141,7 @@ public class GeometryUtil
     	tr = tl.add(new Point2D(r2.getWidth(), 0));
     	bl = tl.add(new Point2D(0, r2.getHeight())) ;
     	
-    	if (isPointInside(tl, r1) || isPointInside(br, r1) || isPointInside(tr, r1) || isPointInside(bl, r1)) {
+    	if (r1.contains(tl) || r1.contains(br) || r1.contains(tr) || r1.contains(bl)) {
     		return true;
     	}
     	
@@ -353,41 +175,11 @@ public class GeometryUtil
      * @param l the line
      * @return a unit normal vector of the line
      */
-    public static Point2D calculateUnitNormal(Line l) {
+    public static Point2D calculateUnitNormal(Segment l) {
     	return calculateUnitNormal(new Point2D(l.getStartX(), l.getStartY()),new Point2D(l.getEndX(), l.getEndY()));
     }
 
-	/**
-     * Checks whether a point is inside a rectangle (inclusive of edges)
-     * @param p point to check
-     * @param r rectangle
-     * @return true if point is inside rectangle, false otherwise.
-     */
-    public static boolean isPointInside(Point2D p, Rectangle r) {
-    	//check point beyond top left corner of rectangle
-    	if(p.getX()>=r.getX() && p.getY()>=r.getY()) {
-    		//check point before bottom right corner of rectangle
-        	if(p.getX()<=(r.getX()+r.getWidth()) && p.getY()<=(r.getY()) + r.getHeight()) {
-        		return true;
-        	}
-    	}
-    	
-    	return false;
-    }
     
-    /**
-     * Checks whether a point is inside a circle
-     * @param p the point
-     * @param c the circle
-     * @return true if the point is inside, false otherwise
-     */
-    public static boolean isPointInside(Point2D p, Circle c) {
-    	double distance = getDistanceBetweenTwoPoints(p,new Point2D(c.getCenterX(),c.getCenterY()));
-    	if(distance<=c.getRadius()) {
-    		return true;
-    	}
-    	return false;
-    }
     
 	/**
 	 * Calculates the overlap vector of two circles
@@ -398,8 +190,8 @@ public class GeometryUtil
 	public static Point2D getResolutionVector(Circle c1, Circle c2) {
 		//intersect if the distance between their two centres is less than the sum of their radiuses
 		double radiusSum = c1.getRadius()+c2.getRadius();
-		Point2D centre1 = new Point2D(c1.getCenterX(), c1.getCenterY());
-		Point2D centre2 = new Point2D(c2.getCenterX(), c2.getCenterY());
+		Point2D centre1 = new Point2D(c1.getCentreX(), c1.getCentreY());
+		Point2D centre2 = new Point2D(c2.getCentreX(), c2.getCentreY());
 		double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
 		
 		double overlap = radiusSum - distanceBetweenCentres;
@@ -428,14 +220,14 @@ public class GeometryUtil
 		double overlap = Double.MAX_VALUE;
 		Point2D p = new Point2D(0,0);
 		//check each side of rectangle
-		Line top_r1 = new Line(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
-		Line bottom_r1 = new Line(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
-		Line left_r2 = new Line(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
-		Line right_r1 = new Line(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
-		Line top_r2 = new Line(r2.getX(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY());
-		Line bottom_r2 = new Line(r2.getX(), r2.getY()+r2.getHeight(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
-		Line left_r1 = new Line(r1.getX(), r1.getY(), r1.getX(), r1.getY()+r1.getHeight());
-		Line right_r2 = new Line(r2.getX()+r2.getWidth(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
+		Segment top_r1 = new Segment(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY());
+		Segment bottom_r1 = new Segment(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
+		Segment left_r2 = new Segment(r2.getX(), r2.getY(), r2.getX(), r2.getY()+r2.getHeight());
+		Segment right_r1 = new Segment(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(), r1.getY()+r1.getHeight());
+		Segment top_r2 = new Segment(r2.getX(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY());
+		Segment bottom_r2 = new Segment(r2.getX(), r2.getY()+r2.getHeight(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
+		Segment left_r1 = new Segment(r1.getX(), r1.getY(), r1.getX(), r1.getY()+r1.getHeight());
+		Segment right_r2 = new Segment(r2.getX()+r2.getWidth(), r2.getY(), r2.getX()+r2.getWidth(), r2.getY()+r2.getHeight());
 	
 		if((intersects(left_r2, top_r1) && intersects(left_r2, bottom_r1)) ||
 			(intersects(left_r1, top_r2) && intersects(left_r1, bottom_r2))|| 
@@ -494,11 +286,11 @@ public class GeometryUtil
 		//ISSUE: collision with corner of rectangle will cause sudden movement
 		double overlap = Double.MAX_VALUE;
 		Point2D p = new Point2D(0,0);
-		Point2D centre = new Point2D(c.getCenterX(), c.getCenterY());
-		Line top = new Line(r.getX(), r.getY(), r.getX()+r.getWidth(), r.getY());
-		Line bottom = new Line(r.getX(), r.getY()+r.getHeight(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
-		Line right = new Line(r.getX()+r.getWidth(), r.getY(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
-		Line left = new Line(r.getX(), r.getY(), r.getX(), r.getY()+r.getHeight());
+		Point2D centre = new Point2D(c.getCentreX(), c.getCentreY());
+		Segment top = new Segment(r.getX(), r.getY(), r.getX()+r.getWidth(), r.getY());
+		Segment bottom = new Segment(r.getX(), r.getY()+r.getHeight(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
+		Segment right = new Segment(r.getX()+r.getWidth(), r.getY(), r.getX()+r.getWidth(), r.getY()+r.getHeight());
+		Segment left = new Segment(r.getX(), r.getY(), r.getX(), r.getY()+r.getHeight());
 	
 		double minDistance = Double.MAX_VALUE;
 		double distanceToTop = calculateDistanceBetweenPointAndLine(centre, top)-c.getRadius();
@@ -534,9 +326,9 @@ public class GeometryUtil
 	 * @param l the line
 	 * @return the shortest distance between the point and the line
 	 */
-	public static double calculateDistanceBetweenPointAndLine(Point2D p, Line l) {
+	public static double calculateDistanceBetweenPointAndLine(Point2D p, Segment l) {
 		
-		if(pointOnSegment(p,l)) {
+		if(l.contains(p)) {
 			return 0;
 		}
 		
@@ -550,7 +342,7 @@ public class GeometryUtil
 		
 		distance = Math.abs(distance);
 		//check closest point is on segment
-		if(pointOnSegment(d,l)) {
+		if(l.contains(d)) {
 			//System.out.println("point on segment");
 			return distance;
 		}

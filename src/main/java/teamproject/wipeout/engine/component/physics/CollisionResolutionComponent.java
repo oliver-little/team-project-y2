@@ -1,13 +1,7 @@
 package teamproject.wipeout.engine.component.physics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;

@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -141,8 +137,8 @@ public class HitboxComponent implements GameComponent {
     }
     
     private static Circle addAbsolutePosition(Point2D p, Circle c) {
-    	return new Circle(c.getCenterX()+p.getX(),
-    					  c.getCenterY()+p.getY(),
+    	return new Circle(c.getCentreX()+p.getX(),
+    					  c.getCentreY()+p.getY(),
     					  c.getRadius());
     }
     
