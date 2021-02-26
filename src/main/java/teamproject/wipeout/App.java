@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -14,12 +15,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
-import teamproject.wipeout.engine.component.render.CameraComponent;
-import teamproject.wipeout.engine.component.render.InventoryRenderable;
-import teamproject.wipeout.engine.component.render.RectRenderable;
-import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
+import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -81,6 +77,32 @@ public class App implements Controller {
         camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
+        //GameEntity bigBall = gameScene.createEntity();
+        //bigBall.addComponent(new Transform(25, 125));
+        //bigBall.addComponent(new CircleRenderComponent(Color.BLACK, 50, 50));
+        //bigBall.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        //bigBall.addComponent(new CollisionComponent(new Circle(25,25,25)));
+
+        
+        GameEntity rec = gameScene.createEntity();
+        rec.addComponent(new Transform(100, 125));
+        rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
+        rec.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec.addComponent(new CollisionComponent(new Rectangle(40,60)));
+        
+        GameEntity rec2 = gameScene.createEntity();
+        rec2.addComponent(new Transform(200, 70));
+        rec2.addComponent(new RenderComponent(new RectRenderable(Color.RED, 100, 20)));
+        rec2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec2.addComponent(new CollisionComponent(new Rectangle(100,20)));
+        
+        GameEntity rec3 = gameScene.createEntity();
+        rec3.addComponent(new Transform(300, 300));
+        rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
+        rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec3.addComponent(new CollisionComponent(false, new Rectangle(150,150)));
+        
+        
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
 
@@ -110,6 +132,7 @@ public class App implements Controller {
         PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
         nge.addComponent(new PlayerStateComponent(playerState));
 
+
         try {
             spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
@@ -120,6 +143,8 @@ public class App implements Controller {
         
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
+        potato.addComponent(new CollisionComponent(true, true, new Rectangle(10, 10)));
+
         try {
             spriteManager.loadSpriteSheet("crops-descriptor.json", "crops.png");
             Image[] frames = spriteManager.getSpriteSet("crops", "potato");
@@ -137,12 +162,11 @@ public class App implements Controller {
         InputHandler input = new InputHandler(root.getScene());
 
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
-        nge.addComponent(ngeSound);
+        //nge.addComponent(ngeSound);
 
         input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
         
         GameAudio ga = new GameAudio("backingTrack2.wav");
-        ga.play();
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
         
         input.addKeyAction(KeyCode.LEFT,
@@ -208,6 +232,7 @@ public class App implements Controller {
             e.printStackTrace();
         }
     }
+
 
     /**
      * Gets the root node of this class.

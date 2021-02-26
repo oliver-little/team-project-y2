@@ -12,7 +12,7 @@ public class TransformYComparator implements Comparator<GameEntity> {
         Transform transformB = b.getComponent(Transform.class);
 
         if (transformA != null && transformB != null) {
-            return Double.compare(transformA.position.getY(), transformB.position.getY());
+            return Double.compare(transformA.getWorldPosition().getY(), transformB.getWorldPosition().getY());
         }
 
         return 0;

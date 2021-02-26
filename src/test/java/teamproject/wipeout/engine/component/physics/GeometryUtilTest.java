@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.component.physics;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
@@ -115,6 +114,15 @@ class GeometryUtilTest
 		
 		p = new Point2D(11,11);
 		l = new Line(0,0,10,10);
+		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		
+		p = new Point2D(1,0);
+		l = new Line(0,0,10,10);
+		assertFalse(GeometryUtil.pointOnSegment(p, l));
+		
+		System.out.println("the test");
+		l = new Line(1, 3, 1, 1);
+		p = new Point2D(1,4);
 		assertFalse(GeometryUtil.pointOnSegment(p, l));
 	}
 	
@@ -240,7 +248,7 @@ class GeometryUtilTest
     	assertTrue(GeometryUtil.intersects(l1, l2));
     	assertEquals(new Point2D(5,2),GeometryUtil.pointOfIntersection(l1, l2));
 		
-		
+    	System.out.println("\nthe test");
 		l1 = new Line(1,2,5,3);
 		l2 = new Line(2,1,7,5);
 		assertTrue(GeometryUtil.intersects(l1, l2));
@@ -274,6 +282,34 @@ class GeometryUtilTest
 		actual = GeometryUtil.calculateUnitNormal(l);
 		System.out.println("actual: "+actual.toString());
 		assertTrue(actual.equals(n1) || actual.equals(n2));
+	}
+	
+	@Test
+	void testCalculateDistanceBetweenPointAndLine() {
+		//point on line
+		Line l = new Line(0,0,10,10);
+		Point2D p = new Point2D(1,1);
+		assertEquals(0, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l));
+		
+		l = new Line(0,0,10,10);
+		p = new Point2D(1,0);
+		assertTrue(GeometryUtil.approxEquals(Math.sqrt(Math.pow(0.5, 2)*2), GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(5, 5, 5, 10);
+		p = new Point2D(3,6);
+		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(0, 0, 0, 10);
+		p = new Point2D(2,6);
+		assertTrue(GeometryUtil.approxEquals(2, GeometryUtil.calculateDistanceBetweenPointAndLine(p, l)));
+		
+		l = new Line(1, 3, 1, 1);
+		p = new Point2D(5,4);
+		double actual = GeometryUtil.calculateDistanceBetweenPointAndLine(p, l);
+		assertTrue(GeometryUtil.approxEquals(Math.sqrt(17), actual));
+		
+		
+
 	}
 	
 

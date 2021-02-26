@@ -27,4 +27,14 @@ public class GameScene {
         this.entities.add(newEntity);
         return newEntity;
     }
+
+    public void addEntity(GameEntity newEntity) {
+        if (!this.entities.contains(newEntity)) {
+            this.entities.add(newEntity);
+        }
+    }
+
+    public boolean removeEntity(GameEntity toRemove) {
+        return this.entities.remove(toRemove);
+    }
 }

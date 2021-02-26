@@ -14,6 +14,10 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
+/**
+ * System that checks and resolves collisions between entities with the collision component
+ *
+ */
 public class CollisionSystem implements GameSystem {
     
     protected SignatureEntityCollector _entityCollector;
@@ -24,7 +28,7 @@ public class CollisionSystem implements GameSystem {
 
 	@Override
 	public void cleanup() {
-
+		this._entityCollector.cleanup();
 	}
 
 	@Override
@@ -32,8 +36,17 @@ public class CollisionSystem implements GameSystem {
         List<GameEntity> entities = this._entityCollector.getEntities();
 
         for(int i=0; i < entities.size(); i++) {
+			CollisionComponent ci = entities.get(i).getComponent(CollisionComponent.class);
+			if (ci.walkableOn){
+				continue;
+			}
+
             for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
+					CollisionComponent cj = entities.get(j).getComponent(CollisionComponent.class);
+					if (cj.walkableOn){
+						continue;
+					}
                 	Pair<Shape, Shape> p = null;
 					if((p  = CollisionComponent.collides(entities.get(i), entities.get(j)))!=null) {
                 		//System.out.println("Collision");
@@ -63,15 +76,15 @@ public class CollisionSystem implements GameSystem {
     	
     	if(c1.isMoveable) {
         	if(c2.isMoveable) {
-        		t1.position = t1.position.add(resolutionVector.multiply(0.5));
-        		t2.position = t2.position.add(resolutionVector.multiply(-0.5));
+        		t1.setPosition(t1.getPosition().add(resolutionVector.multiply(0.5)));
+        		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-0.5)));
         	}
         	else {
-        		t1.position = t1.position.add(resolutionVector);
+        		t1.setPosition(t1.getPosition().add(resolutionVector));
         	}
     	}
     	else if(c2.isMoveable) {
-    		t2.position = t2.position.add(resolutionVector.multiply(-1));
+    		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-1)));
     	}
     }
     

@@ -1,5 +1,9 @@
 package teamproject.wipeout.game.item;
 
+
+/**
+ * Defines an obtainable item in game.
+ */
 public class Item {
     
     public enum ItemType {
@@ -15,7 +19,7 @@ public class Item {
     public String spriteSheetName;
     public String spriteSetName;
     public Integer maxStackSize;
-    public float defaultBuy;
-    public float defaultSell;
+    public double defaultBuy;
+    public double defaultSell;
     
 }
