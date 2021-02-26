@@ -13,14 +13,16 @@ import teamproject.wipeout.engine.core.GameScene;
  */
 public class SignatureEntityCollector extends BaseEntityCollector {
 
-    protected Set<Class<? extends GameComponent>> _signature;
+    protected Set<Class<? extends GameComponent>> signature;
+    protected List<Class<? extends GameComponent>> signatureList;
     protected List<GameEntity> _entityList;
 
     public SignatureEntityCollector(GameScene scene, Set<Class<? extends GameComponent>> signature) {
         super(scene);
 
         // Convert signature to a list internally for faster iteration
-        this._signature = signature;
+        this.signature = signature;
+        this.signatureList = new ArrayList<>(signature);
 
         this._entityList = new ArrayList<GameEntity>();
     }
@@ -29,25 +31,25 @@ public class SignatureEntityCollector extends BaseEntityCollector {
         return this._entityList;
     }
 
-    protected void _addComponent(GameEntity entity) {
-        if (this._testComponent(entity) && !this._entityList.contains(entity)) {
+    protected void addComponent(GameEntity entity) {
+        if (this.testComponent(entity) && !this._entityList.contains(entity)) {
             this._entityList.add(entity);
         }
     }
 
-    protected void _removeComponent(GameEntity entity) {
-        if (!this._testComponent(entity)) {
+    protected void removeComponent(GameEntity entity) {
+        if (!this.testComponent(entity)) {
             this._entityList.remove(entity);
         }
     }
 
-    protected void _removeEntity(GameEntity entity) {
+    protected void removeEntity(GameEntity entity) {
         this._entityList.remove(entity);
     }
     
 
-    private boolean _testComponent(GameEntity entity) {
-        for (Class<? extends GameComponent> componentClass : this._signature) {
+    private boolean testComponent(GameEntity entity) {
+        for (Class<? extends GameComponent> componentClass : this.signatureList) {
             if (!entity.hasComponent(componentClass)) {
                 return false;
             }

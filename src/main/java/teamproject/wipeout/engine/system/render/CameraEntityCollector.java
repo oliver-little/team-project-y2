@@ -41,13 +41,13 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
 
         switch (change) {
             case "COMPONENT_ADDED":
-                this._addComponent(entity);
+                this.addComponent(entity);
                 break;
             case "COMPONENT_REMOVED":
-                this._removeComponent(entity);
+                this.removeComponent(entity);
                 break;
             case "ENTITY_REMOVED":
-                this._removeEntity(entity);
+                this.removeEntity(entity);
                 break;
             default:
                 System.out.println("Invalid entity change message:" + change);
@@ -55,7 +55,7 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
         }
     }
 
-    protected void _addComponent(GameEntity entity) {
+    protected void addComponent(GameEntity entity) {
         if (this._camera == null && entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class)) {
             this._camera = entity;
             this._cameraTransform = entity.getComponent(Transform.class);
@@ -63,7 +63,7 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
         }
     };
 
-    protected void _removeComponent(GameEntity entity) {
+    protected void removeComponent(GameEntity entity) {
         if (entity.getUUID() == this._camera.getUUID() && !(entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class))) {
             this._camera = null;
             this._cameraTransform = null;
@@ -71,7 +71,7 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
         }
     }
 
-    protected void _removeEntity(GameEntity entity) {
+    protected void removeEntity(GameEntity entity) {
         if (entity.getUUID() == this._camera.getUUID()) {
             this._camera = null;
             this._cameraTransform = null;
