@@ -7,12 +7,10 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.physics.Circle;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
@@ -117,7 +115,7 @@ public class App implements Controller {
                     GameEntity spriteEntity = gameScene.createEntity();
                     spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
                     try {
-                        spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
+                        spriteManager.loadSpriteSheet("player/spritesheet-descriptor.json", "player/spritesheet.png");
                         Image[] frames = spriteManager.getSpriteSet("player", "walk");
                         spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
                         spriteEntity.addComponent(new HitboxComponent(new Rectangle(34,33)));
@@ -142,7 +140,7 @@ public class App implements Controller {
 
 
         try {
-            spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
+            spriteManager.loadSpriteSheet("player/spritesheet-descriptor.json", "player/spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
             nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         } catch (Exception e) {
