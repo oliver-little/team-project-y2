@@ -5,11 +5,22 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
+<<<<<<< HEAD
 import javafx.scene.shape.Shape;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Pair;
 import teamproject.wipeout.engine.component.physics.CollisionComponent;
+=======
+import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.physics.Pair;
+import teamproject.wipeout.engine.component.physics.Shape;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.physics.FacingDirection;
+import teamproject.wipeout.engine.component.physics.GeometryUtil;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
+>>>>>>> collisions
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
@@ -23,7 +34,7 @@ public class CollisionSystem implements GameSystem {
     protected SignatureEntityCollector _entityCollector;
 
     public CollisionSystem(GameScene e) {
-        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, CollisionComponent.class));
+        this._entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, HitboxComponent.class, CollisionResolutionComponent.class));
     }
 
 	@Override
@@ -39,9 +50,9 @@ public class CollisionSystem implements GameSystem {
             for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
                 	Pair<Shape, Shape> p = null;
-					if((p  = CollisionComponent.collides(entities.get(i), entities.get(j)))!=null) {
+					if((p  = HitboxComponent.collides(entities.get(i), entities.get(j)))!=null) {
                 		//System.out.println("Collision");
-						resolveCollision(entities.get(i),entities.get(j), p);
+						CollisionResolutionComponent.resolveCollision(entities.get(i),entities.get(j), p);
                                         
                 	}
             	}
@@ -50,6 +61,7 @@ public class CollisionSystem implements GameSystem {
         
     }
     
+<<<<<<< HEAD
     public void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
     	Point2D resolutionVector = CollisionComponent.getResolutionVector(p.first,p.second);
     	if (resolutionVector==null) {
@@ -78,6 +90,8 @@ public class CollisionSystem implements GameSystem {
     		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-1)));
     	}
     }
+=======
+>>>>>>> collisions
     
 
 
