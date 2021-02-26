@@ -16,6 +16,7 @@ import teamproject.wipeout.engine.component.physics.CollisionComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.InventoryRenderable;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
@@ -127,13 +128,10 @@ public class App implements Controller {
             e.printStackTrace();
         }
         
-        InventoryEntity[] inventorySlots = new InventoryEntity[10];
-        
-        for(int i = 0; i < 10; i++) {
-	        InventoryEntity inventory = new InventoryEntity(gameScene, 20 + (75*i), 500);
-	        inventorySlots[i] = inventory;
-	        gameScene.entities.add(inventory);
-        }
+        InventoryEntity invEntity;
+    	invEntity = new InventoryEntity(gameScene, spriteManager);
+    	gameScene.entities.add(invEntity);
+    	invEntity.addComponent(new RenderComponent(new InventoryRenderable(invEntity)));
         
         // Input
         InputHandler input = new InputHandler(root.getScene());
