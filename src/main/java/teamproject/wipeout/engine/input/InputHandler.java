@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.input;
 
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -13,7 +14,7 @@ import java.util.HashSet;
  * All input event listeners can be temporarily disabled.
  *
  * @see InputKeyAction
- * @see InputMouseAction
+ * @see InputClickableAction
  */
 public class InputHandler {
 
@@ -148,7 +149,50 @@ public class InputHandler {
      *                  with {@code double x} and {@code double y} being the mouse click coordinates
      *                  inside the {@code scene}.
      */
-    public void onMouseClick(InputMouseAction action) {
+    public void onMouseClick(MouseButton button, InputMouseAction action) {
+        this.onMouseClickExists = true;
+        // Register inputScene's listener
+        this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
+            // Do nothing when input is disabled.
+            if (this.disableInput) {
+                return;
+            }
+
+            MouseButton mouseButton = mouseClick.getButton();
+
+            if (this.isDragging != null) {
+                // MOUSE_CLICKED is called even after MOUSE_RELEASED in the onMouseDrag method
+                // so to not call both, isDragging is set to null in this method rather than onMouseDrag.
+                // onMouseDrag ended if the clicked (= released) mouse button is equal to the mouse button pressed
+                // while the mouse was dragged. Do something if the clicked (= released) mouse button is equal
+                // to the mouse button which is being listened to.
+                if (mouseButton == button && this.isDragging == mouseButton) {
+                    this.isDragging = null;
+                }
+                // Otherwise ignore other mouse button clicks while the mouse is dragged.
+                return;
+            }
+
+            // Do something if the isDragging is null and when the clicked (= released) mouse button is equal
+            // to the mouse button which is being listened to.
+            if (mouseButton == button) {
+                action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
+            }
+        });
+    }
+
+    /**
+     * Registers a listener for the specified mouse button click.
+     * Click is registered when the mouse button is released.
+     *
+     * @param button    Mouse button whose click (= release) will be listened to.
+     *                  Mouse button is of type {@link MouseButton}.
+     * @param action    Action performed when the mouse button is clicked (= released).
+     *                  The action is of type {@link InputClickableAction#performMouseClickAction(double x, double y)}
+     *                  with {@code double x} and {@code double y} being the mouse click coordinates
+     *                  inside the {@code scene}.
+     */
+    public void onMouseClick(InputClickableAction action) {
         this.onMouseClickExists = true;
         // Register inputScene's listener
         this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
@@ -203,16 +247,18 @@ public class InputHandler {
             }
 
             // Do something when the pressed mouse button is equal to the mouse button which is being listened to.
-            double mouseClickX = mouseClick.getSceneX();
-            double mouseClickY = mouseClick.getSceneY();
+            if (mouseClick.getButton() == button) {
+                double mouseClickX = mouseClick.getSceneX();
+                double mouseClickY = mouseClick.getSceneY();
 
-            if (this.isDragging == null) {
-                // Mouse drag start
-                this.isDragging = button;
-                pressAction.performMouseClickAction(mouseClickX, mouseClickY, mouseClick.getButton());
-            } else {
-                // Mouse drag happening
-                dragAction.performMouseClickAction(mouseClickX, mouseClickY, mouseClick.getButton());
+                if (this.isDragging == null) {
+                    // Mouse drag start
+                    this.isDragging = button;
+                    pressAction.performMouseClickAction(mouseClickX, mouseClickY);
+                } else {
+                    // Mouse drag happening
+                    dragAction.performMouseClickAction(mouseClickX, mouseClickY);
+                }
             }
         });
 
@@ -226,9 +272,9 @@ public class InputHandler {
             // Do something when the released mouse button is equal to both:
             // 1. the mouse button which is being listened to
             // and 2. the button that is being pressed during mouse dragging.
-            if (this.isDragging == mouseRelease.getButton()) {
+            if (mouseRelease.getButton() == button && this.isDragging == mouseRelease.getButton()) {
                 // Mouse drag end
-                releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY(), mouseRelease.getButton());
+                releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY());
 
                 // If no onMouseClick listener exists (= onMouseClick won't be called after this method)
                 // then set isDragging to null
@@ -237,6 +283,30 @@ public class InputHandler {
                 }
             }
         });
+    }
+
+    public EventHandler<MouseEvent> mouseHovering;
+
+    public void onMouseHover(InputMouseAction hoverAction) {
+        this.mouseHovering = (mouseMove) -> {
+            // Do nothing when input is disabled.
+            if (this.disableInput) {
+                return;
+            }
+
+            if (this.isDragging == null) {
+                hoverAction.performMouseClickAction(mouseMove.getSceneX(), mouseMove.getSceneY());
+            }
+        };
+        this.inputScene.addEventFilter(MouseEvent.MOUSE_MOVED, this.mouseHovering);
+    }
+
+    public void removeMouseHover() {
+        if (this.mouseHovering == null) {
+            return;
+        }
+        this.inputScene.removeEventFilter(MouseEvent.MOUSE_MOVED, this.mouseHovering);
+        this.mouseHovering = null;
     }
 
 }

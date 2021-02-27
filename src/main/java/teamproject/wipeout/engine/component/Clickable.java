@@ -1,15 +1,15 @@
 package teamproject.wipeout.engine.component;
 
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.input.InputMouseAction;
+import teamproject.wipeout.engine.input.InputClickableAction;
 
 public class Clickable implements EntityAwareGameComponent {
 
-    public InputMouseAction onClick;
-    
+    public InputClickableAction onClick;
+
     private GameEntity entity;
 
-    public Clickable(InputMouseAction onClick) {
+    public Clickable(InputClickableAction onClick) {
         this.onClick = onClick;
     }
 

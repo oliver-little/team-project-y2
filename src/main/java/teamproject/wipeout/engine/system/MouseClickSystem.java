@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.engine.input.InputClickableAction;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.input.InputMouseAction;
 import teamproject.wipeout.util.sort.*;
@@ -39,7 +40,7 @@ public class MouseClickSystem implements EventSystem {
         this.collector.cleanup();
     }
 
-    public InputMouseAction onClick = (x, y, button) -> {
+    public InputClickableAction onClick = (x, y, button) -> {
         Clickable clicked = this.getClicked(x, y);
         if (clicked != null && clicked.onClick != null) {
             clicked.onClick.performMouseClickAction(x, y, button);

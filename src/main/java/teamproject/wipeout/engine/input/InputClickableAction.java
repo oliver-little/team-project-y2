@@ -10,12 +10,12 @@ import javafx.scene.input.MouseButton;
  * @see javafx.scene.input.MouseEvent
  */
 @FunctionalInterface
-public interface InputMouseAction {
+public interface InputClickableAction {
     /**
      * Method representing the action that will be triggered by a certain {@code MouseEvent}.
      *
      * @param x is the X-coordinate at which the {@code MouseEvent} occurred.
      * @param y is the Y-coordinate at which the {@code MouseEvent} occurred.
      */
-    void performMouseClickAction(double x, double y);
+    void performMouseClickAction(double x, double y, MouseButton mouseButton);
 }
