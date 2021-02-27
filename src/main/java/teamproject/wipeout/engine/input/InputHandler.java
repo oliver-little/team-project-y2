@@ -148,8 +148,7 @@ public class InputHandler {
      *                  with {@code double x} and {@code double y} being the mouse click coordinates
      *                  inside the {@code scene}.
      */
-    public void onMouseClick(MouseButton button,
-                             InputMouseAction action) {
+    public void onMouseClick(InputMouseAction action) {
         this.onMouseClickExists = true;
         // Register inputScene's listener
         this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
@@ -166,7 +165,7 @@ public class InputHandler {
                 // onMouseDrag ended if the clicked (= released) mouse button is equal to the mouse button pressed
                 // while the mouse was dragged. Do something if the clicked (= released) mouse button is equal
                 // to the mouse button which is being listened to.
-                if (mouseButton == button && this.isDragging == mouseButton) {
+                if (this.isDragging == mouseButton) {
                     this.isDragging = null;
                 }
                 // Otherwise ignore other mouse button clicks while the mouse is dragged.
@@ -175,9 +174,7 @@ public class InputHandler {
 
             // Do something if the isDragging is null and when the clicked (= released) mouse button is equal
             // to the mouse button which is being listened to.
-            if (mouseButton == button) {
-                action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
-            }
+            action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY(), mouseButton);
         });
     }
 
@@ -206,18 +203,16 @@ public class InputHandler {
             }
 
             // Do something when the pressed mouse button is equal to the mouse button which is being listened to.
-            if (mouseClick.getButton() == button) {
-                double mouseClickX = mouseClick.getSceneX();
-                double mouseClickY = mouseClick.getSceneY();
+            double mouseClickX = mouseClick.getSceneX();
+            double mouseClickY = mouseClick.getSceneY();
 
-                if (this.isDragging == null) {
-                    // Mouse drag start
-                    this.isDragging = button;
-                    pressAction.performMouseClickAction(mouseClickX, mouseClickY);
-                } else {
-                    // Mouse drag happening
-                    dragAction.performMouseClickAction(mouseClickX, mouseClickY);
-                }
+            if (this.isDragging == null) {
+                // Mouse drag start
+                this.isDragging = button;
+                pressAction.performMouseClickAction(mouseClickX, mouseClickY, mouseClick.getButton());
+            } else {
+                // Mouse drag happening
+                dragAction.performMouseClickAction(mouseClickX, mouseClickY, mouseClick.getButton());
             }
         });
 
@@ -231,9 +226,9 @@ public class InputHandler {
             // Do something when the released mouse button is equal to both:
             // 1. the mouse button which is being listened to
             // and 2. the button that is being pressed during mouse dragging.
-            if (mouseRelease.getButton() == button && this.isDragging == mouseRelease.getButton()) {
+            if (this.isDragging == mouseRelease.getButton()) {
                 // Mouse drag end
-                releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY());
+                releaseAction.performMouseClickAction(mouseRelease.getSceneX(), mouseRelease.getSceneY(), mouseRelease.getButton());
 
                 // If no onMouseClick listener exists (= onMouseClick won't be called after this method)
                 // then set isDragging to null

@@ -2,7 +2,6 @@ package teamproject.wipeout.engine.system.render;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -13,7 +12,7 @@ import teamproject.wipeout.engine.entity.collector.BaseEntityCollector;
 
 public class RendererEntityCollector extends BaseEntityCollector {
 
-    public static final Set<Class<? extends GameComponent>> signature = Set.of(Transform.class, RenderComponent.class);
+    public static final List<Class<? extends GameComponent>> signature = List.of(Transform.class, RenderComponent.class);
     protected List<GameEntity> dynamicEntityList;
     protected List<GameEntity> staticEntityList;
 
@@ -22,6 +21,11 @@ public class RendererEntityCollector extends BaseEntityCollector {
 
         this.dynamicEntityList = new ArrayList<GameEntity>();
         this.staticEntityList = new ArrayList<GameEntity>();
+
+        // Go through all existing entities once created
+        for (GameEntity entity: this.scene.entities) {
+            this.addComponent(entity);
+        }
     }
 
     public List<GameEntity> getEntities() {
@@ -32,8 +36,8 @@ public class RendererEntityCollector extends BaseEntityCollector {
         return this.staticEntityList;
     }
 
-    protected void _addComponent(GameEntity entity) {
-        if (this._testComponent(entity)) {
+    protected void addComponent(GameEntity entity) {
+        if (this.testComponent(entity)) {
             RenderComponent rc = entity.getComponent(RenderComponent.class);
             if (rc.isStatic() && !this.staticEntityList.contains(entity)) {
                 this.staticEntityList.add(entity);
@@ -44,20 +48,20 @@ public class RendererEntityCollector extends BaseEntityCollector {
         }
     }
 
-    protected void _removeComponent(GameEntity entity) {
-        if (!this._testComponent(entity)) {
+    protected void removeComponent(GameEntity entity) {
+        if (!this.testComponent(entity)) {
             this.dynamicEntityList.remove(entity);
             this.staticEntityList.remove(entity);
         }
     }
 
-    protected void _removeEntity(GameEntity entity) {
+    protected void removeEntity(GameEntity entity) {
         this.dynamicEntityList.remove(entity);
         this.staticEntityList.remove(entity);
     }
     
 
-    private boolean _testComponent(GameEntity entity) {
+    private boolean testComponent(GameEntity entity) {
         for (Class<? extends GameComponent> componentClass : signature) {
             if (!entity.hasComponent(componentClass)) {
                 return false;
