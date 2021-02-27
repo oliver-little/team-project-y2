@@ -1,10 +1,10 @@
 {
 	"fileType": "SpritesheetDescriptor",
 	"version": "1.0.0",
-	"name": "inventory-vegetables",
+	"name": "inventory-fruit",
 	"sprites": [
 		{
-			"name": "yellow-pepper",
+			"name": "apple",
 			"type": "sprite",
 			"parameters" : {
 				"x": 0,
@@ -14,7 +14,7 @@
 			}
 		},
 		{
-			"name": "tomato",
+			"name": "pear",
 			"type": "sprite",
 			"parameters" : {
 				"x": 32,
@@ -23,8 +23,8 @@
 				"height": 32
 			}
 		},
-		{
-			"name": "hot-pepper",
+        {
+			"name": "lemon",
 			"type": "sprite",
 			"parameters" : {
 				"x": 64,
@@ -33,28 +33,18 @@
 				"height": 32
 			}
 		},
-		{
-			"name": "onion",
+        {
+			"name": "orange",
 			"type": "sprite",
 			"parameters" : {
-				"x": 0,
-				"y": 32,
+				"x": 96,
+				"y": 0,
 				"width": 32,
 				"height": 32
 			}
 		},
-		{
-			"name": "carrot",
-			"type": "sprite",
-			"parameters" : {
-				"x": 64,
-				"y": 32,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "broccoli",
+        {
+			"name": "strawberry",
 			"type": "sprite",
 			"parameters" : {
 				"x": 96,
@@ -63,28 +53,18 @@
 				"height": 32
 			}
 		},
-		{
-			"name": "beetroot",
+        {
+			"name": "cherry",
 			"type": "sprite",
 			"parameters" : {
-				"x": 96,
-				"y": 64,
+				"x": 64,
+				"y": 32,
 				"width": 32,
 				"height": 32
 			}
 		},
-		{
-			"name": "lettuce",
-			"type": "sprite",
-			"parameters" : {
-				"x": 64,
-				"y": 96,
-				"width": 64,
-				"height": 64
-			}
-		},
-		{
-			"name": "cauliflower",
+        {
+			"name": "pineapple",
 			"type": "sprite",
 			"parameters" : {
 				"x": 0,
@@ -92,6 +72,17 @@
 				"width": 64,
 				"height": 64
 			}
+		},
+        {
+			"name": "banana",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 160,
+				"width": 64,
+				"height": 64
+			}
 		}
-	]
+
+    ]
 }

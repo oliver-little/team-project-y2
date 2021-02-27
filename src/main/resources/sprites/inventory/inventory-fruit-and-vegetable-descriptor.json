@@ -1,10 +1,10 @@
 {
 	"fileType": "SpritesheetDescriptor",
 	"version": "1.0.0",
-	"name": "inventory-vegetables",
+	"name": "inventory-fruit-and-vegetable",
 	"sprites": [
 		{
-			"name": "yellow-pepper",
+			"name": "potato",
 			"type": "sprite",
 			"parameters" : {
 				"x": 0,
@@ -14,84 +14,94 @@
 			}
 		},
 		{
-			"name": "tomato",
+			"name": "leek",
 			"type": "sprite",
 			"parameters" : {
-				"x": 32,
-				"y": 0,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "hot-pepper",
-			"type": "sprite",
-			"parameters" : {
-				"x": 64,
-				"y": 0,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "onion",
-			"type": "sprite",
-			"parameters" : {
-				"x": 0,
-				"y": 32,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "carrot",
-			"type": "sprite",
-			"parameters" : {
-				"x": 64,
-				"y": 32,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "broccoli",
-			"type": "sprite",
-			"parameters" : {
-				"x": 96,
-				"y": 32,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "beetroot",
-			"type": "sprite",
-			"parameters" : {
-				"x": 96,
-				"y": 64,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
-			"name": "lettuce",
-			"type": "sprite",
-			"parameters" : {
-				"x": 64,
-				"y": 96,
-				"width": 64,
-				"height": 64
-			}
-		},
-		{
-			"name": "cauliflower",
-			"type": "sprite",
-			"parameters" : {
-				"x": 0,
+				"x": 384,
 				"y": 160,
-				"width": 64,
-				"height": 64
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "parsnip",
+			"type": "sprite",
+			"parameters" : {
+				"x": 800,
+				"y": 640,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "sweetcorn",
+			"type": "sprite",
+			"parameters" : {
+				"x": 928,
+				"y": 320,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "red-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 384,
+				"y": 320,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "green-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 352,
+				"y": 320,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "yellow-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 416,
+				"y": 320,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "purple-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 160,
+				"y": 352,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "brown-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 256,
+				"y": 352,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "generic-seeds",
+			"type": "sprite",
+			"parameters" : {
+				"x": 128,
+				"y": 352,
+				"width": 32,
+				"height": 32
 			}
 		}
-	]
+    ]
 }

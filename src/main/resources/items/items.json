@@ -43,7 +43,7 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 6,
+			"id" : 5,
             "itemType" : "NONE",
             "name": "Onion",
 			"spriteSheetName" : "inventory-vegetables",
@@ -53,17 +53,17 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 7,
+			"id" : 6,
             "itemType" : "NONE",
             "name": "Potato",
-			"spriteSheetName" : "inventory-vegetables",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
             "spriteSetName" : "potato",
             "maxStackSize" : 99,
             "defaultBuy" : 1.50,
             "defaultSell" : 0.75
 		},
         {
-			"id" : 8,
+			"id" : 7,
             "itemType" : "NONE",
             "name": "Carrot",
 			"spriteSheetName" : "inventory-vegetables",
@@ -73,7 +73,7 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 9,
+			"id" : 8,
             "itemType" : "NONE",
             "name": "Broccoli",
 			"spriteSheetName" : "inventory-vegetables",
@@ -83,7 +83,7 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 13,
+			"id" : 9,
             "itemType" : "NONE",
             "name": "Beetroot",
 			"spriteSheetName" : "inventory-vegetables",
@@ -93,7 +93,7 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 14,
+			"id" : 10,
             "itemType" : "NONE",
             "name": "Pumpkin",
 			"spriteSheetName" : "inventory-vegetables",
@@ -103,7 +103,7 @@
             "defaultSell" : 0.75
 		},
         {
-			"id" : 15,
+			"id" : 11,
             "itemType" : "NONE",
             "name": "Cauliflower",
 			"spriteSheetName" : "inventory-vegetables",
@@ -111,6 +111,396 @@
             "maxStackSize" : 99,
             "defaultBuy" : 1.50,
             "defaultSell" : 0.75
+		},
+        {
+			"id" : 12,
+            "itemType" : "NONE",
+            "name": "Apple",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "apple",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 13,
+            "itemType" : "NONE",
+            "name": "Pear",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "pear",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 14,
+            "itemType" : "NONE",
+            "name": "Lemon",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "lemon",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 15,
+            "itemType" : "NONE",
+            "name": "Orange",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "orange",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 16,
+            "itemType" : "NONE",
+            "name": "Strawberry",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "strawberry",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 17,
+            "itemType" : "NONE",
+            "name": "Cherry",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "cherry",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 18,
+            "itemType" : "NONE",
+            "name": "Blackberry",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "blackberry",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 19,
+            "itemType" : "NONE",
+            "name": "Pineapple",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "pineapple",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 20,
+            "itemType" : "NONE",
+            "name": "Banana",
+			"spriteSheetName" : "inventory-fruit",
+            "spriteSetName" : "banana",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 21,
+            "itemType" : "NONE",
+            "name": "Leek",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "leek",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 22,
+            "itemType" : "NONE",
+            "name": "Parsnip",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "parsnip",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 23,
+            "itemType" : "NONE",
+            "name": "Sweetcorn",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "sweetcorn",
+            "maxStackSize" : 99,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 24,
+            "itemType" : "USABLE",
+            "name": "Hoe",
+			"spriteSheetName" : "inventory-tools",
+            "spriteSetName" : "hoe",
+            "maxStackSize" : 1,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 25,
+            "itemType" : "USABLE",
+            "name": "Shovel",
+			"spriteSheetName" : "inventory-tools",
+            "spriteSetName" : "shovel",
+            "maxStackSize" : 1,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 26,
+            "itemType" : "USABLE",
+            "name": "Axe",
+			"spriteSheetName" : "inventory-tools",
+            "spriteSetName" : "axe",
+            "maxStackSize" : 1,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 27,
+            "itemType" : "USABLE",
+            "name": "Pickaxe",
+			"spriteSheetName" : "inventory-tools",
+            "spriteSetName" : "pickaxe",
+            "maxStackSize" : 1,
+            "defaultBuy" : 1.50,
+            "defaultSell" : 0.75
+		},
+        {
+			"id" : 28,
+            "itemType" : "PLANTABLE",
+            "name" : "Tomato Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "red-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 29,
+            "itemType" : "PLANTABLE",
+            "name" : "Lettuce Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "green-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 30,
+            "itemType" : "PLANTABLE",
+            "name" : "Yellow Pepper Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "yellow-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 31,
+            "itemType" : "PLANTABLE",
+            "name" : "Hot Pepper Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "red-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 32,
+            "itemType" : "PLANTABLE",
+            "name" : "Onion Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "purple-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 33,
+            "itemType" : "PLANTABLE",
+            "name" : "Potato Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "brown-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 34,
+            "itemType" : "PLANTABLE",
+            "name" : "Carrot Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "generic-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 35,
+            "itemType" : "PLANTABLE",
+            "name" : "Broccoli Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "green-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 36,
+            "itemType" : "PLANTABLE",
+            "name" : "Beetroot Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "purple-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 37,
+            "itemType" : "PLANTABLE",
+            "name" : "Pumpkin Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "generic-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 38,
+            "itemType" : "PLANTABLE",
+            "name" : "Cauliflower Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "generic-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 39,
+            "itemType" : "PLANTABLE",
+            "name" : "Blackberry Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "purple-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 40,
+            "itemType" : "PLANTABLE",
+            "name" : "Leek Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "green-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 41,
+            "itemType" : "PLANTABLE",
+            "name" : "Parsnip Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "generic-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 42,
+            "itemType" : "PLANTABLE",
+            "name" : "Sweetcorn Seeds",
+			"spriteSheetName" : "inventory-fruit-and-vegetable",
+            "spriteSetName" : "yellow-seeds",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 43,
+            "itemType" : "PLANTABLE",
+            "name" : "Apple Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling1",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 44,
+            "itemType" : "PLANTABLE",
+            "name" : "Pear Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling4",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 45,
+            "itemType" : "PLANTABLE",
+            "name" : "Lemon Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling2",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 46,
+            "itemType" : "PLANTABLE",
+            "name" : "Orange Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling2",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 47,
+            "itemType" : "PLANTABLE",
+            "name" : "Strawberry Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling3",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 48,
+            "itemType" : "PLANTABLE",
+            "name" : "Cherry Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling3",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 49,
+            "itemType" : "PLANTABLE",
+            "name" : "Pineapple Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling5",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
+		},
+        {
+			"id" : 50,
+            "itemType" : "PLANTABLE",
+            "name" : "Banana Tree Sapling",
+			"spriteSheetName" : "fruit-tree",
+            "spriteSetName" : "sapling6",
+            "maxStackSize" : 99,
+            "defaultBuy" : 2.00,
+            "defaultSell" : 1.00
 		}
 	]
 }

@@ -115,7 +115,7 @@ public class App implements Controller {
                     GameEntity spriteEntity = gameScene.createEntity();
                     spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
                     try {
-                        spriteManager.loadSpriteSheet("player/spritesheet-descriptor.json", "player/spritesheet.png");
+                        spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
                         Image[] frames = spriteManager.getSpriteSet("player", "walk");
                         spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
                         spriteEntity.addComponent(new HitboxComponent(new Rectangle(34,33)));
@@ -140,7 +140,7 @@ public class App implements Controller {
 
 
         try {
-            spriteManager.loadSpriteSheet("player/spritesheet-descriptor.json", "player/spritesheet.png");
+            spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
             nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         } catch (Exception e) {
