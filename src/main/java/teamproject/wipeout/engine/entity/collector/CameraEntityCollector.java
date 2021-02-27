@@ -9,30 +9,35 @@ import teamproject.wipeout.util.EventObserver;
 
 public class CameraEntityCollector implements EventObserver<EntityChangeData> {
 
-    protected GameEntity _camera;
-    protected Transform _cameraTransform;
-    protected CameraComponent _cameraComponent;
-    protected GameScene _scene;
+    protected GameEntity camera;
+    protected Transform cameraTransform;
+    protected CameraComponent cameraComponent;
+    protected GameScene scene;
 
     public CameraEntityCollector(GameScene scene) {
-        this._scene = scene;
-        this._scene.entityChangeEvent.addObserver(this);
+        this.scene = scene;
+        this.scene.entityChangeEvent.addObserver(this);
+
+        // Go through all existing entities once created
+        for (GameEntity entity: this.scene.entities) {
+            this.addComponent(entity);
+        }
     }
 
     public void cleanup() {
-        this._scene.entityChangeEvent.removeObserver(this);
+        this.scene.entityChangeEvent.removeObserver(this);
     }
 
     public GameEntity getMainCamera() {
-        return this._camera;
+        return this.camera;
     }
 
     public Transform getCameraTransform() {
-        return this._cameraTransform;
+        return this.cameraTransform;
     }
 
     public CameraComponent getCameraComponent() {
-        return this._cameraComponent;
+        return this.cameraComponent;
     }
 
     public void eventCallback(EntityChangeData e) {
@@ -56,26 +61,26 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
     }
 
     protected void addComponent(GameEntity entity) {
-        if (this._camera == null && entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class)) {
-            this._camera = entity;
-            this._cameraTransform = entity.getComponent(Transform.class);
-            this._cameraComponent = entity.getComponent(CameraComponent.class);
+        if (this.camera == null && entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class)) {
+            this.camera = entity;
+            this.cameraTransform = entity.getComponent(Transform.class);
+            this.cameraComponent = entity.getComponent(CameraComponent.class);
         }
     };
 
     protected void removeComponent(GameEntity entity) {
-        if (entity.getUUID() == this._camera.getUUID() && !(entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class))) {
-            this._camera = null;
-            this._cameraTransform = null;
-            this._cameraComponent = null;
+        if (entity.getUUID() == this.camera.getUUID() && !(entity.hasComponent(TagComponent.class) && entity.getComponent(TagComponent.class).tag == "MainCamera" && entity.hasComponent(Transform.class) && entity.hasComponent(CameraComponent.class))) {
+            this.camera = null;
+            this.cameraTransform = null;
+            this.cameraComponent = null;
         }
     }
 
     protected void removeEntity(GameEntity entity) {
-        if (entity.getUUID() == this._camera.getUUID()) {
-            this._camera = null;
-            this._cameraTransform = null;
-            this._cameraComponent = null;
+        if (entity.getUUID() == this.camera.getUUID()) {
+            this.camera = null;
+            this.cameraTransform = null;
+            this.cameraComponent = null;
         }
     }
 

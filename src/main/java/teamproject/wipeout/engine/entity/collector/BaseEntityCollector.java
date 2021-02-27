@@ -6,16 +6,16 @@ import teamproject.wipeout.engine.entity.event.EntityChangeData;
 
 public abstract class BaseEntityCollector implements EntityCollector {
 
-    protected GameScene _scene;
+    protected GameScene scene;
 
     public BaseEntityCollector(GameScene scene) {
-        this._scene = scene;
+        this.scene = scene;
 
         scene.entityChangeEvent.addObserver(this);
     }
 
     public void cleanup() {
-        this._scene.entityChangeEvent.removeObserver(this);
+        this.scene.entityChangeEvent.removeObserver(this);
     }
     
     public void eventCallback(EntityChangeData e) {

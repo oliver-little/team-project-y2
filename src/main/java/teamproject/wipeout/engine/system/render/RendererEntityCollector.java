@@ -21,6 +21,11 @@ public class RendererEntityCollector extends BaseEntityCollector {
 
         this.dynamicEntityList = new ArrayList<GameEntity>();
         this.staticEntityList = new ArrayList<GameEntity>();
+
+        // Go through all existing entities once created
+        for (GameEntity entity: this.scene.entities) {
+            this.addComponent(entity);
+        }
     }
 
     public List<GameEntity> getEntities() {

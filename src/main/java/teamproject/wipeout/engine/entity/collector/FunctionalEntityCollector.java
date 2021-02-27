@@ -16,6 +16,11 @@ public class FunctionalEntityCollector extends BaseEntityCollector {
         this.addComponentFunction = addComponent;
         this.removeComponentFunction = removeComponent;
         this.removeEntityFunction = removeEntity;
+
+        // Go through all existing entities once created
+        for (GameEntity entity: this.scene.entities) {
+            this.addComponent(entity);
+        }
     }
 
     protected void addComponent(GameEntity entity) {

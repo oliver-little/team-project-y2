@@ -25,6 +25,11 @@ public class SignatureEntityCollector extends BaseEntityCollector {
         this.signatureList = new ArrayList<>(signature);
 
         this._entityList = new ArrayList<GameEntity>();
+
+        // Go through all existing entities once created
+        for (GameEntity entity: this.scene.entities) {
+            this.addComponent(entity);
+        }
     }
 
     public List<GameEntity> getEntities() {
