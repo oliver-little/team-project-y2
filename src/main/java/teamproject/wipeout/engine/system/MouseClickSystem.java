@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.input.InputMouseAction;
 import teamproject.wipeout.util.sort.*;
 
@@ -23,9 +24,10 @@ public class MouseClickSystem implements EventSystem {
     private SignatureEntityCollector collector;
     private CameraEntityCollector cameraCollector;
     
-    public MouseClickSystem(GameScene scene) {
+    public MouseClickSystem(GameScene scene, InputHandler input) {
         this.collector = new SignatureEntityCollector(scene, signature);
         this.cameraCollector = new CameraEntityCollector(scene);
+        input.onMouseClick(this.onClick);
     }
 
     public MouseClickSystem(GameScene scene, CameraEntityCollector cameraCollector) {
@@ -37,24 +39,10 @@ public class MouseClickSystem implements EventSystem {
         this.collector.cleanup();
     }
 
-    public InputMouseAction onLeftClick = (x, y) -> {
+    public InputMouseAction onClick = (x, y, button) -> {
         Clickable clicked = this.getClicked(x, y);
-        if (clicked != null && clicked.onLeftClick != null) {
-            clicked.onLeftClick.performMouseClickAction(x, y);
-        }
-    };
-
-    public InputMouseAction onMiddleClick = (x, y) -> {
-        Clickable clicked = this.getClicked(x, y);
-        if (clicked != null && clicked.onMiddleClick != null) {
-            clicked.onLeftClick.performMouseClickAction(x, y);
-        }
-    };
-
-    public InputMouseAction onRightClick = (x, y) -> {
-        Clickable clicked = this.getClicked(x, y);
-        if (clicked != null && clicked.onRightClick != null) {
-            clicked.onLeftClick.performMouseClickAction(x, y);
+        if (clicked != null && clicked.onClick != null) {
+            clicked.onClick.performMouseClickAction(x, y, button);
         }
     };
 

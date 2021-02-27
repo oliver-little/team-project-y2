@@ -9,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import teamproject.wipeout.engine.audio.GameAudio;
+import teamproject.wipeout.engine.component.Clickable;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -25,7 +26,10 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.AudioSystem;
 import teamproject.wipeout.engine.system.CollisionSystem;
+import teamproject.wipeout.engine.system.EventSystem;
+import teamproject.wipeout.engine.system.MouseClickSystem;
 import teamproject.wipeout.engine.system.MovementSystem;
+import teamproject.wipeout.engine.system.UISystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.logic.PlayerState;
@@ -39,6 +43,7 @@ import teamproject.wipeout.networking.server.ServerRunningException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -52,6 +57,7 @@ public class App implements Controller {
     private StackPane root;
     private Canvas dynamicCanvas;
     private Canvas staticCanvas;
+    private StackPane interfaceOverlay;
     private double windowWidth = 800;
     private double windowHeight = 600;
 
@@ -71,6 +77,12 @@ public class App implements Controller {
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
+
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
+        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
+        List<EventSystem> eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), mcs);
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -106,6 +118,7 @@ public class App implements Controller {
         rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
         rec3.addComponent(new HitboxComponent(new Rectangle(150,150)));
         rec3.addComponent(new CollisionResolutionComponent(false));
+        rec3.addComponent(new Clickable((x, y, button) -> System.out.println("Clicked green rect")));
         
         
         // Animated Sprite
@@ -139,6 +152,7 @@ public class App implements Controller {
         nge.addComponent(new PlayerStateComponent(playerState));
         nge.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         nge.addComponent(new CollisionResolutionComponent());
+        nge.addComponent(new Clickable((x, y, button) -> System.out.println("Clicked player")));
 
 
         try {
@@ -148,9 +162,6 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
 
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
         //nge.addComponent(ngeSound);
@@ -233,7 +244,8 @@ public class App implements Controller {
 	{
 		dynamicCanvas = new Canvas(windowWidth, windowHeight);
         staticCanvas = new Canvas(windowWidth, windowHeight);
-        root = new StackPane(dynamicCanvas, staticCanvas);
+        interfaceOverlay = new StackPane();
+        root = new StackPane(interfaceOverlay, dynamicCanvas, staticCanvas);
 		return root;
 	}
 }
