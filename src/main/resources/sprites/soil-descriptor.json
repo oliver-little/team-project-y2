@@ -1,0 +1,106 @@
+{
+  "fileType": "SpritesheetDescriptor",
+  "version": "1.0.0",
+  "name": "soil",
+  "sprites": [
+    {
+      "name": "top-left",
+      "type": "sprite",
+      "parameters" : {
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "centre-left",
+      "type": "sprite",
+      "parameters" : {
+        "x": 0,
+        "y": 32,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "bottom-left",
+      "type": "sprite",
+      "parameters" : {
+        "x": 0,
+        "y": 64,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "top",
+      "type": "sprite",
+      "parameters" : {
+        "x": 32,
+        "y": 0,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "centre",
+      "type": "sprite",
+      "parameters" : {
+        "x": 32,
+        "y": 32,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "bottom",
+      "type": "sprite",
+      "parameters" : {
+        "x": 32,
+        "y": 64,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "top-right",
+      "type": "sprite",
+      "parameters" : {
+        "x": 64,
+        "y": 0,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "centre-right",
+      "type": "sprite",
+      "parameters" : {
+        "x": 64,
+        "y": 32,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    },
+    {
+      "name": "bottom-right",
+      "type": "sprite",
+      "parameters" : {
+        "x": 64,
+        "y": 64,
+        "width": 32,
+        "height": 32,
+        "length": 1
+      }
+    }
+  ]
+}

@@ -44,10 +44,10 @@ public class InventoryEntity extends GameEntity {
 			System.out.println("Item ID : " + itemID);
 			GameEntity entity = gameScene.createEntity();
 	        entity.addComponent(new Transform (topLeft.getX() + ((items.size()-1)*65), topLeft.getY())); //positions plant
-	        Item potatoItem2 = new Item("potato", 1);
+	        Item potatoItem2 = itemStore.getItem(itemID);
 	        entity.addComponent(new ItemComponent(potatoItem2)); //gives it item component
 	        try {
-	            spriteManager.loadSpriteSheet("crops-descriptor.json", "crops.png");
+	            spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
 	            Image[] frames = spriteManager.getSpriteSet("crops", "potato");
 	            entity.addComponent(new RenderComponent(new SpriteRenderable(frames[2]))); //adds sprite image component
 	        } catch (Exception e) {

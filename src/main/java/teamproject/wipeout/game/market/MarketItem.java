@@ -1,11 +1,10 @@
 package teamproject.wipeout.game.market;
 
-import teamproject.wipeout.game.item.Item.ItemType;
+import teamproject.wipeout.game.item.components.TradableComponent;
 
 public class MarketItem {
     
     private int id;
-    private ItemType itemType;
     private double quantityDeviation;
     private double defaultBuyPrice;
     private double defaultSellPrice;
@@ -22,26 +21,19 @@ public class MarketItem {
     /**
      * Default constructor to create a market item - this contains only the relevant information for the market.
      * @param id The ID of the item to add to the market.
-     * @param itemType The type of the item.
-     * @param defaultBuyPrice The initial buy price of the item at the start of the game.
-     * @param defaultSellPrice The initial sell price of the item at the start of the game.
+     * @param tradableComponent The tradable component of the item.
      */
-    public MarketItem(int id, ItemType itemType, double defaultBuyPrice, double defaultSellPrice) {
+    public MarketItem(int id, TradableComponent tradableComponent) {
         this.id = id;
-        this.itemType = itemType;
         this.quantityDeviation = INITIAL_QUANTITY_DEVIATION;
-        this.defaultBuyPrice = defaultBuyPrice;
-        this.defaultSellPrice = defaultSellPrice;
+        this.defaultBuyPrice = tradableComponent.defaultBuyPrice;
+        this.defaultSellPrice = tradableComponent.defaultSellPrice;
         this.currentBuyPrice = defaultBuyPrice;
         this.currentSellPrice = defaultSellPrice;
     }
 
     public int getID() {
         return this.id;
-    }
-
-    public ItemType getItemType() {
-        return this.itemType;
     }
 
     public double getQuantityDeviation() {

@@ -1,0 +1,47 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "inventory-tools",
+	"sprites": [
+		{
+			"name": "hoe",
+			"type": "sprite",
+			"parameters" : {
+				"x": 128,
+				"y": 256,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "shovel",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 256,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "axe",
+			"type": "sprite",
+			"parameters" : {
+				"x": 224,
+				"y": 224,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "pickaxe",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		}
+    ]
+}
