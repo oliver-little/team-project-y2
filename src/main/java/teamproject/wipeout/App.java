@@ -65,6 +65,7 @@ public class App implements Controller {
 
     // Temporarily placed variables
     ItemStore itemStore;
+    Item item;
     FarmEntity farmEntity;
 
     /**
@@ -143,7 +144,12 @@ public class App implements Controller {
 
         farmEntity = new FarmEntity(gameScene, new Point2D(100, 100), "123", spriteManager, itemStore);
 
-        Item item = itemStore.getItem(14);
+        item = itemStore.getItem(14);
+
+        input.onMouseClick(MouseButton.SECONDARY, (x, y) -> {
+            item = itemStore.getItem(item.id + 1);
+            System.out.println(item.id);
+        });
 
         input.onMouseClick(MouseButton.PRIMARY, (x, y) -> {
             if (farmEntity.isWithinFarm(x, y) != null) {

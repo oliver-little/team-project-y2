@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.component.render;
 
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.util.Pair;
@@ -38,7 +39,6 @@ public class CropsRowRenderer implements Renderable {
 
     public void render(GraphicsContext gc, double x, double y, double scale) {
         double cropX = x;
-        double cropY = y - (FarmEntity.SQUARE_SIZE * 0.78);
         for (Pair<Item, Double> pair : farmRow) {
             cropX += FarmEntity.SQUARE_SIZE;
             if (pair == null) {
@@ -55,17 +55,20 @@ public class CropsRowRenderer implements Renderable {
                 }
                 Image sprite = sprites[growthStage];
 
-                double spriteWidth = sprite.getWidth();
-                double spriteHeight = sprite.getHeight();
-                double centeredX = cropX;// - spriteWidth/2;
-                double centeredY = cropY;// - spriteHeight/2;
+                Point2D spriteSize = this.rescaleToFitWidth(sprite.getWidth(), sprite.getHeight());
+                double cropY = (y - spriteSize.getY() * 0.5);
 
-                gc.drawImage(sprite, centeredX * scale, centeredY * scale, spriteWidth * scale, spriteHeight * scale);
+                gc.drawImage(sprite, cropX * scale, cropY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
 
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();
             }
         }
+    }
+
+    protected Point2D rescaleToFitWidth(double w, double h) {
+        double scaleFactor = FarmEntity.SQUARE_SIZE / w;
+        return new Point2D(w * scaleFactor, h * scaleFactor);
     }
 
 }

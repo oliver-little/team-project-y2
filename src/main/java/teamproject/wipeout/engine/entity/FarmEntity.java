@@ -49,7 +49,7 @@ public class FarmEntity extends GameEntity {
 
         for (int i = 0; i < squareGrid.getY(); i++) {
             CropsRowEntity rowEntity = new CropsRowEntity(scene, this.data.getItemsInRow(i), spriteManager, itemStore);
-            rowEntity.addComponent(new Transform(0, (SQUARE_SIZE / 2) + (SQUARE_SIZE * i), 0.0, 1));
+            rowEntity.addComponent(new Transform(0, (SQUARE_SIZE / 1.65) + (SQUARE_SIZE * i), 0.0, 1));
             rowEntity.setParent(this);
             this.addChild(rowEntity);
         }
