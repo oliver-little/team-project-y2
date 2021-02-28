@@ -36,6 +36,7 @@ import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantableComponent;
 import teamproject.wipeout.game.logic.PlayerState;
 import teamproject.wipeout.game.player.Player;
@@ -51,7 +52,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -156,7 +159,6 @@ public class App implements Controller {
         }
         
         List<GameEntity> itemList = new ArrayList<>();
-
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
         potato.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 10, 10)));
@@ -170,12 +172,28 @@ public class App implements Controller {
         Item potatoItem2 = itemStore.getItem(6); //potato id = 6
         potato2.addComponent(new ItemComponent(potatoItem2));
         itemList.add(potato2);
+        
+        GameEntity potato3 = gameScene.createEntity();
+        potato3.addComponent(new Transform (10, 40));
+        potato3.addComponent(new HitboxComponent(true, true, new Rectangle(0, 10, 40, 20)));
+        Item potatoItem3 = itemStore.getItem(6); //potato id = 6
+        potato3.addComponent(new ItemComponent(potatoItem3));
+        itemList.add(potato3);
+        
+        GameEntity potato4 = gameScene.createEntity();
+        potato4.addComponent(new Transform (500, 10));
+        potato4.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 10)));
+        Item potatoItem4 = itemStore.getItem(6); //potato id = 6
+        potato4.addComponent(new ItemComponent(potatoItem4));
+        itemList.add(potato4);
 
         try {
             spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
             Image[] frames = spriteManager.getSpriteSet("crops", "potato");
             potato.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
             potato2.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
+            potato3.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
+            potato4.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +202,7 @@ public class App implements Controller {
         InventoryEntity invEntity;
     	invEntity = new InventoryEntity(gameScene, spriteManager);
     	gameScene.entities.add(invEntity);
-    	invEntity.addComponent(new RenderComponent(new InventoryRenderable(invEntity)));
+    	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
         
         // Input
         InputHandler input = new InputHandler(root.getScene());
