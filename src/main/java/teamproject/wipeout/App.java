@@ -31,6 +31,7 @@ import teamproject.wipeout.engine.system.MovementSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.logic.PlayerState;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
@@ -211,9 +212,13 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DOWN,
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f),
                 () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f));
+        
+        ItemStore itemStore = new ItemStore();
+
 
         input.addKeyAction(KeyCode.X,
-                () -> player.pickup(itemList),
+                () -> {player.pickup(itemList);
+                	   invEntity.showItems(player.getInventory(), itemStore);},
                 () -> System.out.println(""));
 
         
