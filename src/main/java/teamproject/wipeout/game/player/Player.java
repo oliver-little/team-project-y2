@@ -2,6 +2,7 @@ package teamproject.wipeout.game.player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import teamproject.wipeout.engine.component.ItemComponent;
@@ -15,9 +16,12 @@ public class Player extends GameEntity {
     public Integer playerID;
     public String playerName;
     public String spriteSheetName;
-    public Double money;
+    public Integer money;
+    public Integer size;
+    
+    public static int MAX_SIZE = 10;
 
-    private HashMap<Integer, Integer> inventory = new HashMap<>();
+    private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
     /**
      * Creates a new instance of GameEntity
@@ -74,7 +78,7 @@ public class Player extends GameEntity {
         return false;
     }
 
-    public HashMap<Integer, Integer> getInventory() {
+    public LinkedHashMap<Integer, Integer> getInventory() {
         return inventory;
     }
 

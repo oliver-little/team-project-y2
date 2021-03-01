@@ -1,0 +1,167 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "fruit-tree",
+	"sprites": [
+		{
+			"name": "apple-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+		{
+			"name": "orange-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 100,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "blackberry-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 200,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "strawberry-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 300,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "pear-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 400,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "lemon-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 600,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "cherry-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 700,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "pineapple-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 800,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+        {
+			"name": "banana-tree",
+			"type": "sprite-list-y",
+			"parameters" : {
+				"x": 900,
+				"y": 0,
+				"width": 100,
+				"height": 150,
+				"length": 5
+			}
+		},
+		{
+			"name": "sapling1",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		},
+		{
+			"name": "sapling2",
+			"type": "sprite",
+			"parameters" : {
+				"x": 100,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		},
+		{
+			"name": "sapling3",
+			"type": "sprite",
+			"parameters" : {
+				"x": 200,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		},
+		{
+			"name": "sapling4",
+			"type": "sprite",
+			"parameters" : {
+				"x": 400,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		},
+		{
+			"name": "sapling5",
+			"type": "sprite",
+			"parameters" : {
+				"x": 800,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		},
+		{
+			"name": "sapling6",
+			"type": "sprite",
+			"parameters" : {
+				"x": 900,
+				"y": 0,
+				"width": 100,
+				"height": 150
+			}
+		}
+
+	]
+}

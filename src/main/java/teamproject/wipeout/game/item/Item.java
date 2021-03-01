@@ -1,30 +1,54 @@
 package teamproject.wipeout.game.item;
 
+import teamproject.wipeout.game.item.components.ItemComponent;
+
+import java.util.Map;
 
 /**
- * Defines an obtainable item in game.
+ * Defines an obtainable item in the game.
  */
 public class Item {
 
-    public Item(String name, Integer id) {
-        this.name = name;
+
+    public final int id;
+    public final String name;
+
+    protected final Map<Class<?>, ItemComponent> componentMap;
+
+    /**
+     * Protected initializer for an {@code Item}
+     *
+     * @param id ID of the item
+     * @param name Name of the item
+     * @param componentMap Components of the item
+     */
+    protected Item(int id, String name, Map<Class<?>, ItemComponent> componentMap) {
         this.id = id;
+        this.name = name;
+        this.componentMap = componentMap;
     }
 
-    public enum ItemType {
-        PLANTABLE, //Seeds - items that can be placed and grown in the ground.
-        USABLE, //For future implementation of tools which can be used.
-        CONSTRUCTABLE, //For future implementation of utilities which can be placed and used.
-        NONE //For any other items, such as fully grown vegetables which can only be bought/sold.
+    /**
+     * Returns whether the item contains a component of a given type.
+     *
+     * @param component The component type to check for
+     * @return Whether the given component type exists in the item
+     */
+    public <T extends ItemComponent> boolean hasComponent(Class<T> component) {
+        return this.componentMap.containsKey(component);
     }
 
-    public Integer id;
-    public ItemType itemType;
-    public String name;
-    public String spriteSheetName;
-    public String spriteSetName;
-    public Integer maxStackSize;
-    public double defaultBuy;
-    public double defaultSell;
-    
+    /**
+     * Gets a component in the item.
+     *
+     * @param component The component type to return
+     * @return The instance of the component in the item
+     */
+    public <T extends ItemComponent> T getComponent(Class<T> component) {
+        if (this.componentMap.containsKey(component)) {
+            return (T) this.componentMap.get(component);
+        }
+        return null;
+    }
+
 }
