@@ -34,7 +34,7 @@ import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.PlantableComponent;
+import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -141,7 +141,7 @@ public class App implements Controller {
 
         farmEntity = new FarmEntity(gameScene, new Point2D(100, 100), "123", spriteManager, itemStore);
 
-        item = itemStore.getItem(14);
+        item = itemStore.getItem(1);
 
         input.onMouseClick(MouseButton.SECONDARY, (x, y) -> {
             item = itemStore.getItem(item.id + 1);
@@ -164,8 +164,8 @@ public class App implements Controller {
 
         GameEntity shadow = gameScene.createEntity();
         try {
-            PlantableComponent crop = item.getComponent(PlantableComponent.class);
-            Image sprite = spriteManager.getSpriteSet(crop.seedSpriteSheetName, crop.seedSpriteSetName)[0];
+            SeedComponent seeds = item.getComponent(SeedComponent.class);
+            Image sprite = spriteManager.getSpriteSet(seeds.spriteSheetName, seeds.spriteSetName)[0];
             shadow.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
 
             input.onKeyRelease(KeyCode.A, () -> {
@@ -178,7 +178,7 @@ public class App implements Controller {
                             transform = shadow.getComponent(Transform.class);
                         }
                         if (point == null || !farmEntity.isEmpty(x, y)) {
-                            transform.setPosition(new Point2D(x - sprite.getWidth()/3, y - sprite.getHeight()/3));
+                            transform.setPosition(new Point2D(x, y));
                         } else {
                             transform.setPosition(point);
                         }

@@ -15,11 +15,13 @@
           "defaultBuyPrice" : 2.00,
           "defaultSellPrice" : 1.00
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "red-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "tomato",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "red-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "tomato",
           "growthRate" : 3.00
         }
       }
@@ -37,11 +39,13 @@
           "defaultBuyPrice" : 5.00,
           "defaultSellPrice" : 2.50
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "green-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "lettuce",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "green-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "lettuce",
           "growthRate" : 3.00
         }
       }
@@ -59,11 +63,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "yellow-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "yellow-pepper",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "yellow-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "yellow-pepper",
           "growthRate" : 3.00
         }
       }
@@ -81,11 +87,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "red-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "hot-pepper",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "red-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "hot-pepper",
           "growthRate" : 3.00
         }
       }
@@ -103,11 +111,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "purple-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "onion",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "purple-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "onion",
           "growthRate" : 3.00
         }
       }
@@ -125,11 +135,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "brown-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "potato",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "brown-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "potato",
           "growthRate" : 3.00
         }
       }
@@ -147,11 +159,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "generic-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "carrot",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "generic-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "carrot",
           "growthRate" : 3.00
         }
       }
@@ -169,11 +183,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "green-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "broccoli",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "green-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "broccoli",
           "growthRate" : 3.00
         }
       }
@@ -191,11 +207,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "purple-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "beetroot",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "purple-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "beetroot",
           "growthRate" : 3.00
         }
       }
@@ -213,11 +231,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "generic-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "pumpkin",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "generic-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "pumpkin",
           "growthRate" : 3.00
         }
       }
@@ -235,11 +255,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "generic-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "cauliflower",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "generic-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "cauliflower",
           "growthRate" : 3.00
         }
       }
@@ -257,11 +279,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "green-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "leek",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "green-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "leek",
           "growthRate" : 3.00
         }
       }
@@ -279,11 +303,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "generic-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "parsnip",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "generic-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "parsnip",
           "growthRate" : 3.00
         }
       }
@@ -301,11 +327,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "yellow-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "sweetcorn",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "yellow-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "sweetcorn",
           "growthRate" : 3.00
         }
       }
@@ -323,11 +351,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling1",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "apple-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling1"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "apple-tree",
           "growthRate" : 3.00
         }
       }
@@ -345,11 +375,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling4",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "pear-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling4"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "pear-tree",
           "growthRate" : 3.00
         }
       }
@@ -367,11 +399,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling2",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "lemon-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling2"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "lemon-tree",
           "growthRate" : 3.00
         }
       }
@@ -389,11 +423,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling2",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "orange-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling2"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "orange-tree",
           "growthRate" : 3.00
         }
       }
@@ -411,11 +447,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling3",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "strawberry-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling3"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "strawberry-tree",
           "growthRate" : 3.00
         }
       }
@@ -433,11 +471,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling3",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "cherry-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling3"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "cherry-tree",
           "growthRate" : 3.00
         }
       }
@@ -455,11 +495,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "purple-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "blackberry",
+        "SeedComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "purple-seeds"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "blackberry",
           "growthRate" : 3.00
         }
       }
@@ -477,11 +519,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling5",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "pineapple-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling5"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "pineapple-tree",
           "growthRate" : 3.00
         }
       }
@@ -499,11 +543,13 @@
           "defaultBuyPrice" : 1.50,
           "defaultSellPrice" : 0.75
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "fruit-tree",
-          "seedSpriteSetName" : "sapling6",
-          "growthSpriteSheetName" : "fruit-tree",
-          "growthSpriteSetName" : "banana-tree",
+        "SeedComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling6"
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "banana-tree",
           "growthRate" : 3.00
         }
       }

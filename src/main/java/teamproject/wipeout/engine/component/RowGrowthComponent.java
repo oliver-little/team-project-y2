@@ -2,7 +2,7 @@ package teamproject.wipeout.engine.component;
 
 import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
-import teamproject.wipeout.game.item.components.PlantableComponent;
+import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ public class RowGrowthComponent implements GameComponent {
         if (pair == null) {
             return;
         }
-        PlantableComponent crop = pair.getKey().getComponent(PlantableComponent.class);
+        PlantComponent crop = pair.getKey().getComponent(PlantComponent.class);
         double growth = pair.getValue();
 
         if (growth >= (GROWTH_STAGES * crop.growthRate)) {

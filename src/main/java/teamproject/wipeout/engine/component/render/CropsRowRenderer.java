@@ -9,7 +9,8 @@ import teamproject.wipeout.engine.system.GrowthSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.PlantableComponent;
+import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -45,11 +46,11 @@ public class CropsRowRenderer implements Renderable {
                 continue;
             }
             Item currentItem = pair.getKey();
-            PlantableComponent crop = currentItem.getComponent(PlantableComponent.class);
+            PlantComponent crop = currentItem.getComponent(PlantComponent.class);
             int growthStage = GrowthSystem.getCurrentGrowthStage(crop.growthRate, pair.getValue());
 
             try {
-                Image[] sprites = this.spriteManager.getSpriteSet(crop.growthSpriteSheetName, crop.growthSpriteSetName);
+                Image[] sprites = this.spriteManager.getSpriteSet(crop.spriteSheetName, crop.spriteSetName);
                 if (growthStage >= sprites.length) {
                     growthStage = sprites.length - 1;
                 }
