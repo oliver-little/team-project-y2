@@ -6,16 +6,16 @@ import java.util.List;
 
 import teamproject.wipeout.engine.component.ItemComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.market.MarketItem;
 
 public class Player extends GameEntity {
     public Integer playerID;
     public String playerName;
     public String spriteSheetName;
-    public Integer money;
+    public Double money;
 
     private HashMap<Integer, Integer> inventory = new HashMap<>();
 
@@ -26,18 +26,40 @@ public class Player extends GameEntity {
      */
     public Player(GameScene scene) {
         super(scene);
+        this.money = 0.;
     }
 
+    // When called with a market item, purchases an item for a player and returns true,
+    // otherwise if player has not enough money, returns false
+    public boolean buyItem(MarketItem item) {
+        if (item.getCurrentBuyPrice() > this.money) {
+            return false;
+        }
+        this.money -= item.getCurrentBuyPrice();
+        this.acquireItem(item.getID());
+        return true;
+    }
+
+    // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
+    // if the player does not have the item return false
+    public boolean sellItem(MarketItem item) {
+        if (removeItem(item.getID())) {
+            this.money += item.getCurrentSellPrice();
+            return true;
+        }
+        return false;
+    }
 
     // Adds an item to inventory
-    public void pickupItem(Item item) {
-        Integer itemID = item.id;
+    public void acquireItem(Integer itemID) {
         inventory.putIfAbsent(itemID, 0);
         inventory.put(itemID, inventory.get(itemID) + 1);
-        System.out.println("Picked up " + item.name);
+        System.out.println("Acquired itemID: " + itemID);
     }
 
-    public boolean useItem(Integer itemID) {
+    // removes a SINGLE copy of an item from the players backpack and returns true
+    // if player does not have the item, returns false;
+    public boolean removeItem(Integer itemID) {
         if (this.inventory.containsKey(itemID)) {
             int count = this.inventory.get(itemID);
             if (count <= 1){
@@ -64,7 +86,7 @@ public class Player extends GameEntity {
             if (ge.hasComponent(ItemComponent.class)){
                 if(HitboxComponent.checkCollides(this, ge)) {
                     ItemComponent item = ge.getComponent(ItemComponent.class);
-                    this.pickupItem(item.item);
+                    this.acquireItem(item.item.id);
                     removedItems.add(ge);
                 }
             }
