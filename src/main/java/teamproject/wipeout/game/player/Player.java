@@ -16,7 +16,7 @@ public class Player extends GameEntity {
     public Integer playerID;
     public String playerName;
     public String spriteSheetName;
-    public Integer money;
+    public Double money;
     public Integer size;
     
     public static int MAX_SIZE = 10;
