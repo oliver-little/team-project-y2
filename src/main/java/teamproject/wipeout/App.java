@@ -8,7 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
-import teamproject.wipeout.engine.component.ItemComponent;
+import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -123,7 +123,7 @@ public class App implements Controller {
         systemUpdater.addSystem(this.playerStateSystem);
         */
         Player player = gameScene.createPlayer();
-        player.addComponent(new Transform(250, 250));
+        player.addComponent(new Transform(250, 250, 2));
         
         MovementComponent playerPhysics = new MovementComponent(0f, 0f, 0f, 0f);
         player.addComponent(playerPhysics);
@@ -154,6 +154,7 @@ public class App implements Controller {
             spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
             spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
             spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
         }
@@ -163,37 +164,59 @@ public class App implements Controller {
         potato.addComponent(new Transform (10, 10));
         potato.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 10, 10)));
         Item potatoItem = itemStore.getItem(6); //potato id = 6
-        potato.addComponent(new ItemComponent(potatoItem));
+        potato.addComponent(new PickableComponent(potatoItem));
         itemList.add(potato);
 
         GameEntity potato2 = gameScene.createEntity();
         potato2.addComponent(new Transform (200, 300));
         potato2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 200, 300)));
         Item potatoItem2 = itemStore.getItem(6); //potato id = 6
-        potato2.addComponent(new ItemComponent(potatoItem2));
+        potato2.addComponent(new PickableComponent(potatoItem2));
         itemList.add(potato2);
         
         GameEntity potato3 = gameScene.createEntity();
         potato3.addComponent(new Transform (10, 40));
         potato3.addComponent(new HitboxComponent(true, true, new Rectangle(0, 10, 40, 20)));
         Item potatoItem3 = itemStore.getItem(6); //potato id = 6
-        potato3.addComponent(new ItemComponent(potatoItem3));
+        potato3.addComponent(new PickableComponent(potatoItem3));
         itemList.add(potato3);
         
         GameEntity potato4 = gameScene.createEntity();
         potato4.addComponent(new Transform (500, 10));
         potato4.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 10)));
         Item potatoItem4 = itemStore.getItem(6); //potato id = 6
-        potato4.addComponent(new ItemComponent(potatoItem4));
+        potato4.addComponent(new PickableComponent(potatoItem4));
         itemList.add(potato4);
+        
+        GameEntity lettuce = gameScene.createEntity();
+        lettuce.addComponent(new Transform (500, 40));
+        lettuce.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 40)));
+        Item lettuceItem = itemStore.getItem(2); //lettuce id = 2
+        lettuce.addComponent(new PickableComponent(lettuceItem));
+        itemList.add(lettuce);
+        
+        GameEntity lettuce2 = gameScene.createEntity();
+        lettuce2.addComponent(new Transform (500, 120));
+        lettuce2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 120)));
+        Item lettuceItem2 = itemStore.getItem(2); //lettuce id = 2
+        lettuce2.addComponent(new PickableComponent(lettuceItem2));
+        itemList.add(lettuce2);
 
         try {
-            spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
-            Image[] frames = spriteManager.getSpriteSet("crops", "potato");
-            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
-            potato2.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
-            potato3.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
-            potato4.addComponent(new RenderComponent(new SpriteRenderable(frames[2])));
+            //spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
+        	InventoryComponent invComponent = potatoItem.getComponent(InventoryComponent.class);
+        	System.out.println("potato: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
+            Image[] frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
+            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato2.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato3.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato4.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            
+            invComponent = lettuceItem.getComponent(InventoryComponent.class);
+            System.out.println("lettuce: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
+            frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
+            lettuce.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            lettuce2.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
 
         } catch (Exception e) {
             e.printStackTrace();

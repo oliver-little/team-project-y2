@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.ItemComponent;
+//import teamproject.wipeout.engine.component.ItemComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
@@ -34,6 +34,7 @@ public class InventoryEntity extends GameEntity {
 	//Temporarily placed
 	private GameEntity textEntity;
 	private TextRenderable textRenderable;
+	private TextRenderable[] textRenderables = new TextRenderable[SIZE];
 
 	public InventoryEntity(GameScene scene, SpriteManager spriteManager) {
 		super(scene);
@@ -43,28 +44,40 @@ public class InventoryEntity extends GameEntity {
 		this.addComponent(this.transform);
 		this.gameScene = scene;
 		this.topLeft = new Point2D(65, 500); //coord of top left of inventory bar
-		textEntity = gameScene.createEntity();
-        textEntity.addComponent(new Transform (topLeft.getX() + 8, topLeft.getY() + 13, 1));
-        textRenderable = new TextRenderable("");
-        textEntity.addComponent(new RenderComponent(textRenderable));
+		createTextRenderables();
+		
 	}
 	
 	public void showItems(LinkedHashMap<Integer, Integer> items, ItemStore itemStore) {
+		int i = 0;
 		for (Integer itemID : items.keySet()) {
 			System.out.println("Item ID : " + itemID);
 			GameEntity entity = gameScene.createEntity();
-	        entity.addComponent(new Transform (topLeft.getX() + 15 + ((items.size()-1)*65), topLeft.getY() - 20, 1)); //positions plant
+	        //entity.addComponent(new Transform (topLeft.getX() + 15 + (i*65), topLeft.getY() + 20, 1)); //positions plant
 	        Item item = itemStore.getItem(itemID);
-	        entity.addComponent(new ItemComponent(item)); //gives it item component
-	        textRenderable.setText(items.get(itemID).toString());
+	        InventoryComponent inv = item.getComponent(InventoryComponent.class);
+	        textRenderables[i].setText(items.get(itemID).toString());
 	        try {
-	            spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
-	            Image[] frames = spriteManager.getSpriteSet("crops", "potato");
-	            entity.addComponent(new RenderComponent(new SpriteRenderable(frames[2]))); //adds sprite image component
-	            
+	            Image[] frames = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName);
+	            RenderComponent rc = new RenderComponent(new SpriteRenderable(frames[0]));
+	            entity.addComponent(rc); //adds sprite image component
+	            double xpos = topLeft.getX() + (65*i) + ((65-rc.getWidth())/2); //x-offset from top left of tile
+	            double ypos = topLeft.getY() + ((65-rc.getHeight())/2); //y-offset from top left of tile
+	            entity.addComponent(new Transform (xpos, ypos, 1)); 
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
+	        i++;
+		}
+	}
+	
+	private void createTextRenderables() {
+		for(int i = 0; i < SIZE; i++) {
+			textEntity = gameScene.createEntity();
+	        textEntity.addComponent(new Transform (topLeft.getX() + 8 + (65*i), topLeft.getY() + 13, 1));
+	        textRenderable = new TextRenderable("");
+	        textEntity.addComponent(new RenderComponent(textRenderable));
+	        textRenderables[i] = textRenderable;
 		}
 	}
 	

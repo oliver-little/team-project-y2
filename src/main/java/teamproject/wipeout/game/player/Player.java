@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import teamproject.wipeout.engine.component.ItemComponent;
+//import teamproject.wipeout.engine.component.ItemComponent;
+import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
 
 public class Player extends GameEntity {
@@ -87,9 +89,9 @@ public class Player extends GameEntity {
         List<GameEntity> removedItems = new ArrayList<>();
         for (GameEntity ge: entities){
             // Check if entity is an item
-            if (ge.hasComponent(ItemComponent.class)){
+            if (ge.hasComponent(PickableComponent.class)){
                 if(HitboxComponent.checkCollides(this, ge)) {
-                    ItemComponent item = ge.getComponent(ItemComponent.class);
+                	PickableComponent item = ge.getComponent(PickableComponent.class);
                     this.acquireItem(item.item.id);
                     removedItems.add(ge);
                 }
