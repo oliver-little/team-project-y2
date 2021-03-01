@@ -27,6 +27,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.AudioSystem;
 import teamproject.wipeout.engine.system.CollisionSystem;
+import teamproject.wipeout.engine.system.EventSystem;
 import teamproject.wipeout.engine.system.GrowthSystem;
 import teamproject.wipeout.engine.system.MovementSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
@@ -34,19 +35,10 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantableComponent;
-import teamproject.wipeout.game.logic.PlayerState;
-import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.networking.client.ServerDiscovery;
-import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
-import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
-import teamproject.wipeout.networking.server.GameServerRunner;
-import teamproject.wipeout.networking.server.ServerRunningException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.UUID;
+import java.util.List;
 
 
 /**
@@ -67,6 +59,11 @@ public class App implements Controller {
     ItemStore itemStore;
     Item item;
     FarmEntity farmEntity;
+
+    // Store systems for cleanup
+    RenderSystem renderer;
+    SystemUpdater systemUpdater;
+    List<EventSystem> eventSystems;
 
     /**
      * Creates the content to be rendered onto the canvas.
@@ -212,4 +209,17 @@ public class App implements Controller {
 		return root;
 	}
 
+    public void cleanup() {
+        if (renderer != null) {
+            renderer.cleanup();
+        }
+        if (systemUpdater != null) {
+            systemUpdater.cleanup();
+        }
+        if (eventSystems != null) {
+            for (EventSystem eventSystem : eventSystems) {
+                eventSystem.cleanup();
+            }
+        }
+    }
 }

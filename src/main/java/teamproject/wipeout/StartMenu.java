@@ -53,6 +53,10 @@ public class StartMenu implements Controller {
             new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
     );
 
+    public void cleanup() {
+        
+    }
+
     /**
      * Creates the content to be rendered onto the canvas.
      */

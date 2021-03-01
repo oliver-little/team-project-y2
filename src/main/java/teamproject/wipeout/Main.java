@@ -9,6 +9,8 @@ import javafx.stage.Stage;
  */
 public class Main extends Application{
 
+	private Scene scene;
+
 	/**
 	 * Method which starts the application, setting the stage's scene to the start menu first.
 	 */
@@ -18,11 +20,19 @@ public class Main extends Application{
 		double windowWidth = 800;
         double windowHeight = 600;
 		StartMenu menu = new StartMenu();
-		Scene scene = new Scene(menu.getContent(), windowWidth, windowHeight);
+		scene = new Scene(menu.getContent(), windowWidth, windowHeight);
 		
 		stage.setScene(scene);
 		stage.show();
 		
+	}
+
+	@Override
+	public void stop() {
+		if (scene.getRoot() instanceof Controller) {
+			Controller view = (Controller) scene.getRoot();
+			view.cleanup();
+		}
 	}
 	
 	/**
