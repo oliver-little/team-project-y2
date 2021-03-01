@@ -519,7 +519,7 @@
         },
         "TradableComponent" : {
           "defaultBuyPrice" : 1.50,
-          "defaultSellPrice" : 0.75
+          "defaultSellPrice" : -1
         }
       }
     },
@@ -534,7 +534,7 @@
         },
         "TradableComponent" : {
           "defaultBuyPrice" : 1.50,
-          "defaultSellPrice" : 0.75
+          "defaultSellPrice" : -1
         }
       }
     },
@@ -549,7 +549,7 @@
         },
         "TradableComponent" : {
           "defaultBuyPrice" : 1.50,
-          "defaultSellPrice" : 0.75
+          "defaultSellPrice" : -1
         }
       }
     },
@@ -564,7 +564,7 @@
         },
         "TradableComponent" : {
           "defaultBuyPrice" : 1.50,
-          "defaultSellPrice" : 0.75
+          "defaultSellPrice" : -1
         }
       }
     }

@@ -52,11 +52,9 @@ public class Market {
 
         MarketItem item = stockDatabase.get(id);
 
-        // TODO: Adapt to new item components
-        /*if (item.getItemType() == ItemType.CONSTRUCTABLE || item.getItemType() == ItemType.USABLE) {
-            //TODO Add to inventory and remove money here.
-            return item.getCurrentBuyPrice();
-        }*/
+        if (item.getDefaultSellPrice() < 0) { 
+            return quantity * item.getDefaultBuyPrice();
+        }
 
         //TODO Add a check that the player has enough money to buy the item & has enough inventory space.
         //TODO Add to inventory and remove money here.
@@ -82,11 +80,10 @@ public class Market {
 
         MarketItem item = stockDatabase.get(id);
 
-        // TODO: Adapt to new item components
-        /*if (item.getItemType() == ItemType.CONSTRUCTABLE || item.getItemType() == ItemType.USABLE) {
-            System.out.println("Cannot sell constructable or usable item types.");
+        if (item.getDefaultSellPrice() < 0) {
+            System.out.println("Cannot sell this kind of item.");
             return -1;
-        }*/
+        }
 
         //TODO Remove from inventory and add money here.
 
