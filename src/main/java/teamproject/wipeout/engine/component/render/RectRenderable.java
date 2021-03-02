@@ -66,7 +66,7 @@ public class RectRenderable implements Renderable {
         gc.setFill(this.color);
 
         if (scale != 1) {
-            gc.fillRect(x + offset.getX() * scale, y + offset.getY() * scale, this.width * scale, this.height * scale);
+            gc.fillRect((x + offset.getX()) * scale, (y + offset.getY()) * scale, this.width * scale, this.height * scale);
         }
         else {
             gc.fillRect(x + offset.getX(), y + offset.getY(), this.width, this.height);

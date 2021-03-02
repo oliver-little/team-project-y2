@@ -137,7 +137,7 @@ public class RenderSystem implements GameSystem {
             Point2D tWorldPosition = t.getWorldPosition();
             if (cameraBox.intersects(tWorldPosition.getX(), tWorldPosition.getY(), r.getWidth(), r.getHeight())) {
                 // Render the entity, scaled according to the camera view
-                r.render(this.dynamicGC, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
+                r.render(this.dynamicGC, tWorldPosition.getX(), tWorldPosition.getY(), zoom);
             }
         }
 
@@ -159,7 +159,7 @@ public class RenderSystem implements GameSystem {
                 Point2D tWorldPosition = t.getWorldPosition();
                 if (cameraBox.intersects(tWorldPosition.getX(), tWorldPosition.getY(), r.getWidth(), r.getHeight())) {
                     // Render the entity, scaled according to the camera view
-                    r.render(this.staticGC, tWorldPosition.getX() * zoom, tWorldPosition.getY() * zoom, zoom);
+                    r.render(this.staticGC, tWorldPosition.getX(), tWorldPosition.getY(), zoom);
             }
         }
         }
