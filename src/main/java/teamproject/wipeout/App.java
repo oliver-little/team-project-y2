@@ -1,6 +1,7 @@
 package teamproject.wipeout;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
@@ -29,9 +30,12 @@ import teamproject.wipeout.engine.system.AudioSystem;
 import teamproject.wipeout.engine.system.CollisionSystem;
 import teamproject.wipeout.engine.system.EventSystem;
 import teamproject.wipeout.engine.system.GrowthSystem;
+import teamproject.wipeout.engine.system.MouseClickSystem;
 import teamproject.wipeout.engine.system.MovementSystem;
+import teamproject.wipeout.engine.system.UISystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.MarketEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantableComponent;
@@ -71,11 +75,14 @@ public class App implements Controller {
     public void createContent() {
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
+        InputHandler input = new InputHandler(root.getScene());
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
+
+        eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), new MouseClickSystem(gameScene, input));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -102,9 +109,7 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
+        
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
         nge.addComponent(ngeSound);
 
@@ -205,7 +210,9 @@ public class App implements Controller {
 		dynamicCanvas = new Canvas(windowWidth, windowHeight);
         staticCanvas = new Canvas(windowWidth, windowHeight);
         interfaceOverlay = new StackPane();
-        root = new StackPane(interfaceOverlay, dynamicCanvas, staticCanvas);
+        interfaceOverlay.setPrefWidth(windowWidth);
+        interfaceOverlay.setPrefHeight(windowHeight);
+        root = new StackPane(staticCanvas, dynamicCanvas, interfaceOverlay);
 		return root;
 	}
 

@@ -2,7 +2,6 @@ package teamproject.wipeout.engine.entity;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseButton;
-import teamproject.wipeout.engine.component.Clickable;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;

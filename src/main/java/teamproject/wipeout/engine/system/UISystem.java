@@ -2,7 +2,7 @@ package teamproject.wipeout.engine.system;
 
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
-import teamproject.wipeout.engine.component.UIComponent;
+import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.FunctionalEntityCollector;
@@ -32,7 +32,8 @@ public class UISystem implements EventSystem {
     public void getNodeFromEntity(GameEntity entity) {
         if (entity.hasComponent(UIComponent.class)) {
             UIComponent ui = entity.getComponent(UIComponent.class);
-            this.addUINode(ui.getNode());
+            this.addUINode(ui.getUI().getContent());
+            ui.getUI().setParent(root);
             entity.removeComponent(UIComponent.class);
         }
     }
