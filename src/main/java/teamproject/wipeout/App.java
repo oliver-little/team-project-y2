@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -15,25 +16,19 @@ import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
-import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
-import teamproject.wipeout.engine.component.render.CameraComponent;
-import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
+import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.FarmEntity;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
-import teamproject.wipeout.engine.system.AudioSystem;
-import teamproject.wipeout.engine.system.CollisionSystem;
-import teamproject.wipeout.engine.system.EventSystem;
-import teamproject.wipeout.engine.system.GrowthSystem;
-import teamproject.wipeout.engine.system.MovementSystem;
+import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
@@ -141,7 +136,7 @@ public class App implements Controller {
 
         farmEntity = new FarmEntity(gameScene, new Point2D(100, 100), "123", spriteManager, itemStore);
 
-        item = itemStore.getItem(1);
+        item = itemStore.getItem(15);
 
         input.onMouseClick(MouseButton.SECONDARY, (x, y) -> {
             item = itemStore.getItem(item.id + 1);
@@ -162,29 +157,46 @@ public class App implements Controller {
             }
         });
 
-        GameEntity shadow = gameScene.createEntity();
         try {
+            GameEntity shadow = gameScene.createEntity();
+            GameEntity seed = gameScene.createEntity();
             SeedComponent seeds = item.getComponent(SeedComponent.class);
             Image sprite = spriteManager.getSpriteSet(seeds.spriteSheetName, seeds.spriteSetName)[0];
-            shadow.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
+            seed.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
 
             input.onKeyRelease(KeyCode.A, () -> {
                 if (input.mouseHovering == null) {
+                    if (item.getComponent(PlantComponent.class).squareSize == 1) {
+                        shadow.removeComponent(RenderComponent.class);
+                        shadow.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, FarmEntity.SQUARE_SIZE, FarmEntity.SQUARE_SIZE)));
+                    } else {
+                        shadow.removeComponent(RenderComponent.class);
+                        shadow.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, (float) sprite.getWidth(), (float) sprite.getHeight())));
+                    }
+
                     input.onMouseHover((x, y) -> {
                         Point2D point = farmEntity.isWithinFarm(x, y);
-                        Transform transform = shadow.getComponent(Transform.class);
-                        if (transform == null) {
+                        Transform transformShadow = shadow.getComponent(Transform.class);
+                        Transform transformSeed = seed.getComponent(Transform.class);
+                        if (transformShadow == null) {
                             shadow.addComponent(new Transform(x, y, 0.0, 2));
-                            transform = shadow.getComponent(Transform.class);
+                            transformShadow = shadow.getComponent(Transform.class);
                         }
-                        if (point == null || !farmEntity.isEmpty(x, y)) {
-                            transform.setPosition(new Point2D(x, y));
+                        if (transformSeed == null) {
+                            seed.addComponent(new Transform(x, y, 0.0, 2));
+                            transformSeed = seed.getComponent(Transform.class);
+                        }
+                        if (point == null || !farmEntity.isEmpty(x, y, 2, 2)) {
+                            transformShadow.setPosition(new Point2D(x, y));
+                            transformSeed.setPosition(new Point2D(x, y));
                         } else {
-                            transform.setPosition(point);
+                            transformShadow.setPosition(point);
+                            transformSeed.setPosition(point);
                         }
                     });
                 } else {
                     shadow.removeComponent(Transform.class);
+                    seed.removeComponent(Transform.class);
                     input.removeMouseHover();
                 }
             });

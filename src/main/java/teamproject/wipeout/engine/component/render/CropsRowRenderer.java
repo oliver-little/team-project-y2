@@ -10,7 +10,6 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -46,6 +45,9 @@ public class CropsRowRenderer implements Renderable {
                 continue;
             }
             Item currentItem = pair.getKey();
+            if (currentItem == null) {
+                continue;
+            }
             PlantComponent crop = currentItem.getComponent(PlantComponent.class);
             int growthStage = GrowthSystem.getCurrentGrowthStage(crop.growthRate, pair.getValue());
 
@@ -68,7 +70,7 @@ public class CropsRowRenderer implements Renderable {
     }
 
     protected Point2D rescaleToFitWidth(double w, double h) {
-        double scaleFactor = FarmEntity.SQUARE_SIZE / w;
+        double scaleFactor = FarmEntity.SQUARE_SIZE*2 / w;
         return new Point2D(w * scaleFactor, h * scaleFactor);
     }
 

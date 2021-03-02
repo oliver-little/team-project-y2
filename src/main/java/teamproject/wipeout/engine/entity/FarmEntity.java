@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.entity;
 
 import javafx.geometry.Point2D;
-import javafx.scene.input.MouseButton;
 import teamproject.wipeout.engine.component.Clickable;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
@@ -53,6 +52,12 @@ public class FarmEntity extends GameEntity {
             rowEntity.setParent(this);
             this.addChild(rowEntity);
         }
+
+        Clickable clickable = new Clickable((x, y, mouseButton) -> {
+            System.out.println("Show farm menu");
+        });
+        clickable.setEntity(this);
+        this.addComponent(clickable);
     }
 
     /**
@@ -62,11 +67,11 @@ public class FarmEntity extends GameEntity {
      * @param y Y coordinate of the "square"
      * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
      */
-    public boolean isEmpty(double x, double y) {
+    public boolean isEmpty(double x, double y, int w, int h) {
         Point2D coors = this.rescaleCoordinates(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-        return this.data.isEmpty(row, column);
+        return this.data.isEmpty(row, column, w ,h);
     }
 
     /**
@@ -80,9 +85,6 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinates(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-        if (!this.data.isEmpty(row, column)) {
-            return;
-        }
         this.data.putItem(item, row, column);
     }
 
@@ -97,10 +99,6 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinates(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-
-        if (!this.data.canBePicked(row, column)) {
-            return null;
-        }
         return this.data.pickItemAt(row, column);
     }
 

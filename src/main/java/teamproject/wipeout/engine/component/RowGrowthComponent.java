@@ -21,14 +21,18 @@ public class RowGrowthComponent implements GameComponent {
         if (pair == null) {
             return;
         }
-        PlantComponent crop = pair.getKey().getComponent(PlantComponent.class);
+        Item crop = pair.getKey();
+        if (crop == null) {
+            return;
+        }
+        double growthRate = crop.getComponent(PlantComponent.class).growthRate;
         double growth = pair.getValue();
 
-        if (growth >= (GROWTH_STAGES * crop.growthRate)) {
+        if (growth >= (GROWTH_STAGES * growthRate)) {
             return;
         }
         growth += increment;
-        this.cropRow.set(column, new Pair<Item, Double>(pair.getKey(), growth));
+        this.cropRow.set(column, new Pair<Item, Double>(crop, growth));
     }
 
     public void updateGrowth(double timestep) {

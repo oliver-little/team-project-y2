@@ -9,6 +9,7 @@ public class PlantComponent implements ItemComponent {
 
     public final String spriteSheetName;
     public final String spriteSetName;
+    public final int squareSize;
     public final double growthRate;
 
     /**
@@ -20,6 +21,13 @@ public class PlantComponent implements ItemComponent {
         this.spriteSheetName = (String) data.get("spriteSheetName");
         this.spriteSetName = (String) data.get("spriteSetName");
         this.growthRate = (Double) data.get("growthRate");
+
+        Double plantSize = (Double) data.get("squareSize");
+        if (plantSize == null) {
+            this.squareSize = 1;
+        } else {
+            this.squareSize = plantSize.intValue();
+        }
     }
 
     /**
