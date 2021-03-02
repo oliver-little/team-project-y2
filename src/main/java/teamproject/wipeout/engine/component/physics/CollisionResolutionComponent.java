@@ -41,12 +41,14 @@ public class CollisionResolutionComponent implements GameComponent {
     	if (resolutionVector==null) {
     		return;
     	}
-    	
+    	System.out.println("\n");
     	Transform t1 = g1.getComponent(Transform.class);
+    	System.out.println(t1.getWorldPosition());
     	//HitboxComponent h1 = g1.getComponent(HitboxComponent.class);
     	CollisionResolutionComponent c1 = g1.getComponent(CollisionResolutionComponent.class);
     	
     	Transform t2 = g2.getComponent(Transform.class);
+    	System.out.println(t2.getWorldPosition());
     	//HitboxComponent h2 = g2.getComponent(HitboxComponent.class);
     	CollisionResolutionComponent c2 = g2.getComponent(CollisionResolutionComponent.class);
     	    	
