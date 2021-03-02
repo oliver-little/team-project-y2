@@ -1,4 +1,4 @@
-package teamproject.wipeout.util;
+package teamproject.wipeout.util.sort;
 
 import java.util.Comparator;
 import java.util.List;

@@ -1,0 +1,88 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "inventory-fruit",
+	"sprites": [
+		{
+			"name": "apple",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "pear",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "lemon",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "orange",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "strawberry",
+			"type": "sprite",
+			"parameters" : {
+				"x": 96,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "cherry",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 32,
+				"width": 32,
+				"height": 32
+			}
+		},
+        {
+			"name": "pineapple",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 160,
+				"width": 64,
+				"height": 64
+			}
+		},
+        {
+			"name": "banana",
+			"type": "sprite",
+			"parameters" : {
+				"x": 64,
+				"y": 160,
+				"width": 64,
+				"height": 64
+			}
+		}
+
+    ]
+}

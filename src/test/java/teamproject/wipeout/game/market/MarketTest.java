@@ -2,16 +2,29 @@ package teamproject.wipeout.game.market;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import teamproject.wipeout.game.item.ItemStore;
 
 public class MarketTest {
+
+    private static ItemStore itemStore;
+    private Market market;
+
+    @BeforeAll
+    public static void initialization() {
+        itemStore = assertDoesNotThrow(() -> new ItemStore("items.json"));
+    }
+
+    @BeforeEach
+    public void setup() {
+        market = assertDoesNotThrow(() -> new Market(itemStore.getData()));
+    }
     
     @Test
     public void testBuying1Item() {
-
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
 
         double totalCost = market.buyItem(1, 1);
 
@@ -29,8 +42,6 @@ public class MarketTest {
     @Test
     public void testBuying50Items() {
 
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
-
         double totalCost = market.buyItem(1, 50);
 
         double buyPrice = market.stockDatabase.get(1).getCurrentBuyPrice();
@@ -46,8 +57,6 @@ public class MarketTest {
 
     @Test
     public void testBuying100Items() {
-
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
 
         double totalCost = market.buyItem(1, 100);
 
@@ -65,8 +74,6 @@ public class MarketTest {
     @Test
     public void testSelling1Item() {
 
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
-
         double totalCost = market.sellItem(1, 1);
 
         double buyPrice = market.stockDatabase.get(1).getCurrentBuyPrice();
@@ -82,8 +89,6 @@ public class MarketTest {
 
     @Test
     public void testSelling40Items() {
-
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
 
         double totalCost = market.sellItem(1, 40);
 
@@ -101,8 +106,6 @@ public class MarketTest {
     @Test
     public void testSelling100Items() {
 
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
-
         double totalCost = market.sellItem(1, 100);
 
         double buyPrice = market.stockDatabase.get(1).getCurrentBuyPrice();
@@ -118,8 +121,6 @@ public class MarketTest {
 
     @Test
     public void testBuyingAndSellingItems() {
-
-        Market market = assertDoesNotThrow(() -> new Market(ItemStore.getItemFileFromJSON("items.JSON")));
 
         double totalCost = market.buyItem(1, 50);
         totalCost = market.sellItem(1, 40);

@@ -11,8 +11,9 @@ import teamproject.wipeout.engine.component.*;
 import teamproject.wipeout.engine.component.render.*;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
-import teamproject.wipeout.util.InsertionSort;
+import teamproject.wipeout.util.sort.*;
 
 /**
  * System to render relevant GameEntities to the canvas
@@ -59,6 +60,12 @@ public class RenderSystem implements GameSystem {
         this.identityTransform = new Affine();
         this.lastCameraPos = Point2D.ZERO;
         this.lastZoom = 0;
+    }
+
+    public RenderSystem(GameScene scene, Canvas staticCanvas, Canvas dynamicCanvas, CameraEntityCollector cameraCollector) {
+        this(scene, staticCanvas, dynamicCanvas);
+        this.cameraCollector.cleanup();
+        this.cameraCollector = cameraCollector;
     }
 
 

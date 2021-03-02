@@ -1,0 +1,50 @@
+{
+  "fileType": "ItemFile",
+  "version": "2.0.0",
+  "items": [
+    {
+      "id" : 1,
+      "name" : "Tomato",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-vegetables",
+          "spriteSetName" : "tomato",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 2.00,
+          "defaultSellPrice" : 1.00
+        },
+        "PlantableComponent" : {
+          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
+          "seedSpriteSetName" : "red-seeds",
+          "growthSpriteSheetName" : "crops",
+          "growthSpriteSetName" : "tomato",
+          "growthRate" : 3.00
+        }
+      }
+    },
+    {
+      "id" : 2,
+      "name": "Lettuce",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-vegetables",
+          "spriteSetName" : "lettuce",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 2.50
+        },
+        "PlantableComponent" : {
+          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
+          "seedSpriteSetName" : "green-seeds",
+          "growthSpriteSheetName" : "crops",
+          "growthSpriteSetName" : "lettuce",
+          "growthRate" : 3.00
+        }
+      }
+    }
+  ]
+}

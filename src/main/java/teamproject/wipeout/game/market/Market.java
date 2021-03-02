@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import teamproject.wipeout.game.item.Item;
-import teamproject.wipeout.game.item.Item.ItemType;
+import teamproject.wipeout.game.item.components.TradableComponent;
 
 /**
  * Defines the market in which players can buy and sell goods for. The market also regulates the quantites and prices of the goods for sale.
@@ -27,7 +27,11 @@ public class Market {
         stockDatabase = new HashMap<>();
 
         for (Item item : itemsForSale.values()) {
-            MarketItem marketItem = new MarketItem(item.id, item.itemType, item.defaultBuy, item.defaultSell);
+            TradableComponent tradableComponent = item.getComponent(TradableComponent.class);
+            if (tradableComponent == null) {
+                continue;
+            }
+            MarketItem marketItem = new MarketItem(item.id, tradableComponent);
             stockDatabase.put(item.id, marketItem);
         }
     }
@@ -48,9 +52,8 @@ public class Market {
 
         MarketItem item = stockDatabase.get(id);
 
-        if (item.getItemType() == ItemType.CONSTRUCTABLE || item.getItemType() == ItemType.USABLE) {
-            //TODO Add to inventory and remove money here.
-            return item.getCurrentBuyPrice();
+        if (item.getDefaultSellPrice() < 0) { 
+            return quantity * item.getDefaultBuyPrice();
         }
 
         //TODO Add a check that the player has enough money to buy the item & has enough inventory space.
@@ -76,9 +79,9 @@ public class Market {
         }
 
         MarketItem item = stockDatabase.get(id);
- 
-        if (item.getItemType() == ItemType.CONSTRUCTABLE || item.getItemType() == ItemType.USABLE) {
-            System.out.println("Cannot sell constructable or usable item types.");
+
+        if (item.getDefaultSellPrice() < 0) {
+            System.out.println("Cannot sell this kind of item.");
             return -1;
         }
 
