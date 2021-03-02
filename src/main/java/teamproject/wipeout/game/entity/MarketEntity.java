@@ -9,7 +9,8 @@ import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.game.market.MarketUI;
+import teamproject.wipeout.game.market.ui.MarketUI;
+import teamproject.wipeout.util.resources.ResourceType;
 
 public class MarketEntity extends GameEntity {
 
@@ -27,6 +28,10 @@ public class MarketEntity extends GameEntity {
 
     private EntityClickAction onClick = (x, y, button, entity) -> {
         if (this.marketUI.getParent() == null) {
+            this.marketUI.getStylesheets().clear();
+
+            this.marketUI.getStylesheets().add(ResourceType.STYLESHEET.path + "market-menu.css");
+            
             entity.addComponent(new UIComponent(this.marketUI));
         }
     };

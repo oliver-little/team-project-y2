@@ -198,6 +198,8 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
+        MarketEntity marketEntity = new MarketEntity(gameScene, 350, 350);
+
         gl.start();
     }
 

@@ -1,0 +1,17 @@
+.tab-pane {
+    -fx-tab-min-width:90px;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-opacity: 0;
+}
+
+.tab-pane .tab {
+    -fx-background-color: rgb(255, 192, 109);
+}
+
+.button {
+    -fx-background-color: rgb(255, 212, 157);
+    -fx-border-radius: 0;
+    -fx-border-color: rgb(255, 192, 109);
+}
