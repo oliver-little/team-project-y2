@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
-import teamproject.wipeout.engine.component.UIComponent;
+import teamproject.wipeout.engine.component.ui.DialogUIComponent;
+import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 
@@ -20,11 +23,32 @@ public class UISystemTest {
 
         assertEquals(0, root.getChildren().size());
 
-        Rectangle newNode = new Rectangle(10, 10);
+        TestUI newNode = new TestUI();
         entity.addComponent(new UIComponent(newNode));
 
         assertEquals(false, entity.hasComponent(UIComponent.class));
         assertEquals(1, root.getChildren().size());
-        assertEquals(newNode, root.getChildren().get(0));
+        assertEquals(newNode.getContent(), root.getChildren().get(0));
+    }
+
+    /**
+     * Class with no content to test UISystem
+     */
+    public class TestUI implements DialogUIComponent {
+        
+        private Pane parent;
+        private Rectangle rect;
+
+        public TestUI() {
+            rect = new Rectangle();
+        }
+
+        public void setParent(Pane parent) {
+            this.parent = parent;
+        }
+
+        public Node getContent() {
+            return rect;
+        }
     }
 }

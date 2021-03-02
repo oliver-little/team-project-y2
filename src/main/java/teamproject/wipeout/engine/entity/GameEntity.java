@@ -164,7 +164,7 @@ public class GameEntity {
     /**
      * Adds a new component to an entity
      * 
-     * @param {Component} The component to add
+     * @param component The component to add
      * @return true if the component was added successfully, false if not (because a component of that type already exists)
      */
     public <T extends GameComponent> boolean addComponent(T component) {

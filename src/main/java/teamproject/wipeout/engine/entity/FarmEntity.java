@@ -1,8 +1,8 @@
 package teamproject.wipeout.engine.entity;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.Clickable;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
@@ -53,7 +53,7 @@ public class FarmEntity extends GameEntity {
             this.addChild(rowEntity);
         }
 
-        Clickable clickable = new Clickable((x, y, mouseButton) -> {
+        Clickable clickable = new Clickable((x, y, mouseButton, entity) -> {
             System.out.println("Show farm menu");
         });
         clickable.setEntity(this);

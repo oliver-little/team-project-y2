@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.Clickable;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -14,7 +14,6 @@ import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.input.InputClickableAction;
 import teamproject.wipeout.engine.input.InputHandler;
-import teamproject.wipeout.engine.input.InputMouseAction;
 import teamproject.wipeout.util.sort.*;
 
 public class MouseClickSystem implements EventSystem {
@@ -31,9 +30,10 @@ public class MouseClickSystem implements EventSystem {
         input.onMouseClick(this.onClick);
     }
 
-    public MouseClickSystem(GameScene scene, CameraEntityCollector cameraCollector) {
+    public MouseClickSystem(GameScene scene, InputHandler input, CameraEntityCollector cameraCollector) {
         this.collector = new SignatureEntityCollector(scene, signature);
         this.cameraCollector = cameraCollector;
+        input.onMouseClick(this.onClick);
     }
 
     public void cleanup() {
@@ -41,13 +41,16 @@ public class MouseClickSystem implements EventSystem {
     }
 
     public InputClickableAction onClick = (x, y, button) -> {
-        Clickable clicked = this.getClicked(x, y);
-        if (clicked != null && clicked.onClick != null) {
-            clicked.onClick.performMouseClickAction(x, y, button);
+        GameEntity clicked = this.getClicked(x, y);
+        if (clicked != null) {
+            Clickable entityClickable = clicked.getComponent(Clickable.class);
+            if (entityClickable != null) {
+                entityClickable.onClick.performMouseClickAction(x, y, button, clicked);
+            }
         }
     };
 
-    protected Clickable getClicked(double x, double y) {
+    protected GameEntity getClicked(double x, double y) {
         // Transform mouse click position by camera position and zoom
         double zoom = 1;
         Point2D position = Point2D.ZERO;
@@ -71,7 +74,7 @@ public class MouseClickSystem implements EventSystem {
             worldPosition = entity.getComponent(Transform.class).getWorldPosition();
             renderComponent = entity.getComponent(RenderComponent.class);
             if (x > worldPosition.getX() && y > worldPosition.getY() && x < worldPosition.getX() + renderComponent.getWidth() && y < worldPosition.getY() + renderComponent.getHeight()) {
-                return entity.getComponent(Clickable.class);
+                return entity;
             } 
             i--;
         }
