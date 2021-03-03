@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.farm;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -9,9 +10,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.util.Pair;
+import javafx.util.Callback;
 import teamproject.wipeout.engine.component.ui.DialogUIComponent;
-import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 import java.util.ArrayList;
 
@@ -21,32 +22,39 @@ public class FarmUI extends VBox implements DialogUIComponent {
 
     private Pane parent;
 
-    public FarmUI(FarmData farmData) {
+    public FarmUI(FarmData farmData, SpriteManager spriteManager) {
         super();
 
         this.data = farmData;
 
         this.setAlignment(Pos.CENTER);
 
-        ListView<String> listView = new ListView<String>();
+        ListView<FarmItem> listView = new ListView<FarmItem>();
+        listView.setCellFactory(new Callback<ListView<FarmItem>, ListCell<FarmItem>>() {
+            @Override
+            public ListCell<FarmItem> call(ListView<FarmItem> param) {
+                return new FarmItemCell((event) -> data.pickItemAt(0, 0), spriteManager);
+            }
+        });
         listView.setOrientation(Orientation.VERTICAL);
         listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         listView.setPadding(new Insets(0, 10, 10, 10));
         listView.setBackground(new Background(new BackgroundFill(Color.BEIGE, null, null)));
 
-        ObservableList<String> items = this.getList(this.data.items);
+        ObservableList<FarmItem> items = this.getList(this.data.items);
         listView.setItems(items);
         Label emptyLabel = new Label("Your farm is empty");
         listView.setPlaceholder(emptyLabel);
 
         listView.setOnMouseClicked((mouseEvent) -> {
-            String selected = listView.getSelectionModel().getSelectedItem();
+            String selected = listView.getSelectionModel().getSelectedItem().get().name;
             items.remove(selected);
             this.data.pickItem(selected);
         });
 
         Button closeButton = new Button("X");
-        closeButton.setOnAction((actionEvent) -> this.parent.getChildren().remove(this));
+        closeButton.setCancelButton(true);
+        closeButton.setOnAction((event) -> this.parent.getChildren().remove(this));
 
         HBox hbox = new HBox(closeButton);
         hbox.setAlignment(Pos.CENTER_RIGHT);
@@ -54,6 +62,7 @@ public class FarmUI extends VBox implements DialogUIComponent {
         hbox.setBackground(new Background(new BackgroundFill(Color.BEIGE, null, null)));
 
         this.getChildren().addAll(hbox, listView);
+        this.setPadding(new Insets(50, 50, 50, 50));
     }
 
     public void setParent(Pane parent) {
@@ -64,18 +73,25 @@ public class FarmUI extends VBox implements DialogUIComponent {
         return this;
     }
 
-    protected ObservableList<String> getList(ArrayList<ArrayList<Pair<Item, Double>>> items) {
-        ObservableList<String> itemList = FXCollections.observableArrayList();
-        for (ArrayList<Pair<Item, Double>> row : items) {
-            for (Pair<Item, Double> pair : row) {
-                if (pair != null) {
-                    Item item = pair.getKey();
-                    if (item != null) {
-                        itemList.add(item.name);
-                    }
+    protected ObservableList<FarmItem> getList(ArrayList<ArrayList<FarmItem>> items) {
+        ObservableList<FarmItem> itemList = FXCollections.observableArrayList();
+        for (ArrayList<FarmItem> row : items) {
+            for (FarmItem farmItem : row) {
+                if (farmItem != null && farmItem.get() != null) {
+                    itemList.add(farmItem);
                 }
             }
         }
+
+        this.data.setGrowthCallback((farmItem) -> {
+            Platform.runLater(() -> {
+                int itemIndex = itemList.indexOf(farmItem);
+                if (itemIndex >= 0) {
+                    itemList.set(itemIndex, farmItem);
+                }
+            });
+        });
+
         return itemList;
     }
 

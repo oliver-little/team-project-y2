@@ -1,39 +1,42 @@
 package teamproject.wipeout.engine.component.farm;
 
-import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
+import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.Item;
-import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class RowGrowthComponent implements GameComponent {
 
     public static final int GROWTH_STAGES = 4;
 
-    public final ArrayList<Pair<Item, Double>> cropRow;
+    public final ArrayList<FarmItem> cropRow;
 
-    public RowGrowthComponent(ArrayList<Pair<Item, Double>> cropRow) {
+    protected final Consumer<FarmItem> growthUpdater;
+
+    public RowGrowthComponent(ArrayList<FarmItem> cropRow, Consumer<FarmItem> updater) {
         this.cropRow = cropRow;
+        this.growthUpdater = updater;
     }
 
     public void incrementCurrentGrowth(int column, double increment) {
-        Pair<Item, Double> pair = this.cropRow.get(column);
-        if (pair == null) {
+        FarmItem farmItem = this.cropRow.get(column);
+        if (farmItem == null) {
             return;
         }
-        Item crop = pair.getKey();
-        if (crop == null) {
+        Item item = farmItem.get();
+        if (item == null) {
             return;
         }
-        double growthRate = crop.getComponent(PlantComponent.class).growthRate;
-        double growth = pair.getValue();
 
-        if (growth >= (GROWTH_STAGES * growthRate)) {
+        int growthStage = farmItem.getCurrentGrowthStage();
+        if (growthStage == GROWTH_STAGES) {
             return;
         }
-        growth += increment;
-        this.cropRow.set(column, new Pair<Item, Double>(crop, growth));
+
+        farmItem.growth += increment;
+        this.growthUpdater.accept(farmItem);
     }
 
     public void updateGrowth(double timestep) {

@@ -40,8 +40,8 @@ public class FarmEntity extends GameEntity {
      * @param scene The GameScene this entity is part of
      * @param location Location of the farm
      * @param playerID Player's ID this entity belongs to
-     * @param spriteManager {@link SpriteManager} for the {@link CropsRowEntity}
-     * @param itemStore {@link ItemStore} for the {@link CropsRowEntity}
+     * @param spriteManager {@link SpriteManager} for the {@link ItemsRowEntity}
+     * @param itemStore {@link ItemStore} for the {@link ItemsRowEntity}
      */
     public FarmEntity(GameScene scene, Point2D location, String playerID, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
@@ -59,7 +59,7 @@ public class FarmEntity extends GameEntity {
         this.addComponent(new RenderComponent(true, new FarmRenderer(this.size, spriteManager)));
 
         for (int i = 0; i < squareGrid.getY(); i++) {
-            CropsRowEntity rowEntity = new CropsRowEntity(scene, this.data.getItemsInRow(i), spriteManager, itemStore);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(scene, this.data.getItemsInRow(i), this.data.growthCallback, spriteManager, itemStore);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.65) + (SQUARE_SIZE * i));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
             rowEntity.setParent(this);
@@ -68,7 +68,8 @@ public class FarmEntity extends GameEntity {
 
         Clickable clickable = new Clickable((x, y, button, entity) -> {
             if (placingItem == null) {
-                this.addComponent(new UIComponent(new FarmUI(this.data)));
+                FarmUI farmUI = new FarmUI(this.data, this.spriteManager);
+                this.addComponent(new UIComponent(farmUI));
             } else {
                 if (this.placeItem(placingItem, x, y)) {
                     this.stopPlacingItem();

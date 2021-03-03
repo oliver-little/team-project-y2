@@ -3,10 +3,9 @@ package teamproject.wipeout.engine.component.render;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.util.Pair;
 import teamproject.wipeout.engine.entity.farm.FarmEntity;
-import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -15,15 +14,15 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
- * Specifies how a row of crops is rendered.
+ * Specifies how a row of items is rendered.
  */
-public class CropsRowRenderer implements Renderable {
+public class ItemsRowRenderer implements Renderable {
 
-    public final ArrayList<Pair<Item, Double>> farmRow;
+    public final ArrayList<FarmItem> farmRow;
     public ItemStore itemStore;
     public SpriteManager spriteManager;
 
-    public CropsRowRenderer(ArrayList<Pair<Item, Double>> row, SpriteManager spriteManager, ItemStore itemStore) {
+    public ItemsRowRenderer(ArrayList<FarmItem> row, SpriteManager spriteManager, ItemStore itemStore) {
         this.farmRow = row;
         this.itemStore = itemStore;
         this.spriteManager = spriteManager;
@@ -38,30 +37,31 @@ public class CropsRowRenderer implements Renderable {
     }
 
     public void render(GraphicsContext gc, double x, double y, double scale) {
-        double cropX = x;
-        for (Pair<Item, Double> pair : farmRow) {
-            cropX += FarmEntity.SQUARE_SIZE;
-            if (pair == null) {
+        double itemX = x;
+        for (FarmItem farmItem : farmRow) {
+            itemX += FarmEntity.SQUARE_SIZE;
+            if (farmItem == null) {
                 continue;
             }
-            Item currentItem = pair.getKey();
+            Item currentItem = farmItem.get();
             if (currentItem == null) {
                 continue;
             }
-            PlantComponent crop = currentItem.getComponent(PlantComponent.class);
-            int growthStage = GrowthSystem.getCurrentGrowthStage(crop.growthRate, pair.getValue());
+
+            int growthStage = farmItem.getCurrentGrowthStage();
 
             try {
-                Image[] sprites = this.spriteManager.getSpriteSet(crop.spriteSheetName, crop.spriteSetName);
+                PlantComponent plant = currentItem.getComponent(PlantComponent.class);
+                Image[] sprites = this.spriteManager.getSpriteSet(plant.spriteSheetName, plant.spriteSetName);
                 if (growthStage >= sprites.length) {
                     growthStage = sprites.length - 1;
                 }
                 Image sprite = sprites[growthStage];
 
-                Point2D spriteSize = this.rescaleToFitWidth(crop.width, sprite.getWidth(), sprite.getHeight());
-                double cropY = (y - spriteSize.getY() * 0.5);
+                Point2D spriteSize = this.rescaleToFitWidth(plant.width, sprite.getWidth(), sprite.getHeight());
+                double itemY = (y - spriteSize.getY() * 0.5);
 
-                gc.drawImage(sprite, cropX * scale, cropY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
+                gc.drawImage(sprite, itemX * scale, itemY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
 
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();

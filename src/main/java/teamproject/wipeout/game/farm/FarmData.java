@@ -1,13 +1,12 @@
 package teamproject.wipeout.game.farm;
 
-import javafx.geometry.Point2D;
-import javafx.util.Pair;
 import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 /**
  * Class used as a data container for {@code FarmEntity}
@@ -19,7 +18,15 @@ public class FarmData {
 
     public String playerID;
 
-    protected final ArrayList<ArrayList<Pair<Item, Double>>> items;
+    public final Consumer<FarmItem> growthCallback = (farmItem) -> {
+        if (this.growthCustomCallback != null) {
+            this.growthCustomCallback.accept(farmItem);
+        }
+    };
+
+    protected final ArrayList<ArrayList<FarmItem>> items;
+
+    private Consumer<FarmItem> growthCustomCallback;
 
     /**
      * Creates an "empty farm" which is tied to a player's ID.
@@ -29,9 +36,9 @@ public class FarmData {
     public FarmData(String playerID) {
         this.playerID = playerID;
 
-        this.items = new ArrayList<ArrayList<Pair<Item, Double>>>(FARM_ROWS);
+        this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);
         for (int i = 0; i < FARM_ROWS; i++) {
-            ArrayList<Pair<Item, Double>> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
+            ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
             this.items.add(newRow);
         }
     }
@@ -41,7 +48,7 @@ public class FarmData {
      *
      * @return 2D ArrayList of the Items at the farm
      */
-    public ArrayList<ArrayList<Pair<Item, Double>>> getItems() {
+    public ArrayList<ArrayList<FarmItem>> getItems() {
         return this.items;
     }
 
@@ -51,7 +58,7 @@ public class FarmData {
      * @param row Row with the Items
      * @return ArrayList of the Items in the given row
      */
-    public ArrayList<Pair<Item, Double>> getItemsInRow(int row) {
+    public ArrayList<FarmItem> getItemsInRow(int row) {
         return this.items.get(row);
     }
 
@@ -62,10 +69,10 @@ public class FarmData {
      * @param column Column of the Item
      * @return Item in the given row and column
      */
-    public Pair<Item, Double> itemAt(int row, int column) {
-        Pair<Item, Double> item = this.items.get(row).get(column);
-        if (item != null && item.getKey() == null) {
-            String[] coordinates = item.getValue().toString().split("[.]");
+    public FarmItem itemAt(int row, int column) {
+        FarmItem item = this.items.get(row).get(column);
+        if (item != null && item.get() == null) {
+            String[] coordinates = Double.toString(item.growth).split("[.]");
             int actualRow = Integer.parseInt(coordinates[0]);
             int actualColumn = Integer.parseInt(coordinates[1]);
             return this.itemAt(actualRow, actualColumn);
@@ -114,7 +121,7 @@ public class FarmData {
         if (!this.canBePlaced(row, column, plantWidth, plantHeight)) {
             return false;
         }
-        this.items.get(row).set(column, new Pair<Item, Double>(item, 0.0));
+        this.items.get(row).set(column, new FarmItem(item));
 
         if (plantWidth > 1 || plantHeight > 1) {
             this.fillSquares(true, row, column, plantWidth, plantHeight);
@@ -130,16 +137,13 @@ public class FarmData {
      * @param column Column of the Item
      * @return {@code true} if the Item can be picked, <br> otherwise {@code false}
      */
-    public boolean canBePicked(int row, int column) {
-        Pair<Item, Double> checkingItem = this.itemAt(row, column);
+    public boolean canBePicked(int row, int column) { // won't work correctly for oversized plants
+        FarmItem checkingItem = this.itemAt(row, column);
         if (checkingItem == null) {
             return false;
         }
 
-        double growthRate = checkingItem.getKey().getComponent(PlantComponent.class).growthRate;
-        double growth = checkingItem.getValue();
-
-        return growth >= (RowGrowthComponent.GROWTH_STAGES * growthRate);
+        return checkingItem.growth >= (RowGrowthComponent.GROWTH_STAGES * checkingItem.getGrowthRate());
     }
 
     /**
@@ -153,7 +157,7 @@ public class FarmData {
         if (!this.canBePicked(row, column)) {
             return null;
         }
-        Item pickedItem = this.items.get(row).get(column).getKey();
+        Item pickedItem = this.items.get(row).get(column).get();
         this.items.get(row).set(column, null);
 
         PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
@@ -174,11 +178,11 @@ public class FarmData {
      */
     public Item pickItem(String itemName) {
         int rowIndex = 0;
-        for (ArrayList<Pair<Item, Double>> row : this.items) {
+        for (ArrayList<FarmItem> row : this.items) {
             int columnIndex = 0;
-            for (Pair<Item, Double> pair : row) {
-                if (pair != null && pair.getKey() != null) {
-                    if (pair.getKey().name.equals(itemName)) {
+            for (FarmItem item : row) {
+                if (item != null && item.get() != null) {
+                    if (item.get().name.equals(itemName)) {
                         return this.pickItemAt(rowIndex, columnIndex);
                     }
                 }
@@ -187,6 +191,10 @@ public class FarmData {
             rowIndex += 1;
         }
         return null;
+    }
+
+    public void setGrowthCallback(Consumer<FarmItem> growthCallback) {
+        this.growthCustomCallback = growthCallback;
     }
 
     /**
@@ -199,10 +207,10 @@ public class FarmData {
      * @param h Item height
      */
     protected void fillSquares(boolean flag, int row, int column, int w, int h) {
-        Pair<Item, Double> fillPair = null;
+        FarmItem fillItem = null;
         if (flag) {
             String doubleCoordinates = row + "." + column;
-            fillPair = new Pair<Item, Double>(null, Double.valueOf(doubleCoordinates));
+            fillItem = new FarmItem(null, Double.valueOf(doubleCoordinates));
         }
 
         for (int r = row; r < row + h; r++) {
@@ -210,7 +218,7 @@ public class FarmData {
                 if (r == row && c == column) {
                     continue;
                 }
-                this.items.get(r).set(c, fillPair);
+                this.items.get(r).set(c, fillItem);
             }
         }
     }

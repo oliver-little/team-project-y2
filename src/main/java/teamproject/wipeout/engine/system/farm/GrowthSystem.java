@@ -35,15 +35,4 @@ public class GrowthSystem implements GameSystem {
         }
     }
 
-    /**
-     * Calculates the growth stage from a given growth rate and current growth.
-     *
-     * @param growthRate Rate of the growth (seconds per stage)
-     * @param currentGrowth Current growth property value
-     * @return Current growth stage
-     */
-    public static int getCurrentGrowthStage(double growthRate, double currentGrowth) {
-        return (int) (currentGrowth / growthRate);
-    }
-
 }
