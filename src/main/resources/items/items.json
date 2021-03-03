@@ -358,7 +358,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "apple-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -383,7 +384,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pear-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -408,7 +410,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "lemon-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -433,7 +436,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "orange-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -458,7 +462,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "strawberry-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -483,7 +488,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "cherry-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -508,7 +514,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "blackberry",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -533,7 +540,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pineapple-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }
@@ -558,7 +566,8 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "banana-tree",
-          "squareSize" : 2,
+          "width": 2,
+          "height": 2,
           "growthRate" : 3.00
         }
       }

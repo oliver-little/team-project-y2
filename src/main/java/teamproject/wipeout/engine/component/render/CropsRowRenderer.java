@@ -4,8 +4,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.util.Pair;
-import teamproject.wipeout.engine.entity.FarmEntity;
-import teamproject.wipeout.engine.system.GrowthSystem;
+import teamproject.wipeout.engine.entity.farm.FarmEntity;
+import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -58,7 +58,7 @@ public class CropsRowRenderer implements Renderable {
                 }
                 Image sprite = sprites[growthStage];
 
-                Point2D spriteSize = this.rescaleToFitWidth(sprite.getWidth(), sprite.getHeight());
+                Point2D spriteSize = this.rescaleToFitWidth(crop.width, sprite.getWidth(), sprite.getHeight());
                 double cropY = (y - spriteSize.getY() * 0.5);
 
                 gc.drawImage(sprite, cropX * scale, cropY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
@@ -69,8 +69,8 @@ public class CropsRowRenderer implements Renderable {
         }
     }
 
-    protected Point2D rescaleToFitWidth(double w, double h) {
-        double scaleFactor = FarmEntity.SQUARE_SIZE*2 / w;
+    protected Point2D rescaleToFitWidth(int squareScale, double w, double h) {
+        double scaleFactor = squareScale * FarmEntity.SQUARE_SIZE / w;
         return new Point2D(w * scaleFactor, h * scaleFactor);
     }
 

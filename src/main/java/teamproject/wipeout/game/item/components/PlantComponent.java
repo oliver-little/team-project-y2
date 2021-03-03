@@ -1,5 +1,7 @@
 package teamproject.wipeout.game.item.components;
 
+import javafx.geometry.Point2D;
+
 import java.util.Map;
 
 /**
@@ -9,7 +11,8 @@ public class PlantComponent implements ItemComponent {
 
     public final String spriteSheetName;
     public final String spriteSetName;
-    public final int squareSize;
+    public final int width;
+    public final int height;
     public final double growthRate;
 
     /**
@@ -22,11 +25,17 @@ public class PlantComponent implements ItemComponent {
         this.spriteSetName = (String) data.get("spriteSetName");
         this.growthRate = (Double) data.get("growthRate");
 
-        Double plantSize = (Double) data.get("squareSize");
-        if (plantSize == null) {
-            this.squareSize = 1;
+        Double width = (Double) data.get("width");
+        Double height = (Double) data.get("height");
+        if (width == null) {
+            this.width = 1;
         } else {
-            this.squareSize = plantSize.intValue();
+            this.width = width.intValue();
+        }
+        if (height == null) {
+            this.height = 1;
+        } else {
+            this.height = height.intValue();
         }
     }
 

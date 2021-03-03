@@ -1,9 +1,7 @@
-package teamproject.wipeout.engine.system;
-
-import java.util.List;
-import java.util.Set;
+package teamproject.wipeout.engine.system.input;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.input.Clickable;
@@ -14,7 +12,12 @@ import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.input.InputClickableAction;
 import teamproject.wipeout.engine.input.InputHandler;
-import teamproject.wipeout.util.sort.*;
+import teamproject.wipeout.engine.system.EventSystem;
+import teamproject.wipeout.util.sort.InsertionSort;
+import teamproject.wipeout.util.sort.TransformComparator;
+
+import java.util.List;
+import java.util.Set;
 
 public class MouseClickSystem implements EventSystem {
 
@@ -41,16 +44,16 @@ public class MouseClickSystem implements EventSystem {
     }
 
     public InputClickableAction onClick = (x, y, button) -> {
-        GameEntity clicked = this.getClicked(x, y);
+        Pair<GameEntity, Point2D> clicked = this.getClicked(x, y);
         if (clicked != null) {
-            Clickable entityClickable = clicked.getComponent(Clickable.class);
+            Clickable entityClickable = clicked.getKey().getComponent(Clickable.class);
             if (entityClickable != null) {
-                entityClickable.onClick.performMouseClickAction(x, y, button, clicked);
+                entityClickable.onClick.performMouseClickAction(clicked.getValue().getX(), clicked.getValue().getY(), button, clicked.getKey());
             }
         }
     };
 
-    protected GameEntity getClicked(double x, double y) {
+    protected Pair<GameEntity, Point2D> getClicked(double x, double y) {
         // Transform mouse click position by camera position and zoom
         double zoom = 1;
         Point2D position = Point2D.ZERO;
@@ -74,7 +77,7 @@ public class MouseClickSystem implements EventSystem {
             worldPosition = entity.getComponent(Transform.class).getWorldPosition();
             renderComponent = entity.getComponent(RenderComponent.class);
             if (x > worldPosition.getX() && y > worldPosition.getY() && x < worldPosition.getX() + renderComponent.getWidth() && y < worldPosition.getY() + renderComponent.getHeight()) {
-                return entity;
+                return new Pair<GameEntity, Point2D>(entity, new Point2D(x, y));
             } 
             i--;
         }

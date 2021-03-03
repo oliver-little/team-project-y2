@@ -1,10 +1,11 @@
-package teamproject.wipeout.engine.entity;
+package teamproject.wipeout.engine.entity.farm;
 
 import javafx.util.Pair;
-import teamproject.wipeout.engine.component.RowGrowthComponent;
+import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.engine.component.render.CropsRowRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;

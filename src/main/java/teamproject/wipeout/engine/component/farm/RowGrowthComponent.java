@@ -1,6 +1,7 @@
-package teamproject.wipeout.engine.component;
+package teamproject.wipeout.engine.component.farm;
 
 import javafx.util.Pair;
+import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 

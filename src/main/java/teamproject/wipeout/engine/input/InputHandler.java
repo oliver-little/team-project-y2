@@ -145,49 +145,6 @@ public class InputHandler {
      * @param button    Mouse button whose click (= release) will be listened to.
      *                  Mouse button is of type {@link MouseButton}.
      * @param action    Action performed when the mouse button is clicked (= released).
-     *                  The action is of type {@link InputMouseAction#performMouseClickAction(double x, double y)}
-     *                  with {@code double x} and {@code double y} being the mouse click coordinates
-     *                  inside the {@code scene}.
-     */
-    public void onMouseClick(MouseButton button, InputMouseAction action) {
-        this.onMouseClickExists = true;
-        // Register inputScene's listener
-        this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
-            // Do nothing when input is disabled.
-            if (this.disableInput) {
-                return;
-            }
-
-            MouseButton mouseButton = mouseClick.getButton();
-
-            if (this.isDragging != null) {
-                // MOUSE_CLICKED is called even after MOUSE_RELEASED in the onMouseDrag method
-                // so to not call both, isDragging is set to null in this method rather than onMouseDrag.
-                // onMouseDrag ended if the clicked (= released) mouse button is equal to the mouse button pressed
-                // while the mouse was dragged. Do something if the clicked (= released) mouse button is equal
-                // to the mouse button which is being listened to.
-                if (mouseButton == button && this.isDragging == mouseButton) {
-                    this.isDragging = null;
-                }
-                // Otherwise ignore other mouse button clicks while the mouse is dragged.
-                return;
-            }
-
-            // Do something if the isDragging is null and when the clicked (= released) mouse button is equal
-            // to the mouse button which is being listened to.
-            if (mouseButton == button) {
-                action.performMouseClickAction(mouseClick.getSceneX(), mouseClick.getSceneY());
-            }
-        });
-    }
-
-    /**
-     * Registers a listener for the specified mouse button click.
-     * Click is registered when the mouse button is released.
-     *
-     * @param button    Mouse button whose click (= release) will be listened to.
-     *                  Mouse button is of type {@link MouseButton}.
-     * @param action    Action performed when the mouse button is clicked (= released).
      *                  The action is of type {@link InputClickableAction#performMouseClickAction(double x, double y)}
      *                  with {@code double x} and {@code double y} being the mouse click coordinates
      *                  inside the {@code scene}.
@@ -287,7 +244,7 @@ public class InputHandler {
 
     public EventHandler<MouseEvent> mouseHovering;
 
-    public void onMouseHover(InputMouseAction hoverAction) {
+    public void onMouseHover(InputHoverableAction hoverAction) {
         this.mouseHovering = (mouseMove) -> {
             // Do nothing when input is disabled.
             if (this.disableInput) {
@@ -295,7 +252,7 @@ public class InputHandler {
             }
 
             if (this.isDragging == null) {
-                hoverAction.performMouseClickAction(mouseMove.getSceneX(), mouseMove.getSceneY());
+                hoverAction.performMouseHoverAction(mouseMove.getSceneX(), mouseMove.getSceneY());
             }
         };
         this.inputScene.addEventFilter(MouseEvent.MOUSE_MOVED, this.mouseHovering);

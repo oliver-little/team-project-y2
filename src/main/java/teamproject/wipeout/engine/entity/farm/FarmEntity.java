@@ -1,15 +1,20 @@
-package teamproject.wipeout.engine.entity;
+package teamproject.wipeout.engine.entity.farm;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.input.Clickable;
+import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmData;
+import teamproject.wipeout.game.farm.FarmUI;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.io.FileNotFoundException;
 
@@ -25,6 +30,10 @@ public class FarmEntity extends GameEntity {
     public Point2D size;
     public Transform transform;
 
+    protected SpriteManager spriteManager;
+    protected Item placingItem;
+    protected SeedEntity seedEntity;
+
     /**
      * Creates a new instance of {@code FarmEntity}
      *
@@ -36,7 +45,10 @@ public class FarmEntity extends GameEntity {
      */
     public FarmEntity(GameScene scene, Point2D location, String playerID, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
+        scene.addEntity(this);
         this.data = new FarmData(playerID);
+
+        this.spriteManager = spriteManager;
 
         Point2D squareGrid = new Point2D(FarmData.FARM_COLUMNS, FarmData.FARM_ROWS);
         this.size = squareGrid.multiply(SQUARE_SIZE).add(SQUARE_SIZE * 2, SQUARE_SIZE * 2);
@@ -44,20 +56,68 @@ public class FarmEntity extends GameEntity {
         this.transform = new Transform(location, 0.0);
         this.addComponent(this.transform);
 
-        this.addComponent(new RenderComponent(new FarmRenderer(this.size, spriteManager)));
+        this.addComponent(new RenderComponent(true, new FarmRenderer(this.size, spriteManager)));
 
         for (int i = 0; i < squareGrid.getY(); i++) {
             CropsRowEntity rowEntity = new CropsRowEntity(scene, this.data.getItemsInRow(i), spriteManager, itemStore);
-            rowEntity.addComponent(new Transform(0, (SQUARE_SIZE / 1.65) + (SQUARE_SIZE * i), 0.0, 1));
+            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.65) + (SQUARE_SIZE * i));
+            rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
             rowEntity.setParent(this);
             this.addChild(rowEntity);
         }
 
-        Clickable clickable = new Clickable((x, y, mouseButton, entity) -> {
-            System.out.println("Show farm menu");
+        Clickable clickable = new Clickable((x, y, button, entity) -> {
+            if (placingItem == null) {
+                this.addComponent(new UIComponent(new FarmUI(this.data)));
+            } else {
+                if (this.placeItem(placingItem, x, y)) {
+                    this.stopPlacingItem();
+                }
+            }
         });
         clickable.setEntity(this);
         this.addComponent(clickable);
+    }
+
+    public void startPlacingItem(Item item) throws FileNotFoundException {
+        if (item == null) {
+            return;
+        }
+        this.placingItem = item;
+
+        this.seedEntity = new SeedEntity(this.scene, this.placingItem, this.spriteManager);
+
+        Hoverable hoverable = new Hoverable((x, y) -> {
+            Point2D point = this.isWithinFarm(x, y);
+            Transform transform = this.seedEntity.getComponent(Transform.class);
+
+            if (transform == null) {
+                transform = new Transform(x, y, 0.0, 3);
+                this.seedEntity.addComponent(transform);
+            }
+
+            PlantComponent plant = placingItem.getComponent(PlantComponent.class);
+            if (point == null || !this.canBePlaced(x, y, plant.width, plant.height)) {
+                transform.setPosition(new Point2D(x, y));
+                this.seedEntity.hideAreaOverlay();
+            } else {
+                transform.setPosition(point);
+                this.seedEntity.showAreaOverlay();
+            }
+        });
+        hoverable.setEntity(this);
+        this.addComponent(hoverable);
+    }
+
+    public void stopPlacingItem() {
+        this.removeComponent(Hoverable.class);
+        this.seedEntity.destroy();
+        this.seedEntity = null;
+        this.placingItem = null;
+    }
+
+    public Item getPlacingItem() {
+        return this.placingItem;
     }
 
     /**
@@ -67,11 +127,11 @@ public class FarmEntity extends GameEntity {
      * @param y Y coordinate of the "square"
      * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
      */
-    public boolean isEmpty(double x, double y, int w, int h) {
+    protected boolean canBePlaced(double x, double y, int w, int h) {
         Point2D coors = this.rescaleCoordinates(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-        return this.data.isEmpty(row, column, w ,h);
+        return this.data.canBePlaced(row, column, w ,h);
     }
 
     /**
@@ -81,11 +141,11 @@ public class FarmEntity extends GameEntity {
      * @param x X coordinate of the "square"
      * @param y Y coordinate of the "square"
      */
-    public void putItem(Item item, double x, double y) throws FileNotFoundException {
+    protected boolean placeItem(Item item, double x, double y) {
         Point2D coors = this.rescaleCoordinates(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-        this.data.putItem(item, row, column);
+        return this.data.placeItem(item, row, column);
     }
 
     /**

@@ -1,14 +1,11 @@
 package teamproject.wipeout;
 
 import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -17,20 +14,23 @@ import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
-import teamproject.wipeout.engine.component.render.*;
+import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
+import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
-import teamproject.wipeout.engine.entity.FarmEntity;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.farm.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
+import teamproject.wipeout.engine.system.farm.GrowthSystem;
+import teamproject.wipeout.engine.system.input.MouseClickSystem;
+import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -67,14 +67,11 @@ public class App implements Controller {
     public void createContent() {
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
-        InputHandler input = new InputHandler(root.getScene());
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
-
-        eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), new MouseClickSystem(gameScene, input));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -101,7 +98,14 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
+        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
+        eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), mcs, mhs);
+
         AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
         nge.addComponent(ngeSound);
 
@@ -136,76 +140,21 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        farmEntity = new FarmEntity(gameScene, new Point2D(100, 100), "123", spriteManager, itemStore);
+        farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), "123", spriteManager, itemStore);
 
-        item = itemStore.getItem(15);
+        item = itemStore.getItem(14);
 
-        input.onMouseClick(MouseButton.SECONDARY, (x, y) -> {
-            item = itemStore.getItem(item.id + 1);
-            System.out.println(item.id);
-        });
-
-        input.onMouseClick(MouseButton.PRIMARY, (x, y) -> {
-            if (farmEntity.isWithinFarm(x, y) != null) {
-                try {
-                    if (input.mouseHovering == null) {
-                        farmEntity.pickItemAt(x, y);
-                    } else {
-                        farmEntity.putItem(item, x, y);
-                    }
-                } catch (FileNotFoundException exception) {
-                    exception.printStackTrace();
+        input.onKeyRelease(KeyCode.A, () -> {
+            try {
+                if (farmEntity.getPlacingItem() == null) {
+                    farmEntity.startPlacingItem(item);
+                } else {
+                    farmEntity.stopPlacingItem();
                 }
+            } catch (FileNotFoundException exception) {
+                exception.printStackTrace();
             }
         });
-
-        try {
-            GameEntity shadow = gameScene.createEntity();
-            GameEntity seed = gameScene.createEntity();
-            SeedComponent seeds = item.getComponent(SeedComponent.class);
-            Image sprite = spriteManager.getSpriteSet(seeds.spriteSheetName, seeds.spriteSetName)[0];
-            seed.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
-
-            input.onKeyRelease(KeyCode.A, () -> {
-                if (input.mouseHovering == null) {
-                    if (item.getComponent(PlantComponent.class).squareSize == 1) {
-                        shadow.removeComponent(RenderComponent.class);
-                        shadow.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, FarmEntity.SQUARE_SIZE, FarmEntity.SQUARE_SIZE)));
-                    } else {
-                        shadow.removeComponent(RenderComponent.class);
-                        shadow.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, (float) sprite.getWidth(), (float) sprite.getHeight())));
-                    }
-
-                    input.onMouseHover((x, y) -> {
-                        Point2D point = farmEntity.isWithinFarm(x, y);
-                        Transform transformShadow = shadow.getComponent(Transform.class);
-                        Transform transformSeed = seed.getComponent(Transform.class);
-                        if (transformShadow == null) {
-                            shadow.addComponent(new Transform(x, y, 0.0, 2));
-                            transformShadow = shadow.getComponent(Transform.class);
-                        }
-                        if (transformSeed == null) {
-                            seed.addComponent(new Transform(x, y, 0.0, 2));
-                            transformSeed = seed.getComponent(Transform.class);
-                        }
-                        if (point == null || !farmEntity.isEmpty(x, y, 2, 2)) {
-                            transformShadow.setPosition(new Point2D(x, y));
-                            transformSeed.setPosition(new Point2D(x, y));
-                        } else {
-                            transformShadow.setPosition(point);
-                            transformSeed.setPosition(point);
-                        }
-                    });
-                } else {
-                    shadow.removeComponent(Transform.class);
-                    seed.removeComponent(Transform.class);
-                    input.removeMouseHover();
-                }
-            });
-
-        } catch (FileNotFoundException exception) {
-            exception.printStackTrace();
-        }
 
         gl.start();
     }
@@ -219,9 +168,7 @@ public class App implements Controller {
 		dynamicCanvas = new Canvas(windowWidth, windowHeight);
         staticCanvas = new Canvas(windowWidth, windowHeight);
         interfaceOverlay = new StackPane();
-        interfaceOverlay.setPrefWidth(windowWidth);
-        interfaceOverlay.setPrefHeight(windowHeight);
-        root = new StackPane(staticCanvas, dynamicCanvas, interfaceOverlay);
+        root = new StackPane(dynamicCanvas, staticCanvas, interfaceOverlay);
 		return root;
 	}
 
