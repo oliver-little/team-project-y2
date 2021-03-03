@@ -1,17 +1,63 @@
+@font-face {
+    font-family: 'Kalam';
+    src: url('fonts/Kalam-Regular.ttf');
+}
+
 .tab-pane {
     -fx-tab-min-width:90px;
+    -fx-tab-min-height:30px;
+    -fx-tab-max-height:30px;
+}
+
+.tab-pane .tab
+{
+    -fx-background-color: #DDD;
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-background-insets: 1 0 0 0;
+
+    -fx-border-width: 1 1 0 1;
+    -fx-border-radius: 5px 5px 0 0;
+    -fx-border-color: transparent;
+
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: rgb(255, 223, 162);
+    -fx-border-radius: 4px 4px 0 0;
+    -fx-border-width: 1 1 0 1;
+    -fx-border-radius: 5px 5px 0 0;
+    -fx-border-color: #333;
+}
+
+.tab-pane .tab .tab-label { 
+    -fx-font-family: 'Kalam';
+    -fx-font-size: 12pt;
 }
 
 .tab-pane .tab-header-area .tab-header-background {
-    -fx-opacity: 0;
+    -fx-background-color: transparent;
 }
 
-.tab-pane .tab {
-    -fx-background-color: rgb(255, 192, 109);
+.tab-pane .tab-content-area {
+    -fx-background-color: rgb(255, 223, 162);
+    -fx-background-radius: 2px;
+
+    -fx-border-color: #333;
+    -fx-border-width: 1;
+    -fx-border-radius: 2px;
 }
 
 .button {
-    -fx-background-color: rgb(255, 212, 157);
-    -fx-border-radius: 0;
-    -fx-border-color: rgb(255, 192, 109);
+    -fx-background-color: #DDD;
+    -fx-border-radius: 2px;
+}
+
+.button:hover {
+    -fx-background-color:rgb(255, 223, 162);
+}
+
+.button:pressed {
+    -fx-background-color:rgb(255, 205, 112);
 }

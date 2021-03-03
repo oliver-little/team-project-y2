@@ -30,11 +30,11 @@ public class MarketUI extends AnchorPane implements DialogUIComponent {
         Button close = new Button("X");
         close.setOnAction(actionEvent -> this.parent.getChildren().remove(this));
 
-        AnchorPane.setTopAnchor(tabPane, 5.0);
-        AnchorPane.setLeftAnchor(tabPane, 5.0);
-        AnchorPane.setRightAnchor(tabPane, 5.0);
-        AnchorPane.setTopAnchor(close, 6.0);
-        AnchorPane.setRightAnchor(close, 10.0);
+        AnchorPane.setTopAnchor(tabPane, 150.0);
+        AnchorPane.setLeftAnchor(tabPane, 100.0);
+        AnchorPane.setRightAnchor(tabPane, 100.0);
+        AnchorPane.setTopAnchor(close, 160.0);
+        AnchorPane.setRightAnchor(close, 110.0);
 
         this.getChildren().addAll(tabPane, close);
     }
