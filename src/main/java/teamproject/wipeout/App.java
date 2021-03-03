@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
+import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -16,12 +17,14 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.InventoryRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.farm.FarmEntity;
+import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
@@ -31,10 +34,29 @@ import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.logic.PlayerState;
+import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.client.ServerDiscovery;
+import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
+import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
+import teamproject.wipeout.networking.server.GameServerRunner;
+import teamproject.wipeout.networking.server.ServerRunningException;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 /**
@@ -55,6 +77,12 @@ public class App implements Controller {
     ItemStore itemStore;
     Item item;
     FarmEntity farmEntity;
+ // Temporarily placed variables
+    GameServerRunner server = new GameServerRunner();
+    String playerID = UUID.randomUUID().toString();
+    GameClient client;
+    PlayerStateSystem playerStateSystem;
+
 
     // Store systems for cleanup
     RenderSystem renderer;
@@ -82,7 +110,35 @@ public class App implements Controller {
 
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
-
+        /*
+        this.playerStateSystem = new PlayerStateSystem(gameScene,
+                (pState) -> {
+                    GameEntity spriteEntity = gameScene.createEntity();
+                    spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
+                    try {
+                        spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
+                        Image[] frames = spriteManager.getSpriteSet("player", "walk");
+                        spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+                        spriteEntity.addComponent(new HitboxComponent(new Rectangle(34,33)));
+                        spriteEntity.addComponent(new CollisionResolutionComponent());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    spriteEntity.addComponent(new PlayerStateComponent(pState));
+                });
+        systemUpdater.addSystem(this.playerStateSystem);
+        */
+        Player player = gameScene.createPlayer();
+        player.addComponent(new Transform(250, 250, 2));
+        
+        MovementComponent playerPhysics = new MovementComponent(0f, 0f, 0f, 0f);
+        player.addComponent(playerPhysics);
+        
+        PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
+        player.addComponent(new PlayerStateComponent(playerState));
+        player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
+        player.addComponent(new CollisionResolutionComponent());
+        
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(20, 20, 0.0,1));
 
@@ -94,11 +150,89 @@ public class App implements Controller {
         try {
             spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
-            nge.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            player.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        try {
+            itemStore = new ItemStore("items.json");
+            spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
+            spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
+        } catch (IOException | ReflectiveOperationException exception) {
+            exception.printStackTrace();
+        }
+        
+        List<GameEntity> itemList = new ArrayList<>();
+        GameEntity potato = gameScene.createEntity();
+        potato.addComponent(new Transform (10, 10));
+        potato.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 10, 10)));
+        Item potatoItem = itemStore.getItem(6); //potato id = 6
+        potato.addComponent(new PickableComponent(potatoItem));
+        itemList.add(potato);
 
+        GameEntity potato2 = gameScene.createEntity();
+        potato2.addComponent(new Transform (200, 300));
+        potato2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 200, 300)));
+        Item potatoItem2 = itemStore.getItem(6); //potato id = 6
+        potato2.addComponent(new PickableComponent(potatoItem2));
+        itemList.add(potato2);
+        
+        GameEntity potato3 = gameScene.createEntity();
+        potato3.addComponent(new Transform (10, 40));
+        potato3.addComponent(new HitboxComponent(true, true, new Rectangle(0, 10, 40, 20)));
+        Item potatoItem3 = itemStore.getItem(6); //potato id = 6
+        potato3.addComponent(new PickableComponent(potatoItem3));
+        itemList.add(potato3);
+        
+        GameEntity potato4 = gameScene.createEntity();
+        potato4.addComponent(new Transform (500, 10));
+        potato4.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 10)));
+        Item potatoItem4 = itemStore.getItem(6); //potato id = 6
+        potato4.addComponent(new PickableComponent(potatoItem4));
+        itemList.add(potato4);
+        
+        GameEntity lettuce = gameScene.createEntity();
+        lettuce.addComponent(new Transform (500, 40));
+        lettuce.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 40)));
+        Item lettuceItem = itemStore.getItem(2); //lettuce id = 2
+        lettuce.addComponent(new PickableComponent(lettuceItem));
+        itemList.add(lettuce);
+        
+        GameEntity lettuce2 = gameScene.createEntity();
+        lettuce2.addComponent(new Transform (500, 120));
+        lettuce2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 120)));
+        Item lettuceItem2 = itemStore.getItem(2); //lettuce id = 2
+        lettuce2.addComponent(new PickableComponent(lettuceItem2));
+        itemList.add(lettuce2);
+
+        try {
+            //spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
+        	InventoryComponent invComponent = potatoItem.getComponent(InventoryComponent.class);
+        	System.out.println("potato: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
+            Image[] frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
+            potato.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            potato2.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            potato3.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            potato4.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            
+            invComponent = lettuceItem.getComponent(InventoryComponent.class);
+            System.out.println("lettuce: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
+            frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
+            lettuce.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            lettuce2.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        InventoryEntity invEntity;
+    	invEntity = new InventoryEntity(gameScene, spriteManager);
+    	gameScene.entities.add(invEntity);
+    	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
+        
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -116,29 +250,25 @@ public class App implements Controller {
 
         
         input.addKeyAction(KeyCode.LEFT,
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f),
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(500f, 0f));
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.subtract(500f, 0f),
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.add(500f, 0f));
 
         input.addKeyAction(KeyCode.RIGHT,
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(500f, 0f),
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(500f, 0f));
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.add(500f, 0f),
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.subtract(500f, 0f));
 
         input.addKeyAction(KeyCode.UP,
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f),
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f));
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.subtract(0f, 500f),
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.add(0f, 500f));
 
         input.addKeyAction(KeyCode.DOWN,
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.add(0f, 500f),
-                () -> ngePhysics.acceleration = ngePhysics.acceleration.subtract(0f, 500f));
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.add(0f, 500f),
+                () -> playerPhysics.acceleration = playerPhysics.acceleration.subtract(0f, 500f));
 
-        try {
-            itemStore = new ItemStore("items.json");
-            spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
-            spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
-            spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
-        } catch (IOException | ReflectiveOperationException exception) {
-            exception.printStackTrace();
-        }
+        input.addKeyAction(KeyCode.X,
+                () -> {player.pickup(itemList);
+                	   invEntity.showItems(player.getInventory(), itemStore);},
+                () -> System.out.println(""));
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), "123", spriteManager, itemStore);
 
@@ -158,6 +288,7 @@ public class App implements Controller {
 
         gl.start();
     }
+
 
     /**
      * Gets the root node of this class.

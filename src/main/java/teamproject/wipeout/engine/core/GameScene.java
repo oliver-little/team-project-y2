@@ -5,6 +5,7 @@ import java.util.List;
 
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.BasicEvent;
 
 
@@ -24,6 +25,12 @@ public class GameScene {
 
     public GameEntity createEntity() {
         GameEntity newEntity = new GameEntity(this);
+        this.entities.add(newEntity);
+        return newEntity;
+    }
+
+    public Player createPlayer() {
+        Player newEntity = new Player(this);
         this.entities.add(newEntity);
         return newEntity;
     }

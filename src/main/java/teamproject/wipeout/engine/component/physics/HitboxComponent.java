@@ -25,6 +25,13 @@ public class HitboxComponent implements GameComponent {
 	 */
 	public Shape boundingBoxes[];
 	
+	/**
+	 * Boolean flag that indicates whether this entity should be affected by collisions
+	 */
+	public boolean isMoveable = true;
+
+	public boolean walkableOn = false;
+
 	
 	
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
@@ -32,6 +39,19 @@ public class HitboxComponent implements GameComponent {
 		this.boundingBoxes = shapes;
 	}
 	
+	//varargs constructor. See https://www.baeldung.com/java-varargs for info
+	public HitboxComponent(boolean isMoveable, Shape... shapes) {
+		this.boundingBoxes = shapes;
+		this.isMoveable = isMoveable;
+	}
+
+	//varargs constructor. See https://www.baeldung.com/java-varargs for info
+	public HitboxComponent(boolean isMoveable, boolean walkableOn, Shape... shapes) {
+		this.boundingBoxes = shapes;
+		this.isMoveable = isMoveable;
+		this.walkableOn = walkableOn;
+	}
+
 	
 	/**
 	 * Adds new bounding boxes to the bounding box array
