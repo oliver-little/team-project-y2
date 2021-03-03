@@ -13,18 +13,19 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
+import teamproject.wipeout.game.task.Task;
 
 public class Player extends GameEntity {
-    public Integer playerID;
-    public String playerName;
     public String spriteSheetName;
     public Double money;
     public Integer size;
+
+    public ArrayList<Task> tasks;
     
     public static int MAX_SIZE = 10;
 
     private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
-
+    private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
     /**
      * Creates a new instance of GameEntity
      *
@@ -51,6 +52,9 @@ public class Player extends GameEntity {
     public boolean sellItem(MarketItem item) {
         if (removeItem(item.getID())) {
             this.money += item.getCurrentSellPrice();
+            this.soldItems.putIfAbsent(item.getID(), 0);
+            this.soldItems.put(item.getID(), this.soldItems.get(item.getID()) + 1);
+            checkTasks();
             return true;
         }
         return false;
@@ -83,6 +87,9 @@ public class Player extends GameEntity {
     public LinkedHashMap<Integer, Integer> getInventory() {
         return inventory;
     }
+    public LinkedHashMap<Integer, Integer> getSoldItems() {
+        return soldItems;
+    }
 
     // Scan all entities for items the player is standing over, and pick them up, and delete them from the map
     public void pickup(List<GameEntity> entities){
@@ -102,7 +109,33 @@ public class Player extends GameEntity {
             entities.remove(ge);
             ge.destroy();
         }
-
+        this.checkTasks();
         System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+    }
+
+    //check what tasks have been completed
+    public void checkTasks() {
+        for(Task task : tasks) {
+            if(task.completed) {
+                continue;
+            }
+            if(task.condition.apply(this)) {
+                task.completed = true;
+                this.money += task.reward;
+                System.out.println("Task completed");
+            }
+        }
+    }
+
+    // get number of completed tasks
+    // in the future we can check when all tasks have been completed, to always add new ones
+    public int getNumberOfCompletedTasks() {
+        int completedTasks = 0;
+        for(Task task : tasks) {
+            if(task.completed) {
+                completedTasks += 1;
+            }
+        }
+        return completedTasks;
     }
 }

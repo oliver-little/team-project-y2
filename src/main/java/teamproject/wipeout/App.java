@@ -36,11 +36,13 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
+
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.logic.PlayerState;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.ServerDiscovery;
 import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
@@ -52,11 +54,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.function.Function;
 
 
 /**
@@ -286,9 +285,49 @@ public class App implements Controller {
             }
         });
 
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        player.tasks = allTasks;
+
         gl.start();
     }
 
+    public ArrayList<Task> createAllTasks(ItemStore itemStore) {
+
+        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Integer> itemIds  = new ArrayList<>();
+        itemIds.add(2); // add letuce
+        itemIds.add(6); // add potatos
+
+        // Collect tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantityCollected = 1;
+            Task currentTask =  new Task("Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+                    (Player inputPlayer) ->
+                    {
+                        LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();
+                        return inventory.containsKey(itemId) && inventory.get(itemId) == quantityCollected;
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        // Sell tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantitySold = 1;
+            Task currentTask =  new Task("Sell " + quantitySold + " " + name, 10 * quantitySold,
+                    (Player inputPlayer) ->
+                    {
+                        return inputPlayer.getSoldItems().containsKey(itemId);
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        return tasks;
+    }
 
     /**
      * Gets the root node of this class.
