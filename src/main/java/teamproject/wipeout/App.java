@@ -39,15 +39,23 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
+
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
 import teamproject.wipeout.networking.server.GameServerRunner;
 
 import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.function.Function;
 
 
 /**
@@ -71,6 +79,7 @@ public class App implements Controller {
     FarmEntity farmEntity;
  // Temporarily placed variables
     GameServerRunner server = new GameServerRunner();
+    String playerID = UUID.randomUUID().toString();
     GameClient client;
     PlayerStateSystem playerStateSystem;
 
@@ -111,9 +120,9 @@ public class App implements Controller {
 
         player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         player.addComponent(new CollisionResolutionComponent());
-       
-        
-        
+
+
+
         try {
             spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
@@ -122,13 +131,13 @@ public class App implements Controller {
             e.printStackTrace();
         }
         //camera follows player
-        float cameraZoom = camera.getComponent(CameraComponent.class).zoom; 
+        float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
         RenderComponent targetRC = player.getComponent(RenderComponent.class);
 		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
         Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);
         //camera.addComponent(new CameraFollowComponent(player, camPos));
-        
-        
+
+
         try {
             itemStore = new ItemStore("items.json");
             spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
@@ -140,7 +149,7 @@ public class App implements Controller {
         }
 
         market = new Market(itemStore);
-        
+
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
@@ -208,7 +217,7 @@ public class App implements Controller {
     	invEntity = new InventoryEntity(gameScene, spriteManager);
     	gameScene.entities.add(invEntity);
     	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
-                
+
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -262,9 +271,49 @@ public class App implements Controller {
             }
         });
 
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        player.tasks = allTasks;
+
         gl.start();
     }
 
+    public ArrayList<Task> createAllTasks(ItemStore itemStore) {
+
+        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Integer> itemIds  = new ArrayList<>();
+        itemIds.add(2); // add letuce
+        itemIds.add(6); // add potatos
+
+        // Collect tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantityCollected = 1;
+            Task currentTask =  new Task("Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+                    (Player inputPlayer) ->
+                    {
+                        LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();
+                        return inventory.containsKey(itemId) && inventory.get(itemId) == quantityCollected;
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        // Sell tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantitySold = 1;
+            Task currentTask =  new Task("Sell " + quantitySold + " " + name, 10 * quantitySold,
+                    (Player inputPlayer) ->
+                    {
+                        return inputPlayer.getSoldItems().containsKey(itemId);
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        return tasks;
+    }
 
     /**
      * Gets the root node of this class.
