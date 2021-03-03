@@ -6,6 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -16,7 +17,9 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -72,6 +75,7 @@ public class App implements Controller {
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
+        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -80,9 +84,34 @@ public class App implements Controller {
         camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
+
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
+        
+        GameEntity rec = gameScene.createEntity();
+        rec.addComponent(new Transform(100, 125));
+        rec.addComponent(new RenderComponent(new RectRenderable(Color.BLACK, 40, 60)));
+        rec.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec.addComponent(new HitboxComponent(new Rectangle(40,60)));
+        rec.addComponent(new CollisionResolutionComponent());
+        
+        GameEntity rec2 = gameScene.createEntity();
+        rec2.addComponent(new Transform(200, 70));
+        rec2.addComponent(new RenderComponent(new RectRenderable(Color.RED, 100, 20)));
+        rec2.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec2.addComponent(new HitboxComponent(new Rectangle(100,20)));
+        rec2.addComponent(new CollisionResolutionComponent());
+        
+        GameEntity rec3 = gameScene.createEntity();
+        rec3.addComponent(new Transform(400, 400));
+        rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
+        rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        rec3.addComponent(new HitboxComponent(new Rectangle(150,150)));
+        rec3.addComponent(new CollisionResolutionComponent(false));
 
+
+
+        
         GameEntity nge = gameScene.createEntity();
         nge.addComponent(new Transform(20, 20, 0.0,1));
 
@@ -90,7 +119,7 @@ public class App implements Controller {
         nge.addComponent(ngePhysics);
         nge.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         nge.addComponent(new CollisionResolutionComponent());
-
+        
         try {
             spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
@@ -99,6 +128,12 @@ public class App implements Controller {
             e.printStackTrace();
         }
 
+        
+        //camera follows player
+        float cameraZoom = camera.getComponent(CameraComponent.class).zoom; 
+        Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom);
+        camera.addComponent(new CameraFollowComponent(nge, camPos));
+        
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -140,7 +175,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), "123", spriteManager, itemStore);
+        farmEntity = new FarmEntity(gameScene, new Point2D(400, 400), "123", spriteManager, itemStore);
 
         item = itemStore.getItem(14);
 
