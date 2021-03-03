@@ -103,17 +103,14 @@ public class App implements Controller {
         rec2.addComponent(new CollisionResolutionComponent());
         
         GameEntity rec3 = gameScene.createEntity();
-        rec3.addComponent(new Transform(400, 400));
-        rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 150, 150)));
-        rec3.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        rec3.addComponent(new HitboxComponent(new Rectangle(150,150)));
-        rec3.addComponent(new CollisionResolutionComponent(false));
+        rec3.addComponent(new Transform(0, 0));
+        rec3.addComponent(new RenderComponent(new RectRenderable(Color.GREEN, 10, 10)));
 
 
 
         
         GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(20, 20, 0.0,1));
+        nge.addComponent(new Transform(0, 0, 0.0,1));
 
         MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
         nge.addComponent(ngePhysics);
@@ -131,7 +128,9 @@ public class App implements Controller {
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom; 
-        Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom);
+        RenderComponent targetRC = nge.getComponent(RenderComponent.class);
+		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
+        Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);
         camera.addComponent(new CameraFollowComponent(nge, camPos));
         
         // Input
