@@ -16,7 +16,7 @@ public class FarmData {
     public static int FARM_ROWS = 3;
     public static int FARM_COLUMNS = 6;
 
-    public String playerID;
+    public Integer playerID;
 
     public final Consumer<FarmItem> growthCallback = (farmItem) -> {
         if (this.growthCustomCallback != null) {
@@ -33,7 +33,7 @@ public class FarmData {
      *
      * @param playerID Owner's ID
      */
-    public FarmData(String playerID) {
+    public FarmData(Integer playerID) {
         this.playerID = playerID;
 
         this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);

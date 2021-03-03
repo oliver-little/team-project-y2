@@ -29,10 +29,10 @@ public class GameScene {
         return newEntity;
     }
 
-    public Player createPlayer() {
-        Player newEntity = new Player(this);
-        this.entities.add(newEntity);
-        return newEntity;
+    public Player createPlayer(Integer id, String name) {
+        Player playerEntity = new Player(this, id, name);
+        this.entities.add(playerEntity);
+        return playerEntity;
     }
 
     public void addEntity(GameEntity newEntity) {

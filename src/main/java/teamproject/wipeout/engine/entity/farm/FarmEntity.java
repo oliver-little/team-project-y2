@@ -38,12 +38,11 @@ public class FarmEntity extends GameEntity {
      * Creates a new instance of {@code FarmEntity}
      *
      * @param scene The GameScene this entity is part of
-     * @param location Location of the farm
      * @param playerID Player's ID this entity belongs to
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowEntity}
      * @param itemStore {@link ItemStore} for the {@link ItemsRowEntity}
      */
-    public FarmEntity(GameScene scene, Point2D location, String playerID, SpriteManager spriteManager, ItemStore itemStore) {
+    public FarmEntity(GameScene scene, Point2D location, Integer playerID, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
         scene.addEntity(this);
         this.data = new FarmData(playerID);

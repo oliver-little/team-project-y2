@@ -1,18 +1,14 @@
 package teamproject.wipeout.game.player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-//import teamproject.wipeout.engine.component.ItemComponent;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.game.item.Item;
-import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Player extends GameEntity {
     public Integer playerID;
@@ -30,9 +26,11 @@ public class Player extends GameEntity {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene) {
+    public Player(GameScene scene, Integer playerID, String playerName) {
         super(scene);
-        this.money = 0.;
+        this.playerID = playerID;
+        this.playerName = playerName;
+        this.money = 0.0;
     }
 
     // When called with a market item, purchases an item for a player and returns true,

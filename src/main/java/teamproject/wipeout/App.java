@@ -79,7 +79,6 @@ public class App implements Controller {
     FarmEntity farmEntity;
  // Temporarily placed variables
     GameServerRunner server = new GameServerRunner();
-    String playerID = UUID.randomUUID().toString();
     GameClient client;
     PlayerStateSystem playerStateSystem;
 
@@ -128,14 +127,12 @@ public class App implements Controller {
                 });
         systemUpdater.addSystem(this.playerStateSystem);
         */
-        Player player = gameScene.createPlayer();
+        Player player = gameScene.createPlayer(1, "Farmer");
         player.addComponent(new Transform(250, 250, 2));
         
         MovementComponent playerPhysics = new MovementComponent(0f, 0f, 0f, 0f);
         player.addComponent(playerPhysics);
-        
-        PlayerState playerState = new PlayerState(playerID, new Point2D(60, 60));
-        player.addComponent(new PlayerStateComponent(playerState));
+
         player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         player.addComponent(new CollisionResolutionComponent());
         
@@ -270,7 +267,7 @@ public class App implements Controller {
                 	   invEntity.showItems(player.getInventory(), itemStore);},
                 () -> System.out.println(""));
 
-        farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), "123", spriteManager, itemStore);
+        farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
 
         item = itemStore.getItem(14);
 
