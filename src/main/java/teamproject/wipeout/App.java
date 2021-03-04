@@ -106,7 +106,7 @@ public class App implements Controller {
 
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
-        camera.addComponent(new CameraComponent(2));
+        camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
 
