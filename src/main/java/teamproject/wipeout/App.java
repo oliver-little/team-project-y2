@@ -269,7 +269,7 @@ public class App implements Controller {
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
 
-        item = itemStore.getItem(14);
+        item = itemStore.getItem(28);
 
         input.onKeyRelease(KeyCode.A, () -> {
             try {

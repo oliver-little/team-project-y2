@@ -1,7 +1,5 @@
 package teamproject.wipeout.game.item.components;
 
-import javafx.geometry.Point2D;
-
 import java.util.Map;
 
 /**
@@ -14,6 +12,7 @@ public class PlantComponent implements ItemComponent {
     public final int width;
     public final int height;
     public final double growthRate;
+    public final int grownItemID;
 
     /**
      * Creates a {@code PlantComponent} from a given {@code JSON Map} data.
@@ -24,6 +23,7 @@ public class PlantComponent implements ItemComponent {
         this.spriteSheetName = (String) data.get("spriteSheetName");
         this.spriteSetName = (String) data.get("spriteSetName");
         this.growthRate = (Double) data.get("growthRate");
+        this.grownItemID = ((Double) data.get("grownItemID")).intValue();
 
         Double width = (Double) data.get("width");
         Double height = (Double) data.get("height");

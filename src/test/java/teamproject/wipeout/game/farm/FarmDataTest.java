@@ -36,8 +36,8 @@ class FarmDataTest {
     @BeforeAll
     static void initialization() throws FileNotFoundException, ReflectiveOperationException {
         ItemStore itemStore = new ItemStore("items.json");
-        item = itemStore.getItem(1);
-        finishedItem = itemStore.getItem(15);
+        item = itemStore.getItem(28);
+        finishedItem = itemStore.getItem(43);
 
         Assertions.assertTrue(FarmData.FARM_ROWS >= 3);
         Assertions.assertTrue(FarmData.FARM_COLUMNS >= 5);

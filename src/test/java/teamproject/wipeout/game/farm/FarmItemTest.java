@@ -24,8 +24,8 @@ class FarmItemTest {
     @BeforeAll
     static void initialization() throws FileNotFoundException, ReflectiveOperationException {
         ItemStore itemStore = new ItemStore("items.json");
-        item = itemStore.getItem(1);
-        finishedItem = itemStore.getItem(15);
+        item = itemStore.getItem(28);
+        finishedItem = itemStore.getItem(43);
     }
 
     @BeforeEach
