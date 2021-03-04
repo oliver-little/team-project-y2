@@ -32,36 +32,77 @@ public class MarketItem {
         this.currentSellPrice = defaultSellPrice;
     }
 
+    /**
+     * Get function to return the item's ID.
+     * @return Item ID.
+     */
     public int getID() {
         return this.id;
     }
 
+    /**
+     * Get function to return the item's quantity deviation.
+     * @return Item quantity deviation.
+     */
     public double getQuantityDeviation() {
         return this.quantityDeviation;
     }
 
-    public void incrementQuantityDeviation(int i) {
+    /**
+     * Set function to set an item's quantity deviation to a specified value.
+     * @param i The value to set the quantity deviation to.
+     */
+    public void setQuantityDeviation(double i) {
+        this.quantityDeviation = i;
+        updatePrices();
+    }
+
+    /**
+     * Set function to increment an item's quantity deviation by a specified value. Also updates the price of that item according to its new quantity deviation.
+     * @param i The amount to increment the quantity deviation by.
+     */
+    public void incrementQuantityDeviation(double i) {
         this.quantityDeviation += i;
         updatePrices();
     }
 
-    public void decrementQuantityDeviation(int i) {
+    /**
+     * Set function to decrement an item's quantity deviation by a specified value. Also updates the price of that item according to its new quantity deviation.
+     * @param i The amount to decrement the quantity deviation by.
+     */
+    public void decrementQuantityDeviation(double i) {
         this.quantityDeviation -= i;
         updatePrices();
     }
 
+    /**
+     * Get function to return the item's default buy price.
+     * @return The item's default buy price.
+     */
     public double getDefaultBuyPrice() {
         return this.defaultBuyPrice;
     }
 
+    /**
+     * Get function to return the item's default sell price.
+     * @return The item's default sell price.
+     */
     public double getDefaultSellPrice() {
         return this.defaultSellPrice;
     }
 
+    /**
+     * Get function to return the item's current buy price.
+     * @return The item's current buy price.
+     */
     public double getCurrentBuyPrice() {
         return this.currentBuyPrice;
     }
 
+    /**
+     * Get function to return the item's current sell price.
+     * @return The item's current sell price.
+     */
     public double getCurrentSellPrice() {
         return this.currentSellPrice;
     }

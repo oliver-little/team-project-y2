@@ -20,7 +20,7 @@ public class MarketTest {
 
     @BeforeEach
     public void setup() {
-        market = assertDoesNotThrow(() -> new Market(itemStore.getData()));
+        market = assertDoesNotThrow(() -> new Market(itemStore));
     }
     
     @Test

@@ -895,8 +895,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 1.50,
-          "defaultSellPrice" : 0.75
+          "defaultBuyPrice" : 10,
+          "defaultSellPrice" : 5
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
