@@ -40,12 +40,17 @@ public class MarketItem {
         return this.quantityDeviation;
     }
 
-    public void incrementQuantityDeviation(int i) {
+    public void setQuantityDeviation(double i) {
+        this.quantityDeviation = i;
+        updatePrices();
+    }
+
+    public void incrementQuantityDeviation(double i) {
         this.quantityDeviation += i;
         updatePrices();
     }
 
-    public void decrementQuantityDeviation(int i) {
+    public void decrementQuantityDeviation(double i) {
         this.quantityDeviation -= i;
         updatePrices();
     }
