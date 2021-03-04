@@ -6,6 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -18,7 +19,9 @@ import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.InventoryRenderable;
+import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -99,34 +102,18 @@ public class App implements Controller {
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
+        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
-        camera.addComponent(new CameraComponent(1));
+        camera.addComponent(new CameraComponent(1f));
         camera.addComponent(new TagComponent("MainCamera"));
+
 
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
-        /*
-        this.playerStateSystem = new PlayerStateSystem(gameScene,
-                (pState) -> {
-                    GameEntity spriteEntity = gameScene.createEntity();
-                    spriteEntity.addComponent(new Transform(pState.getPosition(), 0));
-                    try {
-                        spriteManager.loadSpriteSheet("spritesheet-descriptor.json", "spritesheet.png");
-                        Image[] frames = spriteManager.getSpriteSet("player", "walk");
-                        spriteEntity.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-                        spriteEntity.addComponent(new HitboxComponent(new Rectangle(34,33)));
-                        spriteEntity.addComponent(new CollisionResolutionComponent());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    spriteEntity.addComponent(new PlayerStateComponent(pState));
-                });
-        systemUpdater.addSystem(this.playerStateSystem);
-        */
         Player player = gameScene.createPlayer(1, "Farmer");
         player.addComponent(new Transform(250, 250, 1));
         
@@ -135,15 +122,9 @@ public class App implements Controller {
 
         player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         player.addComponent(new CollisionResolutionComponent());
+       
         
-        GameEntity nge = gameScene.createEntity();
-        nge.addComponent(new Transform(20, 20, 0.0,1));
-
-        MovementComponent ngePhysics = new MovementComponent(0f, 0f, 0f, 0f);
-        nge.addComponent(ngePhysics);
-        nge.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
-        nge.addComponent(new CollisionResolutionComponent());
-
+        
         try {
             spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
             Image[] frames = spriteManager.getSpriteSet("player", "walk");
@@ -151,6 +132,13 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //camera follows player
+        float cameraZoom = camera.getComponent(CameraComponent.class).zoom; 
+        RenderComponent targetRC = player.getComponent(RenderComponent.class);
+		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
+        Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);
+        //camera.addComponent(new CameraFollowComponent(player, camPos));
+        
         
         try {
             itemStore = new ItemStore("items.json");
@@ -229,7 +217,7 @@ public class App implements Controller {
     	invEntity = new InventoryEntity(gameScene, spriteManager);
     	gameScene.entities.add(invEntity);
     	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
-        
+                
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -237,10 +225,10 @@ public class App implements Controller {
         MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), mcs, mhs);
 
-        AudioComponent ngeSound = new AudioComponent("glassSmashing2.wav");
-        nge.addComponent(ngeSound);
+        AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
+        player.addComponent(playerSound);
 
-        input.onKeyRelease(KeyCode.D, ngeSound::play); //example - pressing the D key will trigger the sound
+        input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
 
         GameAudio ga = new GameAudio("backingTrack2.wav");
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
@@ -268,6 +256,7 @@ public class App implements Controller {
                 () -> System.out.println(""));
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
+
 
         item = itemStore.getItem(14);
 
