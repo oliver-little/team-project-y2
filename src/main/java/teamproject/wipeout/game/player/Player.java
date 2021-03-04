@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class Player extends GameEntity {
+    public Integer playerID;
+    public String playerName;
     public String spriteSheetName;
     public Double money;
     public Integer size;
