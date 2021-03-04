@@ -108,7 +108,7 @@ public class App implements Controller {
 
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
-        camera.addComponent(new CameraComponent(1f));
+        camera.addComponent(new CameraComponent(2));
         camera.addComponent(new TagComponent("MainCamera"));
 
 
@@ -153,42 +153,42 @@ public class App implements Controller {
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
-        potato.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 10, 10)));
+        potato.addComponent(new HitboxComponent(new Rectangle(0, 20, 10, 10)));
         Item potatoItem = itemStore.getItem(6); //potato id = 6
         potato.addComponent(new PickableComponent(potatoItem));
         itemList.add(potato);
 
         GameEntity potato2 = gameScene.createEntity();
         potato2.addComponent(new Transform (200, 300));
-        potato2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 200, 300)));
+        potato2.addComponent(new HitboxComponent(new Rectangle(0, 20, 200, 300)));
         Item potatoItem2 = itemStore.getItem(6); //potato id = 6
         potato2.addComponent(new PickableComponent(potatoItem2));
         itemList.add(potato2);
         
         GameEntity potato3 = gameScene.createEntity();
         potato3.addComponent(new Transform (10, 40));
-        potato3.addComponent(new HitboxComponent(true, true, new Rectangle(0, 10, 40, 20)));
+        potato3.addComponent(new HitboxComponent(new Rectangle(0, 10, 40, 20)));
         Item potatoItem3 = itemStore.getItem(6); //potato id = 6
         potato3.addComponent(new PickableComponent(potatoItem3));
         itemList.add(potato3);
         
         GameEntity potato4 = gameScene.createEntity();
         potato4.addComponent(new Transform (500, 10));
-        potato4.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 10)));
+        potato4.addComponent(new HitboxComponent(new Rectangle(0, 20, 500, 10)));
         Item potatoItem4 = itemStore.getItem(6); //potato id = 6
         potato4.addComponent(new PickableComponent(potatoItem4));
         itemList.add(potato4);
         
         GameEntity lettuce = gameScene.createEntity();
         lettuce.addComponent(new Transform (500, 40));
-        lettuce.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 40)));
+        lettuce.addComponent(new HitboxComponent(new Rectangle(0, 20, 500, 40)));
         Item lettuceItem = itemStore.getItem(2); //lettuce id = 2
         lettuce.addComponent(new PickableComponent(lettuceItem));
         itemList.add(lettuce);
         
         GameEntity lettuce2 = gameScene.createEntity();
         lettuce2.addComponent(new Transform (500, 120));
-        lettuce2.addComponent(new HitboxComponent(true, true, new Rectangle(0, 20, 500, 120)));
+        lettuce2.addComponent(new HitboxComponent(new Rectangle(0, 20, 500, 120)));
         Item lettuceItem2 = itemStore.getItem(2); //lettuce id = 2
         lettuce2.addComponent(new PickableComponent(lettuceItem2));
         itemList.add(lettuce2);
