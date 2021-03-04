@@ -9,14 +9,13 @@ import java.util.Map;
  */
 public class Item {
 
-
     public final int id;
     public final String name;
 
     protected final Map<Class<?>, ItemComponent> componentMap;
 
     /**
-     * Protected initializer for an {@code Item}
+     * Protected initializer for an {@code Item}.
      *
      * @param id ID of the item
      * @param name Name of the item

@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.entity.farm;
+package teamproject.wipeout.game.farm.entity;
 
 import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.engine.component.render.ItemsRowRenderer;

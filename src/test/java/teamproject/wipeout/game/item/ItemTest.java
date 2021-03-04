@@ -13,7 +13,7 @@ class ItemTest {
     private static ItemStore itemStore;
 
     @BeforeAll
-    public static void initialization() {
+    static void initialization() {
         itemStore = assertDoesNotThrow(() -> new ItemStore("items.json"));
     }
 

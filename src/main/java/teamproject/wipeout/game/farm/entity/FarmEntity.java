@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.entity.farm;
+package teamproject.wipeout.game.farm.entity;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.Transform;
@@ -11,7 +11,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmData;
-import teamproject.wipeout.game.farm.FarmUI;
+import teamproject.wipeout.game.farm.ui.FarmUI;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -38,6 +38,7 @@ public class FarmEntity extends GameEntity {
      * Creates a new instance of {@code FarmEntity}
      *
      * @param scene The GameScene this entity is part of
+     * @param location Location of the farm
      * @param playerID Player's ID this entity belongs to
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowEntity}
      * @param itemStore {@link ItemStore} for the {@link ItemsRowEntity}
@@ -58,7 +59,7 @@ public class FarmEntity extends GameEntity {
         this.addComponent(new RenderComponent(true, new FarmRenderer(this.size, spriteManager)));
 
         for (int i = 0; i < squareGrid.getY(); i++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(scene, this.data.getItemsInRow(i), this.data.growthCallback, spriteManager, itemStore);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(scene, this.data.getItemsInRow(i), this.data.getGrowthDelegate(), spriteManager, itemStore);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.65) + (SQUARE_SIZE * i));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
             rowEntity.setParent(this);

@@ -23,7 +23,7 @@ import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.farm.FarmEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
@@ -128,7 +128,7 @@ public class App implements Controller {
         systemUpdater.addSystem(this.playerStateSystem);
         */
         Player player = gameScene.createPlayer(1, "Farmer");
-        player.addComponent(new Transform(250, 250, 2));
+        player.addComponent(new Transform(250, 250, 1));
         
         MovementComponent playerPhysics = new MovementComponent(0f, 0f, 0f, 0f);
         player.addComponent(playerPhysics);

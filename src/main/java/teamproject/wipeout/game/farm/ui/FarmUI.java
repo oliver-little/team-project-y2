@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.farm;
+package teamproject.wipeout.game.farm.ui;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -7,18 +7,24 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.farm.FarmData;
+import teamproject.wipeout.game.farm.FarmItem;
 
 import java.util.ArrayList;
 
 public class FarmUI extends VBox implements DialogUIComponent {
 
     protected FarmData data;
+    protected ObservableList<FarmItem> items;
 
     private Pane parent;
 
@@ -33,24 +39,18 @@ public class FarmUI extends VBox implements DialogUIComponent {
         listView.setCellFactory(new Callback<ListView<FarmItem>, ListCell<FarmItem>>() {
             @Override
             public ListCell<FarmItem> call(ListView<FarmItem> param) {
-                return new FarmItemCell((event) -> data.pickItemAt(0, 0), spriteManager);
+                return new FarmItemCell((farmItem) -> harvestItem(farmItem), spriteManager);
             }
         });
         listView.setOrientation(Orientation.VERTICAL);
-        listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        //listView.setSelectionModel(new NoSelectionModel<FarmItem>());
         listView.setPadding(new Insets(0, 10, 10, 10));
         listView.setBackground(new Background(new BackgroundFill(Color.BEIGE, null, null)));
 
-        ObservableList<FarmItem> items = this.getList(this.data.items);
-        listView.setItems(items);
+        this.items = this.getList(this.data.getItems());
+        listView.setItems(this.items);
         Label emptyLabel = new Label("Your farm is empty");
         listView.setPlaceholder(emptyLabel);
-
-        listView.setOnMouseClicked((mouseEvent) -> {
-            String selected = listView.getSelectionModel().getSelectedItem().get().name;
-            items.remove(selected);
-            this.data.pickItem(selected);
-        });
 
         Button closeButton = new Button("X");
         closeButton.setCancelButton(true);
@@ -73,6 +73,11 @@ public class FarmUI extends VBox implements DialogUIComponent {
         return this;
     }
 
+    protected void harvestItem(FarmItem item) {
+        this.items.remove(item);
+        this.data.pickItem(item);
+    }
+
     protected ObservableList<FarmItem> getList(ArrayList<ArrayList<FarmItem>> items) {
         ObservableList<FarmItem> itemList = FXCollections.observableArrayList();
         for (ArrayList<FarmItem> row : items) {
@@ -83,7 +88,7 @@ public class FarmUI extends VBox implements DialogUIComponent {
             }
         }
 
-        this.data.setGrowthCallback((farmItem) -> {
+        this.data.setGrowthDelegate((farmItem) -> {
             Platform.runLater(() -> {
                 int itemIndex = itemList.indexOf(farmItem);
                 if (itemIndex >= 0) {

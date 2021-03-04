@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.entity.farm;
+package teamproject.wipeout.game.farm.entity;
 
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
