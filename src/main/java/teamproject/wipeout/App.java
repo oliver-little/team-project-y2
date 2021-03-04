@@ -6,7 +6,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -19,9 +18,7 @@ import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.InventoryRenderable;
-import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -97,7 +94,7 @@ public class App implements Controller {
 
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
-        camera.addComponent(new CameraComponent(2));
+        camera.addComponent(new CameraComponent(1));
         camera.addComponent(new TagComponent("MainCamera"));
 
 
