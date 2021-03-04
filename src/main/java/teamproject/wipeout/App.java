@@ -35,6 +35,7 @@ import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
@@ -108,9 +109,11 @@ public class App implements Controller {
 
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
-        camera.addComponent(new CameraComponent(2));
+        camera.addComponent(new CameraComponent(1.5f));
         camera.addComponent(new TagComponent("MainCamera"));
 
+        
+        WorldEntity world = new WorldEntity(gameScene, 4);
 
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
@@ -137,7 +140,7 @@ public class App implements Controller {
         RenderComponent targetRC = player.getComponent(RenderComponent.class);
 		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
         Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);
-        //camera.addComponent(new CameraFollowComponent(player, camPos));
+        camera.addComponent(new CameraFollowComponent(player, camPos));
         
         
         try {
@@ -216,7 +219,7 @@ public class App implements Controller {
         InventoryEntity invEntity;
     	invEntity = new InventoryEntity(gameScene, spriteManager);
     	gameScene.entities.add(invEntity);
-    	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
+    	invEntity.addComponent(new RenderComponent(new InventoryRenderable(invEntity)));
                 
         // Input
         InputHandler input = new InputHandler(root.getScene());
@@ -255,7 +258,7 @@ public class App implements Controller {
                 	   invEntity.showItems(player.getInventory(), itemStore);},
                 () -> System.out.println(""));
 
-        farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
+        //farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
 
         item = itemStore.getItem(28);
 
