@@ -10,6 +10,7 @@ import teamproject.wipeout.game.task.Task;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import teamproject.wipeout.game.task.Task;
 
 public class Player extends GameEntity {
     public Integer playerID;
@@ -19,7 +20,7 @@ public class Player extends GameEntity {
     public Integer size;
 
     public ArrayList<Task> tasks;
-    
+
     public static int MAX_SIZE = 10;
 
     private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
