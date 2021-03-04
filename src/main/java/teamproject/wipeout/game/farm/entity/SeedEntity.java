@@ -9,8 +9,8 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.item.components.SeedComponent;
 
 import java.io.FileNotFoundException;
 
@@ -33,11 +33,11 @@ public class SeedEntity extends GameEntity {
         super(scene);
         scene.addEntity(this);
 
-        SeedComponent seed = item.getComponent(SeedComponent.class);
         PlantComponent plant = item.getComponent(PlantComponent.class);
+        InventoryComponent inventory = item.getComponent(InventoryComponent.class);
         int widthPixelSize = plant.width * FarmEntity.SQUARE_SIZE;
         int heightPixelSize = plant.height * FarmEntity.SQUARE_SIZE;
-        Image seedImage = spriteManager.getSpriteSet(seed.spriteSheetName, seed.spriteSetName)[0];
+        Image seedImage = spriteManager.getSpriteSet(inventory.spriteSheetName, inventory.spriteSetName)[0];
 
         this.seedArea = new RectRenderable(Color.GREEN, widthPixelSize, heightPixelSize);
         this.seedArea.radius = Math.max(widthPixelSize, heightPixelSize) / 3.0;
