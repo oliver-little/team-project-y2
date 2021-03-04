@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.TradableComponent;
 
 /**
@@ -11,14 +12,14 @@ import teamproject.wipeout.game.item.components.TradableComponent;
  */
 public class Market {
 
-    public Map<Integer, Item> itemsForSale;
+    public ItemStore itemsForSale;
 
     public Map<Integer, MarketItem> stockDatabase;
     
     /**
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
      */
-    public Market(Map<Integer, Item> itemsForSale) {
+    public Market(ItemStore itemsForSale) {
         //TODO Add sabotage and task support.
         //TODO Link with systems to reduce quantities over time.
 
@@ -26,7 +27,7 @@ public class Market {
 
         stockDatabase = new HashMap<>();
 
-        for (Item item : itemsForSale.values()) {
+        for (Item item : itemsForSale.getData().values()) {
             TradableComponent tradableComponent = item.getComponent(TradableComponent.class);
             if (tradableComponent == null) {
                 continue;

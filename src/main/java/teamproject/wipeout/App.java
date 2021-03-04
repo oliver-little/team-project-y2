@@ -38,25 +38,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.logic.PlayerState;
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.networking.client.ServerDiscovery;
-import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
 import teamproject.wipeout.networking.server.GameServerRunner;
-import teamproject.wipeout.networking.server.ServerRunningException;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 
 /**
@@ -75,6 +63,7 @@ public class App implements Controller {
 
     // Temporarily placed variables
     ItemStore itemStore;
+    Market market;
     Item item;
     FarmEntity farmEntity;
  // Temporarily placed variables
@@ -161,6 +150,8 @@ public class App implements Controller {
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
         }
+
+        market = new Market(itemStore);
         
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
@@ -224,7 +215,7 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         InventoryEntity invEntity;
     	invEntity = new InventoryEntity(gameScene, spriteManager);
     	gameScene.entities.add(invEntity);
