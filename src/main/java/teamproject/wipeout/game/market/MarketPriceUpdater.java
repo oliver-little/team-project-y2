@@ -4,18 +4,18 @@ package teamproject.wipeout.game.market;
 /**
  * Class which automatically returns market items to their equilibrium price after a set amount of time.
  */
-public class MarketPriceUpdater implements Runnable{
+public class MarketPriceUpdater implements Runnable {
 
     /**
      * Time frequency is the interval in which the prices update - in seconds. The quantity deviation step walks along the x-axis of the price function, resulting in the prices (on the y axis) being increased/decreased accordingly.
      */
-    public static final double timeFrequency = 1;
+    public static final double TIMEFREQUENCY = 1;
 
-    public static final double quantityDeviationStep = 0.5;
+    public static final double QUANTITYDEVIATIONSTEP = 0.5;
     
     public Market market;
     
-    private double negQuantityDeviationStep = -quantityDeviationStep;
+    private double negQuantityDeviationStep = -QUANTITYDEVIATIONSTEP;
 
     public MarketPriceUpdater(Market market) {
         this.market = market;
@@ -36,15 +36,15 @@ public class MarketPriceUpdater implements Runnable{
                     item.setQuantityDeviation(0);
                 }
                 else {
-                    item.incrementQuantityDeviation(quantityDeviationStep);
+                    item.incrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
                 }
             }
             else {
-                if (quantityDeviation < quantityDeviationStep) {
+                if (quantityDeviation < QUANTITYDEVIATIONSTEP) {
                     item.setQuantityDeviation(0);
                 }
                 else {
-                    item.decrementQuantityDeviation(quantityDeviationStep);
+                    item.decrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
                 }
             }
         }
