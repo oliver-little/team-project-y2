@@ -25,7 +25,7 @@ public class MarketPricingTest {
     
     @Test
     public void increasingPrices() {
-        //TODO FIX THIS
+        //TODO Fix this
         market.buyItem(50, 10);
 
         double buyPrice = market.stockDatabase.get(50).getCurrentBuyPrice();
