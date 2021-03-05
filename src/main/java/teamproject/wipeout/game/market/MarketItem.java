@@ -1,22 +1,23 @@
 package teamproject.wipeout.game.market;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import teamproject.wipeout.game.item.components.TradableComponent;
 
 public class MarketItem {
     
-    private int id;
-    private double quantityDeviation;
-    private double defaultBuyPrice;
-    private double defaultSellPrice;
-    private double currentBuyPrice;
-    private double currentSellPrice;
-
     public static final int INITIAL_QUANTITY_DEVIATION = 0;
 
     public static final double GLOBALDAMPINGFACTOR = 2;
 
     public static final double LOCALDAMPINGFACTOR = 0.05;
 
+    private int id;
+    private DoubleProperty quantityDeviation;
+    private DoubleProperty defaultBuyPrice;
+    private DoubleProperty defaultSellPrice;
+    private DoubleProperty currentBuyPrice;
+    private DoubleProperty currentSellPrice;
 
     /**
      * Default constructor to create a market item - this contains only the relevant information for the market.
@@ -25,11 +26,11 @@ public class MarketItem {
      */
     public MarketItem(int id, TradableComponent tradableComponent) {
         this.id = id;
-        this.quantityDeviation = INITIAL_QUANTITY_DEVIATION;
-        this.defaultBuyPrice = tradableComponent.defaultBuyPrice;
-        this.defaultSellPrice = tradableComponent.defaultSellPrice;
-        this.currentBuyPrice = defaultBuyPrice;
-        this.currentSellPrice = defaultSellPrice;
+        this.quantityDeviation = new SimpleDoubleProperty(INITIAL_QUANTITY_DEVIATION);
+        this.defaultBuyPrice = new SimpleDoubleProperty(tradableComponent.defaultBuyPrice);
+        this.defaultSellPrice = new SimpleDoubleProperty(tradableComponent.defaultSellPrice);
+        this.currentBuyPrice = new SimpleDoubleProperty(defaultBuyPrice.get());
+        this.currentSellPrice = new SimpleDoubleProperty(defaultSellPrice.get());
     }
 
     /**
@@ -44,17 +45,25 @@ public class MarketItem {
      * Get function to return the item's quantity deviation.
      * @return Item quantity deviation.
      */
-    public double getQuantityDeviation() {
-        return this.quantityDeviation;
+    public final double getQuantityDeviation() {
+        return this.quantityDeviation.get();
     }
 
     /**
      * Set function to set an item's quantity deviation to a specified value.
      * @param i The value to set the quantity deviation to.
      */
-    public void setQuantityDeviation(double i) {
-        this.quantityDeviation = i;
+    public final void setQuantityDeviation(double i) {
+        this.quantityDeviation.set(i);
         updatePrices();
+    }
+
+    /**
+     * Get function for the DoubleProperty instance of QuantityDeviation
+     * @return The DoubleProperty
+     */
+    public DoubleProperty quantityDeviationProperty() {
+        return this.quantityDeviation;
     }
 
     /**
@@ -62,7 +71,7 @@ public class MarketItem {
      * @param i The amount to increment the quantity deviation by.
      */
     public void incrementQuantityDeviation(double i) {
-        this.quantityDeviation += i;
+        this.setQuantityDeviation(quantityDeviation.get() + i);
         updatePrices();
     }
 
@@ -71,7 +80,7 @@ public class MarketItem {
      * @param i The amount to decrement the quantity deviation by.
      */
     public void decrementQuantityDeviation(double i) {
-        this.quantityDeviation -= i;
+        this.setQuantityDeviation(quantityDeviation.get() - i);
         updatePrices();
     }
 
@@ -79,7 +88,16 @@ public class MarketItem {
      * Get function to return the item's default buy price.
      * @return The item's default buy price.
      */
-    public double getDefaultBuyPrice() {
+    public final double getDefaultBuyPrice() {
+        return this.defaultBuyPrice.get();
+    }
+
+
+    /**
+     * Get function for the DoubleProperty instance of defaultBuyPrice
+     * @return The DoubleProperty
+     */
+    public DoubleProperty defaultBuyPrice() {
         return this.defaultBuyPrice;
     }
 
@@ -87,7 +105,15 @@ public class MarketItem {
      * Get function to return the item's default sell price.
      * @return The item's default sell price.
      */
-    public double getDefaultSellPrice() {
+    public final double getDefaultSellPrice() {
+        return this.defaultSellPrice.get();
+    }
+
+    /**
+     * Get function for the DoubleProperty instance of defaultSellPrice
+     * @return The DoubleProperty
+     */
+    public DoubleProperty defaultSellPrice() {
         return this.defaultSellPrice;
     }
 
@@ -95,7 +121,15 @@ public class MarketItem {
      * Get function to return the item's current buy price.
      * @return The item's current buy price.
      */
-    public double getCurrentBuyPrice() {
+    public final double getCurrentBuyPrice() {
+        return this.currentBuyPrice.get();
+    }
+
+    /**
+     * Get function for the DoubleProperty instance of currentBuyPrice
+     * @return The DoubleProperty
+     */
+    public DoubleProperty currentBuyPrice() {
         return this.currentBuyPrice;
     }
 
@@ -103,7 +137,15 @@ public class MarketItem {
      * Get function to return the item's current sell price.
      * @return The item's current sell price.
      */
-    public double getCurrentSellPrice() {
+    public final double getCurrentSellPrice() {
+        return this.currentSellPrice.get();
+    }
+
+    /**
+     * Get function for the DoubleProperty instance of currentSellPrice
+     * @return The DoubleProperty
+     */
+    public DoubleProperty currentSellPrice() {
         return this.currentSellPrice;
     }
 
@@ -112,18 +154,10 @@ public class MarketItem {
      */
     private void updatePrices() {
       
-        double newCostDeviation = costFunction(this.quantityDeviation);
+        double newCostDeviation = costFunction(this.quantityDeviation.get());
 
-        this.currentBuyPrice = newCostDeviation + defaultBuyPrice;
-        this.currentSellPrice = newCostDeviation + defaultSellPrice;
-
-        if (currentBuyPrice <= 0.01) {
-            this.currentBuyPrice = 0.01;
-        }
-        if (currentSellPrice <= 0.01) {
-            this.currentSellPrice = 0.01;
-        }
-        
+        this.currentBuyPrice.set(Math.max(0.01, newCostDeviation + defaultBuyPrice.get()));
+        this.currentSellPrice.set(Math.max(0.01, newCostDeviation + defaultSellPrice.get()));        
     }
 
     /**

@@ -32,6 +32,7 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
@@ -125,6 +126,8 @@ public class App implements Controller {
             itemStore = new ItemStore("items.json");
             spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
             spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-tools-descriptor.json", "inventory/Tools.png");
             spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
             spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
             spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
@@ -132,8 +135,8 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        market = new Market(itemStore);
-
+        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
+        
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
@@ -207,7 +210,7 @@ public class App implements Controller {
 
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
         MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
-        eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), mcs, mhs);
+        eventSystems = List.of(mcs, mhs);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
