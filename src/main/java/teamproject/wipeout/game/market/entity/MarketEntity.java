@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.market.entity;
 
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ui.UIComponent;
@@ -20,9 +21,12 @@ public class MarketEntity extends GameEntity {
     protected MarketUI marketUI;
     protected Market market;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager) {
+    protected StackPane uiContainer;
+
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer) {
         super(scene);
         scene.addEntity(this);
+        this.uiContainer = uiContainer;
 
         this.addComponent(new Transform(x, y));
         this.addComponent(new RenderComponent(new RectRenderable(Color.BLUE, 50, 50)));
@@ -31,11 +35,12 @@ public class MarketEntity extends GameEntity {
         market = new Market(items);
 
         this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);
+        this.marketUI.setParent(uiContainer);
     }
 
     private EntityClickAction onClick = (x, y, button, entity) -> {
         if (this.marketUI.getParent() == null) {
-            entity.addComponent(new UIComponent(this.marketUI));
+            this.uiContainer.getChildren().add(this.marketUI);
         }
     };
 }

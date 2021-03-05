@@ -139,7 +139,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager);
+        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
         
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
@@ -214,7 +214,7 @@ public class App implements Controller {
 
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
         MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
-        eventSystems = List.of(new UISystem(gameScene, interfaceOverlay), mcs, mhs);
+        eventSystems = List.of(mcs, mhs);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);

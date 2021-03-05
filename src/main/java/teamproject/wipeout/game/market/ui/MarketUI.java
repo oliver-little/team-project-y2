@@ -17,7 +17,6 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
-import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.market.Market;
@@ -28,7 +27,7 @@ import teamproject.wipeout.util.resources.ResourceType;
 /**
  * Creates a tabbed screen with items to buy and sell
  */
-public class MarketUI extends AnchorPane implements DialogUIComponent {
+public class MarketUI extends AnchorPane {
     
     private Pane parent;
 
