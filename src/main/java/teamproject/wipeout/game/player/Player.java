@@ -48,6 +48,16 @@ public class Player extends GameEntity {
         return true;
     }
 
+    // if you want to purchase some task from the market
+    public boolean buyTask(Task task) {
+        if(task.priceToBuy > this.money) {
+            return false;
+        }
+        tasks.add(task);
+        this.money -= task.priceToBuy;
+        return true;
+    }
+
     // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
     // if the player does not have the item return false
     public boolean sellItem(MarketItem item) {

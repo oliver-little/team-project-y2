@@ -11,6 +11,7 @@ public class Task {
     public Integer reward;
     public String description;
     public Boolean completed;
+    public Integer priceToBuy;
     public Function<Player, Boolean> condition;
 
     /**
@@ -24,5 +25,6 @@ public class Task {
         this.reward = reward;
         this.condition = condition;
         this.completed = false;
+        this.priceToBuy = reward - 10;
     }
 }

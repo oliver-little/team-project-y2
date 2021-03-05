@@ -45,6 +45,7 @@ import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.task.entity.TaskEntity;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
 import teamproject.wipeout.networking.server.GameServerRunner;
@@ -77,6 +78,8 @@ public class App implements Controller {
     Market market;
     Item item;
     FarmEntity farmEntity;
+    TaskEntity taskEntity;
+
  // Temporarily placed variables
     GameServerRunner server = new GameServerRunner();
     String playerID = UUID.randomUUID().toString();
@@ -218,6 +221,15 @@ public class App implements Controller {
     	gameScene.entities.add(invEntity);
     	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
 
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        player.tasks = allTasks;
+
+        // add task entity
+        taskEntity = new TaskEntity(gameScene, 10, 100, player);
+
+        gameScene.entities.add(taskEntity);
+
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
@@ -252,7 +264,8 @@ public class App implements Controller {
 
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup(itemList);
-                	   invEntity.showItems(player.getInventory(), itemStore);},
+                	   invEntity.showItems(player.getInventory(), itemStore);
+                	   taskEntity.showTasks(player.tasks); },
                 () -> System.out.println(""));
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
@@ -270,10 +283,6 @@ public class App implements Controller {
                 exception.printStackTrace();
             }
         });
-
-        // Create tasks
-        ArrayList<Task> allTasks = createAllTasks(itemStore);
-        player.tasks = allTasks;
 
         gl.start();
     }
