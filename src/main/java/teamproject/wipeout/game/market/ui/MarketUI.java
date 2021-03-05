@@ -38,18 +38,22 @@ public class MarketUI extends AnchorPane implements DialogUIComponent {
         
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-        Tab buy = new Tab("Buy", new Label("Buy some items."));
-        Tab sell = new Tab("Sell", new Label("Sell some items."));
-        tabPane.getTabs().addAll(buy, sell);
+        Tab seeds = new Tab("Seeds", new ItemMenu());
+        Tab plants = new Tab("Plants & Veg", new Label("Fruit, Veg & Other Farmables"));
+        Tab tools = new Tab("Tools", new Label("Usable Tools"));
+        Tab tasks = new Tab("Tasks", new Label("Purchasable Tasks"));
+        tabPane.getTabs().addAll(seeds, plants, tools, tasks);
 
         Button close = new Button("X");
         close.setOnAction(actionEvent -> this.parent.getChildren().remove(this));
 
-        AnchorPane.setTopAnchor(tabPane, 150.0);
+
+        AnchorPane.setBottomAnchor(tabPane, 50.0);
+        AnchorPane.setTopAnchor(tabPane, 50.0);
         AnchorPane.setLeftAnchor(tabPane, 100.0);
         AnchorPane.setRightAnchor(tabPane, 100.0);
-        AnchorPane.setTopAnchor(close, 160.0);
-        AnchorPane.setRightAnchor(close, 110.0);
+        AnchorPane.setTopAnchor(close, 60.0);
+        AnchorPane.setRightAnchor(close, 100.0);
 
         this.getChildren().addAll(tabPane, close);
     }
