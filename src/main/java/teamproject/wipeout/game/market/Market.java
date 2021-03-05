@@ -57,9 +57,6 @@ public class Market {
             return quantity * item.getDefaultBuyPrice();
         }
 
-        //TODO Add a check that the player has enough money to buy the item & has enough inventory space.
-        //TODO Add to inventory and remove money here.
-
         double totalCost = calculateTotalCost(id, quantity, true);
         item.incrementQuantityDeviation(quantity);
 
@@ -85,8 +82,6 @@ public class Market {
             System.out.println("Cannot sell this kind of item.");
             return -1;
         }
-
-        //TODO Remove from inventory and add money here.
 
         double totalCost = calculateTotalCost(id, quantity, false);
         item.decrementQuantityDeviation(quantity);

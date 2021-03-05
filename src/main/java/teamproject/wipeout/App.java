@@ -139,7 +139,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, spriteManager);
+        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager);
         
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();

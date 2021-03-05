@@ -13,14 +13,14 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
-import teamproject.wipeout.util.resources.ResourceType;
+import teamproject.wipeout.game.player.Player;
 
 public class MarketEntity extends GameEntity {
 
     protected MarketUI marketUI;
     protected Market market;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, SpriteManager spriteManager) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager) {
         super(scene);
         scene.addEntity(this);
 
@@ -30,7 +30,7 @@ public class MarketEntity extends GameEntity {
 
         market = new Market(items);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, spriteManager);
+        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);
     }
 
     private EntityClickAction onClick = (x, y, button, entity) -> {

@@ -21,6 +21,7 @@ import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -31,7 +32,7 @@ public class MarketUI extends AnchorPane implements DialogUIComponent {
     
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, SpriteManager spriteManager) {
+    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager) {
         super();
 
         try {
@@ -52,7 +53,7 @@ public class MarketUI extends AnchorPane implements DialogUIComponent {
         List<Node> tiles = new ArrayList<>();
 
         for (Item item : items) {
-            tiles.add(new MarketItemUI(item, market, spriteManager));
+            tiles.add(new MarketItemUI(item, market, player, spriteManager));
         }
 
         ScrollableTileUI seedMenu = new ScrollableTileUI(tiles);
