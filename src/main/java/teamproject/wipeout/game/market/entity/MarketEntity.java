@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.entity;
+package teamproject.wipeout.game.market.entity;
 
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
@@ -9,29 +9,32 @@ import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
 import teamproject.wipeout.util.resources.ResourceType;
 
 public class MarketEntity extends GameEntity {
 
     protected MarketUI marketUI;
+    protected Market market;
 
-    public MarketEntity(GameScene scene, double x, double y) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, SpriteManager spriteManager) {
         super(scene);
+        scene.addEntity(this);
 
         this.addComponent(new Transform(x, y));
         this.addComponent(new RenderComponent(new RectRenderable(Color.BLUE, 50, 50)));
         this.addComponent(new Clickable(this.onClick));
 
-        this.marketUI = new MarketUI();
+        market = new Market(items);
+
+        this.marketUI = new MarketUI(items.getData().values(), market, spriteManager);
     }
 
     private EntityClickAction onClick = (x, y, button, entity) -> {
         if (this.marketUI.getParent() == null) {
-            this.marketUI.getStylesheets().clear();
-
-            this.marketUI.getStylesheets().add(ResourceType.STYLESHEET.path + "market-menu.css");
-            
             entity.addComponent(new UIComponent(this.marketUI));
         }
     };

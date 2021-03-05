@@ -32,7 +32,7 @@ import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.entity.MarketEntity;
+import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
@@ -131,15 +131,15 @@ public class App implements Controller {
             itemStore = new ItemStore("items.json");
             spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
             spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+            spriteManager.loadSpriteSheet("inventory/inventory-tools-descriptor.json", "inventory/Tools.png");
             spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
             spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
         }
 
-        market = new Market(itemStore);
-        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300);
-        gameScene.addEntity(marketStall);
+        MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, spriteManager);
         
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
