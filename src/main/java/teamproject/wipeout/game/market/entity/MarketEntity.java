@@ -1,12 +1,9 @@
 package teamproject.wipeout.game.market.entity;
 
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.EntityClickAction;
-import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
