@@ -41,7 +41,6 @@ public class CollisionResolutionComponent implements GameComponent {
     	if (resolutionVector==null) {
     		return;
     	}
-    	
     	Transform t1 = g1.getComponent(Transform.class);
     	//HitboxComponent h1 = g1.getComponent(HitboxComponent.class);
     	CollisionResolutionComponent c1 = g1.getComponent(CollisionResolutionComponent.class);

@@ -1,0 +1,18 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "tile",
+	"sprites": [
+		{
+			"name": "tile1",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 65,
+				"height": 65,
+				"length": 1
+			}
+		}
+	]
+}

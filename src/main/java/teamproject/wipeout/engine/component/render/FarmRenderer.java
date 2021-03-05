@@ -3,7 +3,7 @@ package teamproject.wipeout.engine.component.render;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import teamproject.wipeout.engine.entity.FarmEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
 import java.io.IOException;
@@ -32,26 +32,29 @@ public class FarmRenderer implements Renderable {
     public void render(GraphicsContext gc, double x, double y, double scale) {
         try {
             Point2D scaledFarmSize = this.farmSize.multiply(scale);
-            double farmEndX = x + scaledFarmSize.getX();
-            double farmEndY = y + scaledFarmSize.getY();
+            double farmStartX = x * scale;
+            double farmStartY = y * scale;
+            double farmEndX = farmStartX + scaledFarmSize.getX();
+            double farmEndY = farmStartY + scaledFarmSize.getY();
             double spriteWidth = FarmEntity.SQUARE_SIZE * scale;
             double spriteHeight = FarmEntity.SQUARE_SIZE * scale;
 
             // Render top row
-            double topX = x;
-            gc.drawImage(this.getFarmTile("top-left"), topX, y, spriteWidth, spriteHeight);
+            double topX = farmStartX;
+            gc.drawImage(this.getFarmTile("top-left"), topX, farmStartY, spriteWidth, spriteHeight);
             Image top = this.getFarmTile("top");
-            for (topX = x + spriteWidth; topX < farmEndX - spriteWidth; topX += spriteWidth) {
-                gc.drawImage(top, topX, y, spriteWidth, spriteHeight);
+            for (topX += spriteWidth; topX < farmEndX - spriteWidth; topX += spriteWidth) {
+                gc.drawImage(top, topX, farmStartY, spriteWidth, spriteHeight);
             }
-            gc.drawImage(this.getFarmTile("top-right"), topX, y, spriteWidth, spriteHeight);
+            gc.drawImage(this.getFarmTile("top-right"), topX, farmStartY, spriteWidth, spriteHeight);
 
             // Render centre rows
             Image left = this.getFarmTile("centre-left");
             Image centre = this.getFarmTile("centre");
             Image right = this.getFarmTile("centre-right");
-            for (double centerY = y + spriteHeight; centerY < farmEndY - spriteHeight; centerY += spriteHeight) {
-                double centerX = x;
+            double centerY = y * scale;
+            for (centerY += spriteHeight; centerY < farmEndY - spriteHeight; centerY += spriteHeight) {
+                double centerX = x * scale;
                 gc.drawImage(left, centerX, centerY, spriteWidth, spriteHeight);
 
                 for (centerX += spriteWidth; centerX < farmEndX - spriteWidth; centerX += spriteWidth) {
@@ -62,11 +65,11 @@ public class FarmRenderer implements Renderable {
             }
 
             // Render bottom row
-            double bottomX = x;
-            double bottomY = farmEndY - spriteHeight;
+            double bottomX = x * scale;
+            double bottomY = centerY;//farmEndY - spriteHeight;
             gc.drawImage(this.getFarmTile("bottom-left"), bottomX, bottomY, spriteWidth, spriteHeight);
             Image bottom = this.getFarmTile("bottom");
-            for (bottomX = x + spriteWidth; bottomX < farmEndX - spriteWidth; bottomX += spriteWidth) {
+            for (bottomX += spriteWidth; bottomX < farmEndX - spriteWidth; bottomX += spriteWidth) {
                 gc.drawImage(bottom, bottomX, bottomY, spriteWidth, spriteHeight);
             }
             gc.drawImage(this.getFarmTile("bottom-right"), bottomX, bottomY, spriteWidth, spriteHeight);

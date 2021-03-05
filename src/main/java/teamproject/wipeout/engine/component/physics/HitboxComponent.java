@@ -24,8 +24,7 @@ public class HitboxComponent implements GameComponent {
 	 * width and height of rectangle are the dimensions of the bounding box.
 	 */
 	public Shape boundingBoxes[];
-	
-	
+		
 	
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
 	public HitboxComponent(Shape... shapes) {

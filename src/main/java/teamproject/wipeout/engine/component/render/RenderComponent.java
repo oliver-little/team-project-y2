@@ -1,7 +1,7 @@
 package teamproject.wipeout.engine.component.render;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import javafx.scene.canvas.GraphicsContext;
 import teamproject.wipeout.engine.component.GameComponent;
@@ -10,7 +10,7 @@ public class RenderComponent implements GameComponent {
 
     private boolean isStatic;
     
-    private List<Renderable> renderables;
+    private ArrayList<Renderable> renderables;
 
     public RenderComponent() {
         this.isStatic = false;
@@ -28,12 +28,12 @@ public class RenderComponent implements GameComponent {
      */
     public RenderComponent(Renderable... newRenderables) {
         this.isStatic = false;
-        renderables = List.of(newRenderables);
+        this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
 
     public RenderComponent(boolean isStatic, Renderable... newRenderables) {
         this.isStatic = isStatic;
-        renderables = List.of(newRenderables);
+        this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
 
     public boolean isStatic() {
@@ -51,10 +51,11 @@ public class RenderComponent implements GameComponent {
 
     /**
      * Adds the given renderable to the list of renderables.
+     * @param addIndex Index at which renderable will be added (= order of rendering).
      * @param renderableObj The renderable to add.
      */
-    public void addRenderable(Renderable renderableObj) {
-        renderables.add(renderableObj);
+    public void addRenderable(int addIndex, Renderable renderableObj) {
+        renderables.add(addIndex, renderableObj);
     }
 
     /**
@@ -121,4 +122,5 @@ public class RenderComponent implements GameComponent {
     public String getType() {
         return "render";
     }
+
 }

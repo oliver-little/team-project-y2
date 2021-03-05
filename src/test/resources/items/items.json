@@ -14,13 +14,6 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 2.00,
           "defaultSellPrice" : 1.00
-        },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "red-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "tomato",
-          "growthRate" : 3.00
         }
       }
     },
@@ -36,13 +29,86 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 5.00,
           "defaultSellPrice" : 2.50
+        }
+      }
+    },
+    {
+      "id" : 15,
+      "name": "Apple",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-fruit",
+          "spriteSetName" : "apple",
+          "stackSizeLimit" : 99
         },
-        "PlantableComponent" : {
-          "seedSpriteSheetName" : "inventory-fruit-and-vegetable",
-          "seedSpriteSetName" : "green-seeds",
-          "growthSpriteSheetName" : "crops",
-          "growthSpriteSetName" : "lettuce",
-          "growthRate" : 3.00
+        "TradableComponent" : {
+          "defaultBuyPrice" : 1.50,
+          "defaultSellPrice" : 0.75
+        }
+      }
+    },
+    {
+      "id" : 28,
+      "name": "Tomato Seeds",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "red-seeds",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 1.50,
+          "defaultSellPrice" : 0.75
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "tomato",
+          "growthRate" : 3.00,
+          "grownItemID" : 1
+        }
+      }
+    },
+    {
+      "id" : 29,
+      "name": "Lettuce Seeds",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSetName" : "green-seeds",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 1.50,
+          "defaultSellPrice" : 0.75
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "crops",
+          "spriteSetName" : "lettuce",
+          "growthRate" : 3.00,
+          "grownItemID" : 2
+        }
+      }
+    },
+    {
+      "id" : 43,
+      "name": "Apple Tree Sapling",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "sapling1",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 1.50,
+          "defaultSellPrice" : 0.75
+        },
+        "PlantComponent" : {
+          "spriteSheetName" : "fruit-tree",
+          "spriteSetName" : "apple-tree",
+          "growthRate" : 3.00,
+          "width": 2,
+          "height": 2,
+          "grownItemID" : 15
         }
       }
     }
