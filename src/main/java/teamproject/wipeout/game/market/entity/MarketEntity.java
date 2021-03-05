@@ -7,6 +7,7 @@ import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.EntityClickAction;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
@@ -25,7 +26,13 @@ public class MarketEntity extends GameEntity {
         scene.addEntity(this);
 
         this.addComponent(new Transform(x, y));
-        this.addComponent(new RenderComponent(new RectRenderable(Color.BLUE, 50, 50)));
+        try {
+            spriteManager.loadSpriteSheet("market-descriptor.json", "market.png");
+            this.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getSpriteSet("market", "market")[0])));
+        }
+        catch (Exception exception) {
+            exception.printStackTrace();
+        }
         this.addComponent(new Clickable(this.onClick));
 
         market = new Market(items);
