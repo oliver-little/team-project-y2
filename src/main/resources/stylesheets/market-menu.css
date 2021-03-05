@@ -1,8 +1,3 @@
-@font-face {
-    font-family: 'Kalam';
-    src: url('fonts/Kalam-Regular.ttf');
-}
-
 .tab-pane {
     -fx-tab-min-width:90px;
     -fx-tab-min-height:30px;

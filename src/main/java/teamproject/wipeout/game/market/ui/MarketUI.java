@@ -1,6 +1,9 @@
 package teamproject.wipeout.game.market.ui;
 
-import javafx.geometry.Pos;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,7 +12,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 import teamproject.wipeout.engine.component.ui.DialogUIComponent;
+import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 public class MarketUI extends AnchorPane implements DialogUIComponent {
@@ -18,6 +23,16 @@ public class MarketUI extends AnchorPane implements DialogUIComponent {
 
     public MarketUI() {
         super();
+
+        try {
+            InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
+            Font.loadFont(path, 12);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        
+
 
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "market-menu.css");
         
