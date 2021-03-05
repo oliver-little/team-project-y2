@@ -9,8 +9,6 @@ import java.util.function.Consumer;
 
 public class RowGrowthComponent implements GameComponent {
 
-    public static final int GROWTH_STAGES = 4;
-
     public final ArrayList<FarmItem> cropRow;
 
     protected final Consumer<FarmItem> growthUpdater;
@@ -30,8 +28,7 @@ public class RowGrowthComponent implements GameComponent {
             return;
         }
 
-        int growthStage = farmItem.getCurrentGrowthStage();
-        if (growthStage == GROWTH_STAGES) {
+        if (farmItem.getCurrentGrowthStage() == farmItem.getMaxGrowthStage()) {
             return;
         }
 

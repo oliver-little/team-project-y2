@@ -4,11 +4,13 @@ import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.market.MarketItem;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class Player extends GameEntity {
     public Integer playerID;
@@ -21,6 +23,8 @@ public class Player extends GameEntity {
 
     private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
+    private SignatureEntityCollector pickableCollector;
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -31,6 +35,8 @@ public class Player extends GameEntity {
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = 0.0;
+
+        this.pickableCollector = new SignatureEntityCollector(this.scene, Set.of(PickableComponent.class, HitboxComponent.class));
     }
 
     // When called with a market item, purchases an item for a player and returns true,
@@ -83,7 +89,8 @@ public class Player extends GameEntity {
     }
 
     // Scan all entities for items the player is standing over, and pick them up, and delete them from the map
-    public void pickup(List<GameEntity> entities){
+    public void pickup() {
+        List<GameEntity> entities = this.pickableCollector.getEntities();
         List<GameEntity> removedItems = new ArrayList<>();
         for (GameEntity ge: entities){
             // Check if entity is an item

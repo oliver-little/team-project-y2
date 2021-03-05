@@ -423,8 +423,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "tomato",
-          "growthRate" : 3.00,
-          "grownItemID" : 1
+          "grownItemID" : 1,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -444,8 +445,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "lettuce",
-          "growthRate" : 3.00,
-          "grownItemID" : 2
+          "grownItemID" : 2,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -465,8 +467,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "yellow-pepper",
-          "growthRate" : 3.00,
-          "grownItemID" : 3
+          "grownItemID" : 3,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -486,8 +489,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "hot-pepper",
-          "growthRate" : 3.00,
-          "grownItemID" : 4
+          "grownItemID" : 4,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -507,8 +511,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "onion",
-          "growthRate" : 3.00,
-          "grownItemID" : 5
+          "grownItemID" : 5,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -528,8 +533,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "potato",
-          "growthRate" : 3.00,
-          "grownItemID" : 6
+          "grownItemID" : 6,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -549,8 +555,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "carrot",
-          "growthRate" : 3.00,
-          "grownItemID" : 7
+          "grownItemID" : 7,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -570,8 +577,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "broccoli",
-          "growthRate" : 3.00,
-          "grownItemID" : 8
+          "grownItemID" : 8,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -591,8 +599,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "beetroot",
-          "growthRate" : 3.00,
-          "grownItemID" : 9
+          "grownItemID" : 9,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -612,8 +621,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "pumpkin",
-          "growthRate" : 3.00,
-          "grownItemID" : 10
+          "grownItemID" : 10,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -633,8 +643,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "cauliflower",
-          "growthRate" : 3.00,
-          "grownItemID" : 11
+          "grownItemID" : 11,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -654,10 +665,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "blackberry",
+          "grownItemID" : 21,
+          "maxGrowthStage" : 3,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 21
+          "height": 2
         }
       }
     },
@@ -677,8 +689,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "leek",
-          "growthRate" : 3.00,
-          "grownItemID" : 12
+          "grownItemID" : 12,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -698,8 +711,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "parsnip",
-          "growthRate" : 3.00,
-          "grownItemID" : 13
+          "grownItemID" : 13,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -719,8 +733,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "sweetcorn",
-          "growthRate" : 3.00,
-          "grownItemID" : 14
+          "grownItemID" : 14,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -740,10 +755,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "apple-tree",
+          "grownItemID" : 15,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 15
+          "height": 2
         }
       }
     },
@@ -763,10 +779,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pear-tree",
+          "grownItemID" : 16,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 16
+          "height": 2
         }
       }
     },
@@ -786,10 +803,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "lemon-tree",
+          "grownItemID" : 17,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 17
+          "height": 2
         }
       }
     },
@@ -809,10 +827,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "orange-tree",
+          "grownItemID" : 18,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 18
+          "height": 2
         }
       }
     },
@@ -832,10 +851,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "strawberry-tree",
+          "grownItemID" : 19,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 19
+          "height": 2
         }
       }
     },
@@ -855,10 +875,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "cherry-tree",
+          "grownItemID" : 20,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 20
+          "height": 2
         }
       }
     },
@@ -878,10 +899,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pineapple-tree",
+          "grownItemID" : 22,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 22
+          "height": 2
         }
       }
     },
@@ -901,10 +923,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "banana-tree",
+          "grownItemID" : 23,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 23
+          "height": 2
         }
       }
     }

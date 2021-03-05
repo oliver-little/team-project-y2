@@ -19,22 +19,16 @@ import java.util.Set;
 
 public class MouseHoverSystem implements EventSystem {
 
-    public static final Set<Class<? extends GameComponent>> signature = Set.of(Transform.class, RenderComponent.class, Hoverable.class);
+    private final SignatureEntityCollector collector;
+    private final CameraEntityCollector cameraCollector;
 
-    private SignatureEntityCollector collector;
-    private CameraEntityCollector cameraCollector;
+    private double currentMouseX;
+    private double currentMouseY;
 
-    public MouseHoverSystem(GameScene scene, InputHandler input) {
-        this.collector = new SignatureEntityCollector(scene, this.signature);
-        this.cameraCollector = new CameraEntityCollector(scene);
-        input.onMouseHover(this.onHover);
-    }
+    protected final InputHoverableAction onHover = (x, y) -> {
+        this.currentMouseX = x;
+        this.currentMouseY = y;
 
-    public void cleanup() {
-        this.collector.cleanup();
-    }
-
-    protected InputHoverableAction onHover = (x, y) -> {
         Pair<List<GameEntity>, Point2D> hovering = this.getHovered(x, y);
         for (GameEntity entity : hovering.getKey()) {
             Hoverable hoverable = entity.getComponent(Hoverable.class);
@@ -43,6 +37,23 @@ public class MouseHoverSystem implements EventSystem {
             }
         }
     };
+
+    public MouseHoverSystem(GameScene scene, InputHandler input) {
+        this.collector = new SignatureEntityCollector(scene, Set.of(Transform.class, RenderComponent.class, Hoverable.class));
+        this.cameraCollector = new CameraEntityCollector(scene);
+        this.currentMouseX = 0;
+        this.currentMouseY = 0;
+
+        input.onMouseHover(this.onHover);
+    }
+
+    public Point2D getCurrentMousePosition() {
+        return new Point2D(this.currentMouseX, this.currentMouseY);
+    }
+
+    public void cleanup() {
+        this.collector.cleanup();
+    }
 
     protected Pair<List<GameEntity>, Point2D> getHovered(double x, double y) {
         // Transform mouse click position by camera position and zoom
