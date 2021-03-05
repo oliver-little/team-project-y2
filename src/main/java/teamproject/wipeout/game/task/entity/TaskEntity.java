@@ -12,7 +12,6 @@ import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.market.MarketUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;

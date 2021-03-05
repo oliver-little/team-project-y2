@@ -1,6 +1,5 @@
 package teamproject.wipeout.game.farm;
 
-import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
@@ -46,6 +45,15 @@ public class FarmItem {
     }
 
     /**
+     * Gets the max growth stage of the {@link Item} from the {@link PlantComponent}.
+     *
+     * @return Max growth stage in the form of an {@code int}.
+     */
+    public int getMaxGrowthStage() {
+        return this.item.getComponent(PlantComponent.class).maxGrowthStage;
+    }
+
+    /**
      * Gets the growth rate of the {@link Item} from the {@link PlantComponent}.
      *
      * @return Growth rate in the form of a {@code double}.
@@ -60,7 +68,7 @@ public class FarmItem {
      * @return Current growth stage in the form of an {@code int}.
      */
     public int getCurrentGrowthStage() {
-        double growthRate = this.item.getComponent(PlantComponent.class).growthRate;
+        double growthRate = this.getGrowthRate();
         return (int) (this.growth / growthRate);
     }
 
@@ -71,14 +79,24 @@ public class FarmItem {
      * @return Current growth percentage in the form of an {@code int}.
      */
     public int getCurrentGrowthPercentage() {
-        double growthRate = this.getGrowthRate();
-        double maxGrowth = RowGrowthComponent.GROWTH_STAGES * growthRate;
+        PlantComponent plant = this.item.getComponent(PlantComponent.class);
+        double maxGrowth = plant.maxGrowthStage * plant.growthRate;
         double growthPercentage = ((this.growth / maxGrowth) * 100);
         if (growthPercentage >= 100.0) {
             return 100;
         } else {
             return (int) growthPercentage;
         }
+    }
+
+    /**
+     * Checks whether the plant is fully grown.
+     *
+     * @return {@code true} when the plant is fully grown, otherwise {@code false}.
+     */
+    public boolean isFullyGrown() {
+        PlantComponent plant = this.item.getComponent(PlantComponent.class);
+        return this.growth >= plant.maxGrowthStage * plant.growthRate;
     }
 
 }

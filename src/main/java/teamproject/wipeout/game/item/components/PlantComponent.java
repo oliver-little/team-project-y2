@@ -9,10 +9,12 @@ public class PlantComponent implements ItemComponent {
 
     public final String spriteSheetName;
     public final String spriteSetName;
+    public final int grownItemID;
+    public final int maxGrowthStage; // counting from 0., 1., 2.,...
+    public final double growthRate;
+
     public final int width;
     public final int height;
-    public final double growthRate;
-    public final int grownItemID;
 
     /**
      * Creates a {@code PlantComponent} from a given {@code JSON Map} data.
@@ -22,8 +24,9 @@ public class PlantComponent implements ItemComponent {
     public PlantComponent(Map<String, Object> data) {
         this.spriteSheetName = (String) data.get("spriteSheetName");
         this.spriteSetName = (String) data.get("spriteSetName");
-        this.growthRate = (Double) data.get("growthRate");
         this.grownItemID = ((Double) data.get("grownItemID")).intValue();
+        this.maxGrowthStage = ((Double) data.get("maxGrowthStage")).intValue();
+        this.growthRate = (Double) data.get("growthRate");
 
         Double width = (Double) data.get("width");
         Double height = (Double) data.get("height");

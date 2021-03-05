@@ -1,0 +1,17 @@
+{
+  "fileType": "SpritesheetDescriptor",
+  "version": "1.0.0",
+  "name": "market",
+  "sprites": [
+    {
+      "name": "market",
+      "type": "sprite",
+      "parameters" : {
+        "x": 0,
+        "y": 0,
+        "width": 305,
+        "height": 200
+      }
+    }
+  ]
+}

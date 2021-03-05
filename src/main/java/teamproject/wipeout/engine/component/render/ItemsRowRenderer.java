@@ -3,6 +3,7 @@ package teamproject.wipeout.engine.component.render;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmItem;
@@ -12,6 +13,7 @@ import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Specifies how a row of items is rendered.
@@ -22,10 +24,14 @@ public class ItemsRowRenderer implements Renderable {
     public ItemStore itemStore;
     public SpriteManager spriteManager;
 
+    protected HashMap<String, Image> currentSprites;
+
     public ItemsRowRenderer(ArrayList<FarmItem> row, SpriteManager spriteManager, ItemStore itemStore) {
         this.farmRow = row;
         this.itemStore = itemStore;
         this.spriteManager = spriteManager;
+
+        this.currentSprites = new HashMap<String, Image>();
     }
 
     public double getWidth() {
@@ -50,22 +56,26 @@ public class ItemsRowRenderer implements Renderable {
 
             int growthStage = farmItem.getCurrentGrowthStage();
 
-            try {
-                PlantComponent plant = currentItem.getComponent(PlantComponent.class);
-                Image[] sprites = this.spriteManager.getSpriteSet(plant.spriteSheetName, plant.spriteSetName);
-                if (growthStage >= sprites.length) {
-                    growthStage = sprites.length - 1;
+            PlantComponent plant = currentItem.getComponent(PlantComponent.class);
+            String idString = currentItem.id + "." + growthStage;
+            Image sprite = this.currentSprites.get(idString);
+
+            if (sprite == null) {
+                try {
+                    Image[] sprites = this.spriteManager.getSpriteSet(plant.spriteSheetName, plant.spriteSetName);
+                    sprite = sprites[growthStage];
+                    this.currentSprites.put(idString, sprite);
+
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
+                    continue;
                 }
-                Image sprite = sprites[growthStage];
-
-                Point2D spriteSize = this.rescaleToFitWidth(plant.width, sprite.getWidth(), sprite.getHeight());
-                double itemY = (y - spriteSize.getY() * 0.5);
-
-                gc.drawImage(sprite, itemX * scale, itemY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
-
-            } catch (FileNotFoundException exception) {
-                exception.printStackTrace();
             }
+
+            Point2D spriteSize = this.rescaleToFitWidth(plant.width, sprite.getWidth(), sprite.getHeight());
+            double itemY = (y - spriteSize.getY() * 0.5);
+
+            gc.drawImage(sprite, itemX * scale, itemY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
         }
     }
 
