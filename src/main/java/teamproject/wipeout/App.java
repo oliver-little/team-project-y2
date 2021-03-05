@@ -218,14 +218,19 @@ public class App implements Controller {
     	gameScene.entities.add(invEntity);
     	invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
 
-        // Create tasks
+        // Tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
-        player.tasks = allTasks;
 
-        // add task entity
+        ArrayList<Task> playerTasks = new ArrayList<>();
+        for(int i = 0; i < 10; i++) {
+            playerTasks.add(allTasks.get(i));
+        }
+        player.tasks = playerTasks;
+
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
         gameScene.entities.add(taskEntity);
+
 
         // Input
         InputHandler input = new InputHandler(root.getScene());
@@ -301,8 +306,9 @@ public class App implements Controller {
 
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
-        itemIds.add(2); // add letuce
-        itemIds.add(6); // add potatos
+        for(int i = 0; i < 50; i++) {
+            itemIds.add(i);
+        }
 
         // Collect tasks
         for(Integer itemId : itemIds) {
