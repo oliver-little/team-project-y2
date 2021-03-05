@@ -1,11 +1,12 @@
 package teamproject.wipeout.game.farm;
 
-import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
+import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.function.Consumer;
 
 /**
@@ -22,16 +23,8 @@ public class FarmData {
 
     protected final ArrayList<ArrayList<FarmItem>> items;
 
-    private Consumer<FarmItem> growthCustomDelegate;
-
-    /**
-     * Action called when any item changes its growth value.
-     */
-    private final Consumer<FarmItem> growthDelegate = (farmItem) -> {
-        if (this.growthCustomDelegate != null) {
-            this.growthCustomDelegate.accept(farmItem);
-        }
-    };
+    private final HashSet<Consumer<FarmItem>> customGrowthDelegates;
+    private final Consumer<FarmItem> growthDelegate;
 
     /**
      * Creates a data container for an empty farm.
@@ -47,6 +40,13 @@ public class FarmData {
             ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
             this.items.add(newRow);
         }
+
+        this.customGrowthDelegates = new HashSet<Consumer<FarmItem>>();
+        this.growthDelegate = (farmItem) -> {
+            for (Consumer<FarmItem> customDelegate : this.customGrowthDelegates) {
+                customDelegate.accept(farmItem);
+            }
+        };
     }
 
     /**
@@ -89,6 +89,26 @@ public class FarmData {
         }
 
         return item;
+    }
+
+    /**
+     * Gives a row and column of a given item.
+     *
+     * @param item {@link FarmItem} whose position we want to know.
+     * @return {@code int[]} with the item's position (x at int[0], y at int[1]).
+     * If the item is not on the farm, {@code null} is returned.
+     */
+    public int[] positionForItem(FarmItem item) {
+        int rowIndex = 0;
+        for (ArrayList<FarmItem> row : this.items) {
+            int columnIndex = row.indexOf(item);
+            if (columnIndex < 0) {
+                rowIndex += 1;
+                continue;
+            }
+            return new int[]{rowIndex, columnIndex};
+        }
+        return null;
     }
 
     /**
@@ -152,14 +172,16 @@ public class FarmData {
      *
      * @param row Row of the {@code FarmItem}
      * @param column Column of the {@code FarmItem}
-     * @return {@code true} if the {@code FarmItem} can be picked, <br> otherwise {@code false}.
+     * @return {@link Pair} of {@link FarmItem} and {@code Boolean} -
+     * ({@code true} if fully grown, otherwise {@code false}).
+     * {@code null} if the given position is empty.
      */
-    public boolean canBePicked(int row, int column) {
+    public Pair<FarmItem, Boolean> canBePicked(int row, int column) {
         FarmItem checkingItem = this.itemAt(row, column);
         if (checkingItem == null) {
-            return false;
+            return null;
         }
-        return checkingItem.growth >= (RowGrowthComponent.GROWTH_STAGES * checkingItem.getGrowthRate());
+        return new Pair<FarmItem, Boolean>(checkingItem, checkingItem.isFullyGrown());
     }
 
     /**
@@ -170,10 +192,11 @@ public class FarmData {
      * @return Picked(= removed) {@link FarmItem} or {@code null} if nothing can be picked.
      */
     public Item pickItemAt(int row, int column) {
-        if (!this.canBePicked(row, column)) {
+        Pair<FarmItem, Boolean> farmItem = this.canBePicked(row, column);
+        if (farmItem == null || farmItem.getValue() == false) {
             return null;
         }
-        Item pickedItem = this.itemAt(row, column).get();
+        Item pickedItem = farmItem.getKey().get();
 
         // Handles oversized items
         PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
@@ -227,13 +250,22 @@ public class FarmData {
     }
 
     /**
-     * Sets a given action for the growth delegate.
-     * The action is called when any item changes its growth value.
+     * Adds a given action to the growth delegates.
+     * The action will be called when any item changes its growth value.
      *
      * @param customGrowthDelegate Action to be called when any item changes its growth value.
      */
-    public void setGrowthDelegate(Consumer<FarmItem> customGrowthDelegate) {
-        this.growthCustomDelegate = customGrowthDelegate;
+    public void addGrowthDelegate(Consumer<FarmItem> customGrowthDelegate) {
+        this.customGrowthDelegates.add(customGrowthDelegate);
+    }
+
+    /**
+     * Removes a given action from the growth delegates.
+     *
+     * @param customGrowthDelegate Action to be removed
+     */
+    public void removeGrowthDelegate(Consumer<FarmItem> customGrowthDelegate) {
+        this.customGrowthDelegates.remove(customGrowthDelegate);
     }
 
     /**

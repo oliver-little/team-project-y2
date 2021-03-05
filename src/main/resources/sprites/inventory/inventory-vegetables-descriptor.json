@@ -74,6 +74,16 @@
 			}
 		},
 		{
+			"name": "pumpkin",
+			"type": "sprite",
+			"parameters" : {
+				"x": 0,
+				"y": 96,
+				"width": 64,
+				"height": 64
+			}
+		},
+		{
 			"name": "lettuce",
 			"type": "sprite",
 			"parameters" : {

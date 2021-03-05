@@ -20,6 +20,7 @@ import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.FarmItem;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class FarmUI extends VBox implements DialogUIComponent {
 
@@ -27,6 +28,8 @@ public class FarmUI extends VBox implements DialogUIComponent {
     protected ObservableList<FarmItem> items;
 
     private Pane parent;
+
+    private Consumer<FarmItem> growthDelegate;
 
     public FarmUI(FarmData farmData, SpriteManager spriteManager) {
         super();
@@ -43,7 +46,6 @@ public class FarmUI extends VBox implements DialogUIComponent {
             }
         });
         listView.setOrientation(Orientation.VERTICAL);
-        //listView.setSelectionModel(new NoSelectionModel<FarmItem>());
         listView.setPadding(new Insets(0, 10, 10, 10));
         listView.setBackground(new Background(new BackgroundFill(Color.BEIGE, null, null)));
 
@@ -54,7 +56,10 @@ public class FarmUI extends VBox implements DialogUIComponent {
 
         Button closeButton = new Button("X");
         closeButton.setCancelButton(true);
-        closeButton.setOnAction((event) -> this.parent.getChildren().remove(this));
+        closeButton.setOnAction((event) -> {
+            this.data.removeGrowthDelegate(this.growthDelegate);
+            this.parent.getChildren().remove(this);
+        });
 
         HBox hbox = new HBox(closeButton);
         hbox.setAlignment(Pos.CENTER_RIGHT);
@@ -88,14 +93,15 @@ public class FarmUI extends VBox implements DialogUIComponent {
             }
         }
 
-        this.data.setGrowthDelegate((farmItem) -> {
+        this.growthDelegate = (farmItem) -> {
             Platform.runLater(() -> {
                 int itemIndex = itemList.indexOf(farmItem);
                 if (itemIndex >= 0) {
                     itemList.set(itemIndex, farmItem);
                 }
             });
-        });
+        };
+        this.data.addGrowthDelegate(this.growthDelegate);
 
         return itemList;
     }

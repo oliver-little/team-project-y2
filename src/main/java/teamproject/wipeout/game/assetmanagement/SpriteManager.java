@@ -62,7 +62,7 @@ public class SpriteManager {
      */
     public Image[] getSpriteSet(String spriteSheetName, String spriteSetName) throws FileNotFoundException {
         if (!spriteSheetCache.containsKey(spriteSheetName)) {
-            throw new FileNotFoundException("Sprite sheet not loaded.");
+            throw new FileNotFoundException("Sprite sheet not loaded: " + spriteSheetName + " " + spriteSetName);
         }
 
         Map<String, Image[]> spriteSheet = spriteSheetCache.get(spriteSheetName);

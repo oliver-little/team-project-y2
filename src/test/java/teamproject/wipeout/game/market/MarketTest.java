@@ -15,12 +15,12 @@ public class MarketTest {
 
     @BeforeAll
     public static void initialization() {
-        itemStore = assertDoesNotThrow(() -> new ItemStore("items.json"));
+        itemStore = assertDoesNotThrow(() -> new ItemStore("marketitemstest.json"));
     }
 
     @BeforeEach
     public void setup() {
-        market = assertDoesNotThrow(() -> new Market(itemStore.getData()));
+        market = assertDoesNotThrow(() -> new Market(itemStore));
     }
     
     @Test

@@ -1,6 +1,7 @@
 package teamproject.wipeout.game.entity;
 
 import javafx.geometry.Point2D;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
@@ -9,13 +10,17 @@ import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.game.entity.FarmEntity;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.game.market.entity.MarketEntity;
+import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.item.ItemStore;
 
 public class WorldEntity extends GameEntity
 {
 
-	public WorldEntity(GameScene gameScene, int numberOfPlayers)
+	public WorldEntity(GameScene gameScene, int numberOfPlayers, ItemStore itemStore, Player player, SpriteManager spriteManager, StackPane uiContainer)
 	{
 		super(gameScene);
 		gameScene.addEntity(this);
@@ -55,15 +60,15 @@ public class WorldEntity extends GameEntity
 		//TreeEntity tree = new TreeEntity(gameScene, new Point2D(40,40));
 		//TreeEntity tree2 = new TreeEntity(gameScene, new Point2D(20,20));
 		
-		
+		FarmEntity farmEntity = new FarmEntity(gameScene, new Point2D(50, 50), 1, spriteManager, itemStore);
 		if(numberOfPlayers==4) {
-			FarmEntity farmEntity = new FarmEntity(gameScene, new Point2D(50, 50));
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, new Point2D(500, 50));
-			FarmEntity farmEntity3 = new FarmEntity(gameScene, new Point2D(50, 400));
-			FarmEntity farmEntity4 = new FarmEntity(gameScene, new Point2D(500, 400));
+			//FarmEntity farmEntity = new FarmEntity(gameScene, new Point2D(50, 50), 1, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, new Point2D(500, 50), 2, spriteManager, itemStore);
+			FarmEntity farmEntity3 = new FarmEntity(gameScene, new Point2D(50, 400), 3, spriteManager, itemStore);
+			FarmEntity farmEntity4 = new FarmEntity(gameScene, new Point2D(500, 400), 4, spriteManager, itemStore);
 		}
 		
-		MarketEntity market = new MarketEntity(gameScene, 400, 300);
+		MarketEntity market = new MarketEntity(gameScene, 260, 200, itemStore, player, spriteManager, uiContainer);
 
 		
 

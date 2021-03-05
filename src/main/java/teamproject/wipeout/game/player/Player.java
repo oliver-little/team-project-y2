@@ -4,11 +4,13 @@ import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.game.market.MarketItem;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.market.Market;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class Player extends GameEntity {
     public Integer playerID;
@@ -21,6 +23,8 @@ public class Player extends GameEntity {
 
     private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
+    private SignatureEntityCollector pickableCollector;
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -31,39 +35,48 @@ public class Player extends GameEntity {
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = 0.0;
+
+        this.pickableCollector = new SignatureEntityCollector(this.scene, Set.of(PickableComponent.class, HitboxComponent.class));
     }
 
     // When called with a market item, purchases an item for a player and returns true,
     // otherwise if player has not enough money, returns false
-    public boolean buyItem(MarketItem item) {
-        if (item.getCurrentBuyPrice() > this.money) {
+    public boolean buyItem(Market market, int id, int quantity) {
+        if (market.calculateTotalCost(id, quantity, true) > this.money) {
             return false;
         }
-        this.money -= item.getCurrentBuyPrice();
-        this.acquireItem(item.getID());
+        this.money -= market.buyItem(id, quantity);
+        this.acquireItem(id, quantity);
         return true;
     }
 
     // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
     // if the player does not have the item return false
-    public boolean sellItem(MarketItem item) {
-        if (removeItem(item.getID())) {
-            this.money += item.getCurrentSellPrice();
+    public boolean sellItem(Market market, int id, int quantity) {
+        if (removeItem(id, quantity)) {
+            this.money += market.sellItem(id, quantity);
             return true;
         }
         return false;
     }
 
     // Adds an item to inventory
-    public void acquireItem(Integer itemID) {
+    public void acquireItem(int itemID) {
         inventory.putIfAbsent(itemID, 0);
         inventory.put(itemID, inventory.get(itemID) + 1);
         System.out.println("Acquired itemID: " + itemID);
     }
 
+    // Adds a given quantity of an item to the inventory
+    public void acquireItem(int itemID, int quantity) {
+        inventory.putIfAbsent(itemID, 0);
+        inventory.put(itemID, inventory.get(itemID) + quantity);
+        System.out.println("Acquired " + quantity + " of itemID " + itemID);
+    }
+
     // removes a SINGLE copy of an item from the players backpack and returns true
     // if player does not have the item, returns false;
-    public boolean removeItem(Integer itemID) {
+    public boolean removeItem(int itemID) {
         if (this.inventory.containsKey(itemID)) {
             int count = this.inventory.get(itemID);
             if (count <= 1){
@@ -78,12 +91,32 @@ public class Player extends GameEntity {
         return false;
     }
 
+    // Removes a given quantity of an item from the player's backpack and returns true
+    // Returns false if the player doesn't have the item or have enough of the item
+    public boolean removeItem(int itemID, int quantity) {
+        if (this.inventory.containsKey(itemID)) {
+            int count = this.inventory.get(itemID);
+            if (count < quantity) {
+                return false;
+            }
+            else if (count == quantity) {
+                this.inventory.remove(itemID);
+            }
+            else {
+                this.inventory.put(itemID, count - quantity);
+            }
+            return true;
+        }
+        return false;
+    }
+
     public LinkedHashMap<Integer, Integer> getInventory() {
         return inventory;
     }
 
     // Scan all entities for items the player is standing over, and pick them up, and delete them from the map
-    public void pickup(List<GameEntity> entities){
+    public void pickup() {
+        List<GameEntity> entities = this.pickableCollector.getEntities();
         List<GameEntity> removedItems = new ArrayList<>();
         for (GameEntity ge: entities){
             // Check if entity is an item

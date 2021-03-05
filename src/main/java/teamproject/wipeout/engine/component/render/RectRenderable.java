@@ -68,14 +68,6 @@ public class RectRenderable implements Renderable {
         gc.fillRoundRect(xCoordinate, yCoordinate, this.width * scale, this.height * scale, this.radius, this.radius);
 
         gc.setGlobalAlpha(defaultAlpha);
-
-      
-        if (scale != 1) {
-            gc.fillRect((x + offset.getX()) * scale, (y + offset.getY()) * scale, this.width * scale, this.height * scale);
-        }
-        else {
-            gc.fillRect(x + offset.getX(), y + offset.getY(), this.width, this.height);
-        }
-
     }
+
 }
