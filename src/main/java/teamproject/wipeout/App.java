@@ -220,12 +220,8 @@ public class App implements Controller {
 
         // Tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
-
-        ArrayList<Task> playerTasks = new ArrayList<>();
-        for(int i = 0; i < 10; i++) {
-            playerTasks.add(allTasks.get(i));
-        }
-        player.tasks = playerTasks;
+//        ArrayList<Task> playerTasks = new ArrayList<>();
+        player.tasks = allTasks;
 
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
@@ -306,15 +302,15 @@ public class App implements Controller {
 
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
-        for(int i = 0; i < 50; i++) {
-            itemIds.add(i);
-        }
+        itemIds.add(2);
+        itemIds.add(6);
 
-        // Collect tasks
+        int nrOfTask = 0;
+        // Collect taskk
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
-            Task currentTask =  new Task("Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, 5 * quantityCollected,
                     (Player inputPlayer) ->
                     {
                         LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();
@@ -322,19 +318,21 @@ public class App implements Controller {
                     }
             );
             tasks.add(currentTask);
+            nrOfTask += 1;
         }
 
         // Sell tasks
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task("Sell " + quantitySold + " " + name, 10 * quantitySold,
+            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, 10 * quantitySold,
                     (Player inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
                     }
             );
             tasks.add(currentTask);
+            nrOfTask += 1;
         }
 
         return tasks;
