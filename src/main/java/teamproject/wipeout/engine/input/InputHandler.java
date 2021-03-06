@@ -7,7 +7,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * InputHandler is a class for dealing with the keyboard and mouse input of a given {@code Scene}.
@@ -24,6 +26,9 @@ public class InputHandler {
     // Set of keys that are being pressed at a certain point in time.
     // Used to prevent repeated performKeyAction calls.
     private final HashSet<KeyCode> performingKeyActions;
+
+    // Set of key release bindings, used to simulate keys releasing when input is disabled.
+    private HashMap<KeyCode, Set<InputKeyAction>> keyReleaseBindings;
 
     // Control variable used to track mouse dragging.
     // Prevents all mouse click actions while the mouse is being dragged.
@@ -42,6 +47,7 @@ public class InputHandler {
         this.disableInput = false;
 
         this.performingKeyActions = new HashSet<KeyCode>();
+        this.keyReleaseBindings = new HashMap<>();
         this.isDragging = null;
 
         this.onMouseClickExists = false;
@@ -63,6 +69,14 @@ public class InputHandler {
     public void setDisableInput(boolean disabled) {
         this.disableInput = disabled;
         if (disabled) {
+            // Simulate all keys releasing
+            for (KeyCode key : this.performingKeyActions) {
+                for (InputKeyAction action : this.keyReleaseBindings.get(key)) {
+                    action.performKeyAction();
+                }
+            }
+
+            // Clear existing 
             this.performingKeyActions.clear();
             this.isDragging = null;
         }
@@ -107,6 +121,12 @@ public class InputHandler {
      */
     public void onKeyRelease(KeyCode key,
                              InputKeyAction onRelease) {
+
+        if (!this.keyReleaseBindings.containsKey(key)) {
+            this.keyReleaseBindings.put(key, new HashSet<>());
+        }
+        this.keyReleaseBindings.get(key).add(onRelease);
+
         // Register inputScene's listener
         this.inputScene.addEventFilter(KeyEvent.KEY_RELEASED, (releasedKey) -> {
             // Do nothing when input is disabled.

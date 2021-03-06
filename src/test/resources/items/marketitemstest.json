@@ -82,7 +82,7 @@
       "name": "Potato",
       "components" : {
         "InventoryComponent" : {
-          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "potato",
           "stackSizeLimit" : 99
         },
