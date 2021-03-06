@@ -1,16 +1,15 @@
 package teamproject.wipeout.game.market.ui;
 
-import java.util.function.UnaryOperator;
-
 import javafx.beans.binding.Bindings;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.util.converter.IntegerStringConverter;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
@@ -25,21 +24,38 @@ public class MarketItemUI extends VBox {
     public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
+        this.getStyleClass().add("vbox");
+        this.setPrefWidth(300);
+
         InventoryComponent ic = item.getComponent(InventoryComponent.class);
 
         HBox titleLayout = new HBox();
+        titleLayout.setAlignment(Pos.CENTER);
+
+        titleLayout.getStyleClass().add("hbox");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         ImageView iconView = null;
         try {
             iconView = new ImageView(spriteManager.getSpriteSet(ic.spriteSheetName, ic.spriteSetName)[0]);
+            iconView.setFitWidth(48);
+            iconView.setFitHeight(48);
+            iconView.setSmooth(false);
+            iconView.setPreserveRatio(true);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         Label title = new Label(item.name);
-        titleLayout.getChildren().addAll(iconView, title);
+        titleLayout.getChildren().addAll(iconView, spacer, title);
 
         HBox buySellLayout = new HBox();
+        buySellLayout.setAlignment(Pos.CENTER);
+        buySellLayout.setSpacing(20);
+
         Spinner<Integer> quantity = new Spinner<Integer>(1, item.getComponent(InventoryComponent.class).stackSizeLimit, 1, 1);
 
         // Make spinner editable and only allow number input
@@ -48,17 +64,19 @@ public class MarketItemUI extends VBox {
             if (!newValue.matches("\\d*")) {
                 quantity.getEditor().setText(oldValue);
             }
-            else if (newValue == null) {
-                quantity.getEditor().setText("1");
+            else if (newValue.equals("")) {
+                quantity.getEditor().setText(oldValue);
             }
         });
 
         MarketItem marketItem = market.stockDatabase.get(item.id);
 
         Button buy = new Button();
+        buy.setPrefWidth(75);
+
         // Set button text to update with quantity and buy price changes
-        buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createDoubleBinding(() -> {
-            return (double) Math.round(market.calculateTotalCost(item.id, quantity.valueProperty().get(), true) * 100d) / 100d;
+        buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createStringBinding(() -> {
+            return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), true)));
         }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
 
         // Set buy click event
@@ -67,10 +85,11 @@ public class MarketItemUI extends VBox {
         });
 
         Button sell = new Button();
+        sell.setPrefWidth(75);
 
         // Set sell price to update with quantity and sell price changes
-        sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createDoubleBinding(() -> {
-            return (double) Math.round(market.calculateTotalCost(item.id, quantity.valueProperty().get(), false) * 100d) / 100d;
+        sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
+            return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
         }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
 
         // Set sell click event

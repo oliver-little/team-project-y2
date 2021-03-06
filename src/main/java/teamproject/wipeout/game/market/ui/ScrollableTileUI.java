@@ -2,7 +2,6 @@ package teamproject.wipeout.game.market.ui;
 
 import java.util.Collection;
 
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
