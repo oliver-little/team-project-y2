@@ -6,6 +6,10 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.EntityClickAction;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.physics.Shape;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
@@ -38,6 +42,17 @@ public class MarketEntity extends GameEntity {
             exception.printStackTrace();
         }
         this.addComponent(new Clickable(this.onClick));
+        
+        Shape[] hitboxes = {
+        		new Rectangle(6,44,91,96),
+        		new Rectangle(96,20,34,113),
+        		new Rectangle(128,12,64,120),
+        		new Rectangle(192,45,63,96)
+        		
+        };
+        this.addComponent(new HitboxComponent(hitboxes));
+        this.addComponent(new CollisionResolutionComponent(false));
+        
 
         market = new Market(items);
 
