@@ -287,7 +287,7 @@ public class App implements Controller {
         }
 
 
-    	WorldEntity world = new WorldEntity(gameScene,4 , itemStore, player, spriteManager, this.interfaceOverlay);
+    	WorldEntity world = new WorldEntity(gameScene, 4, itemStore, player, spriteManager, this.interfaceOverlay, input);
 
 
         // Create tasks
@@ -370,32 +370,6 @@ public class App implements Controller {
         //farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
 
         item = itemStore.getItem(28);
-
-        input.onKeyRelease(KeyCode.A, () -> {
-            try {
-                if (farmEntity.isPickingItem()) {
-                    farmEntity.stopPickingItem();
-                }
-                if (farmEntity.isPlacingItem()) {
-                    farmEntity.stopPlacingItem();
-                } else {
-                    farmEntity.startPlacingItem(item, mhs.getCurrentMousePosition());
-                }
-            } catch (FileNotFoundException exception) {
-                exception.printStackTrace();
-            }
-        });
-
-        input.onKeyRelease(KeyCode.H, () -> {
-            if (farmEntity.isPlacingItem()) {
-                farmEntity.stopPlacingItem();
-            }
-            if (farmEntity.isPickingItem()) {
-                farmEntity.stopPickingItem();
-            } else {
-                farmEntity.startPickingItem(mhs.getCurrentMousePosition());
-            }
-        });
 
         gl.start();
     }

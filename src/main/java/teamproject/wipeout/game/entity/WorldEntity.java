@@ -11,6 +11,7 @@ import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
@@ -20,7 +21,7 @@ import teamproject.wipeout.game.item.ItemStore;
 public class WorldEntity extends GameEntity
 {
 
-	public WorldEntity(GameScene gameScene, int numberOfPlayers, ItemStore itemStore, Player player, SpriteManager spriteManager, StackPane uiContainer)
+	public WorldEntity(GameScene gameScene, int numberOfPlayers, ItemStore itemStore, Player player, SpriteManager spriteManager, StackPane uiContainer, InputHandler input)
 	{
 		super(gameScene);
 		gameScene.addEntity(this);
@@ -61,6 +62,7 @@ public class WorldEntity extends GameEntity
 		//TreeEntity tree2 = new TreeEntity(gameScene, new Point2D(20,20));
 		
 		FarmEntity farmEntity = new FarmEntity(gameScene, new Point2D(50, 50), 1, spriteManager, itemStore);
+		
 		if(numberOfPlayers==4) {
 			//FarmEntity farmEntity = new FarmEntity(gameScene, new Point2D(50, 50), 1, spriteManager, itemStore);
 			FarmEntity farmEntity2 = new FarmEntity(gameScene, new Point2D(500, 50), 2, spriteManager, itemStore);
@@ -69,8 +71,8 @@ public class WorldEntity extends GameEntity
 		}
 		
 		MarketEntity market = new MarketEntity(gameScene, 260, 200, itemStore, player, spriteManager, uiContainer);
-        //market.setOnUIOpen(() -> input.setDisableInput(true));
-        //market.setOnUIClose(() -> input.setDisableInput(false));
+        market.setOnUIOpen(() -> input.setDisableInput(true));
+        market.setOnUIClose(() -> input.setDisableInput(false));
 		
 
 
