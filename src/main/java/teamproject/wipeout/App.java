@@ -22,8 +22,8 @@ import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
-import teamproject.wipeout.engine.component.render.InventoryRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -143,6 +143,18 @@ public class App implements Controller {
 
         player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
         player.addComponent(new CollisionResolutionComponent());
+        
+        player.acquireItem(6, 98); //for checking stack/inventory limits
+        player.acquireItem(1, 1); 
+        player.acquireItem(2, 98); 
+        player.acquireItem(3, 1); 
+        player.acquireItem(4, 1); 
+        player.acquireItem(5, 1); 
+        player.acquireItem(7, 1); 
+        player.acquireItem(8, 1); 
+        player.acquireItem(9, 1); 
+        
+        
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom; 
         RenderComponent targetRC = player.getComponent(RenderComponent.class);
@@ -200,16 +212,16 @@ public class App implements Controller {
         	InventoryComponent invComponent = potatoItem.getComponent(InventoryComponent.class);
         	System.out.println("potato: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
             frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
-            potato.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-            potato2.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-            potato3.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-            potato4.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            potato.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato2.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato3.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            potato4.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
             
             invComponent = lettuceItem.getComponent(InventoryComponent.class);
             System.out.println("lettuce: sheet, set: " + invComponent.spriteSheetName + ", " +invComponent.spriteSetName);
             frames = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
-            lettuce.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
-            lettuce2.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            lettuce.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
+            lettuce2.addComponent(new RenderComponent(new SpriteRenderable(frames[0])));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,7 +295,7 @@ public class App implements Controller {
 	            try
 				{
 					Image[] images = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
-					e.addComponent(new RenderComponent(new AnimatedSpriteRenderable(images, 10)));
+					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));
 				}
 				catch (FileNotFoundException e1)
 				{

@@ -20,7 +20,6 @@ import teamproject.wipeout.engine.component.physics.HitboxComponent;
 //import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
-import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
@@ -34,7 +33,7 @@ public class InventoryEntity{
 	Group root;
 	
 	public static int MAX_SIZE = 10;
-	private ItemStore itemStore;
+	public ItemStore itemStore;
 	
 	SpriteManager spriteManager;
 	
@@ -53,6 +52,11 @@ public class InventoryEntity{
 		
 	}
 	
+	/**
+	 * Used to update the UI when a change is made (called by Player class).
+	 * @param items updated inventory arraylist
+	 * @param index slot where change happened so only one slot needs to be updated.
+	 */
 	public void updateUI(ArrayList<invPair> items, Integer index) {
 		if(items.get(index) != null) {
 			Item item = itemStore.getItem(items.get(index).itemID);
@@ -63,7 +67,7 @@ public class InventoryEntity{
 			{
 				frame = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
 				spriteViews[index].setImage(frame);
-				spriteViews[index].setX(64*index + (32 - frame.getWidth()/2));
+				spriteViews[index].setX(67*index + (32 - frame.getWidth()/2));
 				spriteViews[index].setY(32 - frame.getHeight()/2);
 				
 			}
@@ -78,16 +82,27 @@ public class InventoryEntity{
 		}
 		
 	}
+	
+	/**
+	 * @return array of rectangles (e.g. for adding action listeners to)
+	 */
 	public Rectangle[] getRectangles() {
 		return rectangles;
 	}
 	
+	/**
+	 * highlights selected slot (changes border colour)
+	 * @param slot index of slot to be selected
+	 */
 	public void selectSlot(int slot) {
 		rectangles[this.currentSelection].setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 		this.currentSelection = slot;
 		rectangles[slot].setStyle("-fx-stroke: red; -fx-stroke-width: 3;");
 	}
 	
+	/**
+	 * creates squares for inventory slots, and adds ImageViews ready for sprite frames
+	 */
 	private void createSquares() {
 		for(int i = 0; i < MAX_SIZE ; i++) {
 			
@@ -107,6 +122,9 @@ public class InventoryEntity{
 		}
 	}
 	
+	/**
+	 * Creates text nodes ready to display quantities in the inventory
+	 */
 	private void createTexts() {
 		for(int i = 0; i < MAX_SIZE; i++) {
 			Text text = new Text("");
@@ -119,10 +137,12 @@ public class InventoryEntity{
 		}
 	}
 	
+	/*
 	public Image getSquare() throws IOException {
 		this.spriteManager.loadSpriteSheet("tile-descriptor.json", "tile.png");
 		return this.spriteManager.getSpriteSet("tile", "tile1")[0];
 		
 	}
+	*/
 	
 }
