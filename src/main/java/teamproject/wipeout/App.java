@@ -6,7 +6,6 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
@@ -20,7 +19,6 @@ import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
-import teamproject.wipeout.engine.component.render.AnimatedSpriteRenderable;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -38,7 +36,6 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
-import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
@@ -48,6 +45,7 @@ import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.InventoryUI;
+import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
 import teamproject.wipeout.game.task.Task;
@@ -112,6 +110,7 @@ public class App implements Controller {
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(new ScriptSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -217,7 +216,11 @@ public class App implements Controller {
         }
 
         //MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
-        
+        //marketStall.setOnUIOpen(() -> input.setDisableInput(true));
+        //marketStall.setOnUIClose(() -> input.setDisableInput(false));
+
+        //Uncomment to turn on automatic price changes in the market.
+        //new MarketPriceUpdater(marketStall.getMarket());
 
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();

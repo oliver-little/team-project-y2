@@ -69,7 +69,8 @@ public class WorldEntity extends GameEntity
 		}
 		
 		MarketEntity market = new MarketEntity(gameScene, 260, 200, itemStore, player, spriteManager, uiContainer);
-
+        //market.setOnUIOpen(() -> input.setDisableInput(true));
+        //market.setOnUIClose(() -> input.setDisableInput(false));
 		
 
 

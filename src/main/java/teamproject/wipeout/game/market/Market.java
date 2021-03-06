@@ -20,8 +20,6 @@ public class Market {
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
      */
     public Market(ItemStore itemsForSale) {
-        //TODO Add sabotage and task support.
-        //TODO Link with systems to reduce quantities over time.
 
         this.itemsForSale = itemsForSale;
 

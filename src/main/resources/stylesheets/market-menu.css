@@ -6,7 +6,7 @@
 
 .tab-pane .tab
 {
-    -fx-background-color: #DDD;
+    -fx-background-color: rgba(194, 194, 194, 0.8);
     -fx-background-radius: 5px 5px 0 0;
     -fx-background-insets: 1 0 0 0;
 
@@ -19,11 +19,19 @@
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: rgb(255, 223, 162);
+    -fx-background-color: rgba(255, 205, 112, 0.8);
     -fx-border-radius: 4px 4px 0 0;
     -fx-border-width: 1 1 0 1;
     -fx-border-radius: 5px 5px 0 0;
     -fx-border-color: #333;
+}
+
+.tab-pane .tab:hover:selected {
+    -fx-background-color: rgba(255, 205, 112, 0.8);
+}
+
+.tab-pane .tab:hover {
+    -fx-background-color: rgba(216, 215, 215, 0.8);
 }
 
 .tab-pane .tab .tab-label { 
@@ -31,28 +39,70 @@
     -fx-font-size: 12pt;
 }
 
+.label {
+    -fx-font-family: 'Kalam';
+    -fx-font-size: 16pt;
+    -fx-padding: 0 15 0 0;
+}
+
 .tab-pane .tab-header-area .tab-header-background {
     -fx-background-color: transparent;
 }
 
 .tab-pane .tab-content-area {
-    -fx-background-color: rgb(255, 223, 162);
+    -fx-background-color: rgba(255, 205, 112, 0.8);
     -fx-background-radius: 2px;
-
     -fx-border-color: #333;
     -fx-border-width: 1;
     -fx-border-radius: 2px;
 }
 
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .track {
+    -fx-opacity: 0.8;
+}
+
+.scroll-pane .scroll-bar {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.8;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.tile-pane {
+    -fx-background-color: transparent;
+}
+
 .button {
-    -fx-background-color: #DDD;
-    -fx-border-radius: 2px;
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-border-color: rgb(0, 0, 0);
+    -fx-border-radius: 2px;  
 }
 
 .button:hover {
-    -fx-background-color:rgb(255, 223, 162);
+    -fx-background-color:rgba(216, 216, 216, 0.8);
 }
 
 .button:pressed {
-    -fx-background-color:rgb(255, 205, 112);
+    -fx-background-color:rgba(172, 172, 172, 0.8);
+}
+
+.spinner {
+    -fx-pref-width: 55px;
+}
+
+.vbox {
+    -fx-background-color:rgba(255, 255, 255, 0.9);
+    -fx-border-radius: 5px;
+    -fx-border-color: rgba(0, 0, 0, 0.9);
+    -fx-padding: 10 5 20 5;
+}
+
+.hbox {
+    -fx-padding: 0 10 15 10;
 }
