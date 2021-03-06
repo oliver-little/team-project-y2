@@ -4,16 +4,6 @@
 	"name": "inventory-fruit-and-vegetable",
 	"sprites": [
 		{
-			"name": "potato",
-			"type": "sprite",
-			"parameters" : {
-				"x": 0,
-				"y": 0,
-				"width": 32,
-				"height": 32
-			}
-		},
-		{
 			"name": "leek",
 			"type": "sprite",
 			"parameters" : {
