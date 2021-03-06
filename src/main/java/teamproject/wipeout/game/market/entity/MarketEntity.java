@@ -28,7 +28,7 @@ public class MarketEntity extends GameEntity {
 
         this.addComponent(new Transform(x, y));
         try {
-            spriteManager.loadSpriteSheet("market-descriptor.json", "market.png");
+            spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             this.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getSpriteSet("market", "market")[0])));
         }
         catch (Exception exception) {
