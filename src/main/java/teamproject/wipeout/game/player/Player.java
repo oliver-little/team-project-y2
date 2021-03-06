@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import teamproject.wipeout.game.task.Task;
 import java.util.Set;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {

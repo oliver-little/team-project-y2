@@ -1,11 +1,13 @@
 package teamproject.wipeout;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
@@ -13,16 +15,18 @@ import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.CameraComponent;
-import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
@@ -34,6 +38,9 @@ import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.entity.MoneyEntity;
+import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
@@ -67,6 +74,7 @@ public class App implements Controller {
     private SpriteManager spriteManager;
 
     TaskEntity taskEntity;
+    MoneyEntity moneyEntity;
 
     // Store systems for cleanup
     Networker networker;
@@ -123,7 +131,7 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(inventory, spriteManager, itemStore);
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
-        
+
         player.acquireItem(6, 98); //for checking stack/inventory limits
         player.acquireItem(1, 2);
         player.acquireItem(28, 98);
@@ -161,7 +169,10 @@ public class App implements Controller {
 
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
+        // Money icon
+        moneyEntity = new MoneyEntity(gameScene, 10, 400, player);
         gameScene.entities.add(taskEntity);
+        gameScene.entities.add(moneyEntity);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -197,7 +208,9 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   taskEntity.showTasks(player.tasks); },
+                	   taskEntity.showTasks(player.tasks);
+                	   moneyEntity.showMoney(player.money);
+                	   },
                 () -> {});
 
         gl.start();
@@ -283,16 +296,4 @@ public class App implements Controller {
             }
         }
     }
-
-    private void loadSpriteSheets() throws IOException {
-        spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
-        spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
-        spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
-        spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
-        spriteManager.loadSpriteSheet("inventory/inventory-tools-descriptor.json", "inventory/Tools.png");
-        spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
-        spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
-        spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
-    }
-
 }
