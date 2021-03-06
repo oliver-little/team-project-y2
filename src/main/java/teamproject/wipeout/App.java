@@ -287,7 +287,7 @@ public class App implements Controller {
         }
 
 
-    	WorldEntity world = new WorldEntity(gameScene, 4, itemStore, player, spriteManager, this.interfaceOverlay, input);
+    	WorldEntity world = new WorldEntity(gameScene,windowWidth,windowHeight, 2, itemStore, player, spriteManager, this.interfaceOverlay, input);
 
 
         // Create tasks
