@@ -105,6 +105,7 @@ public class App implements Controller {
         systemUpdater.addSystem(new AudioSystem(gameScene));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(new ScriptSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -165,7 +166,11 @@ public class App implements Controller {
             exception.printStackTrace();
         }
         MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
-        //new MarketPriceUpdater(marketStall.getMarket()); - Uncomment to turn on automatic price changing in the market.
+        marketStall.setOnUIOpen(() -> input.setDisableInput(true));
+        marketStall.setOnUIClose(() -> input.setDisableInput(false));
+
+        //Uncomment to turn on automatic price changes in the market.
+        //new MarketPriceUpdater(marketStall.getMarket());
 
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
