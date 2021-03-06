@@ -8,10 +8,15 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
 import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.market.Market;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import teamproject.wipeout.game.task.Task;
+import java.util.Set;
 
 public class Player extends GameEntity {
     public Integer playerID;
@@ -30,6 +35,12 @@ public class Player extends GameEntity {
     private ArrayList<invPair> inventory = new ArrayList<>(); //ArrayList used to store inventory
     //private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
+    public Integer size;
+
+    public ArrayList<Task> tasks;
+
+    private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
+    private SignatureEntityCollector pickableCollector;
     /**
      * Creates a new instance of GameEntity
      *
@@ -42,30 +53,42 @@ public class Player extends GameEntity {
         this.money = 0.0;
         this.occupiedSlots = 0;
         this.invUI = invUI;
-        this.itemStore = itemStore;
         for (int i = 0; i < MAX_SIZE; i++) {
         	inventory.add(null);
         }
         selectSlot(0);
-        
+        this.pickableCollector = new SignatureEntityCollector(this.scene, Set.of(PickableComponent.class, HitboxComponent.class));
     }
 
     // When called with a market item, purchases an item for a player and returns true,
     // otherwise if player has not enough money, returns false
-    public boolean buyItem(MarketItem item) {
-        if (item.getCurrentBuyPrice() > this.money) {
+    public boolean buyItem(Market market, int id, int quantity) {
+        if (market.calculateTotalCost(id, quantity, true) > this.money) {
             return false;
         }
-        this.money -= item.getCurrentBuyPrice();
-        this.acquireItem(item.getID());
+        this.money -= market.buyItem(id, quantity);
+        this.acquireItem(id, quantity);
+        return true;
+    }
+
+    // if you want to purchase some task from the market
+    public boolean buyTask(Task task) {
+        if(task.priceToBuy > this.money) {
+            return false;
+        }
+        tasks.add(task);
+        this.money -= task.priceToBuy;
         return true;
     }
 
     // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
     // if the player does not have the item return false
-    public boolean sellItem(MarketItem item) {
-        if (removeItem(item.getID(), 1)) {
-            this.money += item.getCurrentSellPrice();
+    public boolean sellItem(Market market, int id, int quantity) {
+        if (removeItem(id, quantity)) {
+            this.money += market.sellItem(id, quantity);
+            this.soldItems.putIfAbsent(id, 0);
+            this.soldItems.put(id, this.soldItems.get(id) + 1);
+            checkTasks();
             return true;
         }
         return false;
@@ -234,11 +257,26 @@ public class Player extends GameEntity {
     	}
     }
 
+    public int containsItem(Integer itemID) {
+    	int i = 0;
+    	for(invPair pair : inventory) {
+    		if((pair != null ) && (pair.itemID == itemID)) {
+    			return i;
+    		}
+    		i++;
+    	}
+    	return -1;
+    }
+
+    public LinkedHashMap<Integer, Integer> getSoldItems() {
+        return soldItems;
+    }
+
     /**
      * Scan all entities for items the player is standing over, and pick them up, and delete them from the map
-     * @param entities list of entities in the map
      */
-    public void pickup(List<GameEntity> entities){
+    public void pickup() {
+        List<GameEntity> entities = this.pickableCollector.getEntities();
         List<GameEntity> removedItems = new ArrayList<>();
         for (GameEntity ge: entities){
             // Check if entity is pickable
@@ -258,8 +296,35 @@ public class Player extends GameEntity {
             entities.remove(ge);
             ge.destroy();
         }
-
         //System.out.println("Inventory itemID to count:" + this.getInventory().toString());
         //printInventory();
+        this.checkTasks();
+        System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+    }
+
+    //check what tasks have been completed
+    public void checkTasks() {
+        for(Task task : tasks) {
+            if(task.completed) {
+                continue;
+            }
+            if(task.condition.apply(this)) {
+                task.completed = true;
+                this.money += task.reward;
+                System.out.println("Task completed");
+            }
+        }
+    }
+
+    // get number of completed tasks
+    // in the future we can check when all tasks have been completed, to always add new ones
+    public int getNumberOfCompletedTasks() {
+        int completedTasks = 0;
+        for(Task task : tasks) {
+            if(task.completed) {
+                completedTasks += 1;
+            }
+        }
+        return completedTasks;
     }
 }

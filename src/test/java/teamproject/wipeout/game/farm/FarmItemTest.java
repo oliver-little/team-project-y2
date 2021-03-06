@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -68,8 +67,8 @@ class FarmItemTest {
 
     @Test
     void testCurrentGrowthPercentage() {
-        double growthRate = item.getComponent(PlantComponent.class).growthRate;
-        double maxGrowth = RowGrowthComponent.GROWTH_STAGES * growthRate;
+        PlantComponent plant = item.getComponent(PlantComponent.class);
+        double maxGrowth = plant.maxGrowthStage * plant.growthRate;
         int expectedPercentage = (int) ((GROWTH / maxGrowth) * 100);
 
         Assertions.assertEquals(expectedPercentage, farmItem.getCurrentGrowthPercentage());

@@ -15,7 +15,7 @@ public class MarketTest {
 
     @BeforeAll
     public static void initialization() {
-        itemStore = assertDoesNotThrow(() -> new ItemStore("items.json"));
+        itemStore = assertDoesNotThrow(() -> new ItemStore("marketitemstest.json"));
     }
 
     @BeforeEach

@@ -87,7 +87,7 @@ public class FarmRenderer implements Renderable {
      * @throws IOException If the sprite does not exist.
      */
     protected Image getFarmTile(String tile) throws IOException {
-        this.spriteManager.loadSpriteSheet("soil-descriptor.json", "soil.png");
+        this.spriteManager.loadSpriteSheet("gameworld/soil-descriptor.json", "gameworld/soil.png");
         return this.spriteManager.getSpriteSet("soil", tile)[0];
     }
 

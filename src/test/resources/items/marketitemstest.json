@@ -22,7 +22,7 @@
       "name": "Lettuce",
       "components" : {
         "InventoryComponent" : {
-          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "lettuce",
           "stackSizeLimit" : 99
         },
@@ -112,7 +112,7 @@
       "name": "Broccoli",
       "components" : {
         "InventoryComponent" : {
-          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "broccoli",
           "stackSizeLimit" : 99
         },
@@ -142,7 +142,7 @@
       "name": "Pumpkin",
       "components" : {
         "InventoryComponent" : {
-          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "pumpkin",
           "stackSizeLimit" : 99
         },
@@ -157,7 +157,7 @@
       "name": "Cauliflower",
       "components" : {
         "InventoryComponent" : {
-          "spriteSheetName" : "inventory-fruit-and-vegetable",
+          "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "cauliflower",
           "stackSizeLimit" : 99
         },

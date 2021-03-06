@@ -63,8 +63,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "tomato",
-          "growthRate" : 3.00,
-          "grownItemID" : 1
+          "grownItemID" : 1,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -84,8 +85,9 @@
         "PlantComponent" : {
           "spriteSheetName" : "crops",
           "spriteSetName" : "lettuce",
-          "growthRate" : 3.00,
-          "grownItemID" : 2
+          "grownItemID" : 2,
+          "maxGrowthStage" : 3,
+          "growthRate" : 3.00
         }
       }
     },
@@ -105,10 +107,11 @@
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "apple-tree",
+          "grownItemID" : 15,
+          "maxGrowthStage" : 4,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2,
-          "grownItemID" : 15
+          "height": 2
         }
       }
     }

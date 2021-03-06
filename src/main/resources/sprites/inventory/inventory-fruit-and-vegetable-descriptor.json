@@ -4,10 +4,40 @@
 	"name": "inventory-fruit-and-vegetable",
 	"sprites": [
 		{
-			"name": "potato",
+			"name": "lettuce",
 			"type": "sprite",
 			"parameters" : {
-				"x": 0,
+				"x": 32,
+				"y": 160,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "broccoli",
+			"type": "sprite",
+			"parameters" : {
+				"x": 480,
+				"y": 160,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "cauliflower",
+			"type": "sprite",
+			"parameters" : {
+				"x": 448,
+				"y": 160,
+				"width": 32,
+				"height": 32
+			}
+		},
+		{
+			"name": "pumpkin",
+			"type": "sprite",
+			"parameters" : {
+				"x": 896,
 				"y": 0,
 				"width": 32,
 				"height": 32
