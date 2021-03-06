@@ -35,7 +35,6 @@ public class TaskEntity extends GameEntity {
     private TextRenderable[] textRenderables = new TextRenderable[MAX_TASKS];
 
     public TaskEntity(GameScene scene, double x, double y, Player player) {
-//    public TaskEntity(GameScene scene, double x, double y) {
         super(scene);
 
         this.gameScene = scene;
@@ -44,7 +43,6 @@ public class TaskEntity extends GameEntity {
 
         this.topLeft = new Point2D(x, y);
 
-//        this.taskUI = new TaskUI("Test");
         createTextRenderables();
         showTasks(player.tasks);
     }

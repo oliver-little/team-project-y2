@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.player;
+package teamproject.wipeout.game.player.ui;
 
 import javafx.scene.Group;
 import javafx.scene.Parent;

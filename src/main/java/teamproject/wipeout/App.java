@@ -42,8 +42,8 @@ import java.io.IOException;
 import java.util.*;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.player.InventoryUI;
-import teamproject.wipeout.game.market.MarketPriceUpdater;
+import teamproject.wipeout.game.player.entity.MoneyEntity;
+import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
 import teamproject.wipeout.game.task.Task;
@@ -52,15 +52,7 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
 import teamproject.wipeout.networking.server.GameServerRunner;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.function.Function;
 import java.util.List;
 
 
@@ -84,6 +76,7 @@ public class App implements Controller {
     Item item;
     FarmEntity farmEntity;
     TaskEntity taskEntity;
+    MoneyEntity moneyEntity;
 
  // Temporarily placed variables
     GameServerRunner server = new GameServerRunner();
@@ -289,7 +282,10 @@ public class App implements Controller {
 
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
+        // Money icon
+        moneyEntity = new MoneyEntity(gameScene, 10, 400, player);
         gameScene.entities.add(taskEntity);
+        gameScene.entities.add(moneyEntity);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -355,7 +351,9 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   taskEntity.showTasks(player.tasks); },
+                	   taskEntity.showTasks(player.tasks);
+                	   moneyEntity.showMoney(player.money);
+                	   },
                 () -> {});
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);

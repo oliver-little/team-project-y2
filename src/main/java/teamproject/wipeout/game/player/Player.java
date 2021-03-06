@@ -6,8 +6,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.market.MarketItem;
-import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.market.Market;
@@ -15,7 +14,6 @@ import teamproject.wipeout.game.market.Market;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import teamproject.wipeout.game.task.Task;
 import java.util.Set;
 
 public class Player extends GameEntity {

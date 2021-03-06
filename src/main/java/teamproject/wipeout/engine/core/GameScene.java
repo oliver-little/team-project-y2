@@ -5,7 +5,7 @@ import java.util.List;
 
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
-import teamproject.wipeout.game.player.InventoryUI;
+import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.BasicEvent;
 
