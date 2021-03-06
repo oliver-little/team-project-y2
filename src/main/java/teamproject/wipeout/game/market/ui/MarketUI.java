@@ -28,6 +28,8 @@ import teamproject.wipeout.util.resources.ResourceType;
  * Creates a tabbed screen with items to buy and sell
  */
 public class MarketUI extends AnchorPane {
+
+    public Runnable onUIClose;
     
     private Pane parent;
 
@@ -63,7 +65,12 @@ public class MarketUI extends AnchorPane {
         tabPane.getTabs().addAll(seeds, plants, tools, tasks);
 
         Button close = new Button("X");
-        close.setOnAction(actionEvent -> this.parent.getChildren().remove(this));
+        close.setOnAction(actionEvent -> {
+            if (this.onUIClose != null) {
+                this.onUIClose.run();
+            }
+            this.parent.getChildren().remove(this);
+        });
 
         AnchorPane.setBottomAnchor(tabPane, 50.0);
         AnchorPane.setTopAnchor(tabPane, 50.0);

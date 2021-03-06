@@ -28,6 +28,8 @@ public class MarketEntity extends GameEntity {
 
     protected StackPane uiContainer;
 
+    protected Runnable onUIOpen;
+
     // Hover and click variables
     protected Transform playerTransform;
     protected Transform marketTransform;
@@ -76,8 +78,19 @@ public class MarketEntity extends GameEntity {
         return this.market;
     }
 
+    public void setOnUIOpen(Runnable onOpen) {
+        this.onUIOpen = onOpen;
+    }
+
+    public void setOnUIClose(Runnable onClose) {
+        this.marketUI.onUIClose = onClose;
+    }
+
     private EntityClickAction onClick = (x, y, button, entity) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
+            if (this.onUIOpen != null) {
+                this.onUIOpen.run();
+            }
             this.uiContainer.getChildren().add(this.marketUI);
         }
     };
