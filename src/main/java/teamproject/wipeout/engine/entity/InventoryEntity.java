@@ -101,6 +101,7 @@ public class InventoryEntity{
 			rectangles[i] = r;
 			
 			ImageView spriteView = new ImageView();
+			spriteView.setMouseTransparent(true);
 			root.getChildren().add(spriteView);
 			spriteViews[i] = spriteView;
 		}
@@ -112,6 +113,7 @@ public class InventoryEntity{
 			text.setX(i*67 + 5);
 			text.setY(13);
 			text.setFill(Color.MAROON);
+			text.setMouseTransparent(true);
 			root.getChildren().add(text);
 			quantityTexts[i] = text;
 		}
