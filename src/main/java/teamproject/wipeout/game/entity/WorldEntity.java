@@ -37,25 +37,8 @@ public class WorldEntity extends GameEntity
 								new Rectangle(-5,600,810,5),
 								new Rectangle(800,-5,5,610)
 								};
-		GameEntity leftBoundary = gameScene.createEntity();
-		leftBoundary.addComponent(new Transform(0,0));
-		leftBoundary.addComponent(new HitboxComponent(new Rectangle(-5,-5,5,610)));
-		leftBoundary.addComponent(new CollisionResolutionComponent(false));
-		
-		GameEntity topBoundary = gameScene.createEntity();
-		topBoundary.addComponent(new Transform(0,0));
-		topBoundary.addComponent(new HitboxComponent(new Rectangle(-5,-5,810,5)));
-		topBoundary.addComponent(new CollisionResolutionComponent(false));
-
-		GameEntity rightBoundary = gameScene.createEntity();
-		rightBoundary.addComponent(new Transform(0,0));
-		rightBoundary.addComponent(new HitboxComponent(new Rectangle(800,-5,5,610)));
-		rightBoundary.addComponent(new CollisionResolutionComponent(false));
-		
-		GameEntity bottomBoundary = gameScene.createEntity();
-		bottomBoundary.addComponent(new Transform(0,0));
-		bottomBoundary.addComponent(new HitboxComponent(new Rectangle(-5,600,810,5)));
-		bottomBoundary.addComponent(new CollisionResolutionComponent(false));
+		this.addComponent(new HitboxComponent(hitboxes));
+		this.addComponent(new CollisionResolutionComponent(false));
 		
 		
 		//TreeEntity tree = new TreeEntity(gameScene, new Point2D(40,40));
