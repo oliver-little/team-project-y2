@@ -29,7 +29,6 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
@@ -108,8 +108,8 @@ public class App implements Controller {
     	inventory.setTranslateY((windowHeight/2) - 70);
         
     	
-    	//gameScene.entities.add(invEntity);
-    	//invEntity.addComponent(new RenderComponent(true, new InventoryRenderable(invEntity)));
+    	//gameScene.entities.add(invUI);
+    	//invUI.addComponent(new RenderComponent(true, new InventoryRenderable(invUI)));
 
         // Animated Sprite
         SpriteManager spriteManager = new SpriteManager();
@@ -132,9 +132,9 @@ public class App implements Controller {
             e.printStackTrace();
         }
         
-        InventoryEntity invEntity;
-    	invEntity = new InventoryEntity(inventory, spriteManager, itemStore);
-    	Player player = gameScene.createPlayer(1, "Farmer", invEntity);
+        InventoryUI invUI;
+    	invUI = new InventoryUI(inventory, spriteManager, itemStore);
+    	Player player = gameScene.createPlayer(1, "Farmer", invUI);
     	player.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
         player.addComponent(new Transform(250, 250, 1));
         
@@ -264,11 +264,11 @@ public class App implements Controller {
 
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup(itemList);
-                	   /*invEntity.showItems(player.getInventory(), itemStore)*/;},
+                	   /*invUI.showItems(player.getInventory(), itemStore)*/;},
                 () -> System.out.println(""));
         
-        javafx.scene.shape.Rectangle[] invRectangles = invEntity.getRectangles();
-        for(int i = 0; i < invEntity.MAX_SIZE; i++) {
+        javafx.scene.shape.Rectangle[] invRectangles = invUI.getRectangles();
+        for(int i = 0; i < invUI.MAX_SIZE; i++) {
         	int hold = i;
         	invRectangles[i].setOnMouseClicked(new EventHandler<MouseEvent>() {
                 @Override
@@ -307,7 +307,7 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup(itemList);
-                	   /*invEntity.showItems(player.getInventory(), itemStore)*/;},
+                	   /*invUI.showItems(player.getInventory(), itemStore)*/;},
                 () -> System.out.println(""));
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);

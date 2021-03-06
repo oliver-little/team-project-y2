@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.entity;
+package teamproject.wipeout.game.player;
 
 import javafx.scene.Group;
 import javafx.scene.Parent;
@@ -27,7 +27,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.player.invPair;
 
-public class InventoryEntity{
+public class InventoryUI{
 
 	public Point2D size;
 	Group root;
@@ -43,7 +43,7 @@ public class InventoryEntity{
 	private Text[] quantityTexts = new Text[MAX_SIZE];
 	private int currentSelection = 0;
 
-	public InventoryEntity(Group root, SpriteManager spriteManager, ItemStore itemStore) {
+	public InventoryUI(Group root, SpriteManager spriteManager, ItemStore itemStore) {
 		this.root = root; //sets the root node of the inventory UI scene graph
 		this.itemStore = itemStore;
 		this.spriteManager = spriteManager;

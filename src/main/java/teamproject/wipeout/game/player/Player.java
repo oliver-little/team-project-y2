@@ -7,7 +7,6 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
-import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.game.player.invPair;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class Player extends GameEntity {
     public Double money;
     public Integer occupiedSlots;
     
-    public InventoryEntity invEntity;
+    public InventoryUI invUI;
     public ItemStore itemStore;
     
     public int selectedSlot;
@@ -36,13 +35,13 @@ public class Player extends GameEntity {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, InventoryEntity invEntity) {
+    public Player(GameScene scene, Integer playerID, String playerName, InventoryUI invUI) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = 0.0;
         this.occupiedSlots = 0;
-        this.invEntity = invEntity;
+        this.invUI = invUI;
         this.itemStore = itemStore;
         for (int i = 0; i < MAX_SIZE; i++) {
         	inventory.add(null);
@@ -79,7 +78,7 @@ public class Player extends GameEntity {
         	System.out.println("No space in inventory for item");
         	return false;
         }
-        this.invEntity.updateUI(inventory, index);
+        this.invUI.updateUI(inventory, index);
         System.out.println("Acquired itemID: " + itemID);
         occupiedSlots++;
         return true;
@@ -97,7 +96,7 @@ public class Player extends GameEntity {
         	System.out.println("No space in inventory for item(s)");
         	return false;
         }
-        this.invEntity.updateUI(inventory, index);
+        this.invUI.updateUI(inventory, index);
         System.out.println("Acquired " + quantity + " of itemID " + itemID);
         return true;
     }
@@ -110,7 +109,7 @@ public class Player extends GameEntity {
      */
     private int addToInventory(Integer itemID, Integer quantity) {
     	int i = 0;
-    	int stackLimit = invEntity.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	for (invPair pair : inventory) {
     		if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
     			pair.quantity += quantity;
@@ -144,13 +143,13 @@ public class Player extends GameEntity {
         	if((pair != null) && (pair.itemID == itemID) && ((pair.quantity - quantity) >= 0)) {
         		if ((pair.quantity - quantity) == 0) {
         			inventory.set(i, null); //free inventory slot
-        			invEntity.updateUI(inventory, i);
+        			invUI.updateUI(inventory, i);
         			occupiedSlots--; //inventory slot is freed
         			return true;
         		}else {
         			pair.quantity -= quantity;
         			inventory.set(i, pair);
-        			invEntity.updateUI(inventory, i);
+        			invUI.updateUI(inventory, i);
         			return true;
         		}
         	}
@@ -170,13 +169,13 @@ public class Player extends GameEntity {
         if((pair != null) && (pair.quantity - quantity) >= 0) {
         	if ((pair.quantity - quantity) == 0) {
     			inventory.set(selectedSlot, null); //free inventory slot
-    			invEntity.updateUI(inventory, selectedSlot);
+    			invUI.updateUI(inventory, selectedSlot);
     			occupiedSlots--; //inventory slot is freed
     			return true;
     		}else {
     			pair.quantity -= quantity;
     			inventory.set(selectedSlot, pair);
-    			invEntity.updateUI(inventory, selectedSlot);
+    			invUI.updateUI(inventory, selectedSlot);
     			return true;
     		}
         }
@@ -215,7 +214,7 @@ public class Player extends GameEntity {
      */
     public void selectSlot(int slot) {
     	selectedSlot = slot;
-    	invEntity.selectSlot(slot);
+    	invUI.selectSlot(slot);
     }
 
     public ArrayList<invPair> getInventory() {

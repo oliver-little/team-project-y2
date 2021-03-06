@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.InventoryEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
+import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.BasicEvent;
 
@@ -30,8 +30,8 @@ public class GameScene {
         return newEntity;
     }
 
-    public Player createPlayer(Integer id, String name, InventoryEntity invEntity) {
-        Player playerEntity = new Player(this, id, name, invEntity);
+    public Player createPlayer(Integer id, String name, InventoryUI invUI) {
+        Player playerEntity = new Player(this, id, name, invUI);
         this.entities.add(playerEntity);
         return playerEntity;
     }
