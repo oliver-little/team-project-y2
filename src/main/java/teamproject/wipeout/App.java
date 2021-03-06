@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
+import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -106,6 +107,15 @@ public class App implements Controller {
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
+        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
+        PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
+        eventSystems = List.of(mcs, mhs, pas);
+
+
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
         camera.addComponent(new CameraComponent(1));
@@ -123,9 +133,14 @@ public class App implements Controller {
         player.addComponent(new CollisionResolutionComponent());
 
         try {
-            spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
-            Image[] frames = spriteManager.getSpriteSet("player", "walk");
-            player.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+            player.addComponent(new RenderComponent());
+            player.addComponent(new PlayerAnimatorComponent(
+                spriteManager.getSpriteSet("player-red", "walk-up"), 
+                spriteManager.getSpriteSet("player-red", "walk-right"), 
+                spriteManager.getSpriteSet("player-red", "walk-down"), 
+                spriteManager.getSpriteSet("player-red", "walk-left"), 
+                spriteManager.getSpriteSet("player-red", "idle")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -226,13 +241,6 @@ public class App implements Controller {
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
         gameScene.entities.add(taskEntity);
-
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
-
-        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
-        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
-        eventSystems = List.of(mcs, mhs);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
