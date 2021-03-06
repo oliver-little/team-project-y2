@@ -5,6 +5,8 @@ import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.market.MarketItem;
+import teamproject.wipeout.engine.entity.InventoryEntity;
+import teamproject.wipeout.game.player.invPair;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,21 +18,31 @@ public class Player extends GameEntity {
     public String spriteSheetName;
     public Double money;
     public Integer size;
+    public InventoryEntity invEntity;
+    public int selectedSlot;
     
     public static int MAX_SIZE = 10;
-
-    private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
+    
+    private ArrayList<invPair> inventory = new ArrayList<>();
+    //private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
     /**
      * Creates a new instance of GameEntity
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName) {
+    public Player(GameScene scene, Integer playerID, String playerName, InventoryEntity invEntity) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = 0.0;
+        this.size = 0;
+        this.invEntity = invEntity;
+        for (int i = 0; i < MAX_SIZE; i++) {
+        	inventory.add(null);
+        }
+        selectSlot(0);
+        
     }
 
     // When called with a market item, purchases an item for a player and returns true,
@@ -56,30 +68,92 @@ public class Player extends GameEntity {
 
     // Adds an item to inventory
     public void acquireItem(Integer itemID) {
-        inventory.putIfAbsent(itemID, 0);
-        inventory.put(itemID, inventory.get(itemID) + 1);
+        int index = addToInventory(itemID, 1);
+        this.invEntity.updateUI(inventory, index);
         System.out.println("Acquired itemID: " + itemID);
+        size++;
+    }
+    
+    /**
+     * Adds new pair to inventory if item not present, otherwise increments quantity
+     * @param itemID ID of item to be added
+     * @param quantity quantity to be added
+     */
+    private Integer addToInventory(Integer itemID, Integer quantity) {
+    	int i = 0;
+    	for (invPair pair : inventory) {
+    		if((pair != null) && itemID == pair.itemID) {
+    			pair.quantity += quantity;
+    			inventory.set(i, pair);
+    			return i; //returns index of change
+    		}
+    		i++;
+    	}
+    	i = 0;
+    	for (invPair pair : inventory) {
+    		if (pair == null) {
+    			pair = new invPair(itemID, quantity);
+    			inventory.set(i, pair);
+    			return i; //returns index of change
+    		}
+    		i++;
+    	}
+    	return null;
     }
 
     // removes a SINGLE copy of an item from the players backpack and returns true
     // if player does not have the item, returns false;
     public boolean removeItem(Integer itemID) {
-        if (this.inventory.containsKey(itemID)) {
-            int count = this.inventory.get(itemID);
-            if (count <= 1){
-                this.inventory.remove(itemID);
-            } else {
-                this.inventory.put(itemID, count - 1);
-            }
-            
-            return true;
-        } 
-    
+        int i = 0;
+        for (invPair pair : inventory) {
+        	if((pair != null) && pair.itemID == itemID) {
+        		if (pair.quantity == 1) {
+        			inventory.set(i, null);
+        			invEntity.updateUI(inventory, i);
+        			size--;
+        			return true;
+        		}else {
+        			pair.quantity--;
+        			inventory.set(i, pair);
+        			invEntity.updateUI(inventory, i);
+        			size--;
+        			return true;
+        		}
+        	}
+        	i++;
+        }
         return false;
     }
+    
+    public int dropItem() {
+    	if(inventory.get(selectedSlot) == null) {
+    		return -1;
+    	}
+    	int id = inventory.get(selectedSlot).itemID;
+    	removeItem(inventory.get(selectedSlot).itemID);
+    	return id;
+    }
+    
+    public void selectSlot(int slot) {
+    	selectedSlot = slot;
+    	invEntity.selectSlot(slot);
+    }
 
-    public LinkedHashMap<Integer, Integer> getInventory() {
+    public ArrayList<invPair> getInventory() {
         return inventory;
+    }
+    
+    //for checking
+    private void printInventory() {
+    	int i = 0;
+    	for(invPair pair : inventory) {
+    		if (pair == null) {
+    			System.out.println(i + ": empty");
+    		}else {
+    			System.out.println(i + ": ItemID: "+pair.itemID+" Quantity: "+pair.quantity);
+    		}
+    		i++;
+    	}
     }
 
     // Scan all entities for items the player is standing over, and pick them up, and delete them from the map
@@ -101,6 +175,7 @@ public class Player extends GameEntity {
             ge.destroy();
         }
 
-        System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+        //System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+        //printInventory();
     }
 }
