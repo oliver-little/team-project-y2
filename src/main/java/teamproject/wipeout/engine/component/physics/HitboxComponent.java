@@ -107,6 +107,34 @@ public class HitboxComponent implements GameComponent {
 
     }
     
+    public static ArrayList<Pair<Shape, Shape>> collides2(GameEntity g1, GameEntity g2) {
+    	Transform t1 = g1.getComponent(Transform.class);
+    	HitboxComponent c1 = g1.getComponent(HitboxComponent.class);
+    	Shape bb1[] = c1.boundingBoxes;
+    	
+    	Transform t2 = g2.getComponent(Transform.class);
+    	HitboxComponent c2 = g2.getComponent(HitboxComponent.class);
+    	Shape bb2[] = c2.boundingBoxes;
+    	
+    	ArrayList<Pair<Shape, Shape>> collidingPairs = new ArrayList<Pair<Shape, Shape>>();
+    	for(int i=0;i<bb1.length;i++) {
+    		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1[i]);
+        	for(int j=0;j<bb2.length;j++) {
+        		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2[j]);
+            	if(GeometryUtil.intersects(s1,s2)) {
+            		collidingPairs.add(new Pair<Shape, Shape>(s1, s2));
+            	}
+        	}
+    	}
+    	
+    	//No pair of shapes from the boundng boxes collide
+    	if (collidingPairs.size()==0) {
+    		return null;
+    	}
+    	return collidingPairs;
+
+    }
+    
     /**
      * Checks whether two game entities collide
      * @param g1
