@@ -165,7 +165,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
         MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
-        new MarketPriceUpdater(marketStall.getMarket());
+        //new MarketPriceUpdater(marketStall.getMarket()); - Uncomment to turn on automatic price changing in the market.
 
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
