@@ -44,9 +44,6 @@ public class TaskEntity extends GameEntity {
 
         this.topLeft = new Point2D(x, y);
 
-
-        this.addComponent(new Clickable(this.onClick));
-
 //        this.taskUI = new TaskUI("Test");
         createTextRenderables();
         showTasks(player.tasks);
