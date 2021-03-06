@@ -130,7 +130,7 @@ public class Player extends GameEntity {
      * @param quantity quantity to be added
      * @return index of where item was added
      */
-    private int addToInventory(Integer itemID, Integer quantity) {
+    private int addToInventory(int itemID, Integer quantity) {
     	int i = 0;
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	for (invPair pair : inventory) {
@@ -160,7 +160,7 @@ public class Player extends GameEntity {
      * @param quantity of items to be removed
      * @return true if successfully removed, false if unable to remove
      */
-    private boolean removeItem(Integer itemID, int quantity) {
+    private boolean removeItem(int itemID, int quantity) {
         int i = 0;
         for (invPair pair : inventory) {
         	if((pair != null) && (pair.itemID == itemID) && ((pair.quantity - quantity) >= 0)) {
@@ -257,7 +257,7 @@ public class Player extends GameEntity {
     	}
     }
 
-    public int containsItem(Integer itemID) {
+    public int containsItem(int itemID) {
     	int i = 0;
     	for(invPair pair : inventory) {
     		if((pair != null ) && (pair.itemID == itemID)) {

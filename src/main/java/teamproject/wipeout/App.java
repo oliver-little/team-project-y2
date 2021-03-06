@@ -408,7 +408,7 @@ public class App implements Controller {
                     	ArrayList<invPair> inventoryList = inputPlayer.getInventory();
                         //LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();  //inventory is now an ArrayList
                     	int index = inputPlayer.containsItem(itemId);
-                    	if(index >= 0 && inventoryList.get(index).quantity == quantityCollected) {
+                    	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
                     		return true;
                     	}
                     	return false;
