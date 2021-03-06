@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.*;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.entity.TaskEntity;
@@ -164,6 +165,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
         MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
+        new MarketPriceUpdater(marketStall.getMarket());
 
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();

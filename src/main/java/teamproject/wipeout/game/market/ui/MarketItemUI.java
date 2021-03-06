@@ -48,8 +48,8 @@ public class MarketItemUI extends VBox {
             if (!newValue.matches("\\d*")) {
                 quantity.getEditor().setText(oldValue);
             }
-            else if (newValue == null) {
-                quantity.getEditor().setText("1");
+            else if (newValue.equals("")) {
+                quantity.getEditor().setText(oldValue);
             }
         });
 

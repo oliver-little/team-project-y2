@@ -4,6 +4,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javafx.application.Platform;
+
 /**
  * Class which automatically returns market items to their equilibrium price after a set amount of time.
  */
@@ -29,17 +31,24 @@ public class MarketPriceUpdater {
     }
 
     public void start() {
-        executor.scheduleWithFixedDelay(this.updatePrices, TIMEFREQUENCY, TIMEFREQUENCY, TimeUnit.SECONDS);
+        executor.scheduleWithFixedDelay(this.runUpdatePrices, TIMEFREQUENCY, TIMEFREQUENCY, TimeUnit.SECONDS);
     }
 
     public void stop() {
         executor.shutdown();
     }
 
+    /** 
+     * Platform.runLater wrapper for updatePrices to prevent JavaFX error
+     */
+    private Runnable runUpdatePrices = () -> {
+        Platform.runLater(this.updatePrices);
+    };
+
     /**
      * This function runs once the program launches and is run every set time interval, this function updates the market quantity deviations, resulting in the prices eventually returning to equlibirum.
      */
-    public Runnable updatePrices = () -> {
+    private Runnable updatePrices = () -> {
         for (MarketItem item : market.stockDatabase.values()) {
             double quantityDeviation = item.getQuantityDeviation();
 

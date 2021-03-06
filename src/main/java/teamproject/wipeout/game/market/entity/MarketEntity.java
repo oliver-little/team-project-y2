@@ -42,6 +42,10 @@ public class MarketEntity extends GameEntity {
         this.marketUI.setParent(uiContainer);
     }
 
+    public Market getMarket(){
+        return this.market;
+    }
+
     private EntityClickAction onClick = (x, y, button, entity) -> {
         if (this.marketUI.getParent() == null) {
             this.uiContainer.getChildren().add(this.marketUI);
