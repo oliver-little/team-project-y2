@@ -122,8 +122,9 @@ public class AnimatedSpriteRenderable implements Renderable {
             this.lastFrameTime = currentTime;
         }
 
-        Image sprite = this.frames[this.currentFrame];
-
-        gc.drawImage(sprite, (x + offset.getX()) * scale, (y + offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
+        if (this.frames != null) {
+            Image sprite = this.frames[this.currentFrame];
+            gc.drawImage(sprite, (x + offset.getX()) * scale, (y + offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
+        }
     }
 }

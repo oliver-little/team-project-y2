@@ -2,6 +2,7 @@ package teamproject.wipeout.engine.component.render;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javafx.scene.canvas.GraphicsContext;
 import teamproject.wipeout.engine.component.GameComponent;
@@ -36,6 +37,10 @@ public class RenderComponent implements GameComponent {
         this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
 
+    /**
+     * Indicates whether this object is static (only rendered when the camera moves)
+     * @return boolean Whether the current object is static
+     */
     public boolean isStatic() {
         return this.isStatic;
     }
@@ -47,6 +52,23 @@ public class RenderComponent implements GameComponent {
      */
     public boolean hasRenderable(Renderable renderableObj) {
         return renderables.contains(renderableObj);
+    }
+
+    /**
+     * Returns all renderables on this RenderComponent
+     * 
+     * @return The renderables this RenderComponent contains
+     */
+    public List<Renderable> getRenderables() {
+        return this.renderables;
+    }
+
+    /**
+     * Adds the given renderable to end of the list of renderables.
+     * @param renderableObj The renderable to add.
+     */
+    public void addRenderable(Renderable renderableObj) {
+        renderables.add(renderableObj);
     }
 
     /**

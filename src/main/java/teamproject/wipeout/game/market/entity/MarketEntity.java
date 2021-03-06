@@ -1,9 +1,7 @@
 package teamproject.wipeout.game.market.entity;
 
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.EntityClickAction;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
@@ -35,7 +33,7 @@ public class MarketEntity extends GameEntity {
 
         this.addComponent(new Transform(x, y));
         try {
-            spriteManager.loadSpriteSheet("market-descriptor.json", "market.png");
+            spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             this.addComponent(new RenderComponent(new SpriteRenderable(spriteManager.getSpriteSet("market", "market")[0])));
         }
         catch (Exception exception) {

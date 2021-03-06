@@ -82,7 +82,7 @@ public class InventoryEntity extends GameEntity {
 	}
 	
 	public Image getSquare() throws IOException {
-		this.spriteManager.loadSpriteSheet("tile-descriptor.json", "tile.png");
+		this.spriteManager.loadSpriteSheet("gameworld/tile-descriptor.json", "gameworld/tile.png");
 		return this.spriteManager.getSpriteSet("tile", "tile1")[0];
 		
 	}

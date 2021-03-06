@@ -3,48 +3,61 @@ package teamproject.wipeout.engine.component.physics;
 import javafx.geometry.Point2D;
 
 import teamproject.wipeout.engine.component.GameComponent;
+import teamproject.wipeout.util.BasicEvent;
 
 public class MovementComponent implements GameComponent {
 
     public Point2D velocity;
     public Point2D acceleration;
     public FacingDirection facingDirection;
+    public BasicEvent<FacingDirection> facingDirectionChanged;
 
     public MovementComponent() {
+        this.facingDirectionChanged = new BasicEvent<>();
         this.velocity = Point2D.ZERO;
         this.acceleration = Point2D.ZERO;
-        this.facingDirection = FacingDirection.UP;
+        this.facingDirection = FacingDirection.NONE;
     }
 
     public MovementComponent(Point2D velocity, Point2D acceleration) {
+        this.facingDirectionChanged = new BasicEvent<>();
         this.velocity = velocity;
         this.acceleration = acceleration;
-        this.facingDirection = FacingDirection.UP;
+        this.facingDirection = FacingDirection.NONE;
         this.updateFacingDirection();
     }
 
     public MovementComponent(float xVelocity, float yVelocity, float xAcceleration, float yAcceleration) {
+        this.facingDirectionChanged = new BasicEvent<>();
         this.velocity = new Point2D(xVelocity, yVelocity);
         this.acceleration = new Point2D(xAcceleration, yAcceleration);
-        this.facingDirection = FacingDirection.UP;
+        this.facingDirection = FacingDirection.NONE;
         this.updateFacingDirection();
     }
 
     /** Update the facing diection every timestep, based on velocity */
     public void updateFacingDirection() {
-        double xVelocity = this.velocity.getX();
-        double yVelocity = this.velocity.getY();
-        if(xVelocity > 0f) {
+        double x = this.acceleration.getX();
+        double y = this.acceleration.getY();
+        FacingDirection old = this.facingDirection;
+        if(x > 0f) {
             this.facingDirection = FacingDirection.RIGHT;
         }
-        else if(xVelocity < 0f) {
+        else if(x < 0f) {
             this.facingDirection = FacingDirection.LEFT;
         }
-        else if(yVelocity > 0f) {
+        else if(y > 0f) {
             this.facingDirection = FacingDirection.DOWN;
         }
-        else if(yVelocity < 0f) {
+        else if(y < 0f) {
             this.facingDirection = FacingDirection.UP;
+        }
+        else if (this.velocity.getX() == 0 && this.velocity.getY() == 0) {
+            this.facingDirection = FacingDirection.NONE;
+        }
+
+        if (old != this.facingDirection) {
+            facingDirectionChanged.emit(this.facingDirection);
         }
     }
 

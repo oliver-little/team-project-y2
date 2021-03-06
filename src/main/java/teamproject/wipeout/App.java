@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
+import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -36,10 +37,15 @@ import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.task.entity.TaskEntity;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.engine.extension.system.PlayerStateSystem;
 import teamproject.wipeout.networking.server.GameServerRunner;
@@ -47,6 +53,12 @@ import teamproject.wipeout.networking.server.GameServerRunner;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.function.Function;
 import java.util.List;
 
 
@@ -69,8 +81,11 @@ public class App implements Controller {
     Market market;
     Item item;
     FarmEntity farmEntity;
+    TaskEntity taskEntity;
+
  // Temporarily placed variables
     GameServerRunner server = new GameServerRunner();
+    String playerID = UUID.randomUUID().toString();
     GameClient client;
     PlayerStateSystem playerStateSystem;
 
@@ -94,6 +109,15 @@ public class App implements Controller {
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
+        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
+        PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
+        eventSystems = List.of(mcs, mhs, pas);
+
+
         GameEntity camera = gameScene.createEntity();
         camera.addComponent(new Transform(0, 0));
         camera.addComponent(new CameraComponent(1.5f));
@@ -109,13 +133,18 @@ public class App implements Controller {
         MovementComponent playerPhysics = new MovementComponent(0f, 0f, 0f, 0f);
         player.addComponent(playerPhysics);
 
-        player.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
+        player.addComponent(new HitboxComponent(new Rectangle(14, 12, 36, 53)));
         player.addComponent(new CollisionResolutionComponent());
 
         try {
-            spriteManager.loadSpriteSheet("player/player-descriptor.json", "player/player-spritesheet.png");
-            Image[] frames = spriteManager.getSpriteSet("player", "walk");
-            player.addComponent(new RenderComponent(new AnimatedSpriteRenderable(frames, 10)));
+            spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+            player.addComponent(new RenderComponent());
+            player.addComponent(new PlayerAnimatorComponent(
+                spriteManager.getSpriteSet("player-red", "walk-up"), 
+                spriteManager.getSpriteSet("player-red", "walk-right"), 
+                spriteManager.getSpriteSet("player-red", "walk-down"), 
+                spriteManager.getSpriteSet("player-red", "walk-left"), 
+                spriteManager.getSpriteSet("player-red", "idle")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,6 +170,7 @@ public class App implements Controller {
 
         //MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
         
+
         List<GameEntity> itemList = new ArrayList<>();
         GameEntity potato = gameScene.createEntity();
         potato.addComponent(new Transform (10, 10));
@@ -209,14 +239,19 @@ public class App implements Controller {
     	gameScene.entities.add(invEntity);
     	invEntity.addComponent(new RenderComponent(new InventoryRenderable(invEntity)));
 
+
     	WorldEntity world = new WorldEntity(gameScene,4 , itemStore, player, spriteManager, this.interfaceOverlay);
     	
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
 
-        MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
-        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
-        eventSystems = List.of(mcs, mhs);
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        player.tasks = allTasks;
+
+
+        // add task entity
+        taskEntity = new TaskEntity(gameScene, 10, 100, player);
+
+        gameScene.entities.add(taskEntity);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -244,7 +279,8 @@ public class App implements Controller {
 
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   invEntity.showItems(player.getInventory(), itemStore);},
+                	   invEntity.showItems(player.getInventory(), itemStore);
+                	   taskEntity.showTasks(player.tasks); },
                 () -> {});
 
         //farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
@@ -280,6 +316,42 @@ public class App implements Controller {
         gl.start();
     }
 
+    public ArrayList<Task> createAllTasks(ItemStore itemStore) {
+
+        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Integer> itemIds  = new ArrayList<>();
+        itemIds.add(2); // add letuce
+        itemIds.add(6); // add potatos
+
+        // Collect tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantityCollected = 1;
+            Task currentTask =  new Task("Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+                    (Player inputPlayer) ->
+                    {
+                        LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();
+                        return inventory.containsKey(itemId) && inventory.get(itemId) == quantityCollected;
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        // Sell tasks
+        for(Integer itemId : itemIds) {
+            String name = itemStore.getItem(itemId).name;
+            int quantitySold = 1;
+            Task currentTask =  new Task("Sell " + quantitySold + " " + name, 10 * quantitySold,
+                    (Player inputPlayer) ->
+                    {
+                        return inputPlayer.getSoldItems().containsKey(itemId);
+                    }
+            );
+            tasks.add(currentTask);
+        }
+
+        return tasks;
+    }
 
     /**
      * Gets the root node of this class.
