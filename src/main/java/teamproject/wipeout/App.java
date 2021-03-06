@@ -283,7 +283,7 @@ public class App implements Controller {
         taskEntity = new TaskEntity(gameScene, 10, 100, player);
 
         // Money icon
-        moneyEntity = new MoneyEntity(gameScene, 10, 400, player);
+        moneyEntity = new MoneyEntity(gameScene, 10, 500, player);
         gameScene.entities.add(taskEntity);
         gameScene.entities.add(moneyEntity);
 
