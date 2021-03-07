@@ -24,6 +24,8 @@ public class MarketItemUI extends VBox {
     public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
+        final double doubleCompare = 0.0000001;
+
         this.getStyleClass().add("vbox");
         this.setPrefWidth(300);
 
@@ -84,18 +86,26 @@ public class MarketItemUI extends VBox {
             player.buyItem(market, item.id, quantity.getValue());
         });
 
+
         Button sell = new Button();
         sell.setPrefWidth(75);
 
-        // Set sell price to update with quantity and sell price changes
-        sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
-            return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
-        }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
+        //Check if the item is sellable.
+        if (Math.abs(marketItem.getDefaultSellPrice() - (-1)) < doubleCompare) {
+            sell.setDisable(true);
+            sell.textProperty().bind(Bindings.concat("Sell: 0.00"));
+        }
+        else {
+            // Set sell price to update with quantity and sell price changes
+            sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
+                return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
+            }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
 
-        // Set sell click event
-        sell.setOnAction((e) -> {
-            player.sellItem(market, item.id, quantity.getValue());
-        });
+            // Set sell click event
+            sell.setOnAction((e) -> {
+                player.sellItem(market, item.id, quantity.getValue());
+            });
+        }
 
         buySellLayout.getChildren().addAll(buy, sell, quantity);
 
