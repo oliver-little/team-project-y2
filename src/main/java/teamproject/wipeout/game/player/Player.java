@@ -4,6 +4,7 @@ import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.MarketItem;
@@ -84,14 +85,14 @@ public class Player extends GameEntity {
     // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
     // if the player does not have the item return false
     public boolean sellItem(Market market, int id, int quantity) {
-        if (removeItem(id, quantity)) {
-            this.money += market.sellItem(id, quantity);
-            this.soldItems.putIfAbsent(id, 0);
-            this.soldItems.put(id, this.soldItems.get(id) + 1);
-            checkTasks();
-            return true;
+        if (removeItem(id, quantity) < 0) {
+            return false;
         }
-        return false;
+        this.money += market.sellItem(id, quantity);
+        this.soldItems.putIfAbsent(id, 0);
+        this.soldItems.put(id, this.soldItems.get(id) + 1);
+        checkTasks();
+        return true;
     }
 
     // Adds single item to inventory
@@ -130,7 +131,7 @@ public class Player extends GameEntity {
      * @param quantity quantity to be added
      * @return index of where item was added
      */
-    private int addToInventory(Integer itemID, Integer quantity) {
+    private int addToInventory(int itemID, Integer quantity) {
     	int i = 0;
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	for (invPair pair : inventory) {
@@ -160,7 +161,7 @@ public class Player extends GameEntity {
      * @param quantity of items to be removed
      * @return true if successfully removed, false if unable to remove
      */
-    private boolean removeItem(Integer itemID, int quantity) {
+    private int removeItem(int itemID, int quantity) {
         int i = 0;
         for (invPair pair : inventory) {
         	if((pair != null) && (pair.itemID == itemID) && ((pair.quantity - quantity) >= 0)) {
@@ -168,17 +169,16 @@ public class Player extends GameEntity {
         			inventory.set(i, null); //free inventory slot
         			invUI.updateUI(inventory, i);
         			occupiedSlots--; //inventory slot is freed
-        			return true;
-        		}else {
+                }else {
         			pair.quantity -= quantity;
         			inventory.set(i, pair);
         			invUI.updateUI(inventory, i);
-        			return true;
-        		}
-        	}
+                }
+                return itemID;
+            }
         	i++;
         }
-        return false;
+        return -1;
     }
     
     /**
@@ -235,9 +235,15 @@ public class Player extends GameEntity {
      * Called to select which slot/index in the inventory, ready for dropItem() method to use
      * @param slot or index selected
      */
-    public void selectSlot(int slot) {
+    public int selectSlot(int slot) {
     	selectedSlot = slot;
     	invUI.selectSlot(slot);
+
+    	invPair selectedItemID = this.inventory.get(slot);
+    	if (selectedItemID != null) {
+            return this.removeItem(selectedItemID.itemID, 1);
+        }
+    	return -1;
     }
 
     public ArrayList<invPair> getInventory() {
@@ -257,7 +263,7 @@ public class Player extends GameEntity {
     	}
     }
 
-    public int containsItem(Integer itemID) {
+    public int containsItem(int itemID) {
     	int i = 0;
     	for(invPair pair : inventory) {
     		if((pair != null ) && (pair.itemID == itemID)) {

@@ -9,6 +9,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "tomato",
+          "seedsItemID" : 28,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -24,6 +25,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "lettuce",
+          "seedsItemID" : 29,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -39,6 +41,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "yellow-pepper",
+          "seedsItemID" : 30,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -54,6 +57,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "hot-pepper",
+          "seedsItemID" : 31,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -69,6 +73,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "onion",
+          "seedsItemID" : 32,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -84,6 +89,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "potato",
+          "seedsItemID" : 33,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -99,6 +105,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "carrot",
+          "seedsItemID" : 34,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -114,6 +121,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "broccoli",
+          "seedsItemID" : 35,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -129,6 +137,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "beetroot",
+          "seedsItemID" : 36,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -144,6 +153,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "pumpkin",
+          "seedsItemID" : 37,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -159,6 +169,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "cauliflower",
+          "seedsItemID" : 38,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -174,6 +185,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "leek",
+          "seedsItemID" : 39,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -189,6 +201,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "parsnip",
+          "seedsItemID" : 40,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -204,6 +217,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit-and-vegetable",
           "spriteSetName" : "sweetcorn",
+          "seedsItemID" : 41,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -219,6 +233,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "apple",
+          "seedsItemID" : 42,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -234,6 +249,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "pear",
+          "seedsItemID" : 43,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -249,6 +265,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "lemon",
+          "seedsItemID" : 44,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -264,6 +281,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "orange",
+          "seedsItemID" : 45,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -279,6 +297,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "strawberry",
+          "seedsItemID" : 46,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -294,6 +313,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "cherry",
+          "seedsItemID" : 46,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -309,6 +329,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "blackberry",
+          "seedsItemID" : 47,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -324,6 +345,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "pineapple",
+          "seedsItemID" : 48,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -339,6 +361,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "banana",
+          "seedsItemID" : 49,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
