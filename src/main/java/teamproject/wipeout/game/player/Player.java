@@ -51,7 +51,7 @@ public class Player extends GameEntity {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
-        this.money = 0.0;
+        this.money = 100.0;
         this.occupiedSlots = 0;
         this.invUI = invUI;
         for (int i = 0; i < MAX_SIZE; i++) {

@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -19,6 +20,13 @@ public class FarmRenderer implements Renderable {
     public FarmRenderer(Point2D farmSize, SpriteManager spriteManager) {
         this.farmSize = farmSize;
         this.spriteManager = spriteManager;
+
+        try {
+            this.spriteManager.loadSpriteSheet("gameworld/soil-descriptor.json", "gameworld/soil.png");
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public double getWidth() {
@@ -86,8 +94,7 @@ public class FarmRenderer implements Renderable {
      * @return Sprite for the given name.
      * @throws IOException If the sprite does not exist.
      */
-    protected Image getFarmTile(String tile) throws IOException {
-        this.spriteManager.loadSpriteSheet("gameworld/soil-descriptor.json", "gameworld/soil.png");
+    private Image getFarmTile(String tile) throws IOException {
         return this.spriteManager.getSpriteSet("soil", tile)[0];
     }
 
