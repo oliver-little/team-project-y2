@@ -67,8 +67,10 @@ public class Player extends GameEntity {
         if (market.calculateTotalCost(id, quantity, true) > this.money) {
             return false;
         }
+        if (!this.acquireItem(id, quantity)) {
+        	return false;
+        };
         this.money -= market.buyItem(id, quantity);
-        this.acquireItem(id, quantity);
         return true;
     }
 
