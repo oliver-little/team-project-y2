@@ -45,6 +45,8 @@ public class FarmEntity extends GameEntity {
 
     private Item placingItem;
     private SeedEntity seedEntity;
+    private Consumer<Item> abortPlacing;
+
     private DestroyerEntity destroyerEntity;
     private Consumer<FarmItem> destroyerDelegate;
 
@@ -96,8 +98,9 @@ public class FarmEntity extends GameEntity {
      * @param mousePosition Current {@link Point2D} position of the mouse cursor
      * @throws FileNotFoundException Thrown if the sprites for the {@code Item} cannot be found.
      */
-    public void startPlacingItem(Item item, Point2D mousePosition) throws FileNotFoundException {
+    public void startPlacingItem(Item item, Point2D mousePosition, Consumer<Item> abortPlacing) throws FileNotFoundException {
         this.placingItem = item;
+        this.abortPlacing = abortPlacing;
 
         // Create seed entity for the item being placed and display it at the mouse coordinates
         this.seedEntity = new SeedEntity(this.scene, this.placingItem, this.spriteManager);
@@ -129,9 +132,15 @@ public class FarmEntity extends GameEntity {
     /**
      * Stops placing the item and removes the {@link Hoverable} component.
      */
-    public void stopPlacingItem() {
+    public void stopPlacingItem(boolean successful) {
         this.removeComponent(Hoverable.class);
+
+        if (!successful) {
+            this.abortPlacing.accept(this.placingItem);
+        }
+        this.abortPlacing = null;
         this.placingItem = null;
+
         if (this.seedEntity == null) {
             return;
         }
@@ -357,7 +366,7 @@ public class FarmEntity extends GameEntity {
             }
 
             if (this.placingItem != null && this.placeItem(placingItem, x, y)) {
-                this.stopPlacingItem();
+                this.stopPlacingItem(true);
             }
         });
         clickable.setEntity(this);

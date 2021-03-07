@@ -34,6 +34,7 @@ import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -318,11 +319,27 @@ public class App implements Controller {
         javafx.scene.shape.Rectangle[] invRectangles = invUI.getRectangles();
         for(int i = 0; i < invUI.MAX_SIZE; i++) {
         	int hold = i;
-        	invRectangles[i].setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    player.selectSlot(hold);
+        	invRectangles[i].setOnMouseClicked((event) -> {
+        	    if (farmEntity.isPlacingItem()) {
+        	        farmEntity.stopPlacingItem(false);
+        	        if (hold == player.selectedSlot) {
+        	            return;
+                    }
+                }
+                int selectedItemID = player.selectSlot(hold);
+                if (selectedItemID < 0) {
+                    return;
+                }
+                try {
+                    Item selectedItem = itemStore.getItem(selectedItemID);
+                    int seedsID = selectedItem.getComponent(InventoryComponent.class).seedsItemID;
+                    Item seedsItem = itemStore.getItem(seedsID);
+                    farmEntity.startPlacingItem(seedsItem, new Point2D(event.getSceneX(), event.getSceneY()), (item) -> {
+                        player.acquireItem(item.getComponent(PlantComponent.class).grownItemID);
+                    });
 
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
                 }
             });
         }
@@ -360,26 +377,15 @@ public class App implements Controller {
 
         farmEntity = new FarmEntity(gameScene, new Point2D(150, 150), player.playerID, spriteManager, itemStore);
 
-        item = itemStore.getItem(28);
-
         input.onKeyRelease(KeyCode.A, () -> {
-            try {
-                if (farmEntity.isPickingItem()) {
-                    farmEntity.stopPickingItem();
-                }
-                if (farmEntity.isPlacingItem()) {
-                    farmEntity.stopPlacingItem();
-                } else {
-                    farmEntity.startPlacingItem(item, mhs.getCurrentMousePosition());
-                }
-            } catch (FileNotFoundException exception) {
-                exception.printStackTrace();
+            if (farmEntity.isPlacingItem()) {
+                farmEntity.stopPlacingItem(false);
             }
         });
 
         input.onKeyRelease(KeyCode.H, () -> {
             if (farmEntity.isPlacingItem()) {
-                farmEntity.stopPlacingItem();
+                farmEntity.stopPlacingItem(false);
             }
             if (farmEntity.isPickingItem()) {
                 farmEntity.stopPickingItem();
