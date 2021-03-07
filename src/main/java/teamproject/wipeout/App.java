@@ -26,6 +26,8 @@ import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.gameclock.ClockEntity;
+import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
@@ -37,6 +39,10 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.time.Clock;
+import java.util.*;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.entity.MoneyEntity;
@@ -69,6 +75,8 @@ public class App implements Controller {
     private StackPane interfaceOverlay;
     private double windowWidth = 800;
     private double windowHeight = 600;
+    Double TIME_FOR_GAME = 2000.0;
+
 
     private ItemStore itemStore;
     private SpriteManager spriteManager;
@@ -171,6 +179,9 @@ public class App implements Controller {
 
         // Money icon
         moneyEntity = new MoneyEntity(gameScene, 10, 500, player);
+        //Time left
+        systemUpdater.addSystem(new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME));
+
         gameScene.entities.add(taskEntity);
         gameScene.entities.add(moneyEntity);
 
