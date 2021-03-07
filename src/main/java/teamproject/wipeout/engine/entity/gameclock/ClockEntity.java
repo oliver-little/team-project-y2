@@ -30,13 +30,17 @@ public class ClockEntity extends GameEntity {
         this.INITIAL_TIME = time;
         textEntity = scene.createEntity();
         textEntity.addComponent(new Transform (x + 10, y + 10));
-        textRenderable = new TextRenderable("Remaining time: " + this.time.toString());
+        int min = (int)(this.time / 60);
+        int seconds = (int)(this.time % 60);
+        textRenderable = new TextRenderable("Remaining time: " + min + ":" + seconds);
         textEntity.addComponent(new RenderComponent(textRenderable));
     }
 
     public void showTime(Double timestep) {
         this.time -= timestep;
-        textRenderable.setText("Remaining time: " + this.time.toString());
+        int min = (int)(this.time / 60);
+        int seconds = (int)(this.time % 60);
+        textRenderable.setText("Remaining time: " + min + ":" + seconds);
     }
 
     public void restart(){
