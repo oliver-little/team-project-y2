@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
@@ -60,7 +61,8 @@ public class WorldEntity extends GameEntity
         market.setOnUIOpen(() -> input.setDisableInput(true));
         market.setOnUIClose(() -> input.setDisableInput(false));
 		
-
+		//Activates automatic price updates to the market.
+		new MarketPriceUpdater(market.getMarket());
 
 	}
 

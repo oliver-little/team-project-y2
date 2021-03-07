@@ -216,6 +216,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
+        //THE FOLLOWING COMMENTS HAVE BEEN MOVED TO WORLD ENTITY.
         //MarketEntity marketStall = new MarketEntity(gameScene, 300, 300, itemStore, player, spriteManager, this.interfaceOverlay);
         //marketStall.setOnUIOpen(() -> input.setDisableInput(true));
         //marketStall.setOnUIClose(() -> input.setDisableInput(false));
