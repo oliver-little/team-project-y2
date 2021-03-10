@@ -74,7 +74,7 @@ public class MarketItemUI extends VBox {
         MarketItem marketItem = market.stockDatabase.get(item.id);
 
         Button buy = new Button();
-        buy.setPrefWidth(75);
+        buy.setPrefWidth(85);
 
         // Set button text to update with quantity and buy price changes
         buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createStringBinding(() -> {
@@ -88,7 +88,7 @@ public class MarketItemUI extends VBox {
 
 
         Button sell = new Button();
-        sell.setPrefWidth(75);
+        sell.setPrefWidth(85);
 
         //Check if the item is sellable.
         if (Math.abs(marketItem.getDefaultSellPrice() - (-1)) < doubleCompare) {
