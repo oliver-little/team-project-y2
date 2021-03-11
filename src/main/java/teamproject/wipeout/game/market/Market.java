@@ -142,12 +142,6 @@ public class Market implements StateUpdatable<MarketState> {
 
         if (isLocal) {
             sendRequest(new MarketOperationRequest(id, totalCost, quantity, false));
-            waitingForResponse = true;
-            while (true) {
-                if (!waitingForResponse) {
-                    break;
-                }
-            }
 
         } else {
             item.decrementQuantityDeviation(quantity);
