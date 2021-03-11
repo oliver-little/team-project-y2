@@ -44,6 +44,7 @@ public class GameServerRunner {
                             javafxGraphicsClasspath + this.getClasspathSeparator() +
                             javafxBeansClasspath + this.getClasspathSeparator() +
                             gsonClasspath;
+
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);

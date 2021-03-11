@@ -56,6 +56,12 @@ public class Networker {
         };
     }
 
+    public void stopServer() throws IOException {
+        if (this.serverRunner.isServerActive()) {
+            this.serverRunner.stopServer();
+        }
+    }
+
     public InputKeyAction initiateClient(GameScene gameScene, SpriteManager spriteManager) {
         return () -> {
             try {
@@ -117,7 +123,7 @@ public class Networker {
                 FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
                 this.worldEntity.setMyFarm(myFarm);
 
-                System.out.println("Connected client " + this.client.id);
+                System.out.println("Connected client with ID: " + this.client.id);
 
                 try {
                     this.client.send(new GameUpdate(myPlayer.getCurrentState()));
