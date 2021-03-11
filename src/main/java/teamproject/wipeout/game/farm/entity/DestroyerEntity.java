@@ -23,7 +23,6 @@ public class DestroyerEntity extends GameEntity {
      */
     public DestroyerEntity(GameScene scene) {
         super(scene);
-        scene.addEntity(this);
 
         this.destroyerArea = new RectRenderable(Color.RED, FarmEntity.SQUARE_SIZE, FarmEntity.SQUARE_SIZE * FarmEntity.SKEW_FACTOR);
         this.destroyerArea.radius = FarmEntity.SQUARE_SIZE / 3.0;

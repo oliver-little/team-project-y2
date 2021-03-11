@@ -38,7 +38,6 @@ public class WorldEntity extends GameEntity {
 
 	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
 		super(gameScene);
-		gameScene.addEntity(this);
 
 		this.farms = new HashMap<Integer, FarmEntity>();
 		this.inputHandler = input;

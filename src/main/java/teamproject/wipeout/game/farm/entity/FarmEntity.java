@@ -73,7 +73,6 @@ public class FarmEntity extends GameEntity {
      */
     public FarmEntity(GameScene scene, Integer farmID, Point2D location, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
-        scene.addEntity(this);
         this.farmID = farmID;
 
         this.transform = new Transform(location, 0.0, 0);

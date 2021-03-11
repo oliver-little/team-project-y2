@@ -55,9 +55,11 @@ public class GameEntity {
      */
     public void setScene(GameScene scene) {
         if (this.scene != null) {
+            this.scene.removeEntity(this);
             this.scene.entityChangeEvent.emit(new EntityChangeEvent("ENTITY_REMOVED", this));
         }
         this.scene = scene;
+        this.scene.addEntity(this);
         this.scene.entityChangeEvent.emit(new EntityChangeEvent("COMPONENT_ADDED", this));
     }
 

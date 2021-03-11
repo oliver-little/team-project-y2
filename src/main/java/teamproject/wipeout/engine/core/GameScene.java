@@ -27,7 +27,6 @@ public class GameScene {
 
     public GameEntity createEntity() {
         GameEntity newEntity = new GameEntity(this);
-        this.entities.add(newEntity);
         return newEntity;
     }
 

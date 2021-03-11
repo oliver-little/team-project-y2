@@ -32,7 +32,6 @@ public class SeedEntity extends GameEntity {
      */
     public SeedEntity(GameScene scene, Item item, SpriteManager spriteManager) throws FileNotFoundException {
         super(scene);
-        scene.addEntity(this);
 
         PlantComponent plant = item.getComponent(PlantComponent.class);
         InventoryComponent inventory = item.getComponent(InventoryComponent.class);

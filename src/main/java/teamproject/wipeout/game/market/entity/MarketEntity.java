@@ -46,7 +46,6 @@ public class MarketEntity extends GameEntity {
 
     public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer) {
         super(scene);
-        scene.addEntity(this);
 
         this.uiContainer = uiContainer;
         this.playerTransform = player.getComponent(Transform.class);
