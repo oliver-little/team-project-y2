@@ -8,7 +8,6 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
-import teamproject.wipeout.networking.engine.extension.component.PlayerStateComponent;
 
 public class MovementSystem implements GameSystem {
     
@@ -32,12 +31,6 @@ public class MovementSystem implements GameSystem {
             t.setPosition(t.getPosition().add(m.velocity.multiply(timeStep)));
 
             m.updateFacingDirection();
-
-            // Update PlayerState's position if the entity has one
-            PlayerStateComponent playerStateComponent = entity.getComponent(PlayerStateComponent.class);
-            if (playerStateComponent != null) {
-                playerStateComponent.playerState.setPosition(t.getPosition());
-            }
         }
     }
 }

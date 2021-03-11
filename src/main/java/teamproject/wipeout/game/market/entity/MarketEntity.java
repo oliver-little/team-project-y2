@@ -76,16 +76,16 @@ public class MarketEntity extends GameEntity {
         		new Rectangle(96,20,34,113),
         		new Rectangle(128,12,64,120),
         		new Rectangle(192,45,63,96)
-        		
+
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
-        
+
         this.addComponent(new Hoverable(this.onHover));
 
         this.addComponent(new ScriptComponent(this.onStep));
 
-        market = new Market(items);
+        market = new Market(items, false);
 
         this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);
         this.marketUI.setParent(uiContainer);

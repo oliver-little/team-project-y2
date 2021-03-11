@@ -2,26 +2,34 @@ package teamproject.wipeout.game.farm;
 
 import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.networking.state.FarmState;
+import teamproject.wipeout.networking.state.MarketState;
+import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Class used as a data container for a {@code FarmEntity}.
  */
-public class FarmData {
+public class FarmData implements StateUpdatable<FarmState> {
 
     /** Number of rows on any farm */
     public static int FARM_ROWS = 3;
     /** Number of columns on any farm */
     public static int FARM_COLUMNS = 6;
 
-    public Integer playerID;
+    public final Integer farmID;
+    public final Integer playerID;
 
     protected final ArrayList<ArrayList<FarmItem>> items;
+
+    private final ItemStore itemStore;
 
     private final HashSet<Consumer<FarmItem>> customGrowthDelegates;
     private final Consumer<FarmItem> growthDelegate;
@@ -32,7 +40,8 @@ public class FarmData {
      *
      * @param playerID Player's ID
      */
-    public FarmData(Integer playerID) {
+    public FarmData(Integer farmID, Integer playerID, ItemStore itemStore) {
+        this.farmID = farmID;
         this.playerID = playerID;
 
         this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);
@@ -41,12 +50,59 @@ public class FarmData {
             this.items.add(newRow);
         }
 
+        this.itemStore = itemStore;
+
         this.customGrowthDelegates = new HashSet<Consumer<FarmItem>>();
         this.growthDelegate = (farmItem) -> {
             for (Consumer<FarmItem> customDelegate : this.customGrowthDelegates) {
                 customDelegate.accept(farmItem);
             }
         };
+    }
+
+    /**
+     * Gets the current state of the farm.
+     *
+     * @return Current {@link FarmState}
+     */
+    public FarmState getCurrentState() {
+        return new FarmState(this.farmID, this.items);
+    }
+
+    /**
+     * Updates the farm based on a given {@link FarmState}.
+     *
+     * @param farmState New state of the farm
+     */
+    public void updateFromState(FarmState farmState) {
+        List<List<Integer>> newItems = farmState.items;
+        for (int r = 0; r < this.items.size(); r++) {
+            for (int c = 0; c < this.items.get(r).size(); c++) {
+
+                FarmItem currentFarmItem = this.items.get(r).get(c);
+                Integer newItemID = newItems.get(r).get(c);
+
+                if (currentFarmItem != null && newItemID == null) {
+                    Item currentItem = currentFarmItem.get();
+
+                    if (currentItem != null) {
+                        this.destroyItemAt(r, c);
+                    }
+
+                }
+
+                if (newItemID != null) {
+                    this.placeItem(this.itemStore.getItem(newItemID), r, c);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return {@code int} number of rows of the farm.
+     */
+    public int getNumberOfRows() {
+        return this.items.size();
     }
 
     /**
@@ -167,6 +223,29 @@ public class FarmData {
         return true;
     }
 
+    public void destroyItemAt(int row, int column) {
+        FarmItem farmItem = this.itemAt(row, column);
+        if (farmItem == null) {
+            return;
+        }
+        Item pickedItem = farmItem.get();
+
+        // Handles oversized items
+        PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
+        int plantWidth = plant.width;
+        int plantHeight= plant.height;
+        if (plantWidth > 1 || plantHeight > 1) {
+            int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
+            if (actualPosition == null) {
+                this.fillSquares(null, row, column, plantWidth, plantHeight);
+            } else {
+                this.fillSquares(null, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
+            }
+        } else {
+            this.items.get(row).set(column, null);
+        }
+    }
+
     /**
      * Checks if a {@link FarmItem} at a given position can be picked.
      *
@@ -199,19 +278,7 @@ public class FarmData {
         Item pickedItem = farmItem.getKey().get();
 
         // Handles oversized items
-        PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
-        int plantWidth = plant.width;
-        int plantHeight= plant.height;
-        if (plantWidth > 1 || plantHeight > 1) {
-            int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
-            if (actualPosition == null) {
-                this.fillSquares(null, row, column, plantWidth, plantHeight);
-            } else {
-                this.fillSquares(null, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
-            }
-        } else {
-            this.items.get(row).set(column, null);
-        }
+        this.destroyItemAt(row, column);
 
         return pickedItem;
     }

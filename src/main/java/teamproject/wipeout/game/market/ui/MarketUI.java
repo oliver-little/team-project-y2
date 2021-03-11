@@ -32,7 +32,7 @@ import teamproject.wipeout.util.resources.ResourceType;
 public class MarketUI extends AnchorPane {
 
     public Runnable onUIClose;
-    
+
     private Pane parent;
 
     public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager) {

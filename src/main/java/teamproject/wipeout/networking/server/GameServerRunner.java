@@ -1,5 +1,7 @@
 package teamproject.wipeout.networking.server;
 
+import com.google.gson.Gson;
+import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
 
 import java.io.*;
@@ -32,17 +34,23 @@ public class GameServerRunner {
             throw new ServerRunningException(this.serverName + " - server is already running!");
         }
 
-        String javaHome = System.getProperty("java.home");
+        String javaHome = System.getProperty("java.home").replace("%20", " ");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String classpath = ownClasspath + this.getClasspathSeparator() + javafxGraphicsClasspath;
+        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String classpath =  ownClasspath + this.getClasspathSeparator() +
+                            javafxGraphicsClasspath + this.getClasspathSeparator() +
+                            javafxBeansClasspath + this.getClasspathSeparator() +
+                            gsonClasspath;
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);
 
         ProcessBuilder sProcessBuilder = new ProcessBuilder(theCommand);
         sProcessBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        //sProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 
         Process newProcess = sProcessBuilder.start();
 
