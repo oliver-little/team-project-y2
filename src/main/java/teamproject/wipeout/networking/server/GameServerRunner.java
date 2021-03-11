@@ -36,12 +36,12 @@ public class GameServerRunner {
             throw new ServerRunningException(this.serverName + " - server is already running!");
         }
 
-        String javaHome = System.getProperty("java.home");
+        String javaHome = System.getProperty("java.home").replace("%20", " ");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
+        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
         String classpath =  ownClasspath + this.getClasspathSeparator() +
                             javafxGraphicsClasspath + this.getClasspathSeparator() +
                             javafxBeansClasspath + this.getClasspathSeparator() +
