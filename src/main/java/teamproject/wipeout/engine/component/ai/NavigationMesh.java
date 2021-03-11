@@ -62,41 +62,32 @@ public class NavigationMesh {
             int i = 0;
             while (i < meshSquares.size()) {
                 NavigationSquare square = meshSquares.get(i);
-                boolean squareRemoved = false;
-                if (square.containsExclBoundaries(shape)) {
 
+                if (square.containsExclBoundaries(shape)) {
                     Point2D shapeTopLeft = new Point2D(shape.getX(), shape.getY());
                     Point2D shapeBottomRight = new Point2D(shape.getX() + shape.getWidth(), shape.getY() + shape.getHeight());
 
                     // Add square to left side only if shape starts after the left edge of the square
                     if (shapeTopLeft.getX() > square.topLeft.getX() && shapeTopLeft.getX() < square.bottomRight.getX()) {
-                        squareRemoved = true;
                         toAdd.add(new NavigationSquare(square.topLeft, new Point2D(shapeTopLeft.getX(), square.bottomRight.getY())));
                     }
                     // Add square to right side only if shape ends before the right edge of the square
                     if (shapeBottomRight.getX() < square.bottomRight.getX() && shapeBottomRight.getX() > square.topLeft.getX()) {
-                        squareRemoved = true;
                         toAdd.add(new NavigationSquare(new Point2D(shapeBottomRight.getX(), square.topLeft.getY()), square.bottomRight));
                     }
-                    
                     // Add square to top side only if shape starts after the top edge of the square
                     if (shapeTopLeft.getY() > square.topLeft.getY() && shapeTopLeft.getY() < square.bottomRight.getY()) {
-                        squareRemoved = true;
                         toAdd.add(new NavigationSquare(new Point2D(Math.max(shapeTopLeft.getX(), square.topLeft.getX()), square.topLeft.getY()), new Point2D(Math.min(shapeBottomRight.getX(), square.bottomRight.getX()), shapeTopLeft.getY())));
                     }
                     // Add square to bottom side only if shape ends before the bottom edge of the square
                     if (shapeBottomRight.getY() < square.bottomRight.getY() && shapeBottomRight.getY() > square.topLeft.getY()) {
-                        squareRemoved = true;
                         toAdd.add(new NavigationSquare(new Point2D(Math.max(shapeTopLeft.getX(), square.topLeft.getX()), shapeBottomRight.getY()), new Point2D(Math.min(shapeBottomRight.getX(), square.bottomRight.getX()), square.bottomRight.getY())));
                     }
 
-                    if (squareRemoved) {
-                        meshSquares.remove(i);
-                    }
+                    meshSquares.remove(i); 
                 
                 }
-                
-                if (!squareRemoved) {
+                else {
                     i++;
                 }
             }
