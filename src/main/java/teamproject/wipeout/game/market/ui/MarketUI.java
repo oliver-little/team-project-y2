@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
@@ -31,7 +32,7 @@ import teamproject.wipeout.util.resources.ResourceType;
 public class MarketUI extends AnchorPane {
 
     public Runnable onUIClose;
-    
+
     private Pane parent;
 
     public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager) {
@@ -73,11 +74,13 @@ public class MarketUI extends AnchorPane {
         tabPane.getTabs().addAll(seeds, plants, tools);
 
         Button close = new Button("X");
-        close.setOnAction(actionEvent -> {
+
+        close.addEventFilter(MouseEvent.MOUSE_CLICKED, actionEvent -> {
             if (this.onUIClose != null) {
                 this.onUIClose.run();
             }
             this.parent.getChildren().remove(this);
+            actionEvent.consume();
         });
 
         AnchorPane.setBottomAnchor(tabPane, 50.0);

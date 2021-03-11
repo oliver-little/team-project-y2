@@ -1,9 +1,9 @@
 package teamproject.wipeout.networking.server;
 
-import teamproject.wipeout.game.logic.PlayerState;
 import teamproject.wipeout.networking.data.GameUpdatable;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.threads.BackgroundThread;
 
 import java.io.EOFException;
@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Handler dealing with a client connection on the server.
@@ -24,7 +25,7 @@ import java.util.ArrayList;
  */
 public class GameClientHandler {
 
-    public final String clientID;
+    public final Integer clientID;
 
     protected final Socket clientSocket;
     protected final ObjectInputStream in;
@@ -39,7 +40,7 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     written to(= send updates) or when the client declines to connect.
      */
-    protected GameClientHandler(String serverID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
+    protected GameClientHandler(Integer serverID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
         this.clientSocket = socket;
         this.updater = updater;
 
@@ -67,18 +68,10 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     *                     written to(= send updates) or when the client declines to connect.
      */
-    static public GameClientHandler allowConnection(String serverID, Socket socket, GameUpdatable updater)
+    static public GameClientHandler allowConnection(Integer serverID, Socket socket, GameUpdatable updater)
             throws IOException, ClassNotFoundException {
 
         GameClientHandler newInstance = new GameClientHandler(serverID, socket, updater);
-
-        Object firstObject = newInstance.in.readObject();
-        if (firstObject != null) {
-            GameUpdate firstGameUpdate = (GameUpdate) firstObject;
-            if (firstGameUpdate.type == GameUpdateType.PLAYER_STATE) {
-                updater.updateWith((GameUpdate) firstObject);
-            }
-        }
 
         newInstance.startReceivingUpdates();
 
@@ -91,9 +84,9 @@ public class GameClientHandler {
      * @param socket {@link Socket} representing the connection with the client.
      * @throws IOException Network problem
      */
-    static public void denyConnection(Socket socket) throws IOException {
+    static public void denyConnection(Socket socket, Integer serverID) throws IOException {
         ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-        GameUpdate decline = new GameUpdate(GameUpdateType.DECLINE, socket.getInetAddress().getHostAddress(), null);
+        GameUpdate decline = new GameUpdate(GameUpdateType.DECLINE, serverID, null);
         outputStream.writeObject(decline);
     }
 
@@ -105,7 +98,13 @@ public class GameClientHandler {
         new BackgroundThread(() -> {
             while (!this.clientSocket.isClosed()) {
                 try {
-                    GameUpdate receivedUpdate = (GameUpdate) this.in.readObject();
+                    GameUpdate receivedUpdate = null;
+                    Object object = this.in.readObject();
+                    if (object instanceof GameUpdate) {
+                        receivedUpdate = (GameUpdate) object;
+                    } else {
+                        continue;
+                    }
                     this.updater.updateWith(receivedUpdate);
 
                     if (receivedUpdate.type == GameUpdateType.DISCONNECT) {
@@ -117,14 +116,7 @@ public class GameClientHandler {
                     break;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (!this.clientSocket.isClosed()) {
-                        try {
-                            this.in.reset();
-
-                        } catch (IOException resetException) {
-                            exception.printStackTrace();
-                            resetException.printStackTrace();
-                            break;
-                        }
+                        exception.printStackTrace();
                     } else {
                         break;
                     }
@@ -140,7 +132,7 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code GameUpdate} cannot be sent.
      */
     public void updateWith(GameUpdate update) throws IOException {
-        this.out.writeUnshared(update);
+        this.out.writeObject(update);
     }
 
     /**
@@ -150,9 +142,9 @@ public class GameClientHandler {
      * @param playerStates {@code ArrayList<PlayerState>} to be sent to the client.
      * @throws IOException Thrown when the {@code ArrayList<PlayerState>} cannot be sent.
      */
-    public void updateWith(ArrayList<PlayerState> playerStates) throws IOException {
+    public void updateWith(Collection<PlayerState> playerStates) throws IOException {
         for (PlayerState playerState : playerStates) {
-            this.out.writeUnshared(new GameUpdate(playerState));
+            this.out.writeObject(new GameUpdate(playerState));
         }
     }
 
@@ -166,7 +158,7 @@ public class GameClientHandler {
     public void closeConnection(boolean serverSide) throws IOException {
         if (serverSide) {
             GameUpdate disconnect = new GameUpdate(GameUpdateType.DISCONNECT, this.clientID);
-            this.out.writeUnshared(disconnect);
+            this.out.writeObject(disconnect);
         }
 
         if (!this.clientSocket.isClosed()) {

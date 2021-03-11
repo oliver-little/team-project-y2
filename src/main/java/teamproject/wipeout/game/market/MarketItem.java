@@ -153,7 +153,6 @@ public class MarketItem {
      * Called when an item is bought/sold from the market. Updates the prices of the item based on the hyperbolic sine function.
      */
     private void updatePrices() {
-      
         double newCostDeviation = costFunction(this.quantityDeviation.get());
 
         this.currentBuyPrice.set(Math.max(0.01, newCostDeviation + defaultBuyPrice.get()));

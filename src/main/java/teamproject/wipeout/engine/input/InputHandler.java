@@ -6,6 +6,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,8 @@ import java.util.Set;
  * @see InputClickableAction
  */
 public class InputHandler {
+
+    public MouseHoverSystem mouseHoverSystem;
 
     private final Scene inputScene;
     private boolean disableInput;

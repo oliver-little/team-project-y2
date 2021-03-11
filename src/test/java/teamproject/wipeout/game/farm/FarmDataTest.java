@@ -53,7 +53,7 @@ class FarmDataTest {
         finishedFarmItem.growth = finishedFarmItem.getGrowthRate() * finishedFarmItem.getMaxGrowthStage();
         dummyFarmItem = new FarmItem(null, 0.1);
 
-        farmData = new FarmData(1);
+        farmData = new FarmData(1, 1, null);
         farmData.addGrowthDelegate(customGrowthDelegate);
         farmData.items.get(0).set(0, farmItem);
         farmData.items.get(0).set(1, finishedFarmItem);

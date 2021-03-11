@@ -1,17 +1,25 @@
 package teamproject.wipeout.networking.client;
 
-import teamproject.wipeout.game.logic.PlayerState;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.server.GameServer;
+import teamproject.wipeout.networking.state.FarmState;
+import teamproject.wipeout.networking.state.MarketOperationResponse;
+import teamproject.wipeout.networking.state.MarketState;
+import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.threads.ServerThread;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * {@code GameClient} class represents the client-part of the client-server network architecture.
@@ -22,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class GameClient {
 
-    public final String id;
+    public final Integer id;
 
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
@@ -30,18 +38,24 @@ public class GameClient {
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
-    protected final ArrayList<PlayerState> playerStates;
+    public NewPlayerAction newPlayerAction;
+    public final HashMap<Integer, Player> players;
+    protected Map<Integer, FarmEntity> farmEntities;
+    public Market market;
+
+    public Consumer<Integer> myFarmIDReceived;
 
     /**
      * Default initializer for {@code GameClient}
      *
      * @param id ID of the current player (= client)
      */
-    protected GameClient(String id) {
+    protected GameClient(Integer id) {
         this.id = id;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
-        this.playerStates = new ArrayList<PlayerState>();
+        this.players = new HashMap<Integer, Player>();
+        this.farmEntities = null;
     }
 
     /**
@@ -54,19 +68,6 @@ public class GameClient {
     }
 
     /**
-     * {@code playerStates} variable getter. Can be also an empty {@code ArrayList}.
-     *
-     * @return {@code ArrayList<PlayerState>} of the latest available player states received from the game server.
-     * @see PlayerState
-     */
-    public ArrayList<PlayerState> getPlayerStates() {
-        // Return playerStates without the client's playerState
-        // Predicate<PlayerState> predicate = (playerState) -> !playerState.getID().equals(this.id);
-        // Stream<PlayerState> filteredPlayers = this.playerStates.stream().filter(predicate);
-        return this.playerStates; // filteredPlayers.collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
      * Connects to a specified game server, sends client's ID and starts
      * listening for incoming updates({@link GameUpdate}) from the game server.
      * It does not allow the client to connect to multiple game servers simultaneously.
@@ -75,8 +76,14 @@ public class GameClient {
      * @param server      {@link InetAddress} of the game server you want to connect to.
      * @throws IOException Problem with establishing a connection to the given server.
      */
-    public static GameClient openConnection(PlayerState playerState, InetSocketAddress server) throws IOException, ClassNotFoundException {
-        GameClient client = new GameClient(playerState.getID());
+    public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Integer> myFarmIDReceived, NewPlayerAction newPlayerAction)
+            throws IOException, ClassNotFoundException {
+
+        GameClient client = new GameClient(player.playerID);
+        client.myFarmIDReceived = myFarmIDReceived;
+        client.newPlayerAction = newPlayerAction;
+        client.players.put(player.playerID, player);
+        client.farmEntities = farms;
 
         // Connect the socket
         client.clientSocket.connect(server, 3000); // 3s timeout
@@ -94,7 +101,6 @@ public class GameClient {
 
         // Send my ID and my latest playerState
         client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id));
-        client.send(new GameUpdate(playerState));
 
         client.startReceivingUpdates();
 
@@ -161,22 +167,45 @@ public class GameClient {
      * Starts listening to updates coming from the game server
      * on a separate {@link ServerThread}.
      */
-    private void startReceivingUpdates() {
+    public void startReceivingUpdates() {
         new ServerThread(() -> {
             while (this.isActive.get()) {
                 try {
-                    GameUpdate receivedUpdate = (GameUpdate) in.readObject();
+                    GameUpdate receivedUpdate = null;
+                    Object object = this.in.readObject();
+                    if (object instanceof GameUpdate) {
+                        receivedUpdate = (GameUpdate) object;
+                    } else {
+                        continue;
+                    }
+
                     switch (receivedUpdate.type) {
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
+                        case FARM_STATE:
+                            FarmState fState = (FarmState) receivedUpdate.content;
+                            this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
+                            break;
+                        case FARM_ID:
+                            Integer farmID = (Integer) receivedUpdate.content;
+                            this.myFarmIDReceived.accept(farmID);
+                            break;
+                        case MARKET_STATE:
+                            MarketState mState = (MarketState) receivedUpdate.content;
+                            this.market.updateFromState(mState);
+                            break;
+                        case RESPONSE:
+                            MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
+                            this.market.responseArrived(response);
+                            break;
                         case DISCONNECT:
-                            String disconnectedClientID = receivedUpdate.originClientID;
+                            Integer disconnectedClientID = receivedUpdate.originClientID;
                             if (disconnectedClientID.equals(this.id)) {
                                 this.closeConnection(false);
                                 return;
                             } else {
-                                this.playerStates.removeIf((state) -> state.getID().equals(disconnectedClientID));
+                                this.players.remove(disconnectedClientID);
                             }
                             break;
                         default:
@@ -190,14 +219,7 @@ public class GameClient {
                     break;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (this.isActive.get()) {
-                        try {
-                            this.in.reset();
-
-                        } catch (IOException resetException) {
-                            exception.printStackTrace();
-                            resetException.printStackTrace();
-                            break;
-                        }
+                        exception.printStackTrace();
                     } else {
                         break;
                     }
@@ -212,13 +234,13 @@ public class GameClient {
      * @param state {@code PlayerState} to be processed.
      */
     private void handlePlayerStateUpdate(PlayerState state) {
-        int pIndex = this.playerStates.indexOf(state);
-        if (pIndex < 0) {
-            // Add to the ArrayList if the state is totally new
-            this.playerStates.add(state);
+        if (!this.players.containsKey(state.getPlayerID())) {
+            Player newPlayer = this.newPlayerAction.createWith(state);
+            if (newPlayer != null) {
+                this.players.put(newPlayer.playerID, newPlayer);
+            }
         } else {
-            // Otherwise, update an existing state in the ArrayList
-            this.playerStates.set(pIndex, state);
+            this.players.get(state.getPlayerID()).updateFromState(state);
         }
     }
 

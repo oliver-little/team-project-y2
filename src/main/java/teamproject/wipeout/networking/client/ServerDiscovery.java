@@ -108,14 +108,14 @@ public class ServerDiscovery {
 
             try {
                 while (this.isActive.get()) {
-                    multicastSocket.receive(packet);
+                    this.multicastSocket.receive(packet);
                     String serverName = new String(nameBytes).trim();
 
                     if (!this.foundServers.containsKey(serverName)) {
                         InetAddress serverAddress = packet.getAddress();
                         InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, GameServer.GAME_PORT);
                         this.foundServers.put(serverName, socketAddress);
-                        onDiscovery.discovered(serverName, serverAddress);
+                        this.onDiscovery.discovered(serverName, socketAddress);
                     }
                 }
 

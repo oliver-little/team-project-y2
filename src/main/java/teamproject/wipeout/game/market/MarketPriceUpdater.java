@@ -24,10 +24,14 @@ public class MarketPriceUpdater {
 
     private ScheduledExecutorService executor;
 
-    public MarketPriceUpdater(Market market) {
+    private boolean isLocal;
+
+    public MarketPriceUpdater(Market market, boolean local) {
         this.market = market;
-        executor = Executors.newSingleThreadScheduledExecutor();
-        start();
+        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.start();
+
+        this.isLocal = local;
     }
 
     public void start() {
@@ -38,39 +42,51 @@ public class MarketPriceUpdater {
         executor.shutdown();
     }
 
-    /** 
+    /**
      * Platform.runLater wrapper for updatePrices to prevent JavaFX error
      */
     private Runnable runUpdatePrices = () -> {
-        Platform.runLater(this.updatePrices);
+        if (this.isLocal) {
+            Platform.runLater(this.updatePrices);
+        } else {
+            this.updatePrices.run();
+        }
     };
 
     /**
      * This function runs once the program launches and is run every set time interval, this function updates the market quantity deviations, resulting in the prices eventually returning to equlibirum.
      */
     private Runnable updatePrices = () -> {
-        for (MarketItem item : market.stockDatabase.values()) {
+        boolean stateChanged = false;
+
+        for (MarketItem item : this.market.stockDatabase.values()) {
             double quantityDeviation = item.getQuantityDeviation();
 
             if (Double.compare(quantityDeviation, 0) == 0) {
                 continue;
-            }
-            else if (quantityDeviation < 0) {
+
+            } else if (quantityDeviation < 0) {
                 if (quantityDeviation > negQuantityDeviationStep) {
                     item.setQuantityDeviation(0);
-                }
-                else {
+
+                } else {
                     item.incrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
                 }
-            }
-            else {
+
+            } else {
                 if (quantityDeviation < QUANTITYDEVIATIONSTEP) {
                     item.setQuantityDeviation(0);
-                }
-                else {
+
+                } else {
                     item.decrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
                 }
             }
+            stateChanged = true;
+        }
+
+        if (stateChanged) {
+            this.market.sendMarketUpdate();
         }
     };
+
 }

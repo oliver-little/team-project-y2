@@ -9,6 +9,7 @@ public class InventoryComponent implements ItemComponent {
 
     public final String spriteSheetName;
     public final String spriteSetName;
+    public final int seedsItemID;
     public final int stackSizeLimit;
 
     /**
@@ -19,6 +20,14 @@ public class InventoryComponent implements ItemComponent {
     public InventoryComponent(Map<String, Object> data) {
         this.spriteSheetName = (String) data.get("spriteSheetName");
         this.spriteSetName = (String) data.get("spriteSetName");
+
+        Double rawSeedsID = (Double) data.get("seedsItemID");
+        if (rawSeedsID != null) {
+            this.seedsItemID = rawSeedsID.intValue();
+        }  else {
+            this.seedsItemID = -1;
+        }
+
         this.stackSizeLimit = ((Double) data.get("stackSizeLimit")).intValue();
     }
 

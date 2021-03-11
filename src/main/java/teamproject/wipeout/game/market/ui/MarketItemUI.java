@@ -24,6 +24,8 @@ public class MarketItemUI extends VBox {
     public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
+        final double doubleCompare = 0.0000001;
+
         this.getStyleClass().add("vbox");
         this.setPrefWidth(300);
 
@@ -72,7 +74,7 @@ public class MarketItemUI extends VBox {
         MarketItem marketItem = market.stockDatabase.get(item.id);
 
         Button buy = new Button();
-        buy.setPrefWidth(75);
+        buy.setPrefWidth(85);
 
         // Set button text to update with quantity and buy price changes
         buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createStringBinding(() -> {
@@ -84,18 +86,26 @@ public class MarketItemUI extends VBox {
             player.buyItem(market, item.id, quantity.getValue());
         });
 
+
         Button sell = new Button();
-        sell.setPrefWidth(75);
+        sell.setPrefWidth(85);
 
-        // Set sell price to update with quantity and sell price changes
-        sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
-            return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
-        }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
+        //Check if the item is sellable.
+        if (Math.abs(marketItem.getDefaultSellPrice() - (-1)) < doubleCompare) {
+            sell.setDisable(true);
+            sell.textProperty().bind(Bindings.concat("Sell: 0.00"));
+        }
+        else {
+            // Set sell price to update with quantity and sell price changes
+            sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
+                return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
+            }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
 
-        // Set sell click event
-        sell.setOnAction((e) -> {
-            player.sellItem(market, item.id, quantity.getValue());
-        });
+            // Set sell click event
+            sell.setOnAction((e) -> {
+                player.sellItem(market, item.id, quantity.getValue());
+            });
+        }
 
         buySellLayout.getChildren().addAll(buy, sell, quantity);
 

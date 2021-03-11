@@ -5,6 +5,7 @@ import teamproject.wipeout.networking.server.GameServer;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,12 +17,12 @@ class ServerDiscoveryTest {
 
     private ServerDiscovery serverDiscovery;
     private AtomicReference<String> serverName;
-    private AtomicReference<InetAddress> serverAddress;
+    private AtomicReference<InetSocketAddress> serverAddress;
 
     @BeforeAll
     void initializeServerDiscovery() {
         this.serverName = new AtomicReference<String>(null);
-        this.serverAddress = new AtomicReference<InetAddress>(null);
+        this.serverAddress = new AtomicReference<InetSocketAddress>(null);
 
         try {
             this.serverDiscovery = new ServerDiscovery((name, address) -> {
@@ -37,7 +38,7 @@ class ServerDiscoveryTest {
     @BeforeEach
     void setUp() throws IOException, ClassNotFoundException {
         this.serverName = new AtomicReference<String>(null);
-        this.serverAddress = new AtomicReference<InetAddress>(null);
+        this.serverAddress = new AtomicReference<InetSocketAddress>(null);
     }
 
     @AfterEach
@@ -54,7 +55,7 @@ class ServerDiscoveryTest {
         Assertions.assertTrue(this.serverDiscovery.foundServers.isEmpty());
 
         String testServerName = "TestServer#123";
-        InetAddress testServerAddress = InetAddress.getLoopbackAddress();
+        InetSocketAddress testServerAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), GameServer.GAME_PORT);
         this.serverDiscovery.onDiscovery.discovered(testServerName, testServerAddress);
 
         Assertions.assertEquals(testServerName, this.serverName.get());
@@ -79,7 +80,7 @@ class ServerDiscoveryTest {
 
             Thread.sleep(50);
 
-        } catch (IOException | InterruptedException exception) {
+        } catch (IOException | InterruptedException | ReflectiveOperationException exception) {
             Assertions.fail(exception.getMessage());
         }
 

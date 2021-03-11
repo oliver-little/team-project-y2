@@ -20,7 +20,7 @@ public class MarketPricingTest {
 
     @BeforeEach
     public void setup() {
-        market = assertDoesNotThrow(() -> new Market(itemStore));
+        market = assertDoesNotThrow(() -> new Market(itemStore, false));
     }
     
     @Test
@@ -30,7 +30,7 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
@@ -62,7 +62,7 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
@@ -108,7 +108,7 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
@@ -159,7 +159,7 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
@@ -216,7 +216,7 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
 
         assertEquals(-60, marketItem.getQuantityDeviation());
 

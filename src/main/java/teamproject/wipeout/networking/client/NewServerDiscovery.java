@@ -1,6 +1,7 @@
 package teamproject.wipeout.networking.client;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * {@code NewServerDiscovery} is a functional interface representing an action that will be executed
@@ -14,5 +15,5 @@ public interface NewServerDiscovery {
      * @param name   Name of the discovered server
      * @param server {@link InetAddress} of the discovered server
      */
-    void discovered(String name, InetAddress server);
+    void discovered(String name, InetSocketAddress server);
 }

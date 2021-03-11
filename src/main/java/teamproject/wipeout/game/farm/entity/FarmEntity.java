@@ -15,6 +15,8 @@ import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
+import teamproject.wipeout.engine.input.InputKeyAction;
+import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.FarmItem;
@@ -22,10 +24,17 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
+import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.state.FarmState;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Defines a farm in the game.
@@ -35,16 +44,22 @@ public class FarmEntity extends GameEntity {
     public static int SQUARE_SIZE = 32;
     public static double SKEW_FACTOR = 0.89;
 
-    public FarmData data;
+    public final Integer farmID;
 
-    public Point2D size;
-    public Transform transform;
+    private FarmData data;
 
-    protected SpriteManager spriteManager;
-    protected ItemStore itemStore;
+    protected Transform transform;
+    protected Point2D size;
+
+    private final SpriteManager spriteManager;
+    private final ItemStore itemStore;
+
+    private final HashSet<ItemsRowEntity> rowEntities;
 
     private Item placingItem;
     private SeedEntity seedEntity;
+    private Consumer<Item> abortPlacing;
+
     private DestroyerEntity destroyerEntity;
     private Consumer<FarmItem> destroyerDelegate;
 
@@ -53,21 +68,22 @@ public class FarmEntity extends GameEntity {
      *
      * @param scene The GameScene this entity is part of
      * @param location Location of the farm
-     * @param playerID Player's ID this entity belongs to
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowEntity}
      * @param itemStore {@link ItemStore} for the {@link ItemsRowEntity}
      */
-    public FarmEntity(GameScene scene, Point2D location, Integer playerID, SpriteManager spriteManager, ItemStore itemStore) {
+    public FarmEntity(GameScene scene, Integer farmID, Point2D location, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
-        scene.addEntity(this);
-        this.data = new FarmData(playerID);
+        this.farmID = farmID;
 
-        this.transform = new Transform(location, 0.0);
+        this.transform = new Transform(location, 0.0, 0);
+
         Point2D squareGrid = new Point2D(FarmData.FARM_COLUMNS, FarmData.FARM_ROWS);
         this.size = squareGrid.multiply(SQUARE_SIZE).add(SQUARE_SIZE * 2, SQUARE_SIZE * 2);
 
         this.spriteManager = spriteManager;
         this.itemStore = itemStore;
+
+        this.rowEntities = new HashSet<ItemsRowEntity>();
 
         this.placingItem = null;
         this.seedEntity = null;
@@ -75,18 +91,64 @@ public class FarmEntity extends GameEntity {
         this.destroyerDelegate = null;
 
         this.addComponent(this.transform);
-        this.addComponent(new RenderComponent(true, new FarmRenderer(this.size, spriteManager)));
-        this.addComponent(this.makeClickable());
+        this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, spriteManager)));
+
+        this.data = new FarmData(-13, null, this.itemStore);
 
         //Create row entities for the rows of the farm
-        for (int i = 0; i < squareGrid.getY(); i++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(scene, this.data.getItemsInRow(i), this.data.getGrowthDelegate(), spriteManager, itemStore);
-            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * i));
+        for (int r = 0; r < this.data.getNumberOfRows(); r++) {
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager, this.itemStore);
+            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
             rowEntity.setParent(this);
             this.addChild(rowEntity);
+            this.rowEntities.add(rowEntity);
         }
+    }
+
+    public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
+        this.removePlayer();
+
+        this.data = new FarmData(this.farmID, playerID, this.itemStore);
+
+        //Create row entities for the rows of the farm
+        for (int r = 0; r < this.data.getNumberOfRows(); r++) {
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager, this.itemStore);
+            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
+            rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
+
+            rowEntity.setParent(this);
+            this.addChild(rowEntity);
+            this.rowEntities.add(rowEntity);
+        }
+
+        if (activePlayer) {
+            this.addComponent(this.makeClickable(clientFunction));
+        }
+    }
+
+    private void removePlayer() {
+        this.data = null;
+
+        //Delete row entities of the farm
+        for (GameEntity removeEntity : this.rowEntities) {
+            this.removeChild(removeEntity);
+            removeEntity.destroy();
+        }
+        this.rowEntities.clear();
+
+        this.removeComponent(Clickable.class);
+        if (this.isPlacingItem()) {
+            this.stopPlacingItem(false);
+        }
+        if (this.isPickingItem()) {
+            this.stopPickingItem();
+        }
+    }
+
+    public void updateFromState(FarmState farmState) {
+        this.data.updateFromState(farmState);
     }
 
     /**
@@ -96,8 +158,9 @@ public class FarmEntity extends GameEntity {
      * @param mousePosition Current {@link Point2D} position of the mouse cursor
      * @throws FileNotFoundException Thrown if the sprites for the {@code Item} cannot be found.
      */
-    public void startPlacingItem(Item item, Point2D mousePosition) throws FileNotFoundException {
+    public void startPlacingItem(Item item, Point2D mousePosition, Consumer<Item> abortPlacing) throws FileNotFoundException {
         this.placingItem = item;
+        this.abortPlacing = abortPlacing;
 
         // Create seed entity for the item being placed and display it at the mouse coordinates
         this.seedEntity = new SeedEntity(this.scene, this.placingItem, this.spriteManager);
@@ -129,9 +192,15 @@ public class FarmEntity extends GameEntity {
     /**
      * Stops placing the item and removes the {@link Hoverable} component.
      */
-    public void stopPlacingItem() {
+    public void stopPlacingItem(boolean successful) {
         this.removeComponent(Hoverable.class);
+
+        if (!successful) {
+            this.abortPlacing.accept(this.placingItem);
+        }
+        this.abortPlacing = null;
         this.placingItem = null;
+
         if (this.seedEntity == null) {
             return;
         }
@@ -325,13 +394,13 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
-     * Rescales a given X, Y scene coordinates to "square" coordinates at the farm.
+     * Rescales a given X, Y scene coordinates to position coordinates at the farm.
      *
      * @param x X coordinate to be rescaled
      * @param y Y coordinate to be rescaled
-     * @return Rescaled point
+     * @return Rescaled point = row anc column position at the farm
      */
-    protected Point2D rescaleCoordinates(double x, double y) {
+    public Point2D rescaleCoordinates(double x, double y) {
         double startX = this.transform.getWorldPosition().getX() + SQUARE_SIZE;
         double startY = this.transform.getWorldPosition().getY() + SQUARE_SIZE;
         double itemX = x - startX;
@@ -343,21 +412,48 @@ public class FarmEntity extends GameEntity {
         return new Point2D(itemColumn, itemRow);
     }
 
+    public InputKeyAction onKeyPickAction(MouseHoverSystem mouseHoverSystem) {
+        return () -> {
+            if (this.isPlacingItem()) {
+                this.stopPlacingItem(false);
+            }
+
+            if (this.isPickingItem()) {
+                this.stopPickingItem();
+
+            } else {
+                this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
+            }
+        };
+    }
+
     /**
      * Creates a {@code Clickable} component for the farm entity.
      *
      * @return {@link Clickable} component
      */
-    private Clickable makeClickable() {
+    private Clickable makeClickable(Supplier<GameClient> clientFunction) {
         Clickable clickable = new Clickable((x, y, button, entity) -> {
+            boolean stateChanged = false;
+
             if (this.isPickingItem()) {
                 this.pickItemAt(x, y);
                 this.stopPickingItem();
-                return;
+                stateChanged = true;
+
+            } else if (this.placingItem != null && this.placeItem(placingItem, x, y)) {
+                this.stopPlacingItem(true);
+                stateChanged = true;
             }
 
-            if (this.placingItem != null && this.placeItem(placingItem, x, y)) {
-                this.stopPlacingItem();
+            GameClient client = clientFunction.get();
+            if (client != null && stateChanged) {
+                try {
+                    client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.id, this.data.getCurrentState()));
+
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
             }
         });
         clickable.setEntity(this);

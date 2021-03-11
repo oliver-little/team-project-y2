@@ -1,6 +1,8 @@
 package teamproject.wipeout.engine.component.physics;
 
 
+import java.util.ArrayList;
+
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -64,7 +66,12 @@ public class CollisionResolutionComponent implements GameComponent {
     	}
 
     }
-
+    
+    public static void resolveCollision2(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
+    	for(int i=0; i<p.size();i++) {
+    		resolveCollision(g1,g2,p.get(i));
+    	}
+    }
    
     
 }

@@ -19,6 +19,13 @@ public class FarmRenderer implements Renderable {
     public FarmRenderer(Point2D farmSize, SpriteManager spriteManager) {
         this.farmSize = farmSize;
         this.spriteManager = spriteManager;
+
+        try {
+            this.spriteManager.loadSpriteSheet("gameworld/soil-descriptor.json", "gameworld/soil.png");
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public double getWidth() {
@@ -87,7 +94,6 @@ public class FarmRenderer implements Renderable {
      * @throws IOException If the sprite does not exist.
      */
     protected Image getFarmTile(String tile) throws IOException {
-        this.spriteManager.loadSpriteSheet("gameworld/soil-descriptor.json", "gameworld/soil.png");
         return this.spriteManager.getSpriteSet("soil", tile)[0];
     }
 

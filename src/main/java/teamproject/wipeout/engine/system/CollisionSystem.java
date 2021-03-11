@@ -41,10 +41,10 @@ public class CollisionSystem implements GameSystem {
         for(int i=0; i < entities.size(); i++) {
             for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
-                	Pair<Shape, Shape> p = null;
-					if((p  = HitboxComponent.collides(entities.get(i), entities.get(j)))!=null) {
+                	ArrayList<Pair<Shape, Shape>> p = null;
+					if((p = HitboxComponent.collides2(entities.get(i), entities.get(j))) != null) {
                 		//System.out.println("Collision");
-						CollisionResolutionComponent.resolveCollision(entities.get(i),entities.get(j), p);
+						CollisionResolutionComponent.resolveCollision2(entities.get(i),entities.get(j), p);
                                         
                 	}
             	}
