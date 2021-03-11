@@ -1,9 +1,11 @@
 package teamproject.wipeout.game.player;
 
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -15,16 +17,23 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 //import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.input.InputKeyAction;
+import teamproject.wipeout.engine.input.InputMouseAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.player.invPair;
 
 public class InventoryUI{
@@ -84,13 +93,6 @@ public class InventoryUI{
 	}
 	
 	/**
-	 * @return array of rectangles (e.g. for adding action listeners to)
-	 */
-	public Rectangle[] getRectangles() {
-		return rectangles;
-	}
-	
-	/**
 	 * highlights selected slot (changes border colour)
 	 * @param slot index of slot to be selected
 	 */
@@ -98,6 +100,80 @@ public class InventoryUI{
 		rectangles[this.currentSelection].setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 		this.currentSelection = slot;
 		rectangles[slot].setStyle("-fx-stroke: red; -fx-stroke-width: 3;");
+	}
+
+	/**
+	 * Sets up the inventory mouse input.
+	 *
+	 * @param world {@link WorldEntity} of the {@code GameScene}
+	 * @return {@link EventHandler} handling the mouse click events.
+	 */
+	public void onMouseClick(WorldEntity world) {
+		for(int i = 0; i < MAX_SIZE; i++) {
+			int hold = i;
+			rectangles[i].setOnMouseClicked((event) -> {
+				FarmEntity myFarm = world.getMyFarm();
+				Player myPlayer = world.getMyPlayer();
+
+				if (myFarm.isPlacingItem()) {
+					myFarm.stopPlacingItem(false);
+					if (hold == myPlayer.selectedSlot) {
+						return;
+					}
+				}
+
+				int selectedItemID = myPlayer.selectSlot(hold);
+				if (selectedItemID < 0) {
+					return;
+				}
+
+				try {
+					Item selectedItem = itemStore.getItem(selectedItemID);
+					if (!selectedItem.hasComponent(PlantComponent.class)) {
+						return;
+					}
+					myPlayer.dropItem();
+					myFarm.startPlacingItem(selectedItem, new Point2D(event.getSceneX(), event.getSceneY()), (item) -> {
+						myPlayer.acquireItem(item.id);
+					});
+
+				} catch (FileNotFoundException exception) {
+					exception.printStackTrace();
+				}
+			});
+		}
+	}
+
+	/**
+	 * Sets up the inventory key input.
+	 *
+	 * @param gameScene {@link GameScene} of the {@code InventoryUI}
+	 * @param player {@link Player} who owns the inventory
+	 * @return {@link InputKeyAction} executed on a specified key event.
+	 */
+	public InputKeyAction dropOnKeyRelease(GameScene gameScene, Player player) {
+		return () -> {
+			int id = player.dropItem();
+			System.out.println("***itemID: " + id);
+			if(id != -1) {
+				GameEntity e = gameScene.createEntity();
+				Transform tr = player.getComponent(Transform.class);
+				e.addComponent(new Transform (tr.getPosition().getX(), tr.getPosition().getY()));
+				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.physics.Rectangle(0, -20, 20, 20)));
+				Item eItem = itemStore.getItem(id);
+				e.addComponent(new PickableComponent(eItem));
+				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);
+
+				try {
+					Image[] images = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
+					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));
+
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		};
 	}
 	
 	/**

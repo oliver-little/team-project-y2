@@ -1,5 +1,7 @@
 package teamproject.wipeout.networking.server;
 
+import com.google.gson.Gson;
+import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
 
 import java.io.*;
@@ -36,13 +38,19 @@ public class GameServerRunner {
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String classpath = ownClasspath + this.getClasspathSeparator() + javafxGraphicsClasspath;
+        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String classpath =  ownClasspath + this.getClasspathSeparator() +
+                            javafxGraphicsClasspath + this.getClasspathSeparator() +
+                            javafxBeansClasspath + this.getClasspathSeparator() +
+                            gsonClasspath;
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);
 
         ProcessBuilder sProcessBuilder = new ProcessBuilder(theCommand);
         sProcessBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        //sProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 
         Process newProcess = sProcessBuilder.start();
 

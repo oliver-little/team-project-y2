@@ -1,6 +1,6 @@
 package teamproject.wipeout.networking.data;
 
-import teamproject.wipeout.game.logic.PlayerState;
+import teamproject.wipeout.networking.state.PlayerState;
 
 import java.io.Serializable;
 
@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class GameUpdate implements Serializable {
 
     public final GameUpdateType type;
-    public final String originClientID;
+    public final Integer originClientID;
     public final Serializable content;
     public final long timestamp;
 
@@ -26,7 +26,7 @@ public class GameUpdate implements Serializable {
      * @param clientID ID of the client or server
      * @param content  Message(= object) to be sent which needs to implement {@link Serializable}
      */
-    public GameUpdate(GameUpdateType type, String clientID, Serializable content) {
+    public GameUpdate(GameUpdateType type, Integer clientID, Serializable content) {
         this.type = type;
         this.originClientID = clientID;
         this.content = content;
@@ -40,7 +40,7 @@ public class GameUpdate implements Serializable {
      * @param type     {@link GameUpdateType} of the message(= object)
      * @param clientID ID of the client or server
      */
-    public GameUpdate(GameUpdateType type, String clientID) {
+    public GameUpdate(GameUpdateType type, Integer clientID) {
         this.type = type;
         this.originClientID = clientID;
         this.content = null;
@@ -54,7 +54,7 @@ public class GameUpdate implements Serializable {
      */
     public GameUpdate(PlayerState playerState) {
         this.type = GameUpdateType.PLAYER_STATE;
-        this.originClientID = playerState.getID();
+        this.originClientID = playerState.getPlayerID();
         this.content = playerState;
         this.timestamp = playerState.getTimestamp();
     }

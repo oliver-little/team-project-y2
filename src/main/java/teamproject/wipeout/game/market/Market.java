@@ -1,27 +1,41 @@
 package teamproject.wipeout.game.market;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import javafx.application.Platform;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.TradableComponent;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
+import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.state.MarketOperationRequest;
+import teamproject.wipeout.networking.state.MarketOperationResponse;
+import teamproject.wipeout.networking.state.MarketState;
+import teamproject.wipeout.networking.state.StateUpdatable;
 
 /**
  * Defines the market in which players can buy and sell goods for. The market also regulates the quantites and prices of the goods for sale.
  */
-public class Market {
-
-    public ItemStore itemsForSale;
+public class Market implements StateUpdatable<MarketState> {
 
     public Map<Integer, MarketItem> stockDatabase;
+
+    public Supplier<Integer> serverIDGetter;
+    public Consumer<GameUpdate> serverUpdater;
+    public GameClient client;
+
+    private boolean isLocal;
+    private boolean waitingForResponse;
     
     /**
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
      */
-    public Market(ItemStore itemsForSale) {
-
-        this.itemsForSale = itemsForSale;
+    public Market(ItemStore itemsForSale, boolean local) {
 
         stockDatabase = new HashMap<>();
 
@@ -33,8 +47,43 @@ public class Market {
             MarketItem marketItem = new MarketItem(item.id, tradableComponent);
             stockDatabase.put(item.id, marketItem);
         }
+
+        isLocal = local;
+        waitingForResponse = false;
     }
-    
+
+    /**
+     * Gets the current state of the market.
+     *
+     * @return Current {@link MarketState}
+     */
+    public MarketState getCurrentState() {
+        return new MarketState(stockDatabase);
+    }
+
+    /**
+     * Updates the market based on a given {@link MarketState}.
+     *
+     * @param newState New state of the market
+     */
+    public void updateFromState(MarketState newState) {
+        Platform.runLater(() -> {
+            for (Map.Entry<Integer, Double> updatedStock : newState.items.entrySet()) {
+                MarketItem currentStock = this.stockDatabase.get(updatedStock.getKey());
+                currentStock.setQuantityDeviation(updatedStock.getValue());
+            }
+        });
+    }
+
+    /**
+     * Sets market property of being local (= does all price computing),
+     * or not local (= server-side computing).
+     *
+     * @param newIsLocal Local market property
+     */
+    public void setIsLocal(boolean newIsLocal) {
+        this.isLocal = newIsLocal;
+    }
     
     /**
      * This function is run when a player purchases an item from the market.
@@ -51,12 +100,20 @@ public class Market {
 
         MarketItem item = stockDatabase.get(id);
 
-        if (item.getDefaultSellPrice() < 0) { 
-            return quantity * item.getDefaultBuyPrice();
+        double totalCost;
+        if (item.getDefaultSellPrice() < 0) {
+            totalCost = quantity * item.getDefaultBuyPrice();
+        } else {
+            totalCost = calculateTotalCost(id, quantity, true);
         }
 
-        double totalCost = calculateTotalCost(id, quantity, true);
-        item.incrementQuantityDeviation(quantity);
+        if (isLocal) {
+            this.sendRequest(new MarketOperationRequest(id, totalCost, quantity, true));
+
+        } else {
+            item.incrementQuantityDeviation(quantity);
+            this.sendMarketUpdate();
+        }
 
         return totalCost;
     }
@@ -82,7 +139,20 @@ public class Market {
         }
 
         double totalCost = calculateTotalCost(id, quantity, false);
-        item.decrementQuantityDeviation(quantity);
+
+        if (isLocal) {
+            sendRequest(new MarketOperationRequest(id, totalCost, quantity, false));
+            waitingForResponse = true;
+            while (true) {
+                if (!waitingForResponse) {
+                    break;
+                }
+            }
+
+        } else {
+            item.decrementQuantityDeviation(quantity);
+            sendMarketUpdate();
+        }
 
         return totalCost;
     }
@@ -131,4 +201,43 @@ public class Market {
 
         return totalCost;
     }
+
+    /**
+     * Response from the server arrived.
+     * (Client-side method)
+     *
+     * @param response {@link MarketOperationResponse} of the server
+     */
+    public void responseArrived(MarketOperationResponse response) {
+        waitingForResponse = false;
+    }
+
+    /**
+     * (Server) sends a new market state to all clients.
+     * (Server-side method)
+     */
+    protected void sendMarketUpdate() {
+        if (serverUpdater != null) {
+            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), getCurrentState());
+            serverUpdater.accept(update);
+        }
+    }
+
+    /**
+     * (Client) sends a {@link MarketOperationRequest} to the server.
+     * (Client-side method)
+     *
+     * @param request Request for the server
+     */
+    private void sendRequest(MarketOperationRequest request) {
+        if (client != null) {
+            try {
+                client.send(new GameUpdate(GameUpdateType.REQUEST, client.id, request));
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
 }
