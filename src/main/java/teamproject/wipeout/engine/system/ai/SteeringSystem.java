@@ -26,7 +26,7 @@ public class SteeringSystem implements GameSystem{
         this.entityCollector.cleanup();
     }
 
-    public void accept(double timeStep) {
+    public void accept(Double timeStep) {
         List<GameEntity> entities = this.entityCollector.getEntities();
 
         for (GameEntity entity : entities) {
