@@ -69,6 +69,7 @@ public class App implements Controller {
     TaskEntity taskEntity;
 
     // Store systems for cleanup
+    Networker networker;
     RenderSystem renderer;
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
@@ -77,7 +78,7 @@ public class App implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     public void createContent() {
-        Networker networker = new Networker();
+        this.networker = new Networker();
 
         try {
             this.itemStore = new ItemStore("items.json");
@@ -259,6 +260,14 @@ public class App implements Controller {
 	}
 
     public void cleanup() {
+        try {
+            this.networker.getClient().closeConnection(true);
+            this.networker.stopServer();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
         if (renderer != null) {
             renderer.cleanup();
         }

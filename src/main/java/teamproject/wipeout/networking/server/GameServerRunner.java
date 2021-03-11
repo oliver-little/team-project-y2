@@ -5,6 +5,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -44,6 +46,8 @@ public class GameServerRunner {
                             javafxGraphicsClasspath + this.getClasspathSeparator() +
                             javafxBeansClasspath + this.getClasspathSeparator() +
                             gsonClasspath;
+        classpath = URLDecoder.decode(classpath, Charset.defaultCharset());
+
         String className = GameServer.class.getName();
 
         List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);
