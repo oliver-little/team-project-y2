@@ -72,9 +72,11 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new Clickable(this.onClick));
 
         Shape[] hitboxes = {
-        		new Rectangle(44, 47, 213, 93),
-                new Rectangle(17, 82, 28, 49),
-                new Rectangle(5, 132, 48, 22)
+        		new Rectangle(6, 45, 91, 96),
+                new Rectangle(96, 45, 34, 70),
+                new Rectangle(128, 45, 64, 77),
+                new Rectangle(192, 45, 55, 96),
+                new Rectangle(247, 67, 35, 52)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
