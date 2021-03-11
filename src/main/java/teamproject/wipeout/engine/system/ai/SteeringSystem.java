@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.system.ai;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,8 @@ public class SteeringSystem implements GameSystem{
     public static final double MAGNITUDE = 10;
 
     protected SignatureEntityCollector entityCollector;
+
+    private List<GameEntity> toRemove = new ArrayList<>();
     
     public SteeringSystem(GameScene e) {
         this.entityCollector = new SignatureEntityCollector(e, Set.of(Transform.class, MovementComponent.class, SteeringComponent.class));
@@ -28,6 +31,7 @@ public class SteeringSystem implements GameSystem{
 
     public void accept(Double timeStep) {
         List<GameEntity> entities = this.entityCollector.getEntities();
+        toRemove.clear();
 
         for (GameEntity entity : entities) {
             MovementComponent m = entity.getComponent(MovementComponent.class);
@@ -42,16 +46,21 @@ public class SteeringSystem implements GameSystem{
 
             if (vector.magnitude() < MAGNITUDE) {
                 if (s.currentPoint == s.path.size() - 1) {
-                    if (s.onArrive != null) {
-                        s.onArrive.run();
-                    }
-                    entity.removeComponent(SteeringComponent.class);
+                    m.acceleration = Point2D.ZERO;
+                    toRemove.add(entity);
                     continue;
                 }
                 s.currentPoint ++;
             }
 
             m.acceleration = vector.normalize().multiply(s.accelerationMultiplier);
+        }
+
+        for(GameEntity entity : toRemove) {
+            SteeringComponent s = entity.removeComponent(SteeringComponent.class);
+            if (s.onArrive != null) {
+                s.onArrive.run(); 
+            };
         }
     }
 }

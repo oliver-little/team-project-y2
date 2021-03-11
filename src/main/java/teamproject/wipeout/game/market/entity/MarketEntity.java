@@ -51,7 +51,7 @@ public class MarketEntity extends GameEntity {
         this.uiContainer = uiContainer;
         this.playerTransform = player.getComponent(Transform.class);
 
-        this.marketTransform = new Transform(x, y);
+        this.marketTransform = new Transform(x, y, 1);
         this.addComponent(this.marketTransform);
         try {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
@@ -72,11 +72,9 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new Clickable(this.onClick));
 
         Shape[] hitboxes = {
-        		new Rectangle(6,44,91,96),
-        		new Rectangle(96,20,34,113),
-        		new Rectangle(128,12,64,120),
-        		new Rectangle(192,45,63,96)
-
+        		new Rectangle(44, 47, 213, 93),
+                new Rectangle(17, 82, 28, 49),
+                new Rectangle(5, 132, 48, 22)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));

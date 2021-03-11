@@ -27,7 +27,7 @@ public class PathFindingSystem {
      * @param yGoal The goal y co-ordinate.
      * @return
      */
-    public double calculateEuclidianDistanceSquared(double xPos, double yPos, double xGoal, double yGoal) {
+    public static double calculateEuclidianDistanceSquared(double xPos, double yPos, double xGoal, double yGoal) {
 
         double euclideanDistanceSquared = Math.pow((xPos - xGoal),2) + Math.pow((yPos - yGoal),2);
 
@@ -45,7 +45,7 @@ public class PathFindingSystem {
      * @param yGoal The goal y co-ordinate.
      * @return Returns the optimal traversal path of squares to get from the current location to the desired destination.
      */
-    public List<NavigationSquare> findPathThroughSquares(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
+    public static List<NavigationSquare> findPathThroughSquares(NavigationSquare startSquare, double xPos, double yPos, NavigationSquare goalSquare, double xGoal, double yGoal) {
 
         Point2D midPoint;
 
@@ -137,7 +137,7 @@ public class PathFindingSystem {
      * @param squarePath The set of squares to pass through
      * @return A list of points to traverse to follow the shortest path through the squares
      */
-    public List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
+    public static List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
         // Test for invalid cases
         if (squarePath == null || squarePath.size() == 0) {
             return null;
@@ -254,7 +254,7 @@ public class PathFindingSystem {
      * @param endSquare The square to finish in (end position must be inside this square)
      * @return The list of points to traverse through to get from the start to end position
      */
-    public List<Point2D> findPath(Point2D start, Point2D end, NavigationSquare startSquare, NavigationSquare endSquare) {
+    public static List<Point2D> findPath(Point2D start, Point2D end, NavigationSquare startSquare, NavigationSquare endSquare) {
         List<NavigationSquare> squarePath = findPathThroughSquares(startSquare, start.getX(), start.getY(), endSquare, end.getX(), end.getY());
         
         if (squarePath == null) {
@@ -272,7 +272,7 @@ public class PathFindingSystem {
      * @param mesh The NavigationMesh to traverse through. (start and end position must be on this mesh)
      * @return The list of points to traverse through to get from the start to end position.
      */
-    public List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
+    public static List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
         NavigationSquare startSquare = null;
         NavigationSquare endSquare = null;
 
