@@ -5,6 +5,9 @@ import java.util.List;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 
+/**
+ * Wrapper for a steering component, contains the current point, the traversable path, the method to run on arrival and the speed at which to traverse the path.
+ */
 public class SteeringComponent implements GameComponent {
     
     public List<Point2D> path;

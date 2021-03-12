@@ -25,6 +25,9 @@ public class AnimalEntity extends GameEntity {
 
     private Transform transformComponent;
 
+    /**
+     * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
+     */
     public AnimalEntity(GameScene scene, Point2D position, NavigationMesh navMesh, SpriteManager spriteManager) {
         super(scene);
 
@@ -54,7 +57,16 @@ public class AnimalEntity extends GameEntity {
         this.pickRandomPath.run();
     }
 
+    /**
+     * Runnable method which runs when the animal arrives at its destination, in this case, steals vegetables and picks a new destination to go to.
+     */
     private Runnable pickRandomPath = () -> {
+
+        //Is the animal on a farm, if so, try to harvest some vegetables.
+
+        
+
+        //Pick next path to take.
 
         int rand = new Random().nextInt(navMesh.squares.size());
 
@@ -66,7 +78,7 @@ public class AnimalEntity extends GameEntity {
         Point2D wp = transformComponent.getWorldPosition();
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(randX, randY), navMesh);
-        System.out.println(path);
+
         followPath(path);
     };
 

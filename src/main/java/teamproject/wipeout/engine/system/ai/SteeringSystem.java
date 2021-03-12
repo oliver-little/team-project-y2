@@ -13,6 +13,9 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
+/**
+ * Allows an entity to traverse a calculated path through a navigation mesh.
+ */
 public class SteeringSystem implements GameSystem{
 
     public static final double MAGNITUDE = 10;
@@ -29,6 +32,9 @@ public class SteeringSystem implements GameSystem{
         this.entityCollector.cleanup();
     }
 
+    /**
+     * Perform the movement through the mesh once the steering component is present.
+     */
     public void accept(Double timeStep) {
         List<GameEntity> entities = this.entityCollector.getEntities();
         toRemove.clear();
