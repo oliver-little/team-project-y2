@@ -35,6 +35,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.Player;
 
 public class InventoryUI{
 
