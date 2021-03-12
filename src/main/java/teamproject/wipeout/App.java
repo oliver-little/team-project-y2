@@ -58,8 +58,6 @@ import teamproject.wipeout.game.task.entity.TaskEntity;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -81,11 +79,16 @@ public class App implements Controller {
     Double TIME_FOR_GAME = 500.0;
 
 
-    private ItemStore itemStore;
-    private SpriteManager spriteManager;
-
+    // Temporarily placed variables
+    ItemStore itemStore;
+    Market market;
+    Item item;
+    FarmEntity farmEntity;
     TaskEntity taskEntity;
     MoneyEntity moneyEntity;
+
+    private SpriteManager spriteManager;
+
 
     // Store systems for cleanup
     Networker networker;

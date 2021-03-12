@@ -35,8 +35,6 @@ public class ClockSystem implements GameSystem {
         ClockUI clockUI = new ClockUI(time);
         this.clockUI = clockUI;
 
-//        clockEntity = new ClockEntity(scene, x, y, time);
-//        scene.entities.add(clockEntity);
     }
 
     public void cleanup() {
