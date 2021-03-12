@@ -17,10 +17,8 @@ public class Main extends Application{
 	@Override
 	public void start(Stage stage) throws Exception
 	{
-		double windowWidth = 800;
-        double windowHeight = 600;
 		StartMenu menu = new StartMenu();
-		scene = new Scene(menu.getContent(), windowWidth, windowHeight);
+		scene = new Scene(menu.getContent());
 		
 		stage.setScene(scene);
 		stage.show();

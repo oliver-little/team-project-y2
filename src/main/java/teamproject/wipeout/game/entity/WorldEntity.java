@@ -44,8 +44,12 @@ public class WorldEntity extends GameEntity {
 
 		this.addComponent(new Transform(0,0));
 		//grass background
-		this.addComponent(new RenderComponent(new RectRenderable(Color.rgb(47, 129, 54), width, height)));
+		GameEntity grass = new GameEntity(gameScene);
+		grass.setParent(this);
+		grass.addComponent(new Transform(-width * 4, -height * 4));
+		grass.addComponent(new RenderComponent(new RectRenderable(Color.rgb(47, 129, 54), width * 8, height * 8)));
 		
+
 		//boundaries
 		GameEntity worldBoundaries = gameScene.createEntity();
 		worldBoundaries.addComponent(new Transform(0,0));
