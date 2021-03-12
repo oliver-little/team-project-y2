@@ -103,7 +103,8 @@ public class App implements Controller {
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
-
+        systemUpdater.addSystem(new MovementAudioSystem(gameScene, 0.1f));
+        
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
         // Input
