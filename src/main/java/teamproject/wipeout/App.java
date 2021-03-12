@@ -20,6 +20,7 @@ import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
@@ -28,6 +29,7 @@ import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
+import teamproject.wipeout.engine.entity.gameclock.ClockUI;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
@@ -48,11 +50,12 @@ import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.entity.MoneyEntity;
 import teamproject.wipeout.game.player.ui.InventoryUI;
 import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.entity.TaskEntity;
+import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
 import java.io.FileNotFoundException;
@@ -75,7 +78,7 @@ public class App implements Controller {
     private StackPane interfaceOverlay;
     private double windowWidth = 800;
     private double windowHeight = 600;
-    Double TIME_FOR_GAME = 2000.0;
+    Double TIME_FOR_GAME = 500.0;
 
 
     private ItemStore itemStore;
@@ -172,18 +175,30 @@ public class App implements Controller {
 
         // Tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
-//        ArrayList<Task> playerTasks = new ArrayList<>();
         player.tasks = allTasks;
 
-        taskEntity = new TaskEntity(gameScene, 10, 100, player);
+        TaskUI taskUI = new TaskUI( player);
+        taskUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(taskUI);
+        taskUI.setTranslateX(-(windowWidth/2) + 100);
+        taskUI.setTranslateY((windowHeight/2) - 300);
 
         // Money icon
-        moneyEntity = new MoneyEntity(gameScene, 10, 500, player);
-        //Time left
-        systemUpdater.addSystem(new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME));
+        MoneyUI moneyUI = new MoneyUI(player);
+        moneyUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(moneyUI);
+        moneyUI.setTranslateX(-(windowWidth/2) + 50);
+        moneyUI.setTranslateY((windowHeight/2) + 150);
 
-        gameScene.entities.add(taskEntity);
-        gameScene.entities.add(moneyEntity);
+        //Time left
+        ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
+        systemUpdater.addSystem(clockSystem);
+
+        ClockUI clockUI = clockSystem.clockUI;
+        clockUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(clockUI);
+        clockUI.setTranslateX(-(windowWidth/2) + 700);
+        clockUI.setTranslateY((windowHeight/2) - 300);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -219,8 +234,8 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   taskEntity.showTasks(player.tasks);
-                	   moneyEntity.showMoney(player.money);
+                	   taskUI.showTasks(player.tasks);
+                	   moneyUI.showMoney(player.money);
                 	   },
                 () -> {});
 
@@ -307,4 +322,16 @@ public class App implements Controller {
             }
         }
     }
+
+    private void loadSpriteSheets() throws IOException {
+        spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+        spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
+        spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-tools-descriptor.json", "inventory/Tools.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+    }
+
 }
