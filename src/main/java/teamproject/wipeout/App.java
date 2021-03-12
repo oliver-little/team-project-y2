@@ -1,28 +1,24 @@
 package teamproject.wipeout;
 
-import javafx.event.EventHandler;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
-import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
-import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -39,7 +35,6 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
-import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -48,8 +43,9 @@ import java.util.*;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.entity.MoneyEntity;
-import teamproject.wipeout.game.player.ui.InventoryUI;
+//import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
 import teamproject.wipeout.game.player.ui.MoneyUI;
@@ -58,6 +54,7 @@ import teamproject.wipeout.game.task.entity.TaskEntity;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -66,6 +63,8 @@ import java.util.Random;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
+ * 
+ * Begin by creating an instance, then call init, add App to a scene, then call createContent
  *
  */
 public class App implements Controller {
@@ -74,19 +73,18 @@ public class App implements Controller {
     private Canvas dynamicCanvas;
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
+
     private double windowWidth = 800;
     private double windowHeight = 600;
     Double TIME_FOR_GAME = 500.0;
 
-
     // Temporarily placed variables
     ItemStore itemStore;
     Market market;
-    Item item;
     FarmEntity farmEntity;
-    TaskEntity taskEntity;
-    MoneyEntity moneyEntity;
 
+    private ReadOnlyDoubleProperty widthProperty;
+    private ReadOnlyDoubleProperty heightProperty;
     private SpriteManager spriteManager;
 
 
@@ -95,6 +93,13 @@ public class App implements Controller {
     RenderSystem renderer;
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
+
+    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
+        this.widthProperty = widthProperty;
+        this.heightProperty = heightProperty;
+        Parent contentRoot = this.getContent();
+        return contentRoot;
+    }
 
     /**
      * Creates the content to be rendered onto the canvas.
@@ -138,12 +143,13 @@ public class App implements Controller {
         camera.addComponent(new CameraComponent(1.5f));
         camera.addComponent(new TagComponent("MainCamera"));
         
-        Group inventory = new Group();
-        this.root.getChildren().add(inventory);
-        inventory.setTranslateX(-(windowWidth/2) + 400);
-    	inventory.setTranslateY((windowHeight/2) - 33);
 
-        InventoryUI invUI = new InventoryUI(inventory, spriteManager, itemStore);
+        InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
+        this.interfaceOverlay.getChildren().add(invUI);
+        
+        addInvUIInput(input, invUI);
+        
+
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
         player.acquireItem(6, 98); //for checking stack/inventory limits
@@ -168,10 +174,14 @@ public class App implements Controller {
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
         RenderComponent targetRC = player.getComponent(RenderComponent.class);
 		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
-        Point2D camPos = new Point2D(windowWidth, windowHeight).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);
+
+        // Use JavaFX binding to ensure camera is in correct position even when screen size changes
+        ObjectBinding<Point2D> camPosBinding = Bindings.createObjectBinding(() -> {return new Point2D(this.widthProperty.doubleValue(), this.heightProperty.doubleValue()).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);}, this.widthProperty, this.heightProperty);
+        ObjectProperty<Point2D> camPos = new SimpleObjectProperty<>();
+        camPos.bind(camPosBinding);
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
-        WorldEntity world = new WorldEntity(gameScene,windowWidth,windowHeight, 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
+        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
         world.networker = networker;
         world.setMyPlayer(player);
         networker.worldEntity = world;
@@ -191,7 +201,7 @@ public class App implements Controller {
         moneyUI.setParent(interfaceOverlay);
         interfaceOverlay.getChildren().add(moneyUI);
         moneyUI.setTranslateX(-(windowWidth/2) + 50);
-        moneyUI.setTranslateY((windowHeight/2) + 150);
+        moneyUI.setTranslateY((windowHeight/2) + 100);
 
         //Time left
         ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
@@ -245,6 +255,7 @@ public class App implements Controller {
         gl.start();
     }
 
+    
     public ArrayList<Task> createAllTasks(ItemStore itemStore) {
 
         ArrayList<Task> tasks = new ArrayList<>();
@@ -297,8 +308,25 @@ public class App implements Controller {
      */
 	@Override
 	public Parent getContent() {
-		dynamicCanvas = new Canvas(windowWidth, windowHeight);
-        staticCanvas = new Canvas(windowWidth, windowHeight);
+		dynamicCanvas = new Canvas();
+        staticCanvas = new Canvas();
+        if (widthProperty != null) {
+            dynamicCanvas.widthProperty().bind(this.widthProperty);
+            staticCanvas.widthProperty().bind(this.widthProperty);
+        }
+        else {
+            dynamicCanvas.setWidth(800);
+            staticCanvas.setWidth(800);
+        }
+        if (heightProperty != null) {
+            dynamicCanvas.heightProperty().bind(this.heightProperty);
+            staticCanvas.heightProperty().bind(this.heightProperty);
+        }
+        else {
+            dynamicCanvas.setHeight(600);
+            staticCanvas.setHeight(600);
+        }
+
         interfaceOverlay = new StackPane();
         root = new StackPane(dynamicCanvas, staticCanvas, interfaceOverlay);
 		return root;
@@ -335,6 +363,39 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+    }
+    
+    private void addInvUIInput(InputHandler input, InventoryUI invUI) {
+        input.addKeyAction(KeyCode.DIGIT1,
+                () -> invUI.selectSlot(0),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT2,
+                () -> invUI.selectSlot(1),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT3,
+                () -> invUI.selectSlot(2),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT4,
+                () -> invUI.selectSlot(3),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT5,
+                () -> invUI.selectSlot(4),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT6,
+                () -> invUI.selectSlot(5),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT7,
+                () -> invUI.selectSlot(6),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT8,
+                () -> invUI.selectSlot(7),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT9,
+                () -> invUI.selectSlot(8),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT0,
+                () -> invUI.selectSlot(9),
+                () -> {});
     }
 
 }

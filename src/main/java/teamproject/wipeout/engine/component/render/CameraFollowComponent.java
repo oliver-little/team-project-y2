@@ -1,5 +1,7 @@
 package teamproject.wipeout.engine.component.render;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -25,17 +27,24 @@ public class CameraFollowComponent implements GameComponent
 	/**
 	 * Camera position offset from the target
 	 */
-	private Point2D offset = new Point2D(0,0);
+	private ObjectProperty<Point2D> offset;
+
+	// Skips interpolation for one frame
+	private boolean skipInterpolation = false;
 	
 	public CameraFollowComponent(GameEntity target) {
 		this.target = target;
+		this.offset = new SimpleObjectProperty<>(Point2D.ZERO);
 	}
 
-	public CameraFollowComponent(GameEntity target, Point2D offset) {
+	public CameraFollowComponent(GameEntity target, ObjectProperty<Point2D> offset) {
 		this.target = target;
 		this.offset = offset;
+		this.offset.addListener((observable, oldValue, newValue) -> {
+			skipInterpolation = true;
+		});
 	}
-	
+
 	public void setTarget(GameEntity target) {
 		this.target = target;
 	}
@@ -50,10 +59,16 @@ public class CameraFollowComponent implements GameComponent
 	 * @param camera The camera to be updated
 	 */
 	public void updateCameraPosition(double timestep, GameEntity camera) {
-		Point2D destinationPos = target.getComponent(Transform.class).getWorldPosition().add(offset);
+		Point2D destinationPos = target.getComponent(Transform.class).getWorldPosition().add(offset.getValue());
 		Transform cameraTransform = camera.getComponent(Transform.class);
-		Point2D currentPos = cameraTransform.getWorldPosition();
-		cameraTransform.setPosition(currentPos.interpolate(destinationPos, timestep*stickiness));
+		if (skipInterpolation) {
+			cameraTransform.setPosition(destinationPos);
+			skipInterpolation = false;
+		}
+		else {
+			Point2D currentPos = cameraTransform.getWorldPosition();
+			cameraTransform.setPosition(currentPos.interpolate(destinationPos, timestep*stickiness));
+		}
 	}
 	
 	@Override

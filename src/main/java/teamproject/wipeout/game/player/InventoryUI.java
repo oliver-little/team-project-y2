@@ -1,32 +1,28 @@
-package teamproject.wipeout.game.player.ui;
+package teamproject.wipeout.game.player;
 
 import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-//import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputKeyAction;
-import teamproject.wipeout.engine.input.InputMouseAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -34,10 +30,8 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
-import teamproject.wipeout.game.player.invPair;
-import teamproject.wipeout.game.player.Player;
 
-public class InventoryUI{
+public class InventoryUI extends StackPane {
 
 	public Point2D size;
 	Group root;
@@ -53,13 +47,17 @@ public class InventoryUI{
 	private Text[] quantityTexts = new Text[MAX_SIZE];
 	private int currentSelection = 0;
 
-	public InventoryUI(Group root, SpriteManager spriteManager, ItemStore itemStore) {
-		this.root = root; //sets the root node of the inventory UI scene graph
+	public InventoryUI(SpriteManager spriteManager, ItemStore itemStore) {
+		super();
+		this.root = new Group(); //sets the root node of the inventory UI scene graph
+		this.getChildren().add(this.root);
+		
+		StackPane.setAlignment(root, Pos.BOTTOM_CENTER);
+
 		this.itemStore = itemStore;
 		this.spriteManager = spriteManager;
 		createSquares();
 		createTexts();
-		
 	}
 	
 	/**

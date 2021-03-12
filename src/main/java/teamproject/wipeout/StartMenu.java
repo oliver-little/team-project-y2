@@ -19,6 +19,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.beans.binding.Bindings;
@@ -44,9 +45,12 @@ public class StartMenu implements Controller {
     private Line line;
     
     private List<Pair<String, Runnable>> menuData = Arrays.asList(
-            new Pair<String, Runnable>("Play", () -> {App app = new App();
-				            							root.getScene().setRoot(app.getContent());
-				            							app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
+            new Pair<String, Runnable>("Play", () -> {
+                App app = new App();
+                Window window = root.getScene().getWindow();
+                Parent content = app.init(window.widthProperty(), window.heightProperty());
+                root.getScene().setRoot(content);
+                app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
             new Pair<String, Runnable>("TODO", () -> {}),
             new Pair<String, Runnable>("TODO", () -> {}),
             new Pair<String, Runnable>("TODO", () -> {}),
