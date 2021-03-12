@@ -14,8 +14,8 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
@@ -72,7 +72,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(new Transform(position, 0.0, 1));
         this.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
         this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
-        this.addComponent(new HitboxComponent(new Rectangle(14, 12, 36, 53)));
+
+        this.addComponent(new HitboxComponent(new Rectangle(14, 7, 36, 26)));
         this.addComponent(new CollisionResolutionComponent());
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO);

@@ -9,11 +9,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
@@ -22,25 +24,43 @@ import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.gameclock.ClockEntity;
+import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
+import teamproject.wipeout.engine.entity.gameclock.ClockUI;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
+import teamproject.wipeout.engine.system.ai.SteeringSystem;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.time.Clock;
+import java.util.*;
+import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.entity.MoneyEntity;
+//import teamproject.wipeout.game.player.InventoryUI;
+import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.entity.TaskEntity;
+import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.Random;
 
 
@@ -58,13 +78,19 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    private ItemStore itemStore;
-    private SpriteManager spriteManager;
+    private double windowWidth = 800;
+    private double windowHeight = 600;
+    Double TIME_FOR_GAME = 500.0;
+
+    // Temporarily placed variables
+    ItemStore itemStore;
+    Market market;
+    FarmEntity farmEntity;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
+    private SpriteManager spriteManager;
 
-    TaskEntity taskEntity;
 
     // Store systems for cleanup
     Networker networker;
@@ -103,8 +129,8 @@ public class App implements Controller {
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
-        systemUpdater.addSystem(new MovementAudioSystem(gameScene, 0.1f));
-        
+        systemUpdater.addSystem(new MovementAudioSystem(gameScene, 0.05f));
+        systemUpdater.addSystem(new SteeringSystem(gameScene));
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
         // Input
@@ -125,9 +151,12 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         this.interfaceOverlay.getChildren().add(invUI);
+        
+        addInvUIInput(input, invUI);
+        
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
-        
+
         player.acquireItem(6, 98); //for checking stack/inventory limits
         player.acquireItem(1, 2);
         player.acquireItem(28, 98);
@@ -135,7 +164,7 @@ public class App implements Controller {
 
 
         try {
-            player.addComponent(new RenderComponent());
+            player.addComponent(new RenderComponent(new Point2D(0, -32)));
             player.addComponent(new PlayerAnimatorComponent(
                 spriteManager.getSpriteSet("player-red", "walk-up"), 
                 spriteManager.getSpriteSet("player-red", "walk-right"), 
@@ -162,14 +191,35 @@ public class App implements Controller {
         world.setMyPlayer(player);
         networker.worldEntity = world;
 
-        // Tasks
+        //Currently broken in networking mode.
+        //new AnimalEntity(gameScene, new Point2D(50, 50), world.getNavMesh(), spriteManager, new ArrayList<>(world.farms.values()));
+
+        // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
-//        ArrayList<Task> playerTasks = new ArrayList<>();
         player.tasks = allTasks;
 
-        taskEntity = new TaskEntity(gameScene, 10, 100, player);
+        TaskUI taskUI = new TaskUI( player);
+        taskUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(taskUI);
+        taskUI.setTranslateX(-(windowWidth/2) + 100);
+        taskUI.setTranslateY((windowHeight/2) - 300);
 
-        gameScene.entities.add(taskEntity);
+        // Money icon
+        MoneyUI moneyUI = new MoneyUI(player);
+        moneyUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(moneyUI);
+        moneyUI.setTranslateX(-(windowWidth/2) + 50);
+        moneyUI.setTranslateY((windowHeight/2) + 100);
+
+        //Time left
+        ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
+        systemUpdater.addSystem(clockSystem);
+
+        ClockUI clockUI = clockSystem.clockUI;
+        clockUI.setParent(interfaceOverlay);
+        interfaceOverlay.getChildren().add(clockUI);
+        clockUI.setTranslateX(-(windowWidth/2) + 700);
+        clockUI.setTranslateY((windowHeight/2) - 300);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -205,12 +255,15 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   taskEntity.showTasks(player.tasks); },
+                	   taskUI.showTasks(player.tasks);
+                	   moneyUI.showMoney(player.money);
+                	   },
                 () -> {});
 
         gl.start();
     }
 
+    
     public ArrayList<Task> createAllTasks(ItemStore itemStore) {
 
         ArrayList<Task> tasks = new ArrayList<>();
@@ -318,6 +371,41 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
+        spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
+    }
+    
+    private void addInvUIInput(InputHandler input, InventoryUI invUI) {
+        input.addKeyAction(KeyCode.DIGIT1,
+                () -> invUI.selectSlot(0),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT2,
+                () -> invUI.selectSlot(1),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT3,
+                () -> invUI.selectSlot(2),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT4,
+                () -> invUI.selectSlot(3),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT5,
+                () -> invUI.selectSlot(4),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT6,
+                () -> invUI.selectSlot(5),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT7,
+                () -> invUI.selectSlot(6),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT8,
+                () -> invUI.selectSlot(7),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT9,
+                () -> invUI.selectSlot(8),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT0,
+                () -> invUI.selectSlot(9),
+                () -> {});
     }
 
 }

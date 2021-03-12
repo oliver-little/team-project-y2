@@ -36,7 +36,7 @@ public class GameAudio {
      */
     public GameAudio(String audioFileName, boolean loop) {
     	fileName = audioFileName;
-    	volume = 1.0f;
+    	volume = 0.1f;
     	playing = false;
     	this.toLoop = loop;
     	File audioFile;

@@ -81,7 +81,8 @@ public class PlayerAnimatorSystem implements EventSystem {
             m.facingDirectionChanged.addObserver(onDirectionChange);
 
             RenderComponent render = entity.getComponent(RenderComponent.class);
-            AnimatedSpriteRenderable newRenderable = new AnimatedSpriteRenderable(entity.getComponent(PlayerAnimatorComponent.class).getIdleFrames(), 15);
+            PlayerAnimatorComponent pac = entity.getComponent(PlayerAnimatorComponent.class);
+            AnimatedSpriteRenderable newRenderable = new AnimatedSpriteRenderable(pac.getIdleFrames(), 15);
             render.addRenderable(newRenderable);
             this.spriteRenderables.put(entity, newRenderable);
         }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.physics.Rectangle;
 
 public class NavigationMeshTest {
 
@@ -801,5 +802,293 @@ public class NavigationMeshTest {
 
         assertEquals(2, navigationMesh.squares.size());
         
+    }
+
+    @Test
+    public void testGenerateNoColliders() {
+        Point2D topLeft = new Point2D(0, 0);
+        Point2D bottomRight = new Point2D(100, 100);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, new ArrayList<>());
+
+        assertEquals(1, navigationMesh.squares.size());
+        
+        NavigationSquare square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+    }
+
+    @Test
+    public void testGenerateSingleCollider() {
+        Point2D topLeft = new Point2D(0, 0);
+        Point2D bottomRight = new Point2D(100, 100);
+
+        List<Rectangle> colliders = new ArrayList<>();
+        colliders.add(new Rectangle(new Point2D(10, 10), 10, 10));
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(4, navigationMesh.squares.size());
+        
+        NavigationSquare square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(20, 10), square.bottomRight);
+        square = navigationMesh.squares.get(3);
+        assertEquals(new Point2D(10, 20), square.topLeft);
+        assertEquals(new Point2D(20, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(0, 10), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(3, navigationMesh.squares.size());
+        square = navigationMesh.squares.get(0);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(0, 0), square.topLeft);
+        assertEquals(new Point2D(10, 10), square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(0, 20), square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(90, 10), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(3, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(90, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(90, 0), square.topLeft);
+        assertEquals(new Point2D(100, 10), square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(90, 20), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(10, 0), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(3, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(10, 10), square.topLeft);
+        assertEquals(new Point2D(20, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(10, 90), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(3, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(20, 90), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(0, 0), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(2, navigationMesh.squares.size());
+
+        square = navigationMesh.squares.get(0);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(0, 10), square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(0, 90), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(2, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 90), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(90, 0), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(2, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(90, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(90, 10), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(90, 90), 10, 10));
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(2, navigationMesh.squares.size());
+        
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(90, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(90, 0), square.topLeft);
+        assertEquals(new Point2D(100, 90), square.bottomRight);
+    }
+
+    @Test
+    public void testGenerateTwoColliders() {
+        Point2D topLeft = new Point2D(0, 0);
+        Point2D bottomRight = new Point2D(100, 100);
+
+        List<Rectangle> colliders = new ArrayList<>();
+        colliders.add(new Rectangle(new Point2D(10, 10), 10, 10));
+        colliders.add(new Rectangle(new Point2D(80, 80), 10, 10));
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(7, navigationMesh.squares.size());
+
+        NavigationSquare square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);;
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(20, 10), square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(10, 20), square.topLeft);
+        assertEquals(new Point2D(20, 100), square.bottomRight);
+        square = navigationMesh.squares.get(3);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(new Point2D(80, 100), square.bottomRight);
+        square = navigationMesh.squares.get(4);
+        assertEquals(new Point2D(90, 0), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+        square = navigationMesh.squares.get(5);
+        assertEquals(new Point2D(80, 0), square.topLeft);
+        assertEquals(new Point2D(90, 80), square.bottomRight);
+        square = navigationMesh.squares.get(6);
+        assertEquals(new Point2D(80, 90), square.topLeft);
+        assertEquals(new Point2D(90, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(10, 10), 10, 10));
+        colliders.add(new Rectangle(new Point2D(10, 80), 10, 10));
+
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(5, navigationMesh.squares.size());
+
+        square = navigationMesh.squares.get(0);
+        assertEquals(topLeft, square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(bottomRight, square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(20, 10), square.bottomRight);
+        square = navigationMesh.squares.get(3);
+        assertEquals(new Point2D(10, 20), square.topLeft);
+        assertEquals(new Point2D(20, 80), square.bottomRight);
+        square = navigationMesh.squares.get(4);
+        assertEquals(new Point2D(10, 90), square.topLeft);
+        assertEquals(new Point2D(20, 100), square.bottomRight);
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(10, 10), 10, 10));
+        colliders.add(new Rectangle(new Point2D(5, 80), 20, 10));
+
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(9, navigationMesh.squares.size());
+
+        square = navigationMesh.squares.get(0);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(20, 10), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(0, 0), square.topLeft);
+        assertEquals(new Point2D(5, 100), square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(5, 0), square.topLeft);
+        assertEquals(new Point2D(10, 80), square.bottomRight);
+        square = navigationMesh.squares.get(3);
+        assertEquals(new Point2D(5, 90), square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(4);
+        assertEquals(new Point2D(25, 0), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+        square = navigationMesh.squares.get(5);
+        assertEquals(new Point2D(20, 0), square.topLeft);
+        assertEquals(new Point2D(25, 80), square.bottomRight);
+        square = navigationMesh.squares.get(6);
+        assertEquals(new Point2D(20, 90), square.topLeft);
+        assertEquals(new Point2D(25, 100), square.bottomRight);
+        square = navigationMesh.squares.get(7);
+        assertEquals(new Point2D(10, 20), square.topLeft);
+        assertEquals(new Point2D(20, 80), square.bottomRight);
+        square = navigationMesh.squares.get(8);
+        assertEquals(new Point2D(10, 90), square.topLeft);
+        assertEquals(new Point2D(20, 100), square.bottomRight);
+
+
+        colliders.clear();
+        colliders.add(new Rectangle(new Point2D(10, 10), 80, 10));
+        colliders.add(new Rectangle(new Point2D(5, 80), 90, 10));
+
+        navigationMesh = NavigationMesh.generateMesh(topLeft, bottomRight, colliders);
+
+        assertEquals(9, navigationMesh.squares.size());
+
+        square = navigationMesh.squares.get(0);
+        assertEquals(new Point2D(10, 0), square.topLeft);
+        assertEquals(new Point2D(90, 10), square.bottomRight);
+        square = navigationMesh.squares.get(1);
+        assertEquals(new Point2D(0, 0), square.topLeft);
+        assertEquals(new Point2D(5, 100), square.bottomRight);
+        square = navigationMesh.squares.get(2);
+        assertEquals(new Point2D(5, 0), square.topLeft);
+        assertEquals(new Point2D(10, 80), square.bottomRight);
+        square = navigationMesh.squares.get(3);
+        assertEquals(new Point2D(5, 90), square.topLeft);
+        assertEquals(new Point2D(10, 100), square.bottomRight);
+        square = navigationMesh.squares.get(4);
+        assertEquals(new Point2D(95, 0), square.topLeft);
+        assertEquals(new Point2D(100, 100), square.bottomRight);
+        square = navigationMesh.squares.get(5);
+        assertEquals(new Point2D(90, 0), square.topLeft);
+        assertEquals(new Point2D(95, 80), square.bottomRight);
+        square = navigationMesh.squares.get(6);
+        assertEquals(new Point2D(90, 90), square.topLeft);
+        assertEquals(new Point2D(95, 100), square.bottomRight);
+        square = navigationMesh.squares.get(7);
+        assertEquals(new Point2D(10, 20), square.topLeft);
+        assertEquals(new Point2D(90, 80), square.bottomRight);
+        square = navigationMesh.squares.get(8);
+        assertEquals(new Point2D(10, 90), square.topLeft);
+        assertEquals(new Point2D(90, 100), square.bottomRight);
     }
 }

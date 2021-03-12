@@ -31,7 +31,9 @@ import teamproject.wipeout.networking.state.FarmState;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -296,7 +298,7 @@ public class FarmEntity extends GameEntity {
      * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
      */
     protected boolean canBePlaced(double x, double y, int w, int h) {
-        Point2D coors = this.rescaleCoordinates(x, y);
+        Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
         return this.data.canBePlaced(row, column, w ,h);
@@ -312,7 +314,7 @@ public class FarmEntity extends GameEntity {
      * {@code null} if the given position is empty.
      */
     protected Pair<FarmItem, Boolean> canBePicked(double x, double y) {
-        Point2D coors = this.rescaleCoordinates(x, y);
+        Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
         return this.data.canBePicked(row, column);
@@ -326,7 +328,7 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      */
     protected boolean placeItem(Item item, double x, double y) {
-        Point2D coors = this.rescaleCoordinates(x, y);
+        Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
         return this.data.placeItem(item, row, column);
@@ -339,7 +341,17 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      */
     public void pickItemAt(double x, double y) {
-        Point2D coors = this.rescaleCoordinates(x, y);
+        pickItemAt(x, y, true);
+    }
+
+    /**
+     * Picks(= removes) an Item from a given position defined by the X and Y coordinates with an extra flag to check whether you want the item to drop on plant destruction.
+     * @param x X scene coordinate
+     * @param y Y scene coordinate
+     * @param makePickable True if you want the item to be pickable, otherwise false.
+     */
+    public void pickItemAt(double x, double y, boolean makePickable) {
+        Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
 
@@ -348,14 +360,17 @@ public class FarmEntity extends GameEntity {
             return;
         }
 
-        int inventoryID = pickedItem.getComponent(PlantComponent.class).grownItemID;
-        Item inventoryItem = this.itemStore.getItem(inventoryID);
+        if (makePickable) {
+            int inventoryID = pickedItem.getComponent(PlantComponent.class).grownItemID;
+            Item inventoryItem = this.itemStore.getItem(inventoryID);
 
-        try {
-            this.createPickablesFor(inventoryItem, x, y);
-        } catch (FileNotFoundException exception) {
-            exception.printStackTrace();
+            try {
+                this.createPickablesFor(inventoryItem, x, y);
+            } catch (FileNotFoundException exception) {
+                exception.printStackTrace();
+            }
         }
+        
     }
 
     /**
@@ -372,7 +387,7 @@ public class FarmEntity extends GameEntity {
         double endX = startX + this.size.getX() - (SQUARE_SIZE * 2);
         double endY = startY + this.size.getY() - (SQUARE_SIZE * 2);
         if ((startX < x && x < endX) && (startY < y && y < endY)) {
-            Point2D coors = this.rescaleCoordinates(x, y);
+            Point2D coors = this.rescaleCoordinatesToFarm(x, y);
             int row = (int) coors.getY();
             int column = (int) coors.getX();
             return new Point2D(startX + (column * SQUARE_SIZE), startY + (row * SQUARE_SIZE));
@@ -398,9 +413,9 @@ public class FarmEntity extends GameEntity {
      *
      * @param x X coordinate to be rescaled
      * @param y Y coordinate to be rescaled
-     * @return Rescaled point = row anc column position at the farm
+     * @return Rescaled point = row and column position at the farm
      */
-    public Point2D rescaleCoordinates(double x, double y) {
+    public Point2D rescaleCoordinatesToFarm(double x, double y) {
         double startX = this.transform.getWorldPosition().getX() + SQUARE_SIZE;
         double startY = this.transform.getWorldPosition().getY() + SQUARE_SIZE;
         double itemX = x - startX;
@@ -410,6 +425,17 @@ public class FarmEntity extends GameEntity {
         int itemColumn = (int) itemX / SQUARE_SIZE;
 
         return new Point2D(itemColumn, itemRow);
+    }
+
+    /**
+     * Rescales a given X, Y farm coordinates to position coordinates at the scene.
+     *
+     * @param x X coordinate to be rescaled
+     * @param y Y coordinate to be rescaled
+     * @return Rescaled point = row and column position at the scene
+     */
+    public Point2D rescaleCoordinatesToScene(double x, double y) {
+        return new Point2D(this.transform.getWorldPosition().getX() + x * SQUARE_SIZE + SQUARE_SIZE, this.transform.getWorldPosition().getY() + y * SQUARE_SIZE + SQUARE_SIZE);
     }
 
     public InputKeyAction onKeyPickAction(MouseHoverSystem mouseHoverSystem) {
@@ -425,6 +451,24 @@ public class FarmEntity extends GameEntity {
                 this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
             }
         };
+    }
+
+    public List<Point2D> getGrownItemPositions() {
+
+        List<Point2D> fullyGrownItems = new ArrayList<>();
+
+        ArrayList<ArrayList<FarmItem>> items = data.getItems();
+
+        for (int i = 0; i < items.size(); i++) {
+            for (int j = 0; j < items.get(i).size(); j++) {
+                FarmItem item = items.get(i).get(j);
+                if (item != null && item.isFullyGrown()) {
+                    fullyGrownItems.add(rescaleCoordinatesToScene(j, i));
+                }
+            }
+        }
+
+        return fullyGrownItems;
     }
 
     /**

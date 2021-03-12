@@ -1,0 +1,61 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "mouse",
+	"sprites": [
+		{
+			"name": "up",
+			"type": "sprite-list-x",
+			"parameters" : {
+				"x": 0,
+				"y": 0,
+				"width": 32,
+				"height": 32,
+				"length": 3
+			}
+		},
+		{
+			"name": "right",
+			"type": "sprite-list-x",
+			"parameters" : {
+				"x": 0,
+				"y": 32,
+				"width": 32,
+				"height": 32,
+				"length": 3
+			}
+		},
+		{
+			"name": "down",
+			"type": "sprite-list-x",
+			"parameters" : {
+				"x": 0,
+				"y": 64,
+				"width": 32,
+				"height": 32,
+				"length": 3
+			}
+		},
+		{
+			"name": "left",
+			"type": "sprite-list-x",
+			"parameters" : {
+				"x": 0,
+				"y": 96,
+				"width": 32,
+				"height": 32,
+				"length": 3
+			}
+		},
+		{
+			"name": "idle",
+			"type": "sprite",
+			"parameters" : {
+				"x": 32,
+				"y": 64,
+				"width": 32,
+				"height": 32
+			}
+		}
+    ]
+}

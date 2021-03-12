@@ -36,7 +36,7 @@ public class MovementAudioComponent implements GameComponent{
 		this.moveComp = m;
 		
 		audio = new GameAudio(fileName, true);
-		audio.setVolume(1.0f);
+		audio.setVolume(0.1f);
 	}
 	
 	public void playSound() {
