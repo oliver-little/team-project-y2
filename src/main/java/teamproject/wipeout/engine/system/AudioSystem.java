@@ -17,9 +17,9 @@ public class AudioSystem implements GameSystem {
 	 * System which dictates which sounds to play
 	 * @param e  Scene which is searched for entities with AudioComponents
 	 */
-    public AudioSystem(GameScene e) {
+    public AudioSystem(GameScene e, double volume) {
         this.entityCollector = new SignatureEntityCollector(e, Set.of(AudioComponent.class)); //collects entities with AudioComponents
-        this.spotEffectsVolume = 1.0; //initialised to full volume
+        this.spotEffectsVolume = volume; //initialised to full volume
     }
 
 	/**

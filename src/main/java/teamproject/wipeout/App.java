@@ -99,7 +99,7 @@ public class App implements Controller {
         SystemUpdater systemUpdater = new SystemUpdater();
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
-        systemUpdater.addSystem(new AudioSystem(gameScene));
+        systemUpdater.addSystem(new AudioSystem(gameScene, 0.1f));
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
