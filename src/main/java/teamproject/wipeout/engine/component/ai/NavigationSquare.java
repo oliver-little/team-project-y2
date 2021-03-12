@@ -3,6 +3,7 @@ package teamproject.wipeout.engine.component.ai;
 import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.physics.Rectangle;
 
 /**
  * Stores a square that can be navigated by an AI. Stores the top left and bottom right co-ordinates, including edges which intersect adjacent squares.
@@ -25,6 +26,7 @@ public class NavigationSquare {
     public NavigationSquare(Point2D topLeft, Point2D bottomRight) {
         this.topLeft = topLeft;
         this.bottomRight = bottomRight;
+        this.adjacentEdges = new ArrayList<>();
     }
 
     /**
@@ -94,8 +96,34 @@ public class NavigationSquare {
         return true;
     }
 
+    /**
+     * Calculates if a given position is contained within the NavigationSquare (including boundary collisions)
+     * 
+     * @param position The position to check
+     * @return Whether the position is inside the square
+     */
     public boolean contains(Point2D position) {
         return this.topLeft.getX() <= position.getX() && position.getX() <= this.bottomRight.getX() && this.topLeft.getY() <= position.getY() && position.getY() <= this.bottomRight.getY();
+    }
+
+    /**
+     * Calculates if a given Rectangle is contained within the NavigationSquare (including boundary collisions)
+     * 
+     * @param rect The rectangle to check
+     * @return Whether the Rectangle is inside the square
+     */
+    public boolean contains(Rectangle rect) {
+        return !(rect.getX() > this.bottomRight.getX() || (rect.getX() + rect.getWidth()) < this.topLeft.getX() || rect.getY() > this.bottomRight.getY() || (rect.getY() + rect.getHeight()) < this.topLeft.getY());
+    }
+
+    /**
+     * Calculates if a given Rectangle is contained within the NavigationSquare (excluding boundary collisions - returns false for a rectangle that borders this square)
+     * 
+     * @param rect The rectangle to check
+     * @return Whether the Rectangle is inside the square
+     */
+    public boolean containsExclBoundaries(Rectangle rect) {
+        return !(rect.getX() >= this.bottomRight.getX() || (rect.getX() + rect.getWidth()) <= this.topLeft.getX() || rect.getY() >= this.bottomRight.getY() || (rect.getY() + rect.getHeight()) <= this.topLeft.getY());
     }
 
     @Override

@@ -15,6 +15,7 @@ import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
@@ -29,11 +30,13 @@ import teamproject.wipeout.engine.entity.gameclock.ClockUI;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
+import teamproject.wipeout.engine.system.ai.SteeringSystem;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import java.io.FileNotFoundException;
@@ -57,6 +60,7 @@ import teamproject.wipeout.util.Networker;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.Random;
 
 
@@ -125,6 +129,7 @@ public class App implements Controller {
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
+        systemUpdater.addSystem(new SteeringSystem(gameScene));
 
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -186,7 +191,10 @@ public class App implements Controller {
         world.setMyPlayer(player);
         networker.worldEntity = world;
 
-        // Tasks
+        //Currently broken in networking mode.
+        //new AnimalEntity(gameScene, new Point2D(50, 50), world.getNavMesh(), spriteManager, new ArrayList<>(world.farms.values()));
+
+        // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
         player.tasks = allTasks;
 
@@ -363,6 +371,8 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
+        spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
     }
     
     private void addInvUIInput(InputHandler input, InventoryUI invUI) {
