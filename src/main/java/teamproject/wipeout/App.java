@@ -175,8 +175,8 @@ public class App implements Controller {
         player.addComponent(playerSound);
 
         input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
-
-        GameAudio ga = new GameAudio("backingTrack2.wav");
+        
+        GameAudio ga = new GameAudio("backingTrack2.wav", true);
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
 
         input.addKeyAction(KeyCode.LEFT,

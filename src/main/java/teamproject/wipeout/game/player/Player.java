@@ -1,6 +1,7 @@
 package teamproject.wipeout.game.player;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
@@ -54,6 +55,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private SignatureEntityCollector pickableCollector;
 
     private final PlayerState playerState;
+    
 
     /**
      * Creates a new instance of GameEntity

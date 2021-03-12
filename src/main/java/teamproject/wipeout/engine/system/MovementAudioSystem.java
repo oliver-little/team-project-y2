@@ -16,7 +16,7 @@ public class MovementAudioSystem implements GameSystem {
 	
 	/**
 	 * System which dictates which sounds to play
-	 * @param e  Scene which is searched for entities with AudioComponents
+	 * @param e  Scene which is searched for entities with MovementAudioComponents
 	 */
     public MovementAudioSystem(GameScene e, double volume) {
         this.entityCollector = new SignatureEntityCollector(e, Set.of(MovementAudioComponent.class)); //collects entities with AudioComponents
@@ -31,7 +31,7 @@ public class MovementAudioSystem implements GameSystem {
 	}
 
 	/**
-     * Checks, for each frame, whether any MovementAudioComponents need playing if velocity is bigger than 0.
+     * Checks, for each frame, whether any MovementAudioComponents need playing if velocity is non-zero.
      */
 	public void accept(Double timeStep) {
 		if (volume == 0.0) { //do nothing if volume is muted
@@ -51,16 +51,16 @@ public class MovementAudioSystem implements GameSystem {
 	}
 	
 	/**
-	 * sets the volume for all AudioComponent spot effects.
-	 * @param volume double value between 0.0 (inaudible) and 1.0 (full volume).
+	 * sets the volume for all MovementAudioComponents.
+	 * @param volume - double value between 0.0 (inaudible) and 1.0 (full volume).
 	 */
 	public void setVolume(double volume) {
 		this.volume = volume;
 	}
 	
 	/**
-	 * returns the volume for all AudioComponent spot effects.
-	 * @return  a double value between 0.0 (inaudible) and 1.0 (full volume).
+	 * returns the volume for all MovementAudioComponents.
+	 * @return a double value between 0.0 (inaudible) and 1.0 (full volume).
 	 */
 	public double getVolume() {
 		return volume;
