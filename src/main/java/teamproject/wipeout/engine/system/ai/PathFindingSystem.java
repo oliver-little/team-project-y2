@@ -145,7 +145,10 @@ public class PathFindingSystem {
         else if (squarePath.size() == 1) {
             NavigationSquare square = squarePath.get(0);
             if(square.contains(startPoint) && square.contains(endPoint)) {
-                return List.of(startPoint, endPoint); 
+                List<Point2D> output = new ArrayList<Point2D>();
+                output.add(startPoint); 
+                output.add(endPoint);
+                return output;
             }
             else {
                 return null;
@@ -289,8 +292,7 @@ public class PathFindingSystem {
         double closestEndDistance = Double.POSITIVE_INFINITY;
 
         for (NavigationSquare square : mesh.squares) {
-            Point2D closestPoint = rectClosestPoint(square, start);
-            double closestDistance = closestPoint.distance(start);
+            
             if (startSquare == null) {
                 if (square.contains(start)) {
                     startSquare = square;
@@ -298,10 +300,14 @@ public class PathFindingSystem {
                         break;
                     }
                 }
-                else if (closestDistance < closestStartDistance) {
-                        closestStartSquare = square;
-                        closestStartPoint = closestPoint;
-                        closestStartDistance = closestDistance;
+                else {
+                    Point2D closestPoint = rectClosestPoint(square, start);
+                    double closestDistance = closestPoint.distance(start);
+                    if (closestDistance < closestStartDistance) {
+                            closestStartSquare = square;
+                            closestStartPoint = closestPoint;
+                            closestStartDistance = closestDistance;
+                    }
                 }
             }
             if (endSquare == null) {
@@ -311,10 +317,14 @@ public class PathFindingSystem {
                         break;
                     }
                 }
-                else if (closestDistance < closestEndDistance) {
-                        closestEndSquare = square;
-                        closestEndPoint = closestPoint;
-                        closestEndDistance = closestDistance;
+                else {
+                    Point2D closestPoint = rectClosestPoint(square, end);
+                    double closestDistance = closestPoint.distance(end);
+                    if (closestDistance < closestEndDistance) {
+                            closestEndSquare = square;
+                            closestEndPoint = closestPoint;
+                            closestEndDistance = closestDistance;
+                    }
                 }
             }
         }
@@ -323,16 +333,16 @@ public class PathFindingSystem {
 
         if (startSquare == null && endSquare == null) {
             path = findPath(closestStartPoint, closestEndPoint, closestStartSquare, closestEndSquare);
-            path.add(1, closestStartPoint);
-            path.add(path.size() - 2, closestEndPoint);
+            path.add(0, start);
+            path.add(end);
         }
         else if (startSquare == null) {
             path = findPath(closestStartPoint, end, closestStartSquare, endSquare);
-            path.add(1, closestStartPoint);
+            path.add(0, start);
         }
         else if (endSquare == null) {
             path = findPath(start, closestEndPoint, startSquare, closestEndSquare);
-            path.add(path.size() - 2, closestEndPoint);
+            path.add(end);
         }
         else {
             path = findPath(start, end, startSquare, endSquare);
