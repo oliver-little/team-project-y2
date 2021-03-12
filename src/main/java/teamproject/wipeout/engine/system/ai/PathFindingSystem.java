@@ -265,36 +265,98 @@ public class PathFindingSystem {
     }
 
     /**
-     * Finds a path from a start position and end position through a NavigationMesh
+     * Finds a path from a start position and end position through a NavigationMesh.
+     * If either the start or end position is not on the mesh, the shortest path to get onto the mesh will be used
      * 
      * @param start The start position
      * @param end The end position
-     * @param mesh The NavigationMesh to traverse through. (start and end position must be on this mesh)
+     * @param mesh The NavigationMesh to traverse through.
      * @return The list of points to traverse through to get from the start to end position.
      */
     public static List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
+        if (mesh.squares.size() == 0) {
+            throw new IllegalArgumentException("NavigationMesh contains no squares");
+        }
+
         NavigationSquare startSquare = null;
+        NavigationSquare closestStartSquare = null;
+        Point2D closestStartPoint = null;
+        double closestStartDistance = Double.POSITIVE_INFINITY;
+
         NavigationSquare endSquare = null;
+        NavigationSquare closestEndSquare = null;
+        Point2D closestEndPoint = null;
+        double closestEndDistance = Double.POSITIVE_INFINITY;
 
         for (NavigationSquare square : mesh.squares) {
-            if (startSquare == null && square.contains(start)) {
-                startSquare = square;
-                if (endSquare != null) {
-                    break;
+            Point2D closestPoint = rectClosestPoint(square, start);
+            double closestDistance = closestPoint.distance(start);
+            if (startSquare == null) {
+                if (square.contains(start)) {
+                    startSquare = square;
+                    if (endSquare != null) {
+                        break;
+                    }
+                }
+                else if (closestDistance < closestStartDistance) {
+                        closestStartSquare = square;
+                        closestStartPoint = closestPoint;
+                        closestStartDistance = closestDistance;
                 }
             }
-            if (endSquare == null && square.contains(end)) {
-                endSquare = square;
-                if (startSquare != null) {
-                    break;
+            if (endSquare == null) {
+                if (square.contains(end)) {
+                    endSquare = square;
+                    if (startSquare != null) {
+                        break;
+                    }
+                }
+                else if (closestDistance < closestEndDistance) {
+                        closestEndSquare = square;
+                        closestEndPoint = closestPoint;
+                        closestEndDistance = closestDistance;
                 }
             }
         }
 
-        if (startSquare == null || endSquare == null) {
-            return null;
+        List<Point2D> path = null;
+
+        if (startSquare == null && endSquare == null) {
+            path = findPath(closestStartPoint, closestEndPoint, closestStartSquare, closestEndSquare);
+            path.add(1, closestStartPoint);
+            path.add(path.size() - 2, closestEndPoint);
+        }
+        else if (startSquare == null) {
+            path = findPath(closestStartPoint, end, closestStartSquare, endSquare);
+            path.add(1, closestStartPoint);
+        }
+        else if (endSquare == null) {
+            path = findPath(start, closestEndPoint, startSquare, closestEndSquare);
+            path.add(path.size() - 2, closestEndPoint);
+        }
+        else {
+            path = findPath(start, end, startSquare, endSquare);
+        }
+        
+        return path;
+    }
+
+    private static Point2D rectClosestPoint(NavigationSquare square, Point2D point) {
+        double x = point.getX();
+        double y = point.getY();
+        if (x < square.topLeft.getX()) {
+            x = square.topLeft.getX();
+        }
+        else if (x > square.bottomRight.getX()) {
+            x = square.bottomRight.getX();
+        }
+        if (y < square.topLeft.getY()) {
+            y = square.topLeft.getY();
+        }
+        else if (y > square.bottomRight.getY()) {
+            y = square.bottomRight.getY();
         }
 
-        return findPath(start, end, startSquare, endSquare);
+        return new Point2D(x, y);
     }
 }
