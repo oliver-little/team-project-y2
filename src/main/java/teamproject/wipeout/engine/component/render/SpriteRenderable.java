@@ -10,7 +10,6 @@ import javafx.scene.image.Image;
 public class SpriteRenderable implements Renderable {
     
     public Image sprite;
-    public Point2D offset;
     public Point2D spriteScale;
 
     /**
@@ -20,7 +19,6 @@ public class SpriteRenderable implements Renderable {
      */
     public SpriteRenderable(Image sprite) {
         this.sprite = sprite;
-        this.offset = Point2D.ZERO;
         this.spriteScale = new Point2D(1, 1);
     }
 
@@ -32,7 +30,6 @@ public class SpriteRenderable implements Renderable {
      */
     public SpriteRenderable(Image sprite, Point2D offset) {
         this.sprite = sprite;
-        this.offset = offset;
         this.spriteScale = new Point2D(1, 1);
     }
 
@@ -44,7 +41,6 @@ public class SpriteRenderable implements Renderable {
      */
     public SpriteRenderable(Image sprite, double scale) {
         this.sprite = sprite;
-        this.offset = Point2D.ZERO;
         this.spriteScale = new Point2D(scale, scale);
     }
 
@@ -57,34 +53,6 @@ public class SpriteRenderable implements Renderable {
      */
     public SpriteRenderable(Image sprite, double scaleX, double scaleY) {
         this.sprite = sprite;
-        this.offset = Point2D.ZERO;
-        this.spriteScale = new Point2D(scaleX, scaleY);
-    }
-
-    /**
-     * Creates an instance of SpriteRenderable
-     * 
-     * @param sprite The sprite image to render
-     * @param offset An offset position to display at, from the top left of this object
-     * @param scale A scale to multiply the width and height by
-     */
-    public SpriteRenderable(Image sprite, Point2D offset, double scale) {
-        this.sprite = sprite;
-        this.offset = offset;
-        this.spriteScale = new Point2D(scale, scale);
-    }
-
-    /**
-     * Creates an instance of SpriteRenderable
-     * 
-     * @param sprite The sprite image to render
-     * @param offset An offset position to display at, from the top left of this object
-     * @param scaleX A scale to multiply the width by
-     * @param scaleY A scale to multiply the height by
-     */
-    public SpriteRenderable(Image sprite, Point2D offset, double scaleX, double scaleY) {
-        this.sprite = sprite;
-        this.offset = offset;
         this.spriteScale = new Point2D(scaleX, scaleY);
     }
 
@@ -97,6 +65,6 @@ public class SpriteRenderable implements Renderable {
     }
 
     public void render(GraphicsContext gc, double x, double y, double scale){
-        gc.drawImage(this.sprite, (x + offset.getX()) * scale, (y + offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
+        gc.drawImage(this.sprite, x * scale, y * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
     }
 }

@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
  */
 public class AnimatedSpriteRenderable implements Renderable {
 
-    public Point2D offset;
     public Point2D spriteScale;
     
     protected Image[] frames;
@@ -29,23 +28,9 @@ public class AnimatedSpriteRenderable implements Renderable {
         this.setFrames(frames);
         this.setFPS(framesPerSecond);
 
-        this.offset = Point2D.ZERO;
         this.spriteScale = new Point2D(1, 1);
 
         this.lastFrameTime = System.nanoTime() / 1000000000.0;
-    }
-
-    /**
-     * Creates a new instance of AnimatedSpriteRenderable
-     * 
-     * @param frames The images to display, in order
-     * @param framesPerSecond The number of images to display per second
-     * @param offset An offset position to display at, from the top left of this object
-     */
-    public AnimatedSpriteRenderable(Image[] frames, int framesPerSecond, Point2D offset) {
-        this(frames, framesPerSecond);
-        this.offset = offset;
-        this.spriteScale = new Point2D(1, 1);
     }
 
     /**
@@ -124,7 +109,7 @@ public class AnimatedSpriteRenderable implements Renderable {
 
         if (this.frames != null) {
             Image sprite = this.frames[this.currentFrame];
-            gc.drawImage(sprite, (x + offset.getX()) * scale, (y + offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
+            gc.drawImage(sprite, x * scale, y * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
         }
     }
 }

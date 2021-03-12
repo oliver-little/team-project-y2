@@ -4,22 +4,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import teamproject.wipeout.engine.component.GameComponent;
 
 public class RenderComponent implements GameComponent {
 
-    private boolean isStatic;
+    public Point2D offset = Point2D.ZERO;
+
+    private boolean isStatic = false;
     
     private ArrayList<Renderable> renderables;
 
     public RenderComponent() {
-        this.isStatic = false;
         this.renderables = new ArrayList<Renderable>();
     }
 
     public RenderComponent(boolean isStatic) {
-        this.isStatic = isStatic;
+        this.renderables = new ArrayList<Renderable>();
+    }
+
+    public RenderComponent(Point2D offset) {
+        this.offset = offset;
         this.renderables = new ArrayList<Renderable>();
     }
 
@@ -28,11 +34,21 @@ public class RenderComponent implements GameComponent {
      * @param newRenderables An arbitrary number of renderable objects.
      */
     public RenderComponent(Renderable... newRenderables) {
-        this.isStatic = false;
         this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
 
     public RenderComponent(boolean isStatic, Renderable... newRenderables) {
+        this.isStatic = isStatic;
+        this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
+    }
+
+    public RenderComponent(Point2D offset, Renderable... newRenderables) {
+        this.offset = offset;
+        this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
+    }
+
+    public RenderComponent(Point2D offset, boolean isStatic, Renderable... newRenderables) {
+        this.offset = offset;
         this.isStatic = isStatic;
         this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
@@ -87,6 +103,10 @@ public class RenderComponent implements GameComponent {
     public void removeRenderable(Renderable renderableObj) {
         renderables.remove(renderableObj);
     }
+
+    public Point2D getOffset() {
+        return this.offset;
+    } 
     
     /**
      * Returns the maximum width of this RenderComponent
@@ -98,7 +118,7 @@ public class RenderComponent implements GameComponent {
         double width = 0;
 
         for (Renderable r : renderables) {
-            double rWidth = r.getWidth();
+            double rWidth = this.offset.getX() + r.getWidth();
             
             if (rWidth > width) {
                 width = rWidth;
@@ -118,7 +138,7 @@ public class RenderComponent implements GameComponent {
         double height = 0;
 
         for (Renderable r : renderables) {
-            double rHeight = r.getHeight();
+            double rHeight = this.offset.getY() + r.getHeight();
             
             if (rHeight > height) {
                 height = rHeight;
@@ -137,7 +157,7 @@ public class RenderComponent implements GameComponent {
      */
     public void render(GraphicsContext gc, double x, double y, double scale) {
         for (Renderable r : renderables) {
-            r.render(gc, x, y, scale);
+            r.render(gc, x + offset.getX(), y + offset.getY(), scale);
         }
     }
 
