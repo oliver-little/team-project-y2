@@ -191,9 +191,6 @@ public class App implements Controller {
         world.setMyPlayer(player);
         networker.worldEntity = world;
 
-        //Currently broken in networking mode.
-        //new AnimalEntity(gameScene, new Point2D(50, 50), world.getNavMesh(), spriteManager, new ArrayList<>(world.farms.values()));
-
         // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
         player.tasks = allTasks;

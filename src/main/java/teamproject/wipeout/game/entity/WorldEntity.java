@@ -36,6 +36,7 @@ public class WorldEntity extends GameEntity {
 	public final Map<Integer, FarmEntity> farms;
 
 	private Player myPlayer;
+	private AnimalEntity myAnimal;
 	private FarmEntity myFarm;
 	private NavigationMesh navMesh;
 
@@ -109,12 +110,18 @@ public class WorldEntity extends GameEntity {
 
         navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
+		myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
+
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
 	}
 
 	public Player getMyPlayer() {
 		return this.myPlayer;
+	}
+
+	public AnimalEntity getMyAnimal() {
+		return this.myAnimal;
 	}
 
 	public FarmEntity getMyFarm() {

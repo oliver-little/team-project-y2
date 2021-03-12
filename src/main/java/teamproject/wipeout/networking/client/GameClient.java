@@ -1,15 +1,13 @@
 package teamproject.wipeout.networking.client;
 
+import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.server.GameServer;
-import teamproject.wipeout.networking.state.FarmState;
-import teamproject.wipeout.networking.state.MarketOperationResponse;
-import teamproject.wipeout.networking.state.MarketState;
-import teamproject.wipeout.networking.state.PlayerState;
+import teamproject.wipeout.networking.state.*;
 import teamproject.wipeout.util.threads.ServerThread;
 
 import java.io.*;
@@ -40,6 +38,7 @@ public class GameClient {
 
     public NewPlayerAction newPlayerAction;
     public final HashMap<Integer, Player> players;
+    public AnimalEntity myAnimal;
     protected Map<Integer, FarmEntity> farmEntities;
     public Market market;
 
@@ -182,6 +181,11 @@ public class GameClient {
                     switch (receivedUpdate.type) {
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
+                            break;
+                        case ANIMAL_STATE:
+                            if (!receivedUpdate.originClientID.equals(this.id)) {
+                                this.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
+                            }
                             break;
                         case FARM_STATE:
                             FarmState fState = (FarmState) receivedUpdate.content;

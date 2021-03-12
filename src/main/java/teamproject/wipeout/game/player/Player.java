@@ -117,7 +117,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public void updateFromState(PlayerState newState) {
         this.getComponent(MovementComponent.class).acceleration = newState.getAcceleration();
-        this.getComponent(Transform.class).setPosition(newState.getPosition());
+        //if (newState.getAcceleration().equals(Point2D.ZERO)) {
+            this.getComponent(Transform.class).setPosition(newState.getPosition());
+        //}
         this.playerState.updateStateFrom(newState);
     }
 
