@@ -157,8 +157,6 @@ public class PathFindingSystemTest {
 
         assertEquals(3, path.size());
 
-        System.out.println(path);
-
         assertEquals(path.get(0),a);
         assertEquals(path.get(1),c);
         assertEquals(path.get(2),d);
@@ -1055,5 +1053,54 @@ public class PathFindingSystemTest {
         List<Point2D> nodes = PathFindingSystem.findPath(start, end, navigationMesh);
 
         assertEquals(null, nodes);
+    }
+
+    @Test
+    public void testFindPathPointsOutsideMesh() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(0, 20);
+        c.bottomRight = new Point2D(10, 30);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c));
+
+        Point2D start = new Point2D(1, -5);
+        Point2D end = new Point2D(1, 35);
+
+        List<Point2D> nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(4, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(1, 0), nodes.get(1));
+        assertEquals(new Point2D(1, 30), nodes.get(2));
+        assertEquals(end, nodes.get(3));
+
+        start = new Point2D(-5, 1);
+        end = new Point2D(0, 30);
+
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(0, 1), nodes.get(1));
+        assertEquals(end, nodes.get(2));
+
+        start = new Point2D(0, 0);
+        end = new Point2D(15, 30);
+
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(10, 30), nodes.get(1));
+        assertEquals(end, nodes.get(2));
     }
 }
