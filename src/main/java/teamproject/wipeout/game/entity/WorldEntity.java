@@ -21,6 +21,7 @@ import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.util.Networker;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +62,17 @@ public class WorldEntity extends GameEntity {
 		this.addComponent(new HitboxComponent(hitboxes));
 		this.addComponent(new CollisionResolutionComponent(false));
 		
-		//TreeEntity tree = new TreeEntity(gameScene, new Point2D(40,40));
+		try
+		{
+			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,-100), spriteManager);
+		
+		}
+		catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//TreeEntity tree = new TreeEntity(gameScene, -50,-100, spriteManager);
 		//TreeEntity tree2 = new TreeEntity(gameScene, new Point2D(20,20));
 
 		this.myPlayer = player;
