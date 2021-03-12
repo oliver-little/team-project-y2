@@ -69,7 +69,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.addComponent(new Transform(position, 0.0, 1));
         this.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
-        this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav", 0.1f));
+        this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
         this.addComponent(new HitboxComponent(new Rectangle(14, 12, 36, 53)));
         this.addComponent(new CollisionResolutionComponent());
 

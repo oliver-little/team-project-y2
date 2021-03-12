@@ -28,9 +28,9 @@ public class MovementAudioComponent implements GameComponent{
 	public boolean playing;
 	Clip audioClip;
 	
-	public MovementAudioComponent(MovementComponent m, String fileName, double volume) {
+	public MovementAudioComponent(MovementComponent m, String fileName) {
 		this.moveComp = m;
-		this.volume = volume;
+		this.volume = 1.0f;
 		File audioFile;
 		try
 		{
