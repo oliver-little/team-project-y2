@@ -1,6 +1,7 @@
 package teamproject.wipeout.engine.entity.gameclock;
 
 import javafx.geometry.Point2D;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -12,6 +13,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
+import teamproject.wipeout.game.player.ui.MoneyUI;
 
 import java.util.List;
 import java.util.Set;
@@ -23,22 +25,26 @@ public class ClockSystem implements GameSystem {
     private GameEntity textEntity;
 
     private TextRenderable textRenderable;
-    ClockEntity clockEntity;
+    public ClockUI clockUI;
     protected SignatureEntityCollector entityCollector;
 
 
     public ClockSystem(GameScene scene, double x, double y, Double time) {
         this.entityCollector = new SignatureEntityCollector(scene, Set.of());
-        clockEntity = new ClockEntity(scene, x, y, time);
-        scene.entities.add(clockEntity);
+
+        ClockUI clockUI = new ClockUI(time);
+        this.clockUI = clockUI;
+
+//        clockEntity = new ClockEntity(scene, x, y, time);
+//        scene.entities.add(clockEntity);
     }
 
     public void cleanup() {
-        this.clockEntity.restart();
+        this.clockUI.restart();
         this.entityCollector.cleanup();
     }
 
     public void accept(Double timeStep) {
-        this.clockEntity.showTime(timeStep);
+        this.clockUI.showTime(timeStep);
     }
 }
