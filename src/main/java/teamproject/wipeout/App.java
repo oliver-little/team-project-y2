@@ -124,6 +124,9 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         this.interfaceOverlay.getChildren().add(invUI);
+        
+        addInvUIInput(input, invUI);
+        
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
         
@@ -210,6 +213,7 @@ public class App implements Controller {
         gl.start();
     }
 
+    
     public ArrayList<Task> createAllTasks(ItemStore itemStore) {
 
         ArrayList<Task> tasks = new ArrayList<>();
@@ -317,6 +321,39 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+    }
+    
+    private void addInvUIInput(InputHandler input, InventoryUI invUI) {
+        input.addKeyAction(KeyCode.DIGIT1,
+                () -> invUI.selectSlot(0),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT2,
+                () -> invUI.selectSlot(1),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT3,
+                () -> invUI.selectSlot(2),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT4,
+                () -> invUI.selectSlot(3),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT5,
+                () -> invUI.selectSlot(4),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT6,
+                () -> invUI.selectSlot(5),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT7,
+                () -> invUI.selectSlot(6),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT8,
+                () -> invUI.selectSlot(7),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT9,
+                () -> invUI.selectSlot(8),
+                () -> {});
+        input.addKeyAction(KeyCode.DIGIT0,
+                () -> invUI.selectSlot(9),
+                () -> {});
     }
 
 }
