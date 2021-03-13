@@ -176,15 +176,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     // Adds single item to inventory
     public boolean acquireItem(Integer itemID) {
-        int index = addToInventory(itemID, 1);
-        if (index < 0) {
-        	System.out.println("No space in inventory for item");
-        	return false;
-        }
-        this.invUI.updateUI(inventory, index);
-        System.out.println("Acquired itemID: " + itemID);
-        occupiedSlots++;
-        return true;
+        return acquireItem(itemID, 1);
     }
 
     /**
@@ -411,5 +403,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
         }
         return completedTasks;
+    }
+    
+    public void clearInventory() {
+    	for (int i = 0; i < MAX_SIZE; i++) {
+            inventory.set(i, null);
+        }
     }
 }
