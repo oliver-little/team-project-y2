@@ -4,13 +4,16 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -19,15 +22,18 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.beans.binding.Bindings;
+import javafx.geometry.Pos;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,13 +42,11 @@ import java.util.List;
  * It implements the Controller Interface.
  */
 public class StartMenu implements Controller {
-	
-	private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
     
     private Pane root = new StackPane();
-    private VBox menuBox = new VBox(-5);
-    private Line line;
+    private VBox menuBox = new VBox(30);
+    private VBox buttonBox;
+    private Text title;
     
     private List<Pair<String, Runnable>> menuData = Arrays.asList(
             new Pair<String, Runnable>("Play", () -> {
@@ -51,9 +55,9 @@ public class StartMenu implements Controller {
                 Parent content = app.init(window.widthProperty(), window.heightProperty());
                 root.getScene().setRoot(content);
                 app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-            new Pair<String, Runnable>("TODO", () -> {}),
-            new Pair<String, Runnable>("TODO", () -> {}),
-            new Pair<String, Runnable>("TODO", () -> {}),
+            //new Pair<String, Runnable>("TODO", () -> {}), // Commented out until implemented
+            //new Pair<String, Runnable>("TODO", () -> {}),
+            //new Pair<String, Runnable>("TODO", () -> {}),
             new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
     );
 
@@ -65,13 +69,19 @@ public class StartMenu implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     private void createContent() {
+        root.setPrefSize(800, 600);
+
+        root.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
+
+        menuBox.setAlignment(Pos.CENTER);
+        StackPane.setAlignment(menuBox, Pos.CENTER);
+
         addBackground();
+
         addTitle();
+        addMenu();
 
-        double menuPosX = WIDTH / 2 - 100;
-        double menuPosY = HEIGHT / 3 + 50;
-
-        addMenu(menuPosX + 5, menuPosY + 5);
+        root.getChildren().add(menuBox);
 
         startAnimation();
     }
@@ -84,8 +94,12 @@ public class StartMenu implements Controller {
 		try {
 		    FileInputStream imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
 			imageView = new ImageView(new Image(imgFile));
-			imageView.setFitWidth(WIDTH);
-	        imageView.setFitHeight(HEIGHT);
+            ColorAdjust brightness = new ColorAdjust();
+            brightness.setBrightness(-0.2);
+            brightness.setInput(new GaussianBlur(30));
+            imageView.setEffect(brightness);
+            imageView.setPreserveRatio(true);
+            imageView.fitWidthProperty().bind(Bindings.add(root.widthProperty(), 50));
 
 	        root.getChildren().add(imageView);
 
@@ -98,35 +112,48 @@ public class StartMenu implements Controller {
      * A method to add the title to the menu.
      */
     private void addTitle() {
-    	Pane pane = new Pane();
-    	Text text = new Text("Farmageddon");
-    	text.setFont(Font.font("Arial", 40));
-    	text.setFill(Color.WHITE);
-        pane.setTranslateX(WIDTH / 2 - text.getLayoutBounds().getWidth() / 2);
-        pane.setTranslateY(HEIGHT / 4);
-        
-        pane.getChildren().addAll(text);
-        root.getChildren().add(pane);
+    	title = new Text("Farmageddon");
+
+        try {
+            InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
+            Font.loadFont(path, 12);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    	title.setFont(Font.font("Kalam", 40));
+    	title.setFill(Color.WHITE);
+
+        menuBox.getChildren().addAll(title);
     }
 
     /**
      * A method to animate the menu items.
      */
     private void startAnimation() {
-        ScaleTransition st = new ScaleTransition(Duration.seconds(1), line);
+        double titleDuration = 0.5;
+        double buttonDuration = 0.5;
+
+        // Set initial values
+        title.setScaleX(2);
+        title.setScaleY(2);
+        buttonBox.setOpacity(0);
+
+        ScaleTransition st = new ScaleTransition(Duration.seconds(titleDuration), title);
+        st.setFromX(2);
+        st.setFromY(2);
+        st.setToX(1);
         st.setToY(1);
-        st.setOnFinished(e -> {
 
-            for (int i = 0; i < menuBox.getChildren().size(); i++) {
-                Node n = menuBox.getChildren().get(i);
+        FadeTransition ft = new FadeTransition(Duration.seconds(buttonDuration), buttonBox);
+        ft.setFromValue(0);
+        ft.setToValue(1);
 
-                TranslateTransition tt = new TranslateTransition(Duration.seconds(1 + i * 0.15), n);
-                tt.setToX(0);
-                tt.setOnFinished(e2 -> n.setClip(null));
-                tt.play();
-            }
-        });
-        st.play();
+        SequentialTransition full = new SequentialTransition(st, ft);
+        full.setDelay(Duration.seconds(1.25));
+        full.setInterpolator(Interpolator.EASE_BOTH);
+        full.play();
     }
     
     /**
@@ -134,53 +161,16 @@ public class StartMenu implements Controller {
      * @param x x-position of the menu.
      * @param y y-position of the menu.
      */
-    private void addMenu(double x, double y) {
-        menuBox.setTranslateX(x);
-        menuBox.setTranslateY(y);
+    private void addMenu() {
+        buttonBox = new VBox(10);
+        buttonBox.setAlignment(Pos.CENTER);
+        
         menuData.forEach(data -> {
-            Pane pane = new Pane();
-            Polygon pgon = new Polygon(
-                    0, 0,
-                    200, 0,
-                    215, 15,
-                    200, 30,
-                    0, 30
-            );
-            pgon.setStroke(Color.color(1, 1, 1, 0.75));
-            pgon.setEffect(new GaussianBlur());
-
-            pgon.fillProperty().bind(
-                    Bindings.when(pane.pressedProperty())
-                            .then(Color.color(0, 0, 0, 0.75))
-                            .otherwise(Color.color(0, 0, 0, 0.25))
-            );
-            
-            Text text = new Text(data.getKey());
-            text.setTranslateX(5);
-            text.setTranslateY(20);
-            text.setFont(Font.font("Arial"));
-            text.setFill(Color.WHITE);
-            Effect shadow = new DropShadow(5, Color.WHITE);
-            Effect blur = new BoxBlur(1, 1, 2);
-            text.effectProperty().bind(
-                    Bindings.when(pane.hoverProperty())
-                            .then(shadow)
-                            .otherwise(blur)
-            );
-
-            pane.getChildren().addAll(pgon, text); //polygon shape and text added to a pane.
-            pane.setOnMouseClicked(e -> data.getValue().run()); //executes the runnable corresponding to the menu item.
-            pane.setTranslateX(-300);
-
-            Rectangle clip = new Rectangle(300, 30);
-            clip.translateXProperty().bind(pane.translateXProperty().negate());
-
-            pane.setClip(clip);
-
-            menuBox.getChildren().addAll(pane); //pane added to the menu box.
+            Button button = new Button(data.getKey());
+            button.setOnAction(((event) -> data.getValue().run()));
+            buttonBox.getChildren().add(button);
         });
-
-        root.getChildren().add(menuBox); //menu box added to the root node.
+        menuBox.getChildren().add(buttonBox); //menu box added to the root node.
     }
 	
     /**
@@ -193,6 +183,4 @@ public class StartMenu implements Controller {
 		createContent();
 		return root;
 	}
-	
-	
 }
