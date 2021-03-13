@@ -2,6 +2,9 @@ package teamproject.wipeout.networking.server;
 
 import javafx.geometry.Point2D;
 import org.junit.jupiter.api.*;
+import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.ServerDiscovery;
@@ -9,28 +12,53 @@ import teamproject.wipeout.networking.data.GameUpdate;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.function.Consumer;
 
-/*@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GameServerTest {
 
     private static final Integer[] CLIENT_IDs = {0, 1, 2, 3, 4, 5, 6};
     private static final String SERVER_NAME = "TestServer#99";
-    private static final int CATCHUP_TIME = 50;
+    private static final int CATCHUP_TIME = 80;
     private static final int MAX_CONNECTIONS = 6;
 
     private GameClient[] gameClients;
-    private PlayerState[] clientPlayerStates;
+    private Player[] clientPlayers;
 
     private GameServer gameServer;
 
     private InetSocketAddress serverAddress;
 
+    private Player playerWaitingForFarmID;
+    private GameClient clientWaitingForFarmID;
+    private final Consumer<Integer> farmIDReceived = (farmID) -> {
+        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmID);
+        try {
+            this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
+            Thread.sleep(CATCHUP_TIME);
+        } catch (IOException | InterruptedException exception) {
+            exception.printStackTrace();
+        }
+    };
+
+    private HashSet<PlayerState> newPlayers;
+    private final NewPlayerAction newPlayerAction = (newPlayer) -> {
+        newPlayers.add(newPlayer);
+        for (Player player : this.clientPlayers) {
+            if (player.playerID.equals(newPlayer.getPlayerID())) {
+                return player;
+            }
+        }
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null);
+    };
+
     @BeforeAll
     void initializeGameServer() {
         try {
+            this.newPlayers = new HashSet<PlayerState>();
             this.gameServer = new GameServer(SERVER_NAME);
             this.gameServer.startClientSearch();
 
@@ -43,6 +71,11 @@ class GameServerTest {
             serverDiscovery.stopLookingForServers();
 
             this.gameServer.stopClientSearch();
+
+            this.clientPlayers = new Player[CLIENT_IDs.length];
+            for (int i = 0; i < CLIENT_IDs.length; i++) {
+                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), null);
+            }
 
         } catch (IOException | InterruptedException | ReflectiveOperationException exception) {
             Assertions.fail(exception.getMessage());
@@ -61,12 +94,10 @@ class GameServerTest {
     @BeforeEach
     void setUp() throws IOException, ClassNotFoundException, InterruptedException {
         this.gameClients = new GameClient[CLIENT_IDs.length];
-        this.clientPlayerStates = new PlayerState[CLIENT_IDs.length];
-        for (int i = 0; i < CLIENT_IDs.length; i++) {
-            this.clientPlayerStates[i] = new PlayerState(CLIENT_IDs[i], new Point2D(i, i), Point2D.ZERO);
-        }
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
-            this.gameClients[i] = GameClient.openConnection(this.clientPlayerStates[i], this.serverAddress);
+            this.gameClients[i] = GameClient.openConnection(this.serverAddress, this.clientPlayers[i], new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
+            this.playerWaitingForFarmID = this.clientPlayers[i];
+            this.clientWaitingForFarmID = this.gameClients[i];
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
         }
         this.gameServer.startNewGame();
@@ -115,7 +146,7 @@ class GameServerTest {
             Assertions.assertFalse(this.gameServer.isActive.get());
 
             for (int i = 5; i < CLIENT_IDs.length; ++i) {
-                GameClient newClient = GameClient.openConnection(this.clientPlayerStates[i], this.serverAddress);
+                GameClient newClient = GameClient.openConnection(this.serverAddress, this.clientPlayers[i], new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
                 Assertions.assertNull(newClient);
             }
 
@@ -150,8 +181,8 @@ class GameServerTest {
 
         Collection<PlayerState> playerStates = this.gameServer.playerStates.get().values();
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
-            PlayerState expectedState = this.clientPlayerStates[i];
-            Assertions.assertTrue(playerStates.contains(expectedState));
+            Player expectedState = this.clientPlayers[i];
+            Assertions.assertTrue(playerStates.contains(expectedState.getCurrentState()));
         }
 
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
@@ -168,7 +199,7 @@ class GameServerTest {
 
             for (int i = 0; i < MAX_CONNECTIONS; i++) {
                 GameClient chosenClient = this.gameClients[i];
-                PlayerState updatedState = this.clientPlayerStates[i];
+                PlayerState updatedState = this.clientPlayers[i].getCurrentState();
                 updatedState.setPosition(updatedState.getPosition().add(i, i));
                 updatedPositions.put(chosenClient.id, updatedState.getPosition());
                 chosenClient.send(new GameUpdate(updatedState));
@@ -179,8 +210,7 @@ class GameServerTest {
             Collection<PlayerState> playerStates = this.gameServer.playerStates.get().values();
 
             for (int i = 0; i < MAX_CONNECTIONS; i++) {
-                GameClient chosenClient = this.gameClients[i];
-                PlayerState originalState = this.clientPlayerStates[i];
+                PlayerState originalState = this.clientPlayers[i].getCurrentState();
                 Assertions.assertTrue(playerStates.contains(originalState));
             }
 
@@ -259,4 +289,3 @@ class GameServerTest {
         }
     }
 }
- */

@@ -143,7 +143,7 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code ArrayList<PlayerState>} cannot be sent.
      */
     public void updateWith(Collection<PlayerState> playerStates) throws IOException {
-        for (PlayerState playerState : playerStates) {
+        for (PlayerState playerState : playerStates.toArray(new PlayerState[0])) {
             this.out.writeObject(new GameUpdate(playerState));
         }
     }
