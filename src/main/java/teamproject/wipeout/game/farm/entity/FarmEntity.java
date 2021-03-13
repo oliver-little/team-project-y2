@@ -58,6 +58,8 @@ public class FarmEntity extends GameEntity {
 
     private final HashSet<ItemsRowEntity> rowEntities;
 
+    //private FarmUI farmUI;
+
     private Item placingItem;
     private SeedEntity seedEntity;
     private Consumer<Item> abortPlacing;
@@ -126,6 +128,8 @@ public class FarmEntity extends GameEntity {
         }
 
         if (activePlayer) {
+            //this.farmUI = new FarmUI(this.data, spriteManager);
+            //this.farmUI.setParent(uiContainer);
             this.addComponent(this.makeClickable(clientFunction));
         }
     }
