@@ -51,15 +51,19 @@ class MovementTest
 
 		testComponent.acceleration = new Point2D(10.0, -10.0);
 		testComponent.updateFacingDirection();
-		assertSame(testComponent.facingDirection, FacingDirection.RIGHT);
-
-		testComponent.acceleration = new Point2D(0.0, -10.0);
-		testComponent.updateFacingDirection();
 		assertSame(testComponent.facingDirection, FacingDirection.UP);
 
-		testComponent.acceleration = new Point2D(10.0, -10.0);
+		testComponent.acceleration = new Point2D(10.0, 10.0);
+		testComponent.updateFacingDirection();
+		assertSame(testComponent.facingDirection, FacingDirection.DOWN);
+
+		testComponent.acceleration = new Point2D(10.1, 10.0);
 		testComponent.updateFacingDirection();
 		assertSame(testComponent.facingDirection, FacingDirection.RIGHT);
+
+		testComponent.acceleration = new Point2D(-10.1, 10.0);
+		testComponent.updateFacingDirection();
+		assertSame(testComponent.facingDirection, FacingDirection.LEFT);
 
 		testComponent.acceleration = new Point2D(10.0, 0.0);
 		testComponent.updateFacingDirection();

@@ -138,7 +138,7 @@ public class PathFindingSystem {
      * @return A list of points to traverse to follow the shortest path through the squares
      */
     public static List<Point2D> findStringPullPath(Point2D startPoint, Point2D endPoint, List<NavigationSquare> squarePath) {
-        findStringPullPath(startPoint, endPoint, squarePath, 0);
+        return findStringPullPath(startPoint, endPoint, squarePath, 0);
     }
 
     /**
@@ -261,13 +261,14 @@ public class PathFindingSystem {
         output.add(endPoint);
 
         // If there is a radius > 0, increase the angle around the points
-        if (radius > 0 && output.size() > 2) {
+        if (output.size() > 2) {
             for (int i = 1; i < output.size() - 1; i++) {
                 Point2D currentPoint = output.get(i);
-                Point2D prevVector = output.get(i-1).subtract(currentPoint).normalize();
-                Point2D nextVector = currentPoint.subtract(output.get(i-1)).normalize();
+                Point2D prevVector = currentPoint.subtract(output.get(i-1)).normalize();
+                Point2D nextVector = currentPoint.subtract(output.get(i+1)).normalize();
                 Point2D normal = prevVector.add(nextVector).normalize();
-                output.set(i, currentPoint.add(normal.multiply(radius)));
+                Point2D after = currentPoint.add(normal.multiply(radius));
+                output.set(i, after);
             }
         }
 
@@ -299,6 +300,20 @@ public class PathFindingSystem {
      * @param start The start position
      * @param end The end position
      * @param mesh The NavigationMesh to traverse through.
+     * @return The list of points to traverse through to get from the start to end position.
+     */
+    public static List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh) {
+        return findPath(start, end, mesh, 0);
+    }
+
+    /**
+     * Finds a path from a start position and end position through a NavigationMesh.
+     * If either the start or end position is not on the mesh, the shortest path to get onto the mesh will be used
+     * 
+     * @param start The start position
+     * @param end The end position
+     * @param mesh The NavigationMesh to traverse through.
+     * @param radius The radius of the object finding a path
      * @return The list of points to traverse through to get from the start to end position.
      */
     public static List<Point2D> findPath(Point2D start, Point2D end, NavigationMesh mesh, double radius) {

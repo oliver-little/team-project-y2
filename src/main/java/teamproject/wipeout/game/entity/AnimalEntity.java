@@ -18,6 +18,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
@@ -120,7 +121,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         Point2D wp = transformComponent.getWorldPosition();
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
-        System.out.println(path);
         this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
