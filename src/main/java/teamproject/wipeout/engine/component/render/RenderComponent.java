@@ -118,7 +118,7 @@ public class RenderComponent implements GameComponent {
         double width = 0;
 
         for (Renderable r : renderables) {
-            double rWidth = this.offset.getX() + r.getWidth();
+            double rWidth = r.getWidth();
             
             if (rWidth > width) {
                 width = rWidth;
@@ -138,7 +138,7 @@ public class RenderComponent implements GameComponent {
         double height = 0;
 
         for (Renderable r : renderables) {
-            double rHeight = this.offset.getY() + r.getHeight();
+            double rHeight = r.getHeight();
             
             if (rHeight > height) {
                 height = rHeight;

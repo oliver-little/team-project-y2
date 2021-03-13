@@ -52,7 +52,7 @@ public class WorldEntity extends GameEntity {
 		//grass background
 		GameEntity grass = new GameEntity(gameScene);
 		grass.setParent(this);
-		grass.addComponent(new Transform(-width * 4, -height * 4));
+		grass.addComponent(new Transform(-width * 4, -height * 4, -100));
 		grass.addComponent(new RenderComponent(new RectRenderable(Color.rgb(47, 129, 54), width * 8, height * 8)));
 		
 
@@ -103,7 +103,7 @@ public class WorldEntity extends GameEntity {
 			this.farms.put(farmEntity2.farmID, farmEntity2);
 		}
 
-		this.market = new MarketEntity(gameScene, 260, 200, itemStore, player, spriteManager, uiContainer);
+		this.market = new MarketEntity(gameScene, 260, 250, itemStore, player, spriteManager, uiContainer);
 		this.market.setOnUIOpen(() -> input.setDisableInput(true));
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);

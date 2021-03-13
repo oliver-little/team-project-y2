@@ -59,11 +59,9 @@ public class MarketEntity extends GameEntity {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             Image marketSprite = spriteManager.getSpriteSet("market", "market")[0];
 
-            this.hoverRect = new RectRenderable(Color.DARKGRAY, marketSprite.getWidth(), marketSprite.getHeight());
-            this.hoverRect.alpha = 0;
-            this.hoverRect.radius = 50;
+            
 
-            this.addComponent(new RenderComponent(new Point2D(0, -yOffset), this.hoverRect, new SpriteRenderable(marketSprite)));
+            this.addComponent(new RenderComponent(new Point2D(0, -yOffset), new SpriteRenderable(marketSprite)));
 
             marketEnd = new Point2D(x + marketSprite.getWidth(), y + marketSprite.getHeight());
             marketCentre = this.playerTransform.getPosition().add(marketEnd).multiply(0.5);
@@ -83,10 +81,21 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
 
-        this.addComponent(new Hoverable(this.onHover));
+        // Create child component for hoverable so it displays behind everything
+        GameEntity child = new GameEntity(scene);
+        child.setParent(this);
+        child.addComponent(new Transform(0, 0));
+        child.addComponent(new Hoverable(this.onHover));
+        child.addComponent(new ScriptComponent(this.onStep));
 
-        this.addComponent(new ScriptComponent(this.onStep));
+        RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
+        this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
+        this.hoverRect.alpha = 0;
+        this.hoverRect.radius = 50;
 
+        child.addComponent(new RenderComponent(new Point2D(0, -yOffset), hoverRect));
+
+        // Create logic market
         market = new Market(items, false);
 
         this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);

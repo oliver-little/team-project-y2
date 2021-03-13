@@ -77,7 +77,7 @@ public class FarmEntity extends GameEntity {
         super(scene);
         this.farmID = farmID;
 
-        this.transform = new Transform(location, 0.0, 0);
+        this.transform = new Transform(location, 0.0, -1);
 
         Point2D squareGrid = new Point2D(FarmData.FARM_COLUMNS, FarmData.FARM_ROWS);
         this.size = squareGrid.multiply(SQUARE_SIZE).add(SQUARE_SIZE * 2, SQUARE_SIZE * 2);
