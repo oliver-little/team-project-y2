@@ -1,6 +1,5 @@
 package teamproject.wipeout.game.task;
 
-import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.player.Player;
 
 import java.util.function.Function;

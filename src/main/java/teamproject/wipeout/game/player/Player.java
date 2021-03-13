@@ -1,8 +1,12 @@
 package teamproject.wipeout.game.player;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
@@ -12,8 +16,8 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
@@ -31,7 +35,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public final Integer playerID;
     public String playerName;
     public String spriteSheetName;
-    public Double money;
     public Integer occupiedSlots;
 
     public int selectedSlot;
@@ -54,6 +57,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private final PlayerState playerState;
 
+    private DoubleProperty money;
+    
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -63,13 +69,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
-        this.money = 100.0;
+        this.money = new SimpleDoubleProperty(100.0);
         this.occupiedSlots = 0;
 
         this.addComponent(new Transform(position, 0.0, 1));
         this.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
 
-        this.addComponent(new HitboxComponent(new Rectangle(14, 12, 36, 53)));
+        this.addComponent(new HitboxComponent(new Rectangle(14, 7, 36, 26)));
         this.addComponent(new CollisionResolutionComponent());
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO);
@@ -83,6 +90,18 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
+    }
+
+    public double getMoney() {
+        return this.money.getValue();
+    }
+
+    public void setMoney(double value) {
+        this.money.set(value);
+    }
+
+    public DoubleProperty moneyProperty() {
+        return this.money;
     }
 
     /**
@@ -113,30 +132,32 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public void updateFromState(PlayerState newState) {
         this.getComponent(MovementComponent.class).acceleration = newState.getAcceleration();
-        this.getComponent(Transform.class).setPosition(newState.getPosition());
+        //if (newState.getAcceleration().equals(Point2D.ZERO)) {
+            this.getComponent(Transform.class).setPosition(newState.getPosition());
+        //}
         this.playerState.updateStateFrom(newState);
     }
 
     // When called with a market item, purchases an item for a player and returns true,
     // otherwise if player has not enough money, returns false
     public boolean buyItem(Market market, int id, int quantity) {
-        if (market.calculateTotalCost(id, quantity, true) > this.money) {
+        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
             return false;
         }
         if (!this.acquireItem(id, quantity)) {
         	return false;
         };
-        this.money -= market.buyItem(id, quantity);
+        this.money.set(this.money.getValue() - market.buyItem(id, quantity));
         return true;
     }
 
     // if you want to purchase some task from the market
     public boolean buyTask(Task task) {
-        if(task.priceToBuy > this.money) {
+        if(task.priceToBuy > this.money.getValue()) {
             return false;
         }
         tasks.add(task);
-        this.money -= task.priceToBuy;
+        this.money.set(this.money.getValue() - task.priceToBuy);
         return true;
     }
 
@@ -146,7 +167,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         if (removeItem(id, quantity) < 0) {
             return false;
         }
-        this.money += market.sellItem(id, quantity);
+        this.money.set(this.money.getValue() + market.sellItem(id, quantity));
         this.soldItems.putIfAbsent(id, 0);
         this.soldItems.put(id, this.soldItems.get(id) + 1);
         checkTasks();
@@ -374,7 +395,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
             if(task.condition.apply(this)) {
                 task.completed = true;
-                this.money += task.reward;
+                this.money.set(this.money.getValue() + task.reward);
                 System.out.println("Task completed");
             }
         }

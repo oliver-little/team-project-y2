@@ -4,6 +4,7 @@ import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
@@ -23,39 +24,46 @@ public class GameAudio {
 	//private MediaPlayer player;
     private Boolean playing;
     private String fileName;
-    Clip audioClip;
-    AudioInputStream audioStream;
-    double volume;
+    private Clip audioClip;
+    private AudioInputStream audioStream;
+    public double volume;
+    public boolean toLoop; //whether or not to loop sound continuosly (until stop)
     
     /**
-     * This is a class used to implement the backing track (music).
+     * This is a class used to implement one-off sounds and the backing track.
      * @param audioFileName	name of the audio file inside /resources/audio/
+     * @param loop - whether or not the sound effect needs to loop continously
      */
-    public GameAudio(String audioFileName) {
+    public GameAudio(String audioFileName, boolean loop) {
     	fileName = audioFileName;
-    	volume = 1.0f;
+    	volume = 0.1f;
     	playing = false;
-    	
-    }
-    
-    public void play() {
-    	try
+    	this.toLoop = loop;
+    	File audioFile;
+		try
 		{
-    		File audioFile = ResourceLoader.get(ResourceType.AUDIO, fileName);
-    		audioStream = AudioSystem.getAudioInputStream(audioFile);
+			audioFile = ResourceLoader.get(ResourceType.AUDIO, fileName);
+			audioStream = AudioSystem.getAudioInputStream(audioFile);
 			AudioFormat format = audioStream.getFormat();
 	    	DataLine.Info info = new DataLine.Info(Clip.class, format);
 	    	audioClip = (Clip) AudioSystem.getLine(info);
 			audioClip.open(audioStream);
-	    	audioClip.start();
-	    	audioClip.loop(Clip.LOOP_CONTINUOUSLY);
-	    	setVolume(volume);
 		}
-		catch (UnsupportedAudioFileException | IOException | LineUnavailableException e)
+		catch (IOException | UnsupportedAudioFileException | LineUnavailableException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+    	
+    }
+    
+    public void play() {
+    	audioClip.start();
+    	if(toLoop) {
+    		audioClip.loop(Clip.LOOP_CONTINUOUSLY);
+    	}
+    	setVolume(volume);
     	playing = true;
     	
     }
@@ -74,19 +82,9 @@ public class GameAudio {
     }
     
     public void stop() {
-    	audioClip.close();
-    	
-    	try
-		{
-			audioStream.close();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-    	playing = false;
+    	audioClip.stop();
+		audioClip.setMicrosecondPosition(0);
+		playing = false;
     }
     
     /**

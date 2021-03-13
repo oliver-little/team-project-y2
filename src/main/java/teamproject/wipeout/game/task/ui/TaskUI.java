@@ -1,43 +1,40 @@
 package teamproject.wipeout.game.task.ui;
 
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.TextRenderable;
-import teamproject.wipeout.engine.component.ui.DialogUIComponent;
+import javafx.scene.control.*;
+import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
 
-public class TaskUI extends VBox implements DialogUIComponent {
-    public String description;
-    private Pane parent;
+import java.util.ArrayList;
 
-    public TaskUI(String description) {
+public class TaskUI extends ListView<String> {
+
+    private Integer MAX_TASKS = 5;
+
+    public TaskUI(Player player) {
         super();
 
-        this.setAlignment(Pos.CENTER);
+        this.setMaxWidth(150);
+        this.setMaxHeight(200);
+        this.setMouseTransparent( true );
+        this.setFocusTraversable( false );
+        this.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
-//        TabPane tabPane = new TabPane();
-//        Tab buy = new Tab("Buy", new Label("Buy some items."));
-//        Tab sell = new Tab("Sell", new Label("Sell some items."));
-//        tabPane.getTabs().addAll(buy, sell);
-//        Button close = new Button("X");
-//        close.setOnAction(actionEvent -> this.parent.getChildren().remove(this));
-//
-//        this.getChildren().addAll(tabPane, close);
+        showTasks(player.tasks);
     }
 
-    public void setParent(Pane parent) {
-        this.parent = parent;
-    }
-
-    public Parent getContent() {
-        return this;
+    public void showTasks(ArrayList<Task> tasks) {
+        int i = 0;
+        this.getItems().clear();
+        for(Task task: tasks) {
+            if (task.completed) {
+                continue;
+            }
+            this.getItems().add(task.description);
+            i += 1;
+        }
+        while(i < MAX_TASKS) {
+            this.getItems().add("");
+            i += 1;
+        }
     }
 }

@@ -22,6 +22,7 @@ import teamproject.wipeout.networking.server.ServerRunningException;
 
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Networker {
 
@@ -35,6 +36,10 @@ public class Networker {
     public Networker() {
         this.serverRunner = new GameServerRunner();
     }
+
+    public final Supplier<GameClient> clientSupplier = () -> {
+        return this.client;
+    };
 
     public GameClient getClient() {
         return this.client;
@@ -114,6 +119,8 @@ public class Networker {
 
             Consumer<Integer> farmID = (newFarmID) -> {
                 myPlayer.client = this.client;
+                this.worldEntity.getMyAnimal().clientSupplier = () -> this.client;
+                this.client.myAnimal = this.worldEntity.getMyAnimal();
                 this.client.market = this.worldEntity.market.getMarket();
 
                 myMarket.client = this.client;

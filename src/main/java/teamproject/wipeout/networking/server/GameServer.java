@@ -1,14 +1,12 @@
 package teamproject.wipeout.networking.server;
 
+import javafx.util.Pair;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
-import teamproject.wipeout.networking.state.FarmState;
-import teamproject.wipeout.networking.state.MarketOperationRequest;
-import teamproject.wipeout.networking.state.MarketOperationResponse;
-import teamproject.wipeout.networking.state.PlayerState;
+import teamproject.wipeout.networking.state.*;
 import teamproject.wipeout.util.threads.BackgroundThread;
 import teamproject.wipeout.util.threads.ServerThread;
 import teamproject.wipeout.util.threads.UtilityThread;
@@ -55,6 +53,9 @@ public class GameServer {
     protected final AtomicReference<HashSet<GameClientHandler>> connectedClients;
 
     protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
+
+    protected final AtomicReference<Pair<Integer, AnimalState>> animalBoss;
+
     protected final AtomicReference<HashMap<Integer, FarmState>> farmStates;
     protected final AtomicReference<ArrayList<Integer>> availableFarms;
 
@@ -81,6 +82,9 @@ public class GameServer {
         this.connectedClients = new AtomicReference<HashSet<GameClientHandler>>(new HashSet<GameClientHandler>());
 
         this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
+
+        this.animalBoss = new AtomicReference<Pair<Integer, AnimalState>>(null);
+
         this.farmStates = new AtomicReference<HashMap<Integer, FarmState>>(new HashMap<Integer, FarmState>());
         this.availableFarms = new AtomicReference<ArrayList<Integer>>(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
 
@@ -291,6 +295,9 @@ public class GameServer {
             case PLAYER_STATE:
                 this.handlePlayerStateUpdate((PlayerState) update.content);
                 break;
+            case ANIMAL_STATE:
+                this.handleAnimalStateUpdate(update.originClientID, (AnimalState) update.content);
+                break;
             case FARM_STATE:
                 this.handleFarmStateUpdate(update.originClientID, (FarmState) update.content);
                 break;
@@ -329,6 +336,23 @@ public class GameServer {
         HashMap<Integer, PlayerState> currentPlayerStates = this.playerStates.getAcquire();
         currentPlayerStates.remove(clientID);
         this.playerStates.setRelease(currentPlayerStates);
+    }
+
+    /**
+     * Handles a given {@code AnimalState} update.
+     *
+     * @param state {@link AnimalState} to be processed.
+     */
+    private void handleAnimalStateUpdate(Integer clientID, AnimalState state) {
+        Pair<Integer, AnimalState> currentAnimal = this.animalBoss.getAcquire();
+        if (currentAnimal == null) {
+            this.animalBoss.setRelease(new Pair<Integer, AnimalState>(clientID, state));
+            return;
+        } else if (!currentAnimal.getKey().equals(clientID)) {
+            return;
+        }
+        currentAnimal.getValue().updateStateFrom(state);
+        this.animalBoss.setRelease(currentAnimal);
     }
 
     /**

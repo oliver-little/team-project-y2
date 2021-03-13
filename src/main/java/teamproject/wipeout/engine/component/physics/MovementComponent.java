@@ -40,17 +40,21 @@ public class MovementComponent implements GameComponent {
         double x = this.acceleration.getX();
         double y = this.acceleration.getY();
         FacingDirection old = this.facingDirection;
-        if(x > 0f) {
-            this.facingDirection = FacingDirection.RIGHT;
+        if (x != 0 && Math.abs(x) > Math.abs(y)) {
+            if (x < 0) {
+                this.facingDirection = FacingDirection.LEFT;
+            }
+            else {
+                this.facingDirection = FacingDirection.RIGHT;
+            }
         }
-        else if(x < 0f) {
-            this.facingDirection = FacingDirection.LEFT;
-        }
-        else if(y > 0f) {
-            this.facingDirection = FacingDirection.DOWN;
-        }
-        else if(y < 0f) {
-            this.facingDirection = FacingDirection.UP;
+        else if (y != 0) {
+            if (y < 0) {
+                this.facingDirection = FacingDirection.UP;
+            }
+            else {
+                this.facingDirection = FacingDirection.DOWN;
+            }
         }
         else if (this.velocity.getX() == 0 && this.velocity.getY() == 0) {
             this.facingDirection = FacingDirection.NONE;

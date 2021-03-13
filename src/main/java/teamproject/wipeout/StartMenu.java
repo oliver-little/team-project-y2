@@ -99,7 +99,7 @@ public class StartMenu implements Controller {
      */
     private void addTitle() {
     	Pane pane = new Pane();
-    	Text text = new Text("Game Name");
+    	Text text = new Text("Farmageddon");
     	text.setFont(Font.font("Arial", 40));
     	text.setFill(Color.WHITE);
         pane.setTranslateX(WIDTH / 2 - text.getLayoutBounds().getWidth() / 2);

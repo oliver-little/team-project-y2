@@ -5,9 +5,11 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.physics.Shape;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
@@ -20,9 +22,10 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.util.Networker;
-
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WorldEntity extends GameEntity {
@@ -33,7 +36,9 @@ public class WorldEntity extends GameEntity {
 	public final Map<Integer, FarmEntity> farms;
 
 	private Player myPlayer;
+	private AnimalEntity myAnimal;
 	private FarmEntity myFarm;
+	private NavigationMesh navMesh;
 
 	private InputHandler inputHandler;
 
@@ -103,6 +108,22 @@ public class WorldEntity extends GameEntity {
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);
 
+		List<Rectangle> rectangles = new ArrayList<>();
+
+		Point2D marketPos = market.getComponent(Transform.class).getWorldPosition();
+
+		for (Shape shape : market.getComponent(HitboxComponent.class).boundingBoxes) {
+			if (shape instanceof Rectangle) {
+				Rectangle rect = (Rectangle) shape;
+				Rectangle newRect = new Rectangle(marketPos.add(rect.getX(), rect.getY()), rect.getWidth(), rect.getHeight());
+				rectangles.add(newRect);
+			}
+		}
+
+        navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
+
+		myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
+
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
 	}
@@ -111,8 +132,16 @@ public class WorldEntity extends GameEntity {
 		return this.myPlayer;
 	}
 
+	public AnimalEntity getMyAnimal() {
+		return this.myAnimal;
+	}
+
 	public FarmEntity getMyFarm() {
 		return this.myFarm;
+	}
+
+	public NavigationMesh getNavMesh() {
+		return this.navMesh;
 	}
 
 	public void setMyPlayer(Player myPlayer) {

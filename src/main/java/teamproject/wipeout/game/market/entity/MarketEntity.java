@@ -50,8 +50,11 @@ public class MarketEntity extends GameEntity {
         this.uiContainer = uiContainer;
         this.playerTransform = player.getComponent(Transform.class);
 
-        this.marketTransform = new Transform(x, y);
+        this.marketTransform = new Transform(x, y, 1);
         this.addComponent(this.marketTransform);
+        
+        double yOffset = 44;
+
         try {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             Image marketSprite = spriteManager.getSpriteSet("market", "market")[0];
@@ -60,7 +63,7 @@ public class MarketEntity extends GameEntity {
             this.hoverRect.alpha = 0;
             this.hoverRect.radius = 50;
 
-            this.addComponent(new RenderComponent(this.hoverRect, new SpriteRenderable(marketSprite)));
+            this.addComponent(new RenderComponent(new Point2D(0, -yOffset), this.hoverRect, new SpriteRenderable(marketSprite)));
 
             marketEnd = new Point2D(x + marketSprite.getWidth(), y + marketSprite.getHeight());
             marketCentre = this.playerTransform.getPosition().add(marketEnd).multiply(0.5);
@@ -71,11 +74,11 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new Clickable(this.onClick));
 
         Shape[] hitboxes = {
-        		new Rectangle(6,44,91,96),
-        		new Rectangle(96,20,34,113),
-        		new Rectangle(128,12,64,120),
-        		new Rectangle(192,45,63,96)
-
+        		new Rectangle(6, 45 - yOffset, 91, 96),
+                new Rectangle(96, 45 - yOffset, 34, 70),
+                new Rectangle(128, 45 - yOffset, 64, 77),
+                new Rectangle(192, 45 - yOffset, 55, 96),
+                new Rectangle(247, 67 - yOffset, 35, 52)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));

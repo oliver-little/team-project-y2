@@ -2,32 +2,60 @@ package teamproject.wipeout.networking.client;
 
 import javafx.geometry.Point2D;
 import org.junit.jupiter.api.*;
+import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.server.GameServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-/*@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GameClientTest {
 
     private static final Integer CLIENT_ID = 123;
     private static final Integer DUMMY_CLIENT_ID = 999;
     private static final String SERVER_NAME = "TestServer#1";
-    private static final int CATCHUP_TIME = 50;
+    private static final int CATCHUP_TIME = 80;
 
     private GameClient gameClient;
-    private PlayerState clientPlayerState;
+    private Player clientPlayer;
 
     private GameServer gameServer;
     private InetSocketAddress serverAddress;
 
+    private Player playerWaitingForFarmID;
+    private GameClient clientWaitingForFarmID;
+    private final Consumer<Integer> farmIDReceived = (farmID) -> {
+        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmID);
+        try {
+            if (this.clientWaitingForFarmID == null) {
+                this.gameClient.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
+            } else {
+                this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
+            }
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    };
+
+    private HashSet<PlayerState> newPlayers;
+    private final NewPlayerAction newPlayerAction = (newPlayer) -> {
+        newPlayers.add(newPlayer);
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null);
+    };
+
     @BeforeAll
     void initializeGameClient() throws IOException, InterruptedException, ReflectiveOperationException {
-        this.clientPlayerState = new PlayerState(CLIENT_ID, Point2D.ZERO, Point2D.ZERO);
+        this.clientPlayer = new Player(new GameScene(), CLIENT_ID, "Test", Point2D.ZERO, null);
+        this.newPlayers = new HashSet<>();
 
         this.gameServer = new GameServer(SERVER_NAME);
         this.gameServer.startClientSearch();
@@ -49,6 +77,7 @@ class GameClientTest {
     @BeforeEach
     void setUp() {
         this.gameClient = null;
+        this.playerWaitingForFarmID = this.clientPlayer;
     }
 
     @AfterEach
@@ -62,7 +91,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testOpeningConnection() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -72,13 +101,13 @@ class GameClientTest {
 
             PlayerState dummyPlayerState = new PlayerState(DUMMY_CLIENT_ID, Point2D.ZERO, Point2D.ZERO);
             this.gameServer.updateClients(new GameUpdate(dummyPlayerState));
-            this.gameServer.updateClients(new GameUpdate(this.clientPlayerState));
+            this.gameServer.updateClients(new GameUpdate(this.clientPlayer.getCurrentState()));
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
-            ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
+            Set<Integer> states = this.gameClient.players.keySet();
             Assertions.assertEquals(2, states.size());
-            Assertions.assertTrue(states.contains(dummyPlayerState));
+            Assertions.assertTrue(states.contains(dummyPlayerState.getPlayerID()));
 
         } catch (IOException | InterruptedException | ClassNotFoundException exception) {
             Assertions.fail(exception.getMessage());
@@ -91,13 +120,13 @@ class GameClientTest {
         try {
             this.gameServer.startNewGame(); // will not allow new connections
 
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNull(this.gameClient,
                     "Connected despite the server not allowing connections");
 
             this.gameServer.stopGame(); // will allow new connections
 
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient,
                     "Not connected despite the server allowing connections");
 
@@ -113,7 +142,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testClosingConnection() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -140,7 +169,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testReceivingUpdatesOnConnect() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -149,7 +178,7 @@ class GameClientTest {
             PlayerState dummyPlayerState2 = new PlayerState(DUMMY_CLIENT_ID - 10, Point2D.ZERO, Point2D.ZERO);
 
             this.gameClient.send(new GameUpdate(dummyPlayerState1));
-            this.gameClient.send(new GameUpdate(this.clientPlayerState));
+            this.gameClient.send(new GameUpdate(this.clientPlayer.getCurrentState()));
             this.gameClient.send(new GameUpdate(dummyPlayerState2));
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
@@ -158,18 +187,18 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to disconnect
 
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
+            Set<Integer> states = this.gameClient.players.keySet();
 
             Assertions.assertEquals(3, states.size(),
                     "Incorrect number of received player states");
-            Assertions.assertTrue(states.contains(dummyPlayerState1),
+            Assertions.assertTrue(states.contains(dummyPlayerState1.getPlayerID()),
                     "Incorrectly received player state 1");
-            Assertions.assertTrue(states.contains(dummyPlayerState2),
+            Assertions.assertTrue(states.contains(dummyPlayerState2.getPlayerID()),
                     "Incorrectly received player state 2");
 
             this.gameServer.disconnectClients();
@@ -183,7 +212,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testSendingUpdates() throws IOException {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -193,19 +222,19 @@ class GameClientTest {
             this.gameClient.send(new GameUpdate(dummyPlayerState1));
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
-            this.gameClient.send(new GameUpdate(this.clientPlayerState));
+            this.gameClient.send(new GameUpdate(this.clientPlayer.getCurrentState()));
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
             this.gameClient.send(new GameUpdate(dummyPlayerState2));
             Thread.sleep(CATCHUP_TIME); // time for the client to receive update
 
-            ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
+            Set<Integer> states = this.gameClient.players.keySet();
 
             Assertions.assertEquals(3, states.size(),
                     "Incorrect number of received player states");
-            Assertions.assertTrue(states.contains(dummyPlayerState1),
+            Assertions.assertTrue(states.contains(dummyPlayerState1.getPlayerID()),
                     "Incorrectly received player state 1");
-            Assertions.assertTrue(states.contains(dummyPlayerState2),
+            Assertions.assertTrue(states.contains(dummyPlayerState2.getPlayerID()),
                     "Incorrectly received player state 2");
 
             this.gameServer.disconnectClients();
@@ -221,11 +250,11 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
-            ArrayList<PlayerState> afterStates = this.gameClient.getPlayerStates();
+            Set<Integer> afterStates = this.gameClient.players.keySet();
 
-            Assertions.assertFalse(afterStates.contains(dummyPlayerState3),
+            Assertions.assertFalse(afterStates.contains(dummyPlayerState3.getPlayerID()),
                     "Correctly received player state 3 despite closed connection");
-            Assertions.assertFalse(afterStates.contains(dummyPlayerState4),
+            Assertions.assertFalse(afterStates.contains(dummyPlayerState4.getPlayerID()),
                     "Correctly received player state 4 despite closed connection");
 
         } catch (IOException | InterruptedException | ClassNotFoundException exception) {
@@ -238,7 +267,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testReceivingUpdates() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -246,15 +275,13 @@ class GameClientTest {
             PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 2, Point2D.ZERO, Point2D.ZERO);
 
             this.gameClient.send(dummyPlayerState1);
-            this.gameClient.send(this.clientPlayerState);
+            this.gameClient.send(this.clientPlayer.getCurrentState());
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
-            ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
+            Set<Integer> players = this.gameClient.players.keySet();
 
-            Assertions.assertEquals(2, states.size(),
-                    "Incorrect number of received player states");
-            Assertions.assertTrue(states.contains(dummyPlayerState1),
+            Assertions.assertTrue(players.contains(dummyPlayerState1.getPlayerID()),
                     "Incorrectly received player state");
 
             dummyPlayerState1.setPosition(dummyPlayerState1.getPosition().add(1, 1));
@@ -262,15 +289,12 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
-            ArrayList<PlayerState> updatedStates = this.gameClient.getPlayerStates();
+            Set<Integer> updatedPlayers = this.gameClient.players.keySet();
 
-            Assertions.assertEquals(2, updatedStates.size(),
+            Assertions.assertEquals(2, updatedPlayers.size(),
                     "Incorrect number of received player states");
 
-            int pIndex = updatedStates.indexOf(dummyPlayerState1);
-            Assertions.assertTrue(pIndex > -1,
-                    "Incorrectly received player state");
-            Assertions.assertEquals(dummyPlayerState1, updatedStates.get(pIndex),
+            Assertions.assertTrue(updatedPlayers.contains(dummyPlayerState1.getPlayerID()),
                     "Incorrectly received player state");
 
             this.gameServer.disconnectClients();
@@ -284,29 +308,33 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testReceivingOthersDisconnect() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            PlayerState secondState = new PlayerState(DUMMY_CLIENT_ID, new Point2D(1, 1), Point2D.ZERO);
-            GameClient secondClient = GameClient.openConnection(secondState, this.serverAddress);
+            Player secondPlayer = new Player(new GameScene(), DUMMY_CLIENT_ID, "Test", Point2D.ZERO, null);
+            this.playerWaitingForFarmID = secondPlayer;
+            GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
+            this.clientWaitingForFarmID = secondClient;
             Assertions.assertNotNull(secondClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
+            this.playerWaitingForFarmID = this.clientPlayer;
+            this.clientWaitingForFarmID = null;
 
-            ArrayList<PlayerState> states = this.gameClient.getPlayerStates();
+            Set<Integer> players = this.gameClient.players.keySet();
 
-            Assertions.assertEquals(2, states.size());
-            Assertions.assertTrue(states.contains(secondState));
+            Assertions.assertEquals(2, players.size());
+            Assertions.assertTrue(players.contains(secondPlayer.playerID));
 
             secondClient.closeConnection(true);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to disconnect
 
-            ArrayList<PlayerState> disconnectedStates = this.gameClient.getPlayerStates();
+            Set<Integer> disconnectedPlayers = this.gameClient.players.keySet();
 
-            Assertions.assertEquals(1, disconnectedStates.size());
+            Assertions.assertEquals(1, disconnectedPlayers.size());
 
         } catch (IOException | InterruptedException | ClassNotFoundException exception) {
             Assertions.fail(exception.getMessage());
@@ -317,7 +345,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testDisconnectByServer() {
         try {
-            this.gameClient = GameClient.openConnection(this.clientPlayerState, this.serverAddress);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME);
@@ -336,4 +364,4 @@ class GameClientTest {
         }
     }
 
-}*/
+}

@@ -13,7 +13,6 @@ import java.io.Serializable;
  * <br>
  * {@code PlayerState} implements {@link Serializable}.
  * <br>
- * Game-critical information is: playerID, position.
  */
 public class PlayerState implements Serializable {
 

@@ -30,10 +30,10 @@ public class PathFindingSystemTest {
 
         assertEquals(0, a.adjacentEdges.size()); 
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 1, 9, a, 2, 8);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 1, 9, a, 2, 8);
 
         assertEquals(1, path.size());
 
@@ -62,10 +62,10 @@ public class PathFindingSystemTest {
         assertEquals(1, a.adjacentEdges.size());
         assertEquals(1, b.adjacentEdges.size()); 
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 2, 3, b, 2, -8);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 2, 3, b, 2, -8);
 
         assertEquals(2, path.size());
 
@@ -105,10 +105,10 @@ public class PathFindingSystemTest {
         assertEquals(new Point2D(10, 0), bEdge.start);
         assertEquals(new Point2D(10, 10), bEdge.end);
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 1, 9, b, 19, 9);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 1, 9, b, 19, 9);
 
         assertEquals(2, path.size());
 
@@ -150,14 +150,12 @@ public class PathFindingSystemTest {
         assertEquals(3, c.adjacentEdges.size());
         assertEquals(2, d.adjacentEdges.size());   
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 25, 10, d, 5, 10);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 25, 10, d, 5, 10);
 
         assertEquals(3, path.size());
-
-        System.out.println(path);
 
         assertEquals(path.get(0),a);
         assertEquals(path.get(1),c);
@@ -198,10 +196,10 @@ public class PathFindingSystemTest {
         assertEquals(3, c.adjacentEdges.size());
         assertEquals(2, d.adjacentEdges.size());   
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 25, 15, d, 5, 10);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 25, 15, d, 5, 10);
 
         assertEquals(3, path.size());
 
@@ -268,12 +266,12 @@ public class PathFindingSystemTest {
         assertEquals(2, g.adjacentEdges.size());
         assertEquals(4, h.adjacentEdges.size());   
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
-
-        //Find path through network
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 25, 10, g, 25, -5);
+        
+
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 25, 10, g, 25, -5);
 
         assertEquals(4, path.size());
 
@@ -335,10 +333,10 @@ public class PathFindingSystemTest {
         assertEquals(2, f.adjacentEdges.size());
         assertEquals(1, g.adjacentEdges.size());    
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 21, 14, d, 9, 8);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 21, 14, d, 9, 8);
 
         assertEquals(3, path.size());
 
@@ -399,10 +397,10 @@ public class PathFindingSystemTest {
         assertEquals(2, f.adjacentEdges.size());
         assertEquals(1, g.adjacentEdges.size());    
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 21, 14, e, 8, 4);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 21, 14, e, 8, 4);
 
         assertEquals(3, path.size());
 
@@ -463,10 +461,10 @@ public class PathFindingSystemTest {
         assertEquals(2, f.adjacentEdges.size());
         assertEquals(1, g.adjacentEdges.size());    
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(g, 25, -5, a, 25, 10);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(g, 25, -5, a, 25, 10);
 
         assertEquals(5, path.size());
 
@@ -499,10 +497,10 @@ public class PathFindingSystemTest {
         assertEquals(0, a.adjacentEdges.size());
         assertEquals(0, b.adjacentEdges.size());  
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
+        
+        
 
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 5, 5, b, 25, 5);
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 5, 5, b, 25, 5);
 
         assertEquals(path, null);
     }
@@ -535,10 +533,10 @@ public class PathFindingSystemTest {
         assertEquals(1, b.adjacentEdges.size());
         assertEquals(0, c.adjacentEdges.size());   
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
+        
+        
 
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 5, 5, c, 35, 5);
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 5, 5, c, 35, 5);
 
         assertEquals(path, null);
     }
@@ -571,10 +569,10 @@ public class PathFindingSystemTest {
         assertEquals(2, b.adjacentEdges.size());
         assertEquals(1, c.adjacentEdges.size());   
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 5, 15, c, 25, 15);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 5, 15, c, 25, 15);
 
         assertEquals(3, path.size());
 
@@ -595,7 +593,7 @@ public class PathFindingSystemTest {
         assertEquals(2, c.adjacentEdges.size());
         assertEquals(3, d.adjacentEdges.size());
 
-        path = system.findPathThroughSquares(a, 5, 15, c, 25, 15);
+        path = PathFindingSystem.findPathThroughSquares(a, 5, 15, c, 25, 15);
         
         assertEquals(3, path.size());
 
@@ -638,10 +636,10 @@ public class PathFindingSystemTest {
         assertEquals(2, c.adjacentEdges.size());
         assertEquals(3, d.adjacentEdges.size()); 
 
-        //Find path through network
-        PathFindingSystem system = new PathFindingSystem();
         
-        List<NavigationSquare> path = system.findPathThroughSquares(a, 5, 15, c, 25, 15);
+        
+        
+        List<NavigationSquare> path = PathFindingSystem.findPathThroughSquares(a, 5, 15, c, 25, 15);
 
         assertEquals(3, path.size());
 
@@ -657,7 +655,7 @@ public class PathFindingSystemTest {
         assertEquals(2, b.adjacentEdges.size());
         assertEquals(1, c.adjacentEdges.size());
 
-        path = system.findPathThroughSquares(a, 5, 15, c, 25, 15);
+        path = PathFindingSystem.findPathThroughSquares(a, 5, 15, c, 25, 15);
         
         assertEquals(3, path.size());
 
@@ -673,12 +671,12 @@ public class PathFindingSystemTest {
         a.bottomRight = new Point2D(10, 10);
 
         // Shortest path is a-b-c, node list should just be start, then end.
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(9, 9);
         Point2D end = new Point2D(1, 1);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a));
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, List.of(a));
 
         assertNotEquals(null, nodes);
 
@@ -709,12 +707,12 @@ public class PathFindingSystemTest {
         assertEquals(1, c.adjacentEdges.size());
 
         // Shortest path is a-b-c, node list should just be start, then end.
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(5, 5);
         Point2D end = new Point2D(5, 25);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, navigationMesh.squares);
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, navigationMesh.squares);
 
         assertNotEquals(null, nodes);
 
@@ -745,12 +743,12 @@ public class PathFindingSystemTest {
         assertEquals(1, c.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(9, 0);
         Point2D end = new Point2D(21, 9);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, navigationMesh.squares);
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, navigationMesh.squares);
 
         assertNotEquals(null, nodes);
 
@@ -782,12 +780,12 @@ public class PathFindingSystemTest {
         assertEquals(1, c.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(9, 9);
         Point2D end = new Point2D(21, 9);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c));
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, List.of(a, b, c));
 
         assertNotEquals(null, nodes);
 
@@ -800,7 +798,7 @@ public class PathFindingSystemTest {
         start = new Point2D(21, 9);
         end = new Point2D(9, 9);
 
-        nodes = system.findStringPullPath(start, end, List.of(c, b, a));
+        nodes = PathFindingSystem.findStringPullPath(start, end, List.of(c, b, a));
 
         assertNotEquals(null, nodes);
 
@@ -838,11 +836,11 @@ public class PathFindingSystemTest {
         assertEquals(2, d.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(5, 5);
 
-        List<Point2D> nodes = system.findStringPullPath(start, start, List.of(a, b, c, d, a));
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, start, List.of(a, b, c, d, a));
 
         assertNotEquals(null, nodes);
 
@@ -877,12 +875,12 @@ public class PathFindingSystemTest {
         assertEquals(1, c.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(0, 0);
         Point2D end = new Point2D(30, 0);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c));
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, List.of(a, b, c));
 
         assertNotEquals(null, nodes);
 
@@ -918,12 +916,12 @@ public class PathFindingSystemTest {
         assertEquals(1, d.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(9, 18);
         Point2D end = new Point2D(31, 32);
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, List.of(a, b, c, d));
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, List.of(a, b, c, d));
 
         assertNotEquals(null, nodes);
 
@@ -938,15 +936,15 @@ public class PathFindingSystemTest {
         Point2D end = new Point2D(0, 1);
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
-        List<Point2D> nodes = system.findStringPullPath(start, end, new ArrayList<>());
+        List<Point2D> nodes = PathFindingSystem.findStringPullPath(start, end, new ArrayList<>());
         assertEquals(null, nodes);
 
-        nodes = system.findStringPullPath(start, end, null);
+        nodes = PathFindingSystem.findStringPullPath(start, end, null);
         assertEquals(null, nodes);
 
-        nodes = system.findStringPullPath(start, end, List.of(new NavigationSquare(new Point2D(5, 5), new Point2D(10, 10))));
+        nodes = PathFindingSystem.findStringPullPath(start, end, List.of(new NavigationSquare(new Point2D(5, 5), new Point2D(10, 10))));
         assertEquals(null, nodes);
     }
 
@@ -982,12 +980,12 @@ public class PathFindingSystemTest {
         assertEquals(1, e.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(0, 0);
         Point2D end = new Point2D(0, 1);
 
-        List<Point2D> nodes = system.findPath(start, end, navigationMesh);
+        List<Point2D> nodes = PathFindingSystem.findPath(start, end, navigationMesh);
 
         assertNotEquals(null, nodes);
         assertEquals(2, nodes.size());
@@ -996,7 +994,7 @@ public class PathFindingSystemTest {
 
         end = new Point2D(-20, 5);
 
-        nodes = system.findPath(start, end, navigationMesh);
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
 
         assertNotEquals(null, nodes);
         assertEquals(3, nodes.size());
@@ -1006,7 +1004,7 @@ public class PathFindingSystemTest {
 
         end = new Point2D(-30, -5);
 
-        nodes = system.findPath(start, end, navigationMesh);
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
 
         assertNotEquals(null, nodes);
         assertEquals(3, nodes.size());
@@ -1047,13 +1045,62 @@ public class PathFindingSystemTest {
         assertEquals(0, e.adjacentEdges.size());
 
         // Find shortest path
-        PathFindingSystem system = new PathFindingSystem();
+        
 
         Point2D start = new Point2D(0, 0);
         Point2D end = new Point2D(-30, -5);
 
-        List<Point2D> nodes = system.findPath(start, end, navigationMesh);
+        List<Point2D> nodes = PathFindingSystem.findPath(start, end, navigationMesh);
 
         assertEquals(null, nodes);
+    }
+
+    @Test
+    public void testFindPathPointsOutsideMesh() {
+        //Mesh generation
+        NavigationSquare a = new NavigationSquare();
+        a.topLeft = new Point2D(0, 0);
+        a.bottomRight = new Point2D(10, 10);
+
+        NavigationSquare b = new NavigationSquare();
+        b.topLeft = new Point2D(0, 10);
+        b.bottomRight = new Point2D(10, 20);
+
+        NavigationSquare c = new NavigationSquare();
+        c.topLeft = new Point2D(0, 20);
+        c.bottomRight = new Point2D(10, 30);
+
+        NavigationMesh navigationMesh = NavigationMesh.generateMesh(List.of(a, b, c));
+
+        Point2D start = new Point2D(1, -5);
+        Point2D end = new Point2D(1, 35);
+
+        List<Point2D> nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(4, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(1, 0), nodes.get(1));
+        assertEquals(new Point2D(1, 30), nodes.get(2));
+        assertEquals(end, nodes.get(3));
+
+        start = new Point2D(-5, 1);
+        end = new Point2D(0, 30);
+
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(0, 1), nodes.get(1));
+        assertEquals(end, nodes.get(2));
+
+        start = new Point2D(0, 0);
+        end = new Point2D(15, 30);
+
+        nodes = PathFindingSystem.findPath(start, end, navigationMesh);
+
+        assertEquals(3, nodes.size());
+        assertEquals(start, nodes.get(0));
+        assertEquals(new Point2D(10, 30), nodes.get(1));
+        assertEquals(end, nodes.get(2));
     }
 }
