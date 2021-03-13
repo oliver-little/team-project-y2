@@ -72,8 +72,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
-        this.addComponent(new RenderComponent());
-        this.addComponent(new HitboxComponent(new Rectangle(0, 0, 32, 32)));
+        this.addComponent(new RenderComponent(new Point2D(-16, -16)));
+        this.addComponent(new HitboxComponent(new Rectangle(-16, -16, 32, 32)));
 
         this.animalState = new AnimalState(position, null, -1);
 
@@ -119,8 +119,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         Point2D wp = transformComponent.getWorldPosition();
 
-        List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh);
-
+        List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
+        System.out.println(path);
         this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
