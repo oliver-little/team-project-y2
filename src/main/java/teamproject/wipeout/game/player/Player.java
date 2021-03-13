@@ -1,5 +1,7 @@
 package teamproject.wipeout.game.player;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
@@ -33,7 +35,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public final Integer playerID;
     public String playerName;
     public String spriteSheetName;
-    public Double money;
     public Integer occupiedSlots;
 
     public int selectedSlot;
@@ -55,6 +56,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private SignatureEntityCollector pickableCollector;
 
     private final PlayerState playerState;
+
+    private DoubleProperty money;
     
 
     /**
@@ -66,7 +69,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
-        this.money = 100.0;
+        this.money = new SimpleDoubleProperty(100.0);
         this.occupiedSlots = 0;
 
         this.addComponent(new Transform(position, 0.0, 1));
@@ -87,6 +90,18 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
+    }
+
+    public double getMoney() {
+        return this.money.getValue();
+    }
+
+    public void setMoney(double value) {
+        this.money.set(value);
+    }
+
+    public DoubleProperty moneyProperty() {
+        return this.money;
     }
 
     /**
@@ -126,23 +141,23 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     // When called with a market item, purchases an item for a player and returns true,
     // otherwise if player has not enough money, returns false
     public boolean buyItem(Market market, int id, int quantity) {
-        if (market.calculateTotalCost(id, quantity, true) > this.money) {
+        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
             return false;
         }
         if (!this.acquireItem(id, quantity)) {
         	return false;
         };
-        this.money -= market.buyItem(id, quantity);
+        this.money.set(this.money.getValue() - market.buyItem(id, quantity));
         return true;
     }
 
     // if you want to purchase some task from the market
     public boolean buyTask(Task task) {
-        if(task.priceToBuy > this.money) {
+        if(task.priceToBuy > this.money.getValue()) {
             return false;
         }
         tasks.add(task);
-        this.money -= task.priceToBuy;
+        this.money.set(this.money.getValue() - task.priceToBuy);
         return true;
     }
 
@@ -152,7 +167,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         if (removeItem(id, quantity) < 0) {
             return false;
         }
-        this.money += market.sellItem(id, quantity);
+        this.money.set(this.money.getValue() + market.sellItem(id, quantity));
         this.soldItems.putIfAbsent(id, 0);
         this.soldItems.put(id, this.soldItems.get(id) + 1);
         checkTasks();
@@ -380,7 +395,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
             if(task.condition.apply(this)) {
                 task.completed = true;
-                this.money += task.reward;
+                this.money.set(this.money.getValue() + task.reward);
                 System.out.println("Task completed");
             }
         }

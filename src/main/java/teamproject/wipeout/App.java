@@ -6,9 +6,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
@@ -67,8 +69,6 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    private double windowWidth = 800;
-    private double windowHeight = 600;
     Double TIME_FOR_GAME = 500.0;
 
     // Temporarily placed variables
@@ -183,17 +183,20 @@ public class App implements Controller {
         ArrayList<Task> allTasks = createAllTasks(itemStore);
         player.tasks = allTasks;
 
-        TaskUI taskUI = new TaskUI( player);
+        TaskUI taskUI = new TaskUI(player);
+        StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
 
         // Money icon
         MoneyUI moneyUI = new MoneyUI(player);
+        StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
         ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;
-        this.interfaceOverlay.getChildren().addAll(taskUI, moneyUI, clockUI, invUI);
+        StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -230,7 +233,6 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
                 	   taskUI.showTasks(player.tasks);
-                	   moneyUI.showMoney(player.money);
                 	   },
                 () -> {});
 
@@ -310,7 +312,15 @@ public class App implements Controller {
         }
 
         interfaceOverlay = new StackPane();
-        root = new StackPane(dynamicCanvas, staticCanvas, interfaceOverlay);
+        AnchorPane anchorPane = new AnchorPane();
+        
+        anchorPane.getChildren().add(interfaceOverlay);
+        AnchorPane.setTopAnchor(interfaceOverlay, 10.0);
+        AnchorPane.setRightAnchor(interfaceOverlay, 10.0);
+        AnchorPane.setBottomAnchor(interfaceOverlay, 10.0);
+        AnchorPane.setLeftAnchor(interfaceOverlay, 10.0);
+
+        root = new StackPane(dynamicCanvas, staticCanvas, anchorPane);
 		return root;
 	}
 

@@ -1,0 +1,15 @@
+.label {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 12pt;
+    -fx-text-alignment: center;
+    -fx-text-fill: black;
+
+    -fx-background-color: #D3D3D3;
+    -fx-background-radius: 5px;
+
+    -fx-border-width: 1px;
+    -fx-border-color: black;
+
+    -fx-border-radius: 5px;
+    -fx-padding: 5 10 5 10;
+}
