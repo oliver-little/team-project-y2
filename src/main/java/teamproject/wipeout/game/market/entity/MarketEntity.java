@@ -72,11 +72,22 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new Clickable(this.onClick));
 
         Shape[] hitboxes = {
-        		new Rectangle(6, 45 - yOffset, 91, 96),
-                new Rectangle(96, 45 - yOffset, 34, 70),
-                new Rectangle(128, 45 - yOffset, 64, 77),
-                new Rectangle(192, 45 - yOffset, 55, 96),
-                new Rectangle(247, 67 - yOffset, 35, 52)
+                // Main body right
+        		new Rectangle(96, 44 - yOffset, 159, 95),
+                // Main body left
+                new Rectangle(49, 46 - yOffset, 47, 106),
+                // Sign and wood pile left
+                new Rectangle(22, 152 - yOffset, 65, 32),
+                // Planters and half of spears
+                new Rectangle(16, 78 - yOffset, 37, 74),
+                // Rest of spears
+                new Rectangle(5, 127 - yOffset, 18, 29),
+                // Bows arrows and green plant
+                new Rectangle(172, 138 - yOffset, 75, 29),
+                // Wood pile bottom
+                new Rectangle(225, 166 - yOffset, 22, 17),
+                // Target and scarecrow
+                new Rectangle(246, 68 - yOffset, 46, 84)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
