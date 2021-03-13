@@ -51,7 +51,7 @@ public class GameServerRunner {
 
         ProcessBuilder sProcessBuilder = new ProcessBuilder(theCommand);
         sProcessBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-        sProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        //sProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 
         Process newProcess = sProcessBuilder.start();
 
