@@ -56,7 +56,9 @@ public class FarmEntity extends GameEntity {
     private final SpriteManager spriteManager;
     private final ItemStore itemStore;
 
-    private final HashSet<ItemsRowEntity> rowEntities;
+    private final List<ItemsRowEntity> rowEntities;
+
+    //private FarmUI farmUI;
 
     private Item placingItem;
     private SeedEntity seedEntity;
@@ -85,7 +87,7 @@ public class FarmEntity extends GameEntity {
         this.spriteManager = spriteManager;
         this.itemStore = itemStore;
 
-        this.rowEntities = new HashSet<ItemsRowEntity>();
+        this.rowEntities = new ArrayList<ItemsRowEntity>();
 
         this.placingItem = null;
         this.seedEntity = null;
@@ -99,7 +101,7 @@ public class FarmEntity extends GameEntity {
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager, this.itemStore);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
@@ -114,31 +116,27 @@ public class FarmEntity extends GameEntity {
 
         this.data = new FarmData(this.farmID, playerID, this.itemStore);
 
-        //Create row entities for the rows of the farm
-        for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager, this.itemStore);
-            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
-            rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
-
-            rowEntity.setParent(this);
-            this.addChild(rowEntity);
-            this.rowEntities.add(rowEntity);
+        int row = 0;
+        for (ItemsRowEntity rowEntity : this.rowEntities) {
+            rowEntity.setFarmRow(this.data.getItemsInRow(row));
+            row += 1;
         }
 
         if (activePlayer) {
+            //this.farmUI = new FarmUI(this.data, spriteManager);
+            //this.farmUI.setParent(uiContainer);
             this.addComponent(this.makeClickable(clientFunction));
         }
     }
 
     private void removePlayer() {
-        this.data = null;
+        this.data = new FarmData(-13, null, this.itemStore);
 
-        //Delete row entities of the farm
-        for (GameEntity removeEntity : this.rowEntities) {
-            this.removeChild(removeEntity);
-            removeEntity.destroy();
+        int row = 0;
+        for (ItemsRowEntity rowEntity : this.rowEntities) {
+            rowEntity.setFarmRow(this.data.getItemsInRow(row));
+            row += 1;
         }
-        this.rowEntities.clear();
 
         this.removeComponent(Clickable.class);
         if (this.isPlacingItem()) {

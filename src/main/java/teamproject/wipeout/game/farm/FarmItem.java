@@ -95,6 +95,9 @@ public class FarmItem {
      * @return {@code true} when the plant is fully grown, otherwise {@code false}.
      */
     public boolean isFullyGrown() {
+        if (this.item == null) {
+            return false;
+        }
         PlantComponent plant = this.item.getComponent(PlantComponent.class);
         return this.growth >= plant.maxGrowthStage * plant.growthRate;
     }

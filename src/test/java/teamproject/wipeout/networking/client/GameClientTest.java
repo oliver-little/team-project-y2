@@ -1,6 +1,7 @@
 package teamproject.wipeout.networking.client;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.player.Player;
@@ -32,8 +33,8 @@ class GameClientTest {
 
     private Player playerWaitingForFarmID;
     private GameClient clientWaitingForFarmID;
-    private final Consumer<Integer> farmIDReceived = (farmID) -> {
-        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmID);
+    private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
+        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmPair.getValue());
         try {
             if (this.clientWaitingForFarmID == null) {
                 this.gameClient.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
@@ -99,7 +100,7 @@ class GameClientTest {
             Assertions.assertTrue(this.gameClient.getIsActive(),
                     "The client is not active despite opening a connection.");
 
-            PlayerState dummyPlayerState = new PlayerState(DUMMY_CLIENT_ID, Point2D.ZERO, Point2D.ZERO);
+            PlayerState dummyPlayerState = new PlayerState(DUMMY_CLIENT_ID, Point2D.ZERO, Point2D.ZERO, 0.0);
             this.gameServer.updateClients(new GameUpdate(dummyPlayerState));
             this.gameServer.updateClients(new GameUpdate(this.clientPlayer.getCurrentState()));
 
@@ -174,8 +175,8 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 1, Point2D.ZERO, Point2D.ZERO);
-            PlayerState dummyPlayerState2 = new PlayerState(DUMMY_CLIENT_ID - 10, Point2D.ZERO, Point2D.ZERO);
+            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 1, Point2D.ZERO, Point2D.ZERO, 0.0);
+            PlayerState dummyPlayerState2 = new PlayerState(DUMMY_CLIENT_ID - 10, Point2D.ZERO, Point2D.ZERO, 0.0);
 
             this.gameClient.send(new GameUpdate(dummyPlayerState1));
             this.gameClient.send(new GameUpdate(this.clientPlayer.getCurrentState()));
@@ -217,8 +218,8 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 1, Point2D.ZERO, Point2D.ZERO);
-            PlayerState dummyPlayerState2 = new PlayerState(DUMMY_CLIENT_ID - 10, Point2D.ZERO, Point2D.ZERO);
+            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 1, Point2D.ZERO, Point2D.ZERO, 0.0);
+            PlayerState dummyPlayerState2 = new PlayerState(DUMMY_CLIENT_ID - 10, Point2D.ZERO, Point2D.ZERO, 0.0);
             this.gameClient.send(new GameUpdate(dummyPlayerState1));
             Thread.sleep(CATCHUP_TIME); // time for the client to receive updates
 
@@ -243,8 +244,8 @@ class GameClientTest {
 
             Assertions.assertFalse(this.gameClient.getIsActive());
 
-            PlayerState dummyPlayerState3 = new PlayerState(DUMMY_CLIENT_ID - 2, Point2D.ZERO, Point2D.ZERO);
-            PlayerState dummyPlayerState4 = new PlayerState(DUMMY_CLIENT_ID - 20, Point2D.ZERO, Point2D.ZERO);
+            PlayerState dummyPlayerState3 = new PlayerState(DUMMY_CLIENT_ID - 2, Point2D.ZERO, Point2D.ZERO, 0.0);
+            PlayerState dummyPlayerState4 = new PlayerState(DUMMY_CLIENT_ID - 20, Point2D.ZERO, Point2D.ZERO, 0.0);
             this.gameClient.send(new GameUpdate(dummyPlayerState3));
             this.gameClient.send(new GameUpdate(dummyPlayerState4));
 
@@ -272,7 +273,7 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 2, Point2D.ZERO, Point2D.ZERO);
+            PlayerState dummyPlayerState1 = new PlayerState(DUMMY_CLIENT_ID - 2, Point2D.ZERO, Point2D.ZERO, 0.0);
 
             this.gameClient.send(dummyPlayerState1);
             this.gameClient.send(this.clientPlayer.getCurrentState());

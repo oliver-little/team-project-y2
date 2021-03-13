@@ -7,15 +7,17 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmItem;
-import teamproject.wipeout.game.item.ItemStore;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Represents a row of items.
  */
 public class ItemsRowEntity extends GameEntity {
+
+    private final ItemsRowRenderer rowRenderer;
+    private final RowGrowthComponent growthComponent;
 
     /**
      * Creates a new instance of {@code ItemsRowEntity}.
@@ -24,12 +26,20 @@ public class ItemsRowEntity extends GameEntity {
      * @param row ArrayList of items in a certain row
      * @param growthUpdater Calls .accept() when growth is updated
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowRenderer}
-     * @param itemStore {@link ItemStore} for the {@link ItemsRowRenderer}
      */
-    public ItemsRowEntity(GameScene scene, ArrayList<FarmItem> row, Consumer<FarmItem> growthUpdater, SpriteManager spriteManager, ItemStore itemStore) {
+    public ItemsRowEntity(GameScene scene, List<FarmItem> row, Consumer<FarmItem> growthUpdater, SpriteManager spriteManager) {
         super(scene);
-        this.addComponent(new RenderComponent(new ItemsRowRenderer(row, spriteManager, itemStore)));
-        this.addComponent(new RowGrowthComponent(row, growthUpdater));
+
+        this.growthComponent = new RowGrowthComponent(row, growthUpdater);
+        this.rowRenderer = new ItemsRowRenderer(row, spriteManager);
+
+        this.addComponent(this.growthComponent);
+        this.addComponent(new RenderComponent(this.rowRenderer));
+    }
+
+    public void setFarmRow(List<FarmItem> row) {
+        this.growthComponent.setCropRow(row);
+        this.rowRenderer.setFarmRow(row);
     }
 
 }

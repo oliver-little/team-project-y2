@@ -44,6 +44,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public InventoryUI invUI;
     public ItemStore itemStore;
+    public GameClient client;
 
     public Integer size;
 
@@ -51,14 +52,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
 
-    public GameClient client;
-
     private SignatureEntityCollector pickableCollector;
 
-    private final PlayerState playerState;
-
     private DoubleProperty money;
-    
+
+    private final PlayerState playerState;
+    private final Transform position;
+    private final MovementComponent physics;
 
     /**
      * Creates a new instance of GameEntity
@@ -72,14 +72,20 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.money = new SimpleDoubleProperty(100.0);
         this.occupiedSlots = 0;
 
-        this.addComponent(new Transform(position, 0.0, 1));
-        this.addComponent(new MovementComponent(0f, 0f, 0f, 0f));
+        this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
+
+        this.position = new Transform(position, 0.0, 1);
+        this.physics = new MovementComponent(0f, 0f, 0f, 0f);
+        this.physics.stopCallback = (newPosition) -> {
+            this.playerState.setPosition(newPosition);
+            this.sendPlayerStateUpdate();
+        };
+        this.addComponent(this.position);
+        this.addComponent(this.physics);
         this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
 
-        this.addComponent(new HitboxComponent(new Rectangle(14, 7, 36, 26)));
+        this.addComponent(new HitboxComponent(new Rectangle(20, 12, 24, 16)));
         this.addComponent(new CollisionResolutionComponent());
-
-        this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO);
 
         this.invUI = invUI;
         if (invUI != null) {
@@ -98,6 +104,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public void setMoney(double value) {
         this.money.set(value);
+        this.playerState.setMoney(value);
     }
 
     public DoubleProperty moneyProperty() {
@@ -111,19 +118,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param y Y axis acceleration
      */
     public void addAcceleration(float x, float y) {
-        MovementComponent physics = this.getComponent(MovementComponent.class);
-
-        physics.acceleration = physics.acceleration.add(x, y);
-        this.playerState.setPosition(this.getComponent(Transform.class).getWorldPosition());
-        this.playerState.setAcceleration(physics.acceleration);
-
-        if (this.client != null) {
-            try {
-                client.send(this.playerState);
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }
+        this.physics.acceleration = this.physics.acceleration.add(x, y);
+        this.playerState.setPosition(this.position.getWorldPosition());
+        this.playerState.setAcceleration(this.physics.acceleration);
+        this.sendPlayerStateUpdate();
     }
 
     public PlayerState getCurrentState() {
@@ -131,10 +129,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public void updateFromState(PlayerState newState) {
-        this.getComponent(MovementComponent.class).acceleration = newState.getAcceleration();
-        //if (newState.getAcceleration().equals(Point2D.ZERO)) {
-            this.getComponent(Transform.class).setPosition(newState.getPosition());
-        //}
+        this.physics.acceleration = newState.getAcceleration();
+        if (newState.getAcceleration().equals(Point2D.ZERO)) {
+            this.position.setPosition(newState.getPosition());
+        }
+        this.money.set(newState.getMoney());
         this.playerState.updateStateFrom(newState);
     }
 
@@ -147,7 +146,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         if (!this.acquireItem(id, quantity)) {
         	return false;
         };
-        this.money.set(this.money.getValue() - market.buyItem(id, quantity));
+        this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
         return true;
     }
 
@@ -157,7 +156,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             return false;
         }
         tasks.add(task);
-        this.money.set(this.money.getValue() - task.priceToBuy);
+        this.setMoney(this.money.getValue() - task.priceToBuy);
         return true;
     }
 
@@ -167,7 +166,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         if (removeItem(id, quantity) < 0) {
             return false;
         }
-        this.money.set(this.money.getValue() + market.sellItem(id, quantity));
+        this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
+
         this.soldItems.putIfAbsent(id, 0);
         this.soldItems.put(id, this.soldItems.get(id) + 1);
         checkTasks();
@@ -511,4 +511,16 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             inventory.set(i, null);
         }
     }
+
+    private void sendPlayerStateUpdate() {
+        if (this.client != null) {
+            try {
+                this.client.send(this.playerState);
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
 }

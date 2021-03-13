@@ -88,7 +88,6 @@ public class FarmData implements StateUpdatable<FarmState> {
                     if (currentItem != null) {
                         this.destroyItemAt(r, c);
                     }
-
                 }
 
                 if (newItemID != null) {
@@ -223,6 +222,12 @@ public class FarmData implements StateUpdatable<FarmState> {
         return true;
     }
 
+    /**
+     * Destroys item at a given farm row and column.
+     *
+     * @param row Farm row
+     * @param column Farm column
+     */
     public void destroyItemAt(int row, int column) {
         FarmItem farmItem = this.itemAt(row, column);
         if (farmItem == null) {

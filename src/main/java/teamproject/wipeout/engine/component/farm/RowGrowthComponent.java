@@ -4,18 +4,22 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.Item;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RowGrowthComponent implements GameComponent {
 
-    public final ArrayList<FarmItem> cropRow;
-
     protected final Consumer<FarmItem> growthUpdater;
 
-    public RowGrowthComponent(ArrayList<FarmItem> cropRow, Consumer<FarmItem> updater) {
+    private List<FarmItem> cropRow;
+
+    public RowGrowthComponent(List<FarmItem> cropRow, Consumer<FarmItem> updater) {
         this.cropRow = cropRow;
         this.growthUpdater = updater;
+    }
+
+    public void setCropRow(List<FarmItem> cropRow) {
+        this.cropRow = cropRow;
     }
 
     public void incrementCurrentGrowth(int column, double increment) {

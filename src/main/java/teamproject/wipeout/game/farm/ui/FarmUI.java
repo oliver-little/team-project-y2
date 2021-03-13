@@ -14,7 +14,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.FarmItem;
@@ -22,7 +21,7 @@ import teamproject.wipeout.game.farm.FarmItem;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class FarmUI extends VBox implements DialogUIComponent {
+public class FarmUI extends VBox {
 
     protected FarmData data;
     protected ObservableList<FarmItem> items;

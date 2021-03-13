@@ -18,6 +18,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
@@ -72,10 +73,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
-        this.addComponent(new RenderComponent());
-        this.addComponent(new HitboxComponent(new Rectangle(0, 0, 32, 32)));
+        this.addComponent(new RenderComponent(new Point2D(-16, -16)));
+        this.addComponent(new HitboxComponent(new Rectangle(-16, -16, 32, 32)));
 
-        this.animalState = new AnimalState(null, -1);
+        this.animalState = new AnimalState(position, null, -1);
 
         try {
             this.addComponent(new PlayerAnimatorComponent(
@@ -99,6 +100,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     public void updateFromState(AnimalState newState) {
         this.isPuppet = true;
         this.animalState.updateStateFrom(newState);
+        this.transformComponent.setPosition(newState.getPosition());
+        System.out.println(newState.getPosition());
         int[] traverseTo = newState.getTraveseTo();
         if (traverseTo != null) {
             int eatAt = newState.getEatAt();
@@ -117,8 +120,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         Point2D wp = transformComponent.getWorldPosition();
 
-        List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh);
-
+        List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
         this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
@@ -128,6 +130,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private void aiIdle() {
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
 
+        this.animalState.setPosition(this.transformComponent.getPosition());
         this.animalState.setTraveseTo(null);
         this.animalState.setEatAt(-1);
 
@@ -172,6 +175,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             Platform.runLater(aiDecisionAlgorithm);
         };
 
+        this.animalState.setPosition(this.transformComponent.getPosition());
         this.animalState.setTraveseTo(new int[]{x, y});
         this.animalState.setEatAt(randFarm.farmID);
 
@@ -191,6 +195,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
 
+        this.animalState.setPosition(this.transformComponent.getPosition());
         this.animalState.setTraveseTo(new int[]{randX, randY});
         this.animalState.setEatAt(-1);
 
@@ -242,6 +247,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         GameClient client = this.clientSupplier.get();
         if (client != null) {
             try {
+                System.out.println(this.getCurrentState().getPosition());
                 client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.id, this.getCurrentState()));
 
             } catch (IOException exception) {

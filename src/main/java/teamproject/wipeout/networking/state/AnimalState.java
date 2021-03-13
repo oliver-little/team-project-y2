@@ -16,6 +16,8 @@ import java.io.Serializable;
  */
 public class AnimalState implements Serializable {
 
+    private Point2D position;
+
     private int[] traveseTo;
     private int eatAt;
 
@@ -24,10 +26,12 @@ public class AnimalState implements Serializable {
     /**
      * Default initializer for a {@link AnimalState}.
      *
-     * @param position Player's position represented by {@link Point2D}.
-     * @param acceleration Player's acceleration represented by {@link Point2D}
+     * @param position Animal's position represented by {@link Point2D}.
+     * @param traveseTo Animal's traverse goal represented by {@code int[]}.
+     * @param eatAt Animal's eat at farm represented by {@code int} farm ID.
      */
-    public AnimalState(int[] traveseTo, int eatAt) {
+    public AnimalState(Point2D position, int[] traveseTo, int eatAt) {
+        this.position = position;
         this.traveseTo = traveseTo;
         this.eatAt = eatAt;
         this.timestamp = System.currentTimeMillis();
@@ -36,11 +40,13 @@ public class AnimalState implements Serializable {
     /**
      * Protected initializer for a {@link PlayerState}.
      *
-     * @param position Player's position represented by {@link Point2D}
-     * @param acceleration Player's acceleration represented by {@link Point2D}
+     * @param position Animal's position represented by {@link Point2D}.
+     * @param traveseTo Animal's traverse goal represented by {@code int[]}.
+     * @param eatAt Animal's eat at farm represented by {@code int} farm ID.
      * @param timestamp Timestamp of the state
      */
-    protected AnimalState(int[] traveseTo, int eatAt, long timestamp) {
+    protected AnimalState(Point2D position, int[] traveseTo, int eatAt, long timestamp) {
+        this.position = position;
         this.traveseTo = traveseTo;
         this.eatAt = eatAt;
         this.timestamp = timestamp;
@@ -49,7 +55,7 @@ public class AnimalState implements Serializable {
     /**
      * {@code timestamp} variable getter
      *
-     * @return Timestamp of the {@code PlayerState}
+     * @return Timestamp of the {@code AnimalState}
      */
     public long getTimestamp() {
         return this.timestamp;
@@ -58,7 +64,16 @@ public class AnimalState implements Serializable {
     /**
      * {@code position} getter
      *
-     * @return {@link Point2D} position of the {@code PlayerState}
+     * @return {@link Point2D} position of the {@code AnimalState}
+     */
+    public Point2D getPosition() {
+        return this.position;
+    }
+
+    /**
+     * {@code position} getter
+     *
+     * @return {@link Point2D} position of the {@code AnimalState}
      */
     public int[] getTraveseTo() {
         return this.traveseTo;
@@ -67,7 +82,7 @@ public class AnimalState implements Serializable {
     /**
      * {@code acceleration} getter
      *
-     * @return {@link Point2D} acceleration of the {@code PlayerState}
+     * @return {@link Point2D} acceleration of the {@code AnimalState}
      */
     public int getEatAt() {
         return this.eatAt;
@@ -78,15 +93,25 @@ public class AnimalState implements Serializable {
      *
      * @param newPosition New {@link Point2D} value of the {@code position}
      */
+    public void setPosition(Point2D newPosition) {
+        this.timestamp = System.currentTimeMillis();
+        this.position = newPosition;
+    }
+
+    /**
+     * {@code traveseTo} setter
+     *
+     * @param newPosition New {@code int[]} value of the {@code traveseTo}
+     */
     public void setTraveseTo(int[] newPosition) {
         this.timestamp = System.currentTimeMillis();
         this.traveseTo = newPosition;
     }
 
     /**
-     * {@code acceleration} setter
+     * {@code eatAt} setter
      *
-     * @param newAcceleration New {@link Point2D} value of the {@code acceleration}
+     * @param newEatAt New {@code int} value of the {@code eatAt}
      */
     public void setEatAt(int newEatAt) {
         this.timestamp = System.currentTimeMillis();
@@ -99,24 +124,28 @@ public class AnimalState implements Serializable {
      * @param state {@link AnimalState} used for the update
      */
     public void updateStateFrom(AnimalState state) {
+        this.position = state.position;
         this.traveseTo = state.traveseTo;
         this.eatAt = state.eatAt;
         this.timestamp = state.timestamp;
     }
 
     /**
-     * Creates a copy of the PlayerState
+     * Creates a copy of the AnimalState
      *
-     * @return {@link PlayerState} copy
+     * @return {@link AnimalState} copy
      */
     public AnimalState carbonCopy() {
-        return new AnimalState(this.traveseTo, this.eatAt, this.timestamp);
+        return new AnimalState(this.position, this.traveseTo, this.eatAt, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
     // to make AnimalState serializable despite it containing non-serializable properties (Point2D)
 
     private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeDouble(this.position.getX());
+        out.writeDouble(this.position.getY());
+
         if (this.traveseTo == null) {
             out.writeBoolean(false);
         } else {
@@ -131,6 +160,8 @@ public class AnimalState implements Serializable {
     }
 
     private void readObject(ObjectInputStream in) throws IOException {
+        this.position = new Point2D(in.readDouble(), in.readDouble());
+
         if (in.readBoolean()) {
             this.traveseTo = new int[]{in.readInt(), in.readInt()};
         } else {
@@ -147,19 +178,19 @@ public class AnimalState implements Serializable {
     }
 
     // Customized equals() and hashCode() methods implemented
-    /*
+
     @Override
     public boolean equals(Object o) {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        PlayerState that = (PlayerState) o;
-        return this.equals(that);
+        AnimalState that = (AnimalState) o;
+        return this.position.equals(that.position);
     }
 
     @Override
     public int hashCode() {
-        return this.playerID.hashCode();
+        return this.position.hashCode();
     }
-    */
+
 }

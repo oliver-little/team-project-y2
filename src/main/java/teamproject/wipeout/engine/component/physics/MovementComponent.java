@@ -5,12 +5,16 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.util.BasicEvent;
 
+import java.util.function.Consumer;
+
 public class MovementComponent implements GameComponent {
 
     public Point2D velocity;
     public Point2D acceleration;
     public FacingDirection facingDirection;
     public BasicEvent<FacingDirection> facingDirectionChanged;
+
+    public Consumer<Point2D> stopCallback;
 
     public MovementComponent() {
         this.facingDirectionChanged = new BasicEvent<>();

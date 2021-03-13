@@ -136,7 +136,7 @@ public class RenderSystem implements GameSystem {
             // Test if the entity is actually visible on the camera view
             Point2D tWorldPosition = t.getWorldPosition();
             Point2D rOffset = r.getOffset();
-            if (cameraBox.intersects(tWorldPosition.getX() + rOffset.getX(), tWorldPosition.getY() + rOffset.getY(), rOffset.getX() + r.getWidth(), rOffset.getY() + r.getHeight())) {
+            if (cameraBox.intersects(tWorldPosition.getX() + rOffset.getX(), tWorldPosition.getY() + rOffset.getY(), r.getWidth(), r.getHeight())) {
                 // Render the entity, scaled according to the camera view
                 r.render(this.dynamicGC, tWorldPosition.getX(), tWorldPosition.getY(), zoom);
             }
@@ -159,7 +159,7 @@ public class RenderSystem implements GameSystem {
                 // Test if the entity is actually visible on the camera view
                 Point2D tWorldPosition = t.getWorldPosition();
                 Point2D rOffset = r.getOffset();
-                if (cameraBox.intersects(tWorldPosition.getX() + rOffset.getX(), tWorldPosition.getY() + rOffset.getY(), rOffset.getX() + r.getWidth(), rOffset.getY() + r.getHeight())) {
+                if (cameraBox.intersects(tWorldPosition.getX() + rOffset.getX(), tWorldPosition.getY() + rOffset.getY(), r.getWidth(), r.getHeight())) {
                     // Render the entity, scaled according to the camera view
                     r.render(this.staticGC, tWorldPosition.getX(), tWorldPosition.getY(), zoom);
                 }

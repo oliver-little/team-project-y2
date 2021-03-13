@@ -22,6 +22,8 @@ public class PlayerState implements Serializable {
     private Point2D position;
     private Point2D acceleration;
 
+    private Double money;
+
     private long timestamp;
 
     /**
@@ -31,11 +33,12 @@ public class PlayerState implements Serializable {
      * @param position Player's position represented by {@link Point2D}.
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    public PlayerState(Integer playerID, Point2D position, Point2D acceleration) {
+    public PlayerState(Integer playerID, Point2D position, Point2D acceleration, Double money) {
         this.playerID = playerID;
         this.farmID = -1;
         this.position = position;
         this.acceleration = acceleration;
+        this.money = money;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -47,11 +50,12 @@ public class PlayerState implements Serializable {
      * @param position Player's position represented by {@link Point2D}
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, long timestamp) {
+    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, Double money, long timestamp) {
         this.playerID = playerID;
         this.farmID = farmID;
         this.position = position;
         this.acceleration = acceleration;
+        this.money = money;
         this.timestamp = timestamp;
     }
 
@@ -101,6 +105,15 @@ public class PlayerState implements Serializable {
     }
 
     /**
+     * {@code money} getter
+     *
+     * @return {@link Double} value of {@code money}
+     */
+    public Double getMoney() {
+        return this.money;
+    }
+
+    /**
      * Sets ID of the farm assigned to the player.
      *
      * @param farmID ID of the farm assigned to the player.
@@ -115,6 +128,7 @@ public class PlayerState implements Serializable {
      * @param newPosition New {@link Point2D} value of the {@code position}
      */
     public void setPosition(Point2D newPosition) {
+        this.timestamp = System.currentTimeMillis();
         this.position = newPosition;
     }
 
@@ -124,10 +138,18 @@ public class PlayerState implements Serializable {
      * @param newAcceleration New {@link Point2D} value of the {@code acceleration}
      */
     public void setAcceleration(Point2D newAcceleration) {
-        if (!this.acceleration.equals(newAcceleration)) {
-            this.timestamp = System.currentTimeMillis();
-            this.acceleration = newAcceleration;
-        }
+        this.timestamp = System.currentTimeMillis();
+        this.acceleration = newAcceleration;
+    }
+
+    /**
+     * {@code money} setter
+     *
+     * @param newMoney New {@link Double} value of {@code money}
+     */
+    public void setMoney(Double newMoney) {
+        this.timestamp = System.currentTimeMillis();
+        this.money = newMoney;
     }
 
     /**
@@ -139,6 +161,7 @@ public class PlayerState implements Serializable {
         this.farmID = state.farmID;
         this.position = state.position;
         this.acceleration = state.acceleration;
+        this.money = state.money;
         this.timestamp = state.timestamp;
     }
 
@@ -148,7 +171,7 @@ public class PlayerState implements Serializable {
      * @return {@link PlayerState} copy
      */
     public PlayerState carbonCopy() {
-        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.timestamp);
+        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.money, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -164,6 +187,8 @@ public class PlayerState implements Serializable {
         out.writeDouble(this.acceleration.getX());
         out.writeDouble(this.acceleration.getY());
 
+        out.writeDouble(this.money);
+
         out.writeLong(this.timestamp);
     }
 
@@ -173,6 +198,8 @@ public class PlayerState implements Serializable {
 
         this.position = new Point2D(in.readDouble(), in.readDouble());
         this.acceleration = new Point2D(in.readDouble(), in.readDouble());
+
+        this.money = in.readDouble();
 
         this.timestamp = in.readLong();
     }
