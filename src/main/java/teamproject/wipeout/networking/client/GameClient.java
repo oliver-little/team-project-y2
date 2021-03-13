@@ -42,6 +42,7 @@ public class GameClient {
     protected Map<Integer, FarmEntity> farmEntities;
     public Market market;
 
+    public Consumer<Long> clockCalibration;
     public Consumer<Integer> myFarmIDReceived;
 
     /**
@@ -71,8 +72,8 @@ public class GameClient {
      * listening for incoming updates({@link GameUpdate}) from the game server.
      * It does not allow the client to connect to multiple game servers simultaneously.
      *
-     * @param playerState Current state of the player in the form of a {@link PlayerState}.
-     * @param server      {@link InetAddress} of the game server you want to connect to.
+     * @param player Current player in the form of a {@link PlayerState}.
+     * @param server {@link InetAddress} of the game server you want to connect to.
      * @throws IOException Problem with establishing a connection to the given server.
      */
     public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Integer> myFarmIDReceived, NewPlayerAction newPlayerAction)
@@ -118,7 +119,7 @@ public class GameClient {
             return;
         }
         this.out.writeObject(update);
-        this.out.reset();
+        //this.out.reset();
     }
 
     /**
@@ -133,7 +134,7 @@ public class GameClient {
             return;
         }
         this.out.writeObject(new GameUpdate(updatedState));
-        this.out.reset();
+        //this.out.reset();
 
         this.handlePlayerStateUpdate(updatedState.carbonCopy());
     }
@@ -198,6 +199,11 @@ public class GameClient {
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
                             this.market.updateFromState(mState);
+                            break;
+                        case CLOCK_CALIB:
+                            if (!receivedUpdate.originClientID.equals(this.id)) {
+                                this.clockCalibration.accept((Long) receivedUpdate.content);
+                            }
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;

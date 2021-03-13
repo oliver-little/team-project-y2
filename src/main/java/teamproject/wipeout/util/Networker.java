@@ -7,6 +7,7 @@ import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
@@ -18,6 +19,7 @@ import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.client.NewServerDiscovery;
 import teamproject.wipeout.networking.client.ServerDiscovery;
 import teamproject.wipeout.networking.data.GameUpdate;
+import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.server.GameServerRunner;
 import teamproject.wipeout.networking.server.ServerRunningException;
 
@@ -30,6 +32,7 @@ public class Networker {
     public final GameServerRunner serverRunner;
 
     public WorldEntity worldEntity;
+    public ClockSystem clockSystem;
 
     protected ServerDiscovery serverDiscovery;
     protected GameClient client;
@@ -135,6 +138,7 @@ public class Networker {
 
                 try {
                     this.client.send(new GameUpdate(myPlayer.getCurrentState()));
+                    this.client.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.client.id, this.clockSystem.gameStartTime));
 
                 } catch (IOException exception) {
                     exception.printStackTrace();
@@ -143,6 +147,10 @@ public class Networker {
 
             try {
                 this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmID, this.onPlayerConnection(gameScene, spriteManager));
+                this.client.clockCalibration = (originalGameStart) -> {
+                    double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
+                    this.clockSystem.setTimeDifference(timeDifference);
+                };
 
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();

@@ -191,7 +191,8 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-        ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
+        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
+        this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;

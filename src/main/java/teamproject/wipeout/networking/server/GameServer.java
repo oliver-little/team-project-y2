@@ -52,6 +52,8 @@ public class GameServer {
 
     protected final AtomicReference<HashSet<GameClientHandler>> connectedClients;
 
+    protected final AtomicReference<Pair<Integer, Long>> gameStartTime;
+
     protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
 
     protected final AtomicReference<Pair<Integer, AnimalState>> animalBoss;
@@ -80,6 +82,8 @@ public class GameServer {
         this.isActive = new AtomicBoolean(false);
 
         this.connectedClients = new AtomicReference<HashSet<GameClientHandler>>(new HashSet<GameClientHandler>());
+
+        this.gameStartTime = new AtomicReference<Pair<Integer, Long>>(null);
 
         this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
 
@@ -167,6 +171,7 @@ public class GameServer {
         this.playerStates.set(new HashMap<Integer, PlayerState>());
         this.farmStates.set(new HashMap<Integer, FarmState>());
         this.availableFarms.set(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
+        this.gameStartTime.set(null);
     }
 
     /**
@@ -304,6 +309,9 @@ public class GameServer {
             case FARM_ID:
                 this.handleFarmRequest(update.originClientID);
                 return;
+            case CLOCK_CALIB:
+                this.handleClockCalibration(update.originClientID, (Long) update.content);
+                return;
             case REQUEST:
                 this.handleRequest((MarketOperationRequest) update.content, update.originClientID);
                 return;
@@ -314,6 +322,25 @@ public class GameServer {
                 break;
         }
         this.updateClients(update);
+    }
+
+    /**
+     * Handles a given {@code Long} update.
+     *
+     * @param clockCalibration {@code Long} value - time of the game start.
+     */
+    private void handleClockCalibration(Integer clientID, Long clockCalibration) throws IOException {
+        Pair<Integer, Long> currentGameStartTime = this.gameStartTime.getAcquire();
+        if (currentGameStartTime == null) {
+            currentGameStartTime = new Pair<Integer, Long>(clientID, clockCalibration);
+        } else if (!currentGameStartTime.getKey().equals(clientID)) {
+            for (GameClientHandler client : this.connectedClients.get()) {
+                if (client.clientID.equals(clientID)) {
+                    client.updateWith(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentGameStartTime.getKey(), currentGameStartTime.getValue()));
+                }
+            }
+        }
+        this.gameStartTime.setRelease(currentGameStartTime);
     }
 
     /**

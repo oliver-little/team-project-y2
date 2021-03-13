@@ -8,5 +8,8 @@ import java.io.Serializable;
  * serialized inside a {@code GameUpdate} instance.
  */
 public enum GameUpdateType implements Serializable {
-    ACCEPT, DECLINE, PLAYER_STATE, FARM_STATE, FARM_ID, MARKET_STATE, ANIMAL_STATE, REQUEST, RESPONSE, DISCONNECT
+    ACCEPT, DECLINE,
+    PLAYER_STATE, FARM_STATE, FARM_ID, MARKET_STATE, ANIMAL_STATE,
+    CLOCK_CALIB, REQUEST, RESPONSE,
+    DISCONNECT
 }
