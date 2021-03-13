@@ -1,6 +1,7 @@
 package teamproject.wipeout.networking.server;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.player.Player;
@@ -34,8 +35,8 @@ class GameServerTest {
 
     private Player playerWaitingForFarmID;
     private GameClient clientWaitingForFarmID;
-    private final Consumer<Integer> farmIDReceived = (farmID) -> {
-        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmID);
+    private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
+        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmPair.getValue());
         try {
             this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
             Thread.sleep(CATCHUP_TIME);

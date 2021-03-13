@@ -1,6 +1,7 @@
 package teamproject.wipeout.util;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
@@ -121,24 +122,26 @@ public class Networker {
             Player myPlayer = this.worldEntity.getMyPlayer();
             Market myMarket = this.worldEntity.market.getMarket();
 
-            Consumer<Integer> farmID = (newFarmID) -> {
-                myPlayer.client = this.client;
-                this.worldEntity.getMyAnimal().clientSupplier = () -> this.client;
-                this.client.myAnimal = this.worldEntity.getMyAnimal();
-                this.client.market = this.worldEntity.market.getMarket();
+            Consumer<Pair<GameClient, Integer>> farmHandler = (farmPair) -> {
+                GameClient currentClient = farmPair.getKey();
+                Integer newFarmID = farmPair.getValue();
+                myPlayer.client = currentClient;
+                this.worldEntity.getMyAnimal().clientSupplier = () -> currentClient;
+                currentClient.myAnimal = this.worldEntity.getMyAnimal();
+                currentClient.market = this.worldEntity.market.getMarket();
 
-                myMarket.client = this.client;
+                myMarket.client = currentClient;
                 myMarket.setIsLocal(true);
                 this.worldEntity.marketUpdater.stop();
 
                 FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
                 this.worldEntity.setMyFarm(myFarm);
 
-                System.out.println("Connected client with ID: " + this.client.id);
+                System.out.println("Connected client with ID: " + currentClient.id);
 
                 try {
-                    this.client.send(new GameUpdate(myPlayer.getCurrentState()));
-                    this.client.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.client.id, this.clockSystem.gameStartTime));
+                    currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
+                    currentClient.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentClient.id, this.clockSystem.gameStartTime));
 
                 } catch (IOException exception) {
                     exception.printStackTrace();
@@ -146,7 +149,7 @@ public class Networker {
             };
 
             try {
-                this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmID, this.onPlayerConnection(gameScene, spriteManager));
+                this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmHandler, this.onPlayerConnection(gameScene, spriteManager));
                 this.client.clockCalibration = (originalGameStart) -> {
                     double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
                     this.clockSystem.setTimeDifference(timeDifference);

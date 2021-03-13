@@ -1,5 +1,6 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.util.Pair;
 import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.market.Market;
@@ -43,7 +44,7 @@ public class GameClient {
     public Market market;
 
     public Consumer<Long> clockCalibration;
-    public Consumer<Integer> myFarmIDReceived;
+    public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
 
     /**
      * Default initializer for {@code GameClient}
@@ -76,7 +77,7 @@ public class GameClient {
      * @param server {@link InetAddress} of the game server you want to connect to.
      * @throws IOException Problem with establishing a connection to the given server.
      */
-    public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Integer> myFarmIDReceived, NewPlayerAction newPlayerAction)
+    public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Pair<GameClient, Integer>> myFarmIDReceived, NewPlayerAction newPlayerAction)
             throws IOException, ClassNotFoundException {
 
         GameClient client = new GameClient(player.playerID);
@@ -119,7 +120,7 @@ public class GameClient {
             return;
         }
         this.out.writeObject(update);
-        //this.out.reset();
+        this.out.reset();
     }
 
     /**
@@ -134,7 +135,7 @@ public class GameClient {
             return;
         }
         this.out.writeObject(new GameUpdate(updatedState));
-        //this.out.reset();
+        this.out.reset();
 
         this.handlePlayerStateUpdate(updatedState.carbonCopy());
     }
@@ -194,7 +195,7 @@ public class GameClient {
                             break;
                         case FARM_ID:
                             Integer farmID = (Integer) receivedUpdate.content;
-                            this.myFarmIDReceived.accept(farmID);
+                            this.myFarmIDReceived.accept(new Pair<GameClient, Integer>(this, farmID));
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;

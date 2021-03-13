@@ -3,48 +3,49 @@ package teamproject.wipeout.engine.component.render;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.Item;
-import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Specifies how a row of items is rendered.
  */
 public class ItemsRowRenderer implements Renderable {
 
-    public final ArrayList<FarmItem> farmRow;
-    public ItemStore itemStore;
-    public SpriteManager spriteManager;
+    private List<FarmItem> farmRow;
 
-    protected HashMap<String, Image> currentSprites;
+    private final HashMap<String, Image> currentSprites;
 
-    public ItemsRowRenderer(ArrayList<FarmItem> row, SpriteManager spriteManager, ItemStore itemStore) {
+    private final SpriteManager spriteManager;
+
+    public ItemsRowRenderer(List<FarmItem> row, SpriteManager spriteManager) {
         this.farmRow = row;
-        this.itemStore = itemStore;
         this.spriteManager = spriteManager;
 
         this.currentSprites = new HashMap<String, Image>();
     }
 
     public double getWidth() {
-        return FarmEntity.SQUARE_SIZE * farmRow.size();
+        return FarmEntity.SQUARE_SIZE * this.farmRow.size();
     }
 
     public double getHeight() {
         return FarmEntity.SQUARE_SIZE;
     }
 
+    public void setFarmRow(List<FarmItem> farmRow) {
+        this.farmRow = farmRow;
+    }
+
     public void render(GraphicsContext gc, double x, double y, double scale) {
         double itemX = x;
-        for (FarmItem farmItem : farmRow) {
+        for (FarmItem farmItem : this.farmRow) {
             itemX += FarmEntity.SQUARE_SIZE;
             if (farmItem == null) {
                 continue;

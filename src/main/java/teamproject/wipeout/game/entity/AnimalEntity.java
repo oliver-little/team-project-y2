@@ -100,7 +100,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         this.isPuppet = true;
         this.animalState.updateStateFrom(newState);
         this.transformComponent.setPosition(newState.getPosition());
-
+        System.out.println(newState.getPosition());
         int[] traverseTo = newState.getTraveseTo();
         if (traverseTo != null) {
             int eatAt = newState.getEatAt();
@@ -247,6 +247,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         GameClient client = this.clientSupplier.get();
         if (client != null) {
             try {
+                System.out.println(this.getCurrentState().getPosition());
                 client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.id, this.getCurrentState()));
 
             } catch (IOException exception) {
