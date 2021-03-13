@@ -30,7 +30,7 @@ import java.util.Set;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
-    public static int MAX_SIZE = 10; //no. of inventory slots
+    public final int MAX_SIZE = 10; //no. of inventory slots
 
     public final Integer playerID;
     public String playerName;
@@ -186,14 +186,45 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @return true if successful, false if unsuccessful (e.g. no space)
      */
     public boolean acquireItem(Integer itemID, int quantity) {
-        int index = addToInventory(itemID, quantity);
-        if (index < 0) {
+        if (!addToInventory(itemID, quantity)) {
             System.out.println("No space in inventory for item(s)");
             return false;
         }
-        this.invUI.updateUI(inventory, index);
         System.out.println("Acquired " + quantity + " of itemID " + itemID);
         return true;
+    }
+    
+    /**
+     * Method to count the number of items with a specific itemID
+     * @param itemID - id of item to be counted
+     * @return - quantity of item in inventory
+     */
+    public int countItems(Integer itemID) {
+    	int counter = 0;
+    	for(invPair pair : inventory) {
+    		if((pair != null) && (pair.itemID == itemID)) {
+    			counter += pair.quantity;
+    		}
+    	}
+    	return counter;
+    }
+    
+    /**
+     * Method to count how many items with a specific itemID there is space for in the inventory
+     * @param itemID - of item to be counted
+     * @return - number of free spaces available for item
+     */
+    public int countFreeItemSpaces(Integer itemID) {
+    	int counter = 0;
+    	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	for(invPair pair : inventory) {
+    		if((pair != null) && (pair.itemID == itemID)) {
+    			counter += stackLimit - pair.quantity;
+    		}else if(pair == null) {
+    			counter += stackLimit;
+    		}
+    	}
+    	return counter;
     }
 
     /**
@@ -202,8 +233,49 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param quantity quantity to be added
      * @return index of where item was added
      */
-    private int addToInventory(int itemID, Integer quantity) {
-        int i = 0;
+    private boolean addToInventory(int itemID, Integer quantity) {
+    	if(quantity > countFreeItemSpaces(itemID)) {
+    		return false; //not enough space for this many items
+    	}
+    	
+    	int i = 0;
+        int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+        for (invPair pair : inventory) { //adding to item's existing slots 
+            if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
+                pair.quantity += quantity;
+                inventory.set(i, pair);
+                this.invUI.updateUI(inventory, i);
+                return true; //returns index of change
+            }else if((pair != null) && (itemID == pair.itemID)) {
+            	quantity -= stackLimit - pair.quantity;
+            	pair.quantity = stackLimit;
+            	inventory.set(i, pair);
+            	this.invUI.updateUI(inventory, i);
+            }
+            i++;
+        }
+        if(quantity != 0) { 
+	        i = 0;
+	        for (invPair pair : inventory) { //adding to separate slot(s) to hold remaining items
+	            if ((pair == null) && (quantity <= stackLimit)) {
+	                pair = new invPair(itemID, quantity);
+	                inventory.set(i, pair);
+	                occupiedSlots++;
+	                this.invUI.updateUI(inventory, i);
+	                return true; //returns index of change
+	            }else if(pair == null) {
+	            	pair = new invPair(itemID, stackLimit);
+	            	quantity -= stackLimit;
+	                inventory.set(i, pair);
+	                occupiedSlots++;
+	                this.invUI.updateUI(inventory, i);
+	            }
+	            i++;
+	        }
+        }
+    	return false;
+    	/*
+    	int i = 0;
         int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
         for (invPair pair : inventory) {
             if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
@@ -224,15 +296,43 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             i++;
         }
         return -1;
+        */
     }
 
     /**
-     * removes item(s) from the inventory
+     * removes item(s) from the inventory, even if they span multiple slots
      * @param itemID for item to be removed
      * @param quantity of items to be removed
-     * @return true if successfully removed, false if unable to remove
+     * @return itemID if successfully removed, negative int if unable to remove
      */
     private int removeItem(int itemID, int quantity) {
+    	int noOfThisItem = countItems(itemID);
+    	if(quantity > noOfThisItem) {
+    		return -1;
+    	}
+    	
+    	int i = 0;
+        for (invPair pair : inventory) {
+            if((pair != null) && (pair.itemID == itemID)) {
+            	if(quantity >= pair.quantity) {
+            		quantity -= pair.quantity;
+            		inventory.set(i, null); //free inventory slot
+                    invUI.updateUI(inventory, i);
+                    occupiedSlots--; //inventory slot is freed
+                    if(quantity == 0) {
+                    	return itemID;
+                    }
+            	}else {
+            		pair.quantity -= quantity;
+                    inventory.set(i, pair);
+                    invUI.updateUI(inventory, i);
+                    return itemID;
+            	}
+            }
+            i++;
+        }
+    	return itemID;
+    	/*
         int i = 0;
         for (invPair pair : inventory) {
             if((pair != null) && (pair.itemID == itemID) && ((pair.quantity - quantity) >= 0)) {
@@ -250,6 +350,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             i++;
         }
         return -1;
+        */
     }
 
     /**
