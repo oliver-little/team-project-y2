@@ -3,6 +3,7 @@ package teamproject.wipeout.engine.system;
 import java.util.List;
 import java.util.Set;
 
+import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
@@ -27,10 +28,18 @@ public class MovementSystem implements GameSystem {
         for (GameEntity entity : entities) {
             Transform t = entity.getComponent(Transform.class);
             MovementComponent m = entity.getComponent(MovementComponent.class);
+
+            boolean wasMoving = !m.velocity.equals(Point2D.ZERO);
+
             m.updateVelocity(timeStep);
             t.setPosition(t.getPosition().add(m.velocity.multiply(timeStep)));
 
             m.updateFacingDirection();
+
+            boolean isStationary = m.velocity.equals(Point2D.ZERO);
+            if (m.stopCallback != null && wasMoving && isStationary) {
+                m.stopCallback.accept(t.getWorldPosition());
+            }
         }
     }
 }
