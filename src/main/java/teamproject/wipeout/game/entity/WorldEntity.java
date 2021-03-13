@@ -64,8 +64,10 @@ public class WorldEntity extends GameEntity {
 		
 		try
 		{
-			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,-100), spriteManager);
-		
+			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,0), spriteManager);
+			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,750), spriteManager);
+			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,600), new Point2D(800,0), spriteManager);
+			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(800,-100), new Point2D(0,750), spriteManager);
 		}
 		catch (FileNotFoundException e)
 		{

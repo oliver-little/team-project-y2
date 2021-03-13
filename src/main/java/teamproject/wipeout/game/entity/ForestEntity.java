@@ -18,15 +18,19 @@ public class ForestEntity extends GameEntity
 
 		Image treeImages[] = spriteManager.getSpriteSet("fruit-tree", "apple-tree");
 		
-		int numTrees = 10;
-		TreeEntity[] trees = new TreeEntity[10];
-		double xChange = dimensions.getX()/(float)numTrees;
-		for(int i=0; i<numTrees;i++) {
-			//add small random offset so trees are not placed uniformly
-			double yOffset = Math.random()*20;
-			double xOffset = Math.random()*20;
-			int randomIndex = (int) (Math.random()*treeImages.length);
-			trees[i] = new TreeEntity(scene, coords.getX()+xChange*i+xOffset, coords.getY()-yOffset, treeImages[randomIndex]);
+		int xTrees = 1+ (int) (dimensions.getX()/treeImages[treeImages.length-1].getWidth());
+		int yTrees = 1+ (int) (dimensions.getY()/treeImages[treeImages.length-1].getHeight());
+		TreeEntity[][] trees = new TreeEntity[yTrees][xTrees];
+		double xChange = dimensions.getX()/(float)xTrees;
+		double yChange = dimensions.getY()/(float)yTrees;
+		for(int y=0; y<yTrees;y++) {
+			for(int x=0; x<xTrees;x++) {
+				//add small random offset so trees are not placed uniformly
+				double xOffset = Math.random()*20;
+				double yOffset = Math.random()*20;
+				int randomIndex = (int) (Math.random()*treeImages.length);
+				trees[y][x] = new TreeEntity(scene, coords.getX()+xChange*x+xOffset, coords.getY()-yOffset+yChange*y, treeImages[randomIndex]);
+			}
 		}
 		
 

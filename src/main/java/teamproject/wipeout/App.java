@@ -128,7 +128,7 @@ public class App implements Controller {
         addInvUIInput(input, invUI);
         
 
-    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
+    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(50, 50), invUI);
         
         player.acquireItem(6, 98); //for checking stack/inventory limits
         player.acquireItem(1, 2);
