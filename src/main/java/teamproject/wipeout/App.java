@@ -9,13 +9,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
@@ -24,7 +22,6 @@ import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.gameclock.ClockEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.entity.gameclock.ClockUI;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -36,31 +33,23 @@ import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
-import java.time.Clock;
-import java.util.*;
-import teamproject.wipeout.game.item.components.InventoryComponent;
+
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.player.entity.MoneyEntity;
 //import teamproject.wipeout.game.player.InventoryUI;
-import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.invPair;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
-import teamproject.wipeout.game.task.entity.TaskEntity;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
 import java.util.Random;
 
 
@@ -150,7 +139,6 @@ public class App implements Controller {
         
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-        this.interfaceOverlay.getChildren().add(invUI);
         
         addInvUIInput(input, invUI);
         
@@ -196,27 +184,16 @@ public class App implements Controller {
         player.tasks = allTasks;
 
         TaskUI taskUI = new TaskUI( player);
-        taskUI.setParent(interfaceOverlay);
-        interfaceOverlay.getChildren().add(taskUI);
-        taskUI.setTranslateX(-(windowWidth/2) + 100);
-        taskUI.setTranslateY((windowHeight/2) - 300);
 
         // Money icon
         MoneyUI moneyUI = new MoneyUI(player);
-        moneyUI.setParent(interfaceOverlay);
-        interfaceOverlay.getChildren().add(moneyUI);
-        moneyUI.setTranslateX(-(windowWidth/2) + 50);
-        moneyUI.setTranslateY((windowHeight/2) + 100);
 
         //Time left
         ClockSystem clockSystem = new ClockSystem(gameScene, 680, 0, TIME_FOR_GAME);
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;
-        clockUI.setParent(interfaceOverlay);
-        interfaceOverlay.getChildren().add(clockUI);
-        clockUI.setTranslateX(-(windowWidth/2) + 700);
-        clockUI.setTranslateY((windowHeight/2) - 300);
+        this.interfaceOverlay.getChildren().addAll(taskUI, moneyUI, clockUI, invUI);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);

@@ -1,6 +1,7 @@
 package teamproject.wipeout.game.player.ui;
 
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -12,16 +13,20 @@ import javafx.scene.text.Text;
 import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.game.player.Player;
 
-public class MoneyUI extends VBox implements DialogUIComponent {
+public class MoneyUI extends StackPane {
 
-    private Pane parent;
-    private StackPane stack;
+    Group root;
 
     private Rectangle rectangle = new Rectangle();
     private Text moneyText = new Text();
 
     public MoneyUI(Player player) {
         super();
+
+        this.root = new Group(); //sets the root node of the inventory UI scene graph
+        this.getChildren().add(this.root);
+
+        StackPane.setAlignment(root, Pos.TOP_CENTER);
 
         this.rectangle.setX(0);
         this.rectangle.setY(0);
@@ -34,21 +39,13 @@ public class MoneyUI extends VBox implements DialogUIComponent {
         this.moneyText.setText("Money: " + player.money.toString());
         this.moneyText.setFill(Color.MAROON);
 
-        this.stack = new StackPane();
+        this.moneyText.setX(30);
+        this.moneyText.setY(25);
 
-        this.stack.getChildren().addAll(rectangle, moneyText);
-        this.getChildren().add(this.stack);
+        this.root.getChildren().addAll(rectangle, moneyText);
     }
 
     public void showMoney(Double money) {
         moneyText.setText("Money: " + money.toString());
-    }
-
-    public void setParent(Pane parent) {
-        this.parent = parent;
-    }
-
-    public Parent getContent() {
-        return this;
     }
 }

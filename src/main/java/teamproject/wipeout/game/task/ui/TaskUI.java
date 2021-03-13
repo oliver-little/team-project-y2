@@ -25,17 +25,15 @@ import teamproject.wipeout.game.task.Task;
 
 import java.util.ArrayList;
 
-public class TaskUI extends VBox implements DialogUIComponent {
+public class TaskUI extends StackPane {
 
     public Transform transform;
     public Point2D size;
     public GameScene gameScene;
 
-    private Pane parent;
+    Group root;
 
     private Integer MAX_TASKS = 5;
-
-    private StackPane stack;
 
     private Rectangle rectangle = new Rectangle();
     private Text[] texts = new Text[MAX_TASKS];
@@ -45,6 +43,11 @@ public class TaskUI extends VBox implements DialogUIComponent {
     public TaskUI(Player player) {
         super();
 
+        this.root = new Group(); //sets the root node of the inventory UI scene graph
+        this.getChildren().add(this.root);
+
+        StackPane.setAlignment(root, Pos.TOP_LEFT);
+
         this.rectangle.setX(0);
         this.rectangle.setY(0);
         this.rectangle.setWidth(150);
@@ -52,19 +55,17 @@ public class TaskUI extends VBox implements DialogUIComponent {
         this.rectangle.setFill(Color.BLACK);
         this.rectangle.setMouseTransparent(true);
 
-        this.stack = new StackPane();
-        list.setMaxWidth(200);
-        list.setMaxHeight(200);
-        list.setMouseTransparent( true );
-        list.setFocusTraversable( false );
-        list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
+        this.list.setMaxWidth(200);
+        this.list.setMaxHeight(200);
+        this.list.setMouseTransparent( true );
+        this.list.setFocusTraversable( false );
+        this.list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         createTextRenderables();
 
         showTasks(player.tasks);
 
-        this.stack.getChildren().addAll(rectangle, list);
-        this.getChildren().add(this.stack);
+        this.root.getChildren().addAll(this.rectangle, this.list);
     }
 
     public void showTasks(ArrayList<Task> tasks) {
@@ -73,11 +74,11 @@ public class TaskUI extends VBox implements DialogUIComponent {
             if (task.completed) {
                 continue;
             }
-            list.getItems().get(i).setText(task.description);
+            this.list.getItems().get(i).setText(task.description);
             i += 1;
         }
         while(i < MAX_TASKS) {
-            list.getItems().get(i).setText("");
+            this.list.getItems().get(i).setText("");
             i += 1;
         }
     }
@@ -87,14 +88,7 @@ public class TaskUI extends VBox implements DialogUIComponent {
             texts[i] = new Text("");
             texts[i].setFill(Color.BLACK);
             texts[i].setMouseTransparent(true);
-            list.getItems().add(texts[i]);
+            this.list.getItems().add(texts[i]);
         }
-    }
-    public void setParent(Pane parent) {
-        this.parent = parent;
-    }
-
-    public Parent getContent() {
-        return this;
     }
 }
