@@ -1,5 +1,6 @@
 package teamproject.wipeout.util;
 
+import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
@@ -91,7 +92,7 @@ public class Networker {
             newPlayer.addComponent(new CollisionResolutionComponent());
 
             try {
-                newPlayer.addComponent(new RenderComponent());
+                newPlayer.addComponent(new RenderComponent(new Point2D(0, -32)));
                 newPlayer.addComponent(new PlayerAnimatorComponent(
                         spriteManager.getSpriteSet("player-red", "walk-up"),
                         spriteManager.getSpriteSet("player-red", "walk-right"),
