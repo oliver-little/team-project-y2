@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.control.*;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -45,10 +46,9 @@ public class TaskUI extends VBox {
         list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         this.getChildren().addAll(openCloseButton, list);
+        this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         showTasks(player.tasks);
-
-        
     }
 
     public void showTasks(ArrayList<Task> tasks) {
