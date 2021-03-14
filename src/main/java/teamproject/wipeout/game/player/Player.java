@@ -221,7 +221,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param itemID - of item to be counted
      * @return - number of free spaces available for item
      */
-    public int countFreeItemSpaces(Integer itemID) {
+    private int countFreeItemSpaces(Integer itemID) {
     	int counter = 0;
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	for(invPair pair : inventory) {
@@ -305,19 +305,116 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return -1;
         */
     }
+    
+    /**
+     * Finds the index of the slot with the least number of items with a specific item id.
+     * @param itemID - of items to search for
+     * @param stackLimit - max number of this item per slot
+     * @return - index of slot holding the least of this item
+     */
+    private int findIndexOfLeast(Integer itemID, int stackLimit) {
+    	int index = -1;
+    	int current = stackLimit;
+    	int i = 0;
+    	for (invPair pair : inventory) {
+    		if((pair != null) && (pair.itemID == itemID)) {
+    			if(pair.quantity < current) {
+    				current = i;
+    				index = i;
+    			}
+    		}
+    		i++;
+    	}
+    	return index;
+    }
+    
+    /**
+     * Rearranges items with a specific itemID to ensure they use the minimum number of slots possible
+     * @param itemID - of item to be rearranged
+     * @param quantity - quantity of item to be rearranged
+     */
+    private void rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
+    	if (quantity <= 1) {
+    		return;
+    	}else if(slotWithSpace < 0) {
+    		System.out.println("logic issue - wasted slots but no slot with space");
+    		return;
+    	}
+    	int i = 0;
+    	stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	int indexOfExtraSlot = findIndexOfLeast(itemID, stackLimit);
+    	System.out.println("index of extra slot = " + indexOfExtraSlot);
+    	invPair withSpacePair = inventory.get(slotWithSpace);
+    	withSpacePair.quantity += inventory.get(indexOfExtraSlot).quantity;
+    	inventory.set(slotWithSpace, withSpacePair);
+    	invUI.updateUI(inventory, slotWithSpace);
+    	inventory.set(indexOfExtraSlot, null);
+    	invUI.updateUI(inventory, indexOfExtraSlot);
+    	
+    }
+    
+    private int countSlotsOccupiedBy(Integer itemID) {
+    	int count = 0;
+    	for (invPair pair : inventory) {
+    		if((pair != null) && (pair.itemID == itemID)) {
+    			count++;
+    		}
+    	}
+    	return count;
+    }
 
     /**
-     * removes item(s) from the inventory, even if they span multiple slots
+     * removes item(s) from the inventory, even if they span multiple slots, starting from the right-most slot
      * @param itemID for item to be removed
      * @param quantity of items to be removed
      * @return itemID if successfully removed, negative int if unable to remove
      */
     private int removeItem(int itemID, int quantity) {
     	int noOfThisItem = countItems(itemID);
+    	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	if(quantity > noOfThisItem) {
     		return -1;
     	}
+    	int endQuantity = noOfThisItem - quantity;
+    	int slotWithSpace = -1;
+    	//int i = MAX_SIZE - 1;
+    	invPair pair;
+        for (int i = MAX_SIZE - 1; i >= 0; i--) {
+        	pair = inventory.get(i);
+            if((pair != null) && (pair.itemID == itemID)) {
+            	if(quantity >= pair.quantity) {
+            		quantity -= pair.quantity;
+            		inventory.set(i, null); //free inventory slot
+                    invUI.updateUI(inventory, i);
+                    occupiedSlots--; //inventory slot is freed
+                    if(quantity == 0) {
+                    	break;
+                    	//return itemID;
+                    }
+            	}else {
+            		pair.quantity -= quantity;
+                    inventory.set(i, pair);
+                    invUI.updateUI(inventory, i);
+                    slotWithSpace = i;
+                    break;
+                    //return itemID;
+            	}
+            }
+        }
+        int itemOccupiedSlots = countSlotsOccupiedBy(itemID);
+        int minRequiredSlots = (int) (((double) (endQuantity + stackLimit -1))/((double) stackLimit));
+        if(itemOccupiedSlots > minRequiredSlots) {
+        	System.out.println("items being rearranged");
+        	rearrangeItems(itemID, endQuantity, slotWithSpace, stackLimit); //rearranges items if slots are being wasted
+        }
+    	return itemID;
     	
+    	/*
+    	int noOfThisItem = countItems(itemID);
+    	if(quantity > noOfThisItem) {
+    		return -1;
+    	}
+    	int hold = quantity;
     	int i = 0;
         for (invPair pair : inventory) {
             if((pair != null) && (pair.itemID == itemID)) {
@@ -327,18 +424,23 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                     invUI.updateUI(inventory, i);
                     occupiedSlots--; //inventory slot is freed
                     if(quantity == 0) {
-                    	return itemID;
+                    	break;
+                    	//return itemID;
                     }
             	}else {
             		pair.quantity -= quantity;
                     inventory.set(i, pair);
                     invUI.updateUI(inventory, i);
-                    return itemID;
+                    break;
+                    //return itemID;
             	}
             }
             i++;
         }
+        rearrangeItems(itemID, noOfThisItem - hold);
     	return itemID;
+    	*/
+    	
     	/*
         int i = 0;
         for (invPair pair : inventory) {
