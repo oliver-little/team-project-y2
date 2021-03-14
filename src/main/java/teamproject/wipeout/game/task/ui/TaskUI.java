@@ -40,9 +40,9 @@ public class TaskUI extends VBox {
         list = new ListView<>();
 
         list.setMaxWidth(180);
-        list.setMaxHeight(200);
-//        list.setMouseTransparent( true );
-//        list.setFocusTraversable( false );
+        list.setMaxHeight(240);
+        list.setMouseTransparent( true );
+        list.setFocusTraversable( false );
         list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         this.getChildren().addAll(openCloseButton, list);
