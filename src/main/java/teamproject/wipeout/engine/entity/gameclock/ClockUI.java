@@ -23,7 +23,7 @@ public class ClockUI extends Label {
     }
 
     public void showTime(Double timestep) {
-        this.time -= timestep;
+        this.time = Math.max(0, this.time - timestep);
         int min = (int)(this.time / 60);
         String seconds = String.format("%02d", (int)(this.time % 60));
         this.setText("Remaining Time: " + min + ":" + seconds);
