@@ -83,7 +83,7 @@ public class MarketUI extends AnchorPane {
             actionEvent.consume();
         });
 
-        AnchorPane.setBottomAnchor(tabPane, 50.0);
+        AnchorPane.setBottomAnchor(tabPane, 120.0);
         AnchorPane.setTopAnchor(tabPane, 50.0);
         AnchorPane.setLeftAnchor(tabPane, 100.0);
         AnchorPane.setRightAnchor(tabPane, 100.0);
