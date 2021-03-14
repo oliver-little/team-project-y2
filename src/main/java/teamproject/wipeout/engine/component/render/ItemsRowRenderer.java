@@ -45,7 +45,8 @@ public class ItemsRowRenderer implements Renderable {
 
     public void render(GraphicsContext gc, double x, double y, double scale) {
         double itemX = x;
-        for (FarmItem farmItem : this.farmRow) {
+        for (int i = 0; i < this.farmRow.size(); i++) {
+            FarmItem farmItem = this.farmRow.get(i);
             itemX += FarmEntity.SQUARE_SIZE;
             if (farmItem == null) {
                 continue;

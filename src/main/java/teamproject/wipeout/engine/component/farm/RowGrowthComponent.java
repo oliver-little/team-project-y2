@@ -11,19 +11,19 @@ public class RowGrowthComponent implements GameComponent {
 
     protected final Consumer<FarmItem> growthUpdater;
 
-    private List<FarmItem> cropRow;
+    private List<FarmItem> farmRow;
 
-    public RowGrowthComponent(List<FarmItem> cropRow, Consumer<FarmItem> updater) {
-        this.cropRow = cropRow;
+    public RowGrowthComponent(List<FarmItem> farmRow, Consumer<FarmItem> updater) {
+        this.farmRow = farmRow;
         this.growthUpdater = updater;
     }
 
-    public void setCropRow(List<FarmItem> cropRow) {
-        this.cropRow = cropRow;
+    public void setFarmRow(List<FarmItem> farmRow) {
+        this.farmRow = farmRow;
     }
 
     public void incrementCurrentGrowth(int column, double increment) {
-        FarmItem farmItem = this.cropRow.get(column);
+        FarmItem farmItem = this.farmRow.get(column);
         if (farmItem == null) {
             return;
         }
@@ -41,7 +41,7 @@ public class RowGrowthComponent implements GameComponent {
     }
 
     public void updateGrowth(double timestep) {
-        for (int i = 0; i < this.cropRow.size(); i++) {
+        for (int i = 0; i < this.farmRow.size(); i++) {
             this.incrementCurrentGrowth(i, timestep);
         }
     }

@@ -38,7 +38,7 @@ public class ItemsRowEntity extends GameEntity {
     }
 
     public void setFarmRow(List<FarmItem> row) {
-        this.growthComponent.setCropRow(row);
+        this.growthComponent.setFarmRow(row);
         this.rowRenderer.setFarmRow(row);
     }
 

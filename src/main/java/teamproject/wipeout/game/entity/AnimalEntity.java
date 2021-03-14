@@ -3,7 +3,6 @@ package teamproject.wipeout.game.entity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -18,7 +17,6 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
-import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.physics.Rectangle;
@@ -99,9 +97,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     public void updateFromState(AnimalState newState) {
         this.isPuppet = true;
-        this.animalState.updateStateFrom(newState);
         this.transformComponent.setPosition(newState.getPosition());
-        System.out.println(newState.getPosition());
+
         int[] traverseTo = newState.getTraveseTo();
         if (traverseTo != null) {
             int eatAt = newState.getEatAt();
@@ -111,6 +108,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
                 this.aiStealCrops(new int[]{eatAt, traverseTo[0], traverseTo[1]});
             }
         }
+        this.animalState.updateStateFrom(newState);
     }
 
     /**
@@ -130,9 +128,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private void aiIdle() {
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
 
-        this.animalState.setPosition(this.transformComponent.getPosition());
+        this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(null);
         this.animalState.setEatAt(-1);
+        this.sendStateUpdate();
 
         executor.schedule(() -> Platform.runLater(aiDecisionAlgorithm), idleTime, TimeUnit.SECONDS);
     }
@@ -154,7 +153,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         }
         List<Point2D> fullyGrownItems = new ArrayList<>();
 
-        FarmEntity randFarm = farms.get(randomInteger(0, farms.size() - 1));
+        FarmEntity randFarm = farms.get(randomInteger(0, farms.size()));
 
         fullyGrownItems = randFarm.getGrownItemPositions();
 
@@ -175,9 +174,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             Platform.runLater(aiDecisionAlgorithm);
         };
 
-        this.animalState.setPosition(this.transformComponent.getPosition());
+        this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(new int[]{x, y});
         this.animalState.setEatAt(randFarm.farmID);
+        this.sendStateUpdate();
 
         aiTraverse(x, y, onComplete);
     }
@@ -195,9 +195,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
 
-        this.animalState.setPosition(this.transformComponent.getPosition());
+        this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(new int[]{randX, randY});
         this.animalState.setEatAt(-1);
+        this.sendStateUpdate();
 
         aiTraverse(randX, randY, aiDecisionAlgorithm);
     }
@@ -226,8 +227,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             //Pick random point
             aiPathFind();
         }
-
-        this.sendStateUpdate();
     };
 
     /**
@@ -247,8 +246,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         GameClient client = this.clientSupplier.get();
         if (client != null) {
             try {
-                System.out.println(this.getCurrentState().getPosition());
-                client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.id, this.getCurrentState()));
+                client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.id, this.animalState));
 
             } catch (IOException exception) {
                 exception.printStackTrace();
