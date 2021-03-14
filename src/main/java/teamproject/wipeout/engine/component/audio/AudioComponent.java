@@ -30,7 +30,7 @@ public class AudioComponent implements GameComponent {
 	 */
 	public AudioComponent(String audioFileName) {
 		fileName = audioFileName;
-    	volume = 1.0f;
+    	//volume = 1.0f;
     	play = false;
 	}
 	   

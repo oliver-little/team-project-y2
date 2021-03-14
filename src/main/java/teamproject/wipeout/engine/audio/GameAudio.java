@@ -28,6 +28,7 @@ public class GameAudio {
     private AudioInputStream audioStream;
     public double volume;
     public boolean toLoop; //whether or not to loop sound continuosly (until stop)
+    public boolean muted;
     
     /**
      * This is a class used to implement one-off sounds and the backing track.
@@ -36,9 +37,10 @@ public class GameAudio {
      */
     public GameAudio(String audioFileName, boolean loop) {
     	fileName = audioFileName;
-    	volume = 0.1f;
+    	this.volume = 0.05f;
     	playing = false;
     	this.toLoop = loop;
+    	this.muted = false;
     	File audioFile;
 		try
 		{
@@ -59,12 +61,14 @@ public class GameAudio {
     }
     
     public void play() {
+    	
     	audioClip.start();
     	if(toLoop) {
     		audioClip.loop(Clip.LOOP_CONTINUOUSLY);
     	}
-    	setVolume(volume);
     	playing = true;
+    	setVolume(volume);
+    	
     	
     }
     
@@ -112,4 +116,14 @@ public class GameAudio {
     public boolean isPlaying() {
     	return playing;
     }
+    
+    public void muteUnmute() {
+		if(muted) {
+			muted = false;
+			this.setVolume(0.05f);
+		}else {
+			muted = true;
+			this.setVolume(0.0f);
+		}
+	}
 }

@@ -113,13 +113,15 @@ public class App implements Controller {
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
+        MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
+        AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
-        systemUpdater.addSystem(new AudioSystem(gameScene, 0.1f));
+        systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
-        systemUpdater.addSystem(new MovementAudioSystem(gameScene, 0.05f));
+        systemUpdater.addSystem(mas);
         systemUpdater.addSystem(new SteeringSystem(gameScene));
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
@@ -227,7 +229,9 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
         input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
-
+        input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
+        									 mas.muteUnmute();
+        									 audioSys.muteUnmute();});
 
         invUI.onMouseClick(world);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));

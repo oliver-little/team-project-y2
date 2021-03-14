@@ -13,6 +13,7 @@ public class MovementAudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
 	private double volume;
+	public boolean muted;
 	
 	/**
 	 * System which dictates which sounds to play
@@ -21,6 +22,7 @@ public class MovementAudioSystem implements GameSystem {
     public MovementAudioSystem(GameScene e, double volume) {
         this.entityCollector = new SignatureEntityCollector(e, Set.of(MovementAudioComponent.class)); //collects entities with AudioComponents
         this.volume = volume;
+        this.muted = false;
     }
 
 	/**
@@ -64,5 +66,15 @@ public class MovementAudioSystem implements GameSystem {
 	 */
 	public double getVolume() {
 		return volume;
+	}
+	
+	public void muteUnmute() {
+		if(muted) {
+			muted = false;
+			this.setVolume(0.05f);
+		}else {
+			muted = true;
+			this.setVolume(0.0f);
+		}
 	}
 }

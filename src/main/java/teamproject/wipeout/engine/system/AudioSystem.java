@@ -12,6 +12,7 @@ public class AudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
 	private double spotEffectsVolume;
+	public boolean muted;
 	
 	/**
 	 * System which dictates which sounds to play
@@ -20,6 +21,7 @@ public class AudioSystem implements GameSystem {
     public AudioSystem(GameScene e, double volume) {
         this.entityCollector = new SignatureEntityCollector(e, Set.of(AudioComponent.class)); //collects entities with AudioComponents
         this.spotEffectsVolume = volume; //initialised to full volume
+        this.muted = false;
     }
 
 	/**
@@ -61,5 +63,15 @@ public class AudioSystem implements GameSystem {
 	 */
 	public double getSpotEffectsVolume() {
 		return spotEffectsVolume;
+	}
+	
+	public void muteUnmute() {
+		if(muted) {
+			muted = false;
+			this.setSpotEffectsVolume(0.05f);
+		}else {
+			muted = true;
+			this.setSpotEffectsVolume(0.0f);
+		}
 	}
 }
