@@ -4,6 +4,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -110,7 +111,9 @@ public class InventoryUI extends StackPane {
 	public void onMouseClick(WorldEntity world) {
 		for(int i = 0; i < MAX_SIZE; i++) {
 			int hold = i;
-			rectangles[i].setOnMouseClicked((event) -> {
+			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
+				event.consume();
+
 				FarmEntity myFarm = world.getMyFarm();
 				Player myPlayer = world.getMyPlayer();
 
