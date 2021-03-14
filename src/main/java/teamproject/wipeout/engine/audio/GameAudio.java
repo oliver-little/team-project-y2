@@ -121,9 +121,15 @@ public class GameAudio {
 		if(muted) {
 			muted = false;
 			this.setVolume(0.05f);
+			// Restart the clip as if it was stopped
+			if (this.playing) {
+				audioClip.start();
+			}
 		}else {
 			muted = true;
-			this.setVolume(0.0f);
+			this.setVolume(0f);
+			// Also stop the clip playing so sound cuts immediately
+			audioClip.stop();
 		}
 	}
 }

@@ -46,7 +46,7 @@ public class MovementAudioSystem implements GameSystem {
 			if ((s.playing == false) && (s.moveComp.velocity.getX() != 0.0f || s.moveComp.velocity.getY() != 0.0f)) {
 				s.setVolume(volume); //applies the spot effects volume to component before playing
 				s.playSound();
-			}else if ((s.playing == true) && (s.moveComp.velocity.getX() == 0.0f && s.moveComp.velocity.getY() == 0.0f)) {
+			} else if (s.playing == true && muted || (s.playing == true) && (s.moveComp.velocity.getX() == 0.0f && s.moveComp.velocity.getY() == 0.0f)) {
 				s.stop();
 			}
 		}
@@ -75,6 +75,11 @@ public class MovementAudioSystem implements GameSystem {
 		}else {
 			muted = true;
 			this.setVolume(0.0f);
+
+			List<GameEntity> entities = this.entityCollector.getEntities();
+			for (GameEntity entity: entities) {
+				entity.getComponent(MovementAudioComponent.class).stop();
+			}
 		}
 	}
 }
