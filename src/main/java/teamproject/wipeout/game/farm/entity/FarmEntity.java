@@ -32,7 +32,6 @@ import teamproject.wipeout.networking.state.FarmState;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -66,6 +65,8 @@ public class FarmEntity extends GameEntity {
 
     private DestroyerEntity destroyerEntity;
     private Consumer<FarmItem> destroyerDelegate;
+
+    private Supplier<GameClient> clientSupplier;
 
     /**
      * Creates a new instance of {@code FarmEntity}
@@ -359,6 +360,7 @@ public class FarmEntity extends GameEntity {
         }
 
         if (makePickable) {
+            // Player picking the farm item
             int inventoryID = pickedItem.getComponent(PlantComponent.class).grownItemID;
             Item inventoryItem = this.itemStore.getItem(inventoryID);
 
@@ -367,6 +369,9 @@ public class FarmEntity extends GameEntity {
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();
             }
+        } else {
+            // Animal eating the farm item
+            this.sendStateUpdate();
         }
         
     }
@@ -475,6 +480,8 @@ public class FarmEntity extends GameEntity {
      * @return {@link Clickable} component
      */
     private Clickable makeClickable(Supplier<GameClient> clientFunction) {
+        this.clientSupplier = clientFunction;
+
         Clickable clickable = new Clickable((x, y, button, entity) -> {
             boolean stateChanged = false;
 
@@ -488,14 +495,8 @@ public class FarmEntity extends GameEntity {
                 stateChanged = true;
             }
 
-            GameClient client = clientFunction.get();
-            if (client != null && stateChanged) {
-                try {
-                    client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.id, this.data.getCurrentState()));
-
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                }
+            if (stateChanged) {
+                this.sendStateUpdate();
             }
         });
         clickable.setEntity(this);
@@ -557,6 +558,25 @@ public class FarmEntity extends GameEntity {
             randY = randomiser.nextDouble(y, y + (SQUARE_SIZE / 4.0));
         }
         return new Point2D(randX, randY);
+    }
+
+    /**
+     * If possible, sends an updated state of the farm to the server.
+     */
+    private void sendStateUpdate() {
+        if (this.clientSupplier == null) {
+            return;
+        }
+
+        GameClient client = this.clientSupplier.get();
+        if (client != null) {
+            try {
+                client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.id, this.data.getCurrentState()));
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
 }
