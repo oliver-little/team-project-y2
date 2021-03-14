@@ -51,6 +51,7 @@ import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -141,7 +142,6 @@ public class App implements Controller {
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
         addInvUIInput(input, invUI);
-        
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
@@ -185,6 +185,7 @@ public class App implements Controller {
 
         TaskUI taskUI = new TaskUI(player);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
+        player.setTaskUI(taskUI);
 
         // Money icon
         MoneyUI moneyUI = new MoneyUI(player);
@@ -233,7 +234,6 @@ public class App implements Controller {
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
-                	   taskUI.showTasks(player.tasks);
                 	   },
                 () -> {});
 
@@ -245,8 +245,9 @@ public class App implements Controller {
 
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
-        itemIds.add(2);
-        itemIds.add(6);
+        for(int i = 1; i < 7; i++) {
+            itemIds.add(i);
+        }
 
         int nrOfTask = 0;
         // Collect taskk
@@ -284,6 +285,7 @@ public class App implements Controller {
             nrOfTask += 1;
         }
 
+        Collections.shuffle(tasks);
         return tasks;
     }
 

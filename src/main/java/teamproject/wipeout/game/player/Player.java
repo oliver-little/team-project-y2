@@ -18,6 +18,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
@@ -49,6 +50,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public Integer size;
 
     public ArrayList<Task> tasks;
+    private TaskUI taskUI;
 
     private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
 
@@ -96,6 +98,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
+    }
+
+    public void setTaskUI(TaskUI taskUI) {
+        this.taskUI = taskUI;
+        this.checkTasks();
     }
 
     public double getMoney() {
@@ -169,7 +176,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
 
         this.soldItems.putIfAbsent(id, 0);
-        this.soldItems.put(id, this.soldItems.get(id) + 1);
+        this.soldItems.put(id, this.soldItems.get(id) + quantity);
         checkTasks();
         return true;
     }
@@ -447,7 +454,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public LinkedHashMap<Integer, Integer> getSoldItems() {
-        return soldItems;
+        return this.soldItems;
     }
 
     /**
@@ -482,6 +489,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     //check what tasks have been completed
     public void checkTasks() {
+        System.out.println("Checking tasks");
         for(Task task : tasks) {
             if(task.completed) {
                 continue;
@@ -489,9 +497,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             if(task.condition.apply(this)) {
                 task.completed = true;
                 this.money.set(this.money.getValue() + task.reward);
-                System.out.println("Task completed");
+                System.out.println("Task is completed");
             }
         }
+        taskUI.showTasks(tasks);
     }
 
     // get number of completed tasks
@@ -522,5 +531,4 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
         }
     }
-
 }
