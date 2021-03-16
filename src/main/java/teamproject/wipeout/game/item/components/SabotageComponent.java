@@ -17,6 +17,7 @@ public class SabotageComponent implements ItemComponent {
     }
 
     public final Usage usage;
+    public final double duration; //In seconds
 
     /**
      * Creates a {@code SabotageComponent} from a given {@code JSON Map} data.
@@ -25,6 +26,7 @@ public class SabotageComponent implements ItemComponent {
      */
     public SabotageComponent(Map<String, Object> data) {
         this.usage = Usage.valueOf(data.get("usage").toString());
+        this.duration = (Double) data.get("duration");
     }
 
     /**

@@ -980,7 +980,237 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "NONE"
+          "usage" : "NONE",
+          "duration" : 60,
+          "counteractIDs" : [52, 53]          
+        }
+      }
+    },
+    {
+      "id" : 52,
+      "name": "Rat Repellent (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-rat-repellent",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 53,
+      "name": "Rat Repellent (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-rat-repellent",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 54,
+      "name": "Crop Boost (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-crop-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 55,
+      "name": "Crop Boost (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-crop-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 56,
+      "name": "Crop Poison (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-crop-poison",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 57,
+      "name": "Crop Poison (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-crop-poison",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "FARM",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 58,
+      "name": "Slowness Potion (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-slowness-potion",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 59,
+      "name": "Slowness Potion (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-slowness-potion",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 60,
+      "name": "Reputation Boost (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-reputation-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 61,
+      "name": "Reputation Boost (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-reputation-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 62,
+      "name": "Reputation Poison (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-reputation-poison",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 63,
+      "name": "Reputation Poison (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-reputation-poison",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 18.00,
+          "defaultSellPrice" : 12.00
+        },
+        "SabotageComponent" : {
+          "usage" : "PLAYER",
+          "duration" : 120        
         }
       }
     }
