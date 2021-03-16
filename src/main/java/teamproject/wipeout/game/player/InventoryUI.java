@@ -199,7 +199,7 @@ public class InventoryUI extends StackPane {
 				GameEntity e = gameScene.createEntity();
 				Transform tr = player.getComponent(Transform.class);
 				e.addComponent(new Transform (tr.getPosition().getX(), tr.getPosition().getY()));
-				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.physics.Rectangle(0, -20, 20, 20)));
+				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.shape.Rectangle(0, -20, 20, 20)));
 				Item eItem = itemStore.getItem(id);
 				e.addComponent(new PickableComponent(eItem));
 				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);

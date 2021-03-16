@@ -5,7 +5,7 @@ import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;

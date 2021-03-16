@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.shape.Circle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
+import teamproject.wipeout.engine.component.shape.Segment;
 
 class GeometryUtilTest
 {
@@ -94,34 +97,7 @@ class GeometryUtilTest
 		assertEquals(new Point2D(0.5,0.5), l1.pointOfIntersection(l2));
 		
 	}
-	
-	@Test
-	void testContains() {
-		Point2D p = new Point2D(0,0);
-		Segment l = new Segment(0,0,10,10);
-		assertTrue(l.contains(p));
-		
-		p = new Point2D(1,1);
-		l = new Segment(0,0,10,10);
-		assertTrue(l.contains(p));
-		
-		p = new Point2D(10,10);
-		l = new Segment(0,0,10,10);
-		assertTrue(l.contains(p));
-		
-		p = new Point2D(11,11);
-		l = new Segment(0,0,10,10);
-		assertFalse(l.contains(p));
-		
-		p = new Point2D(1,0);
-		l = new Segment(0,0,10,10);
-		assertFalse(l.contains(p));
-		
-		System.out.println("the test");
-		l = new Segment(1, 3, 1, 1);
-		p = new Point2D(1,4);
-		assertFalse(l.contains(p));
-	}
+
 	
 	@Test
 	void testCirclesIntersect() {

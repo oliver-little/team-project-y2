@@ -4,7 +4,7 @@ import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.Shape;
+import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;

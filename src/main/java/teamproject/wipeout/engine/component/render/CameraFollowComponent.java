@@ -9,6 +9,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 
 /**
  * Component that can be added to an entity with a CameraComponent to track a target entity.
+ * The camera will move with the target entity
  */
 public class CameraFollowComponent implements GameComponent
 {

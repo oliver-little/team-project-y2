@@ -1,8 +1,11 @@
-package teamproject.wipeout.engine.component.physics;
+package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Line;
+import teamproject.wipeout.engine.component.physics.GeometryUtil;
 
+/**
+ * Class for a line that connects two points
+ */
 public class Segment extends Shape
 {
 	private Point2D start;

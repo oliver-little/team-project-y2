@@ -8,7 +8,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;

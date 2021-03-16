@@ -19,7 +19,7 @@ import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;

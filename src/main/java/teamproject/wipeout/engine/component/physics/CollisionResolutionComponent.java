@@ -7,6 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.entity.GameEntity;
 
 /**

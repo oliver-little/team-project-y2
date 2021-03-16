@@ -1,6 +1,7 @@
-package teamproject.wipeout.engine.component.physics;
+package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.shape.Shape;
 
 public class Rectangle extends Shape
 {

@@ -1,6 +1,11 @@
 package teamproject.wipeout.engine.component.physics;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.shape.Circle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
+import teamproject.wipeout.engine.component.shape.Segment;
+import teamproject.wipeout.engine.component.shape.Shape;
+
 /**
  * Class containing functions related to geometry in 2D space
  *
@@ -61,7 +66,7 @@ public class GeometryUtil
      * @param r1 the rectangle
      * @return true if the circle and rectangle intersect, false otherwise
      */
-    public static boolean intersects(Circle c1, Rectangle r1) {    	
+    public static boolean intersects(Circle c1, Rectangle r1) {
     	Point2D centre = new Point2D(c1.getCentreX(), c1.getCentreY());
     	
     	//System.out.println("centre: "+centre);
