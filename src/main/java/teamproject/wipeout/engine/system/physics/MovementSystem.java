@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.system;
+package teamproject.wipeout.engine.system.physics;
 
 import java.util.List;
 import java.util.Set;
@@ -9,6 +9,7 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.engine.system.GameSystem;
 
 public class MovementSystem implements GameSystem {
     

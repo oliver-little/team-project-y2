@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.system;
+package teamproject.wipeout.engine.system.audio;
 
 import java.util.Set;
 import java.util.List;
@@ -8,6 +8,7 @@ import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.engine.system.GameSystem;
 
 public class MovementAudioSystem implements GameSystem {
 

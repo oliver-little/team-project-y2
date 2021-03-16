@@ -80,38 +80,13 @@ public class HitboxComponent implements GameComponent {
     
     
     //collision detection
-    
-    /**
-     * Checks whether two game entities collide (whether any of one's bounding boxes overlaps with the other's)
-     * @param g1 first game entity
-     * @param g2 second game entity
-     * @return pair of shapes from the two GameEntity's bounding boxes that collide
-     */
-    public static Pair<Shape, Shape> collides(GameEntity g1, GameEntity g2) {
-    	Transform t1 = g1.getComponent(Transform.class);
-    	HitboxComponent c1 = g1.getComponent(HitboxComponent.class);
-    	Shape bb1[] = c1.boundingBoxes;
-    	
-    	Transform t2 = g2.getComponent(Transform.class);
-    	HitboxComponent c2 = g2.getComponent(HitboxComponent.class);
-    	Shape bb2[] = c2.boundingBoxes;
-    	
-    	for(int i=0;i<bb1.length;i++) {
-    		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1[i]);
-        	for(int j=0;j<bb2.length;j++) {
-        		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2[j]);
-            	if(GeometryUtil.intersects(s1,s2)) {
-            		return new Pair<Shape, Shape>(s1, s2);
-            	}
-        	}
-    	}
-    	
-    	//No pair of shapes from the boundng boxes collide
-    	return null;
-
-    }
-    
-    public static ArrayList<Pair<Shape, Shape>> collides2(GameEntity g1, GameEntity g2) {
+	/**
+	 * Checks whether two game entities collide (whether any of one's bounding boxes overlaps with the other's)
+	 * @param g1 first game entity
+	 * @param g2 second game entity
+	 * @return all pairs of shapes from the two GameEntity's bounding boxes that collide
+	 */
+    public static ArrayList<Pair<Shape, Shape>> collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
     	HitboxComponent c1 = g1.getComponent(HitboxComponent.class);
     	Shape bb1[] = c1.boundingBoxes;
