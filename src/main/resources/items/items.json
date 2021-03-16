@@ -382,6 +382,9 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 25.00,
           "defaultSellPrice" : -1
+        },
+        "UsableComponent" : {
+          "health" : 10
         }
       }
     },
@@ -397,6 +400,9 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 25.00,
           "defaultSellPrice" : -1
+        },
+        "UsableComponent" : {
+          "health" : 10
         }
       }
     },
@@ -412,6 +418,9 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 25.00,
           "defaultSellPrice" : -1
+        },
+        "UsableComponent" : {
+          "health" : 10
         }
       }
     },
@@ -427,6 +436,9 @@
         "TradableComponent" : {
           "defaultBuyPrice" : 25.00,
           "defaultSellPrice" : -1
+        },
+        "UsableComponent" : {
+          "health" : 10
         }
       }
     },
@@ -951,6 +963,24 @@
           "growthRate" : 10.00,
           "width": 2,
           "height": 2
+        }
+      }
+    },
+    {
+      "id" : 51,
+      "name": "Cheese",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-animals-and-food",
+          "spriteSetName" : "cheese",
+          "stackSizeLimit" : 99
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.00
+        },
+        "SabotageComponent" : {
+          "usage" : "NONE"
         }
       }
     }
