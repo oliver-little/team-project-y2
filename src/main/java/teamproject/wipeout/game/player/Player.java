@@ -31,6 +31,7 @@ import java.util.Set;
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final int MAX_SIZE = 10; //no. of inventory slots
+    public final int INITIAL_MONEY = 25; //initial amount of money
 
     public final Integer playerID;
     public String playerName;
@@ -69,7 +70,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
-        this.money = new SimpleDoubleProperty(100.0);
+        this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());

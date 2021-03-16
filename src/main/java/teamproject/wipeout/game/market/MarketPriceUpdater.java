@@ -16,7 +16,7 @@ public class MarketPriceUpdater {
      */
     public static final long TIMEFREQUENCY = 1;
 
-    public static final double QUANTITYDEVIATIONSTEP = 0.5;
+    public static final double QUANTITYDEVIATIONSTEP = 0.1;
     
     public Market market;
     
