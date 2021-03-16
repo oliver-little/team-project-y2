@@ -41,10 +41,9 @@ import teamproject.wipeout.game.item.ItemStore;
 import java.io.IOException;
 
 import teamproject.wipeout.game.market.Market;
-//import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
@@ -262,7 +261,7 @@ public class App implements Controller {
             Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, 5 * quantityCollected,
                     (Player inputPlayer) ->
                     {
-                    	ArrayList<invPair> inventoryList = inputPlayer.getInventory();
+                    	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
                         //LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();  //inventory is now an ArrayList
                     	int index = inputPlayer.containsItem(itemId);
                     	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {

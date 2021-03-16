@@ -10,8 +10,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -68,7 +66,7 @@ public class InventoryUI extends StackPane {
 	 * @param items updated inventory arraylist
 	 * @param index slot where change happened so only one slot needs to be updated.
 	 */
-	public void updateUI(ArrayList<invPair> items, Integer index) {
+	public void updateUI(ArrayList<InventoryItem> items, Integer index) {
 		if(items.get(index) != null) {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);

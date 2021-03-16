@@ -4,6 +4,7 @@ package teamproject.wipeout.engine.component.physics;
 import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -39,7 +40,7 @@ public class CollisionResolutionComponent implements GameComponent {
    
     
     public static void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
-    	Point2D resolutionVector = GeometryUtil.getResolutionVector(p.first,p.second);
+    	Point2D resolutionVector = GeometryUtil.getResolutionVector(p.getKey(), p.getValue());
     	if (resolutionVector==null) {
     		return;
     	}

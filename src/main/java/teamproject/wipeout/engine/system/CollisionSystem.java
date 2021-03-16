@@ -1,21 +1,17 @@
 package teamproject.wipeout.engine.system;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Pair;
-import teamproject.wipeout.engine.component.physics.Shape;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
-import teamproject.wipeout.engine.component.physics.FacingDirection;
-import teamproject.wipeout.engine.component.physics.GeometryUtil;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.physics.Shape;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * System that checks and resolves collisions between entities with the collision component
