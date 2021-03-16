@@ -143,7 +143,6 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
-        addInvUIInput(input, invUI);
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
@@ -180,6 +179,8 @@ public class App implements Controller {
         world.networker = networker;
         world.setMyPlayer(player);
         networker.worldEntity = world;
+        
+        addInvUIInput(input, invUI, world);
 
         // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
@@ -366,36 +367,37 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
     }
     
-    private void addInvUIInput(InputHandler input, InventoryUI invUI) {
+
+    private void addInvUIInput(InputHandler input, InventoryUI invUI, WorldEntity world) {
         input.addKeyAction(KeyCode.DIGIT1,
-                () -> invUI.selectSlot(0),
+                () -> invUI.useSlot(0, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT2,
-                () -> invUI.selectSlot(1),
+                () -> invUI.useSlot(1, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT3,
-                () -> invUI.selectSlot(2),
+                () -> invUI.useSlot(2, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT4,
-                () -> invUI.selectSlot(3),
+                () -> invUI.useSlot(3, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT5,
-                () -> invUI.selectSlot(4),
+                () -> invUI.useSlot(4, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT6,
-                () -> invUI.selectSlot(5),
+                () -> invUI.useSlot(5, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT7,
-                () -> invUI.selectSlot(6),
+                () -> invUI.useSlot(6, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT8,
-                () -> invUI.selectSlot(7),
+                () -> invUI.useSlot(7, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT9,
-                () -> invUI.selectSlot(8),
+                () -> invUI.useSlot(8, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT0,
-                () -> invUI.selectSlot(9),
+                () -> invUI.useSlot(9, world),
                 () -> {});
     }
 

@@ -10,6 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -143,6 +145,44 @@ public class InventoryUI extends StackPane {
 					exception.printStackTrace();
 				}
 			});
+		}
+	}
+	
+	/**
+	 * Selects a slot and then starts/stops placing item
+	 * @param slot Index of the slot selected
+	 * @param world
+	 */
+	public void useSlot(int slot, WorldEntity world) {
+		this.selectSlot(slot);
+		
+		FarmEntity myFarm = world.getMyFarm();
+		Player myPlayer = world.getMyPlayer();
+
+		if (myFarm.isPlacingItem()) {
+			myFarm.stopPlacingItem(false);
+			if (slot == myPlayer.selectedSlot) {
+				return;
+			}
+		}
+		
+		int selectedItemID = myPlayer.selectSlot(currentSelection);
+		if (selectedItemID < 0) {
+			return;
+		}
+
+		try {
+			Item selectedItem = itemStore.getItem(selectedItemID);
+			if (!selectedItem.hasComponent(PlantComponent.class)) {
+				return;
+			}
+			myPlayer.dropItem();
+			myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
+				myPlayer.acquireItem(item.id);
+			});
+
+		} catch (FileNotFoundException exception) {
+			exception.printStackTrace();
 		}
 	}
 
