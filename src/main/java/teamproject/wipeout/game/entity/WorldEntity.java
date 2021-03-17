@@ -112,7 +112,7 @@ public class WorldEntity extends GameEntity {
 
 		Point2D marketPos = market.getComponent(Transform.class).getWorldPosition();
 
-		for (Shape shape : market.getComponent(HitboxComponent.class).boundingBoxes) {
+		for (Shape shape : market.getComponent(HitboxComponent.class).getHitboxes()) {
 			if (shape instanceof Rectangle) {
 				Rectangle rect = (Rectangle) shape;
 				Rectangle newRect = new Rectangle(marketPos.add(rect.getX(), rect.getY()), rect.getWidth(), rect.getHeight());

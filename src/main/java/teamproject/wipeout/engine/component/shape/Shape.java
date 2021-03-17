@@ -8,4 +8,6 @@ import javafx.geometry.Point2D;
 public abstract class Shape
 {
 	public abstract boolean contains(Point2D p);
+	
+	public abstract boolean equals(Object obj);
 }

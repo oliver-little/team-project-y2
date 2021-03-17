@@ -23,55 +23,49 @@ public class HitboxComponent implements GameComponent {
 	// x = horizontal offset from top left corner
 	// y = vertical offset from top left corner
 	/**
-	 * Array of rectangles that are given collision property.
+	 * ArrayList of shapes to act as hitboxes
 	 * x,y coords of rectangle represent offset from entities top left corner.
 	 * width and height of rectangle are the dimensions of the bounding box.
 	 */
-	public Shape boundingBoxes[];
+	private ArrayList<Shape> hitboxes = new ArrayList<Shape>();
 		
 	
 	//varargs constructor. See https://www.baeldung.com/java-varargs for info
 	public HitboxComponent(Shape... shapes) {
-		this.boundingBoxes = shapes;
-	}
-	
-	
-	/**
-	 * Adds new bounding boxes to the bounding box array
-	 * @param shapes bounding boxes to add
-	 */
-	public void addBoundingBoxes(Shape... shapes) {
-		// May want to change data type of boundingBoxes to something more dynamic for efficiency improvement
-		Shape bb[] = new Shape[boundingBoxes.length+shapes.length];
-
-		for(int i=0; i<boundingBoxes.length;i++) {
-			bb[i]= boundingBoxes[i];
-		}
 		for(int i=0; i<shapes.length;i++) {
-			bb[i+boundingBoxes.length]= shapes[i];
-		}
-		this.boundingBoxes = bb;
-		
-	}
-	
-	/**
-	 * Removes bounding boxes from the bounding box array if they are there
-	 * @param shapes bounding boxes to remove
-	 */
-	public void removeBoundingBoxes(Shape... shapes) {
-		// May want to change data type of boundingBoxes to something more dynamic for efficiency improvement
-		ArrayList<Shape> bb = (ArrayList<Shape>) Arrays.asList(boundingBoxes);
-
-		
-		for(int i=0; i<shapes.length;i++) {
-			for(int j=0; j<boundingBoxes.length; j++) {
-				if(shapes[i].equals(boundingBoxes[j])) {
-					bb.remove(j);
-				}
+			//stop same hitbox getting added twice
+			if(!hitboxes.contains(shapes[i])) {
+				this.hitboxes.add(shapes[i]);
 			}
 		}
-
-		boundingBoxes = (Shape[]) bb.toArray();
+	}
+	
+	
+	/**
+	 * Adds new hitboxes to the hitbox ArrayList
+	 * @param shapes hitboxes to add
+	 */
+	public void addHitboxes(Shape... shapes) {
+		for(int i=0; i<shapes.length;i++) {
+			//stop same hitbox getting added twice
+			if(!hitboxes.contains(shapes[i])) {
+				this.hitboxes.add(shapes[i]);
+			}
+		}		
+	}
+	
+	/**
+	 * Removes hitboxes from the hitbox ArrayList if they are there
+	 * @param shapes hitboxes to remove from hitbox ArrayList
+	 */
+	public void removeHitoxes(Shape... shapes) {
+		for(int i=0; i<shapes.length;i++) {
+			this.hitboxes.remove(shapes[i]);
+		}
+	}
+	
+	public ArrayList<Shape> getHitboxes(){
+		return this.hitboxes;
 	}
 	
     public String getType() {
@@ -81,32 +75,32 @@ public class HitboxComponent implements GameComponent {
     
     //collision detection
 	/**
-	 * Checks whether two game entities collide (whether any of one's bounding boxes overlaps with the other's)
+	 * Checks whether two game entities collide (whether any of one's hitboxes overlaps with the other's)
 	 * @param g1 first game entity
 	 * @param g2 second game entity
-	 * @return all pairs of shapes from the two GameEntity's bounding boxes that collide
+	 * @return all pairs of shapes from the two GameEntity's hitboxes that collide
 	 */
     public static ArrayList<Pair<Shape, Shape>> collides(GameEntity g1, GameEntity g2) {
     	Transform t1 = g1.getComponent(Transform.class);
     	HitboxComponent c1 = g1.getComponent(HitboxComponent.class);
-    	Shape bb1[] = c1.boundingBoxes;
+    	ArrayList<Shape> bb1 = c1.hitboxes;
     	
     	Transform t2 = g2.getComponent(Transform.class);
     	HitboxComponent c2 = g2.getComponent(HitboxComponent.class);
-    	Shape bb2[] = c2.boundingBoxes;
+    	ArrayList<Shape> bb2 = c2.hitboxes;
     	
     	ArrayList<Pair<Shape, Shape>> collidingPairs = new ArrayList<Pair<Shape, Shape>>();
-    	for(int i=0;i<bb1.length;i++) {
-    		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1[i]);
-        	for(int j=0;j<bb2.length;j++) {
-        		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2[j]);
+    	for(int i=0;i<bb1.size();i++) {
+    		Shape s1 = addAbsolutePosition(t1.getWorldPosition(), bb1.get(i));
+        	for(int j=0;j<bb2.size();j++) {
+        		Shape s2 = addAbsolutePosition(t2.getWorldPosition(), bb2.get(j));
             	if(GeometryUtil.intersects(s1,s2)) {
             		collidingPairs.add(new Pair<Shape, Shape>(s1, s2));
             	}
         	}
     	}
     	
-    	//No pair of shapes from the boundng boxes collide
+    	//No pair of hitboxes collide
     	if (collidingPairs.size()==0) {
     		return null;
     	}

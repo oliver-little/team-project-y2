@@ -76,6 +76,25 @@ public class Circle extends Shape
     	}
     	return false;
     }
+    
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Circle other = (Circle) obj;
+		if (Double.doubleToLongBits(centreX) != Double.doubleToLongBits(other.centreX))
+			return false;
+		if (Double.doubleToLongBits(centreY) != Double.doubleToLongBits(other.centreY))
+			return false;
+		if (Double.doubleToLongBits(radius) != Double.doubleToLongBits(other.radius))
+			return false;
+		return true;
+	}
 	
     
 }
