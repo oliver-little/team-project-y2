@@ -7,8 +7,17 @@ import teamproject.wipeout.engine.component.shape.Shape;
 public class Circle extends Shape
 {
 
+	/**
+	 * x coordinate of centre of circle
+	 */
 	private double centreX;
+	/**
+	 * y coordinate of centre of circle
+	 */
 	private double centreY;
+	/**
+	 * radius of circle
+	 */
 	private double radius;
 	
 	public Circle(double radius) {

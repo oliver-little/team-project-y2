@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.shape.Circle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -45,7 +46,6 @@ public class HitboxComponentTest {
         Transform t1 = new Transform(0,0);
         g1.addComponent(t1);
         HitboxComponent h1 = new HitboxComponent(new Rectangle(0,0,10,10));
-        System.out.println(h1.getHitboxes().size());
         g1.addComponent(h1);
         assertEquals(1, h1.getHitboxes().size());
 
@@ -78,4 +78,42 @@ public class HitboxComponentTest {
         
         
     }
+    
+    @Test
+    void circleCollisionTest() {
+        GameScene gameScene = new GameScene();
+
+        GameEntity g1 = new GameEntity(gameScene);
+        //test addAbsolutePosition
+        Transform t1 = new Transform(10,10);
+        g1.addComponent(t1);
+        g1.addComponent(new HitboxComponent(new Circle(5,5,10)));
+
+        GameEntity g2 = new GameEntity(gameScene);
+        Transform t2 = new Transform(12,10);
+        g2.addComponent(t2);
+        g2.addComponent(new HitboxComponent(new Circle(1,2,9)));
+        
+        assertTrue(HitboxComponent.checkCollides(g1,g2));
+    }
+    
+    @Test
+    void circleRectangleCollisionTest() {
+        GameScene gameScene = new GameScene();
+
+        GameEntity g1 = new GameEntity(gameScene);
+        //test addAbsolutePosition
+        Transform t1 = new Transform(0,0);
+        g1.addComponent(t1);
+        g1.addComponent(new HitboxComponent(new Circle(5,5,10)));
+
+        GameEntity g2 = new GameEntity(gameScene);
+        Transform t2 = new Transform(7,0);
+        g2.addComponent(t2);
+        g2.addComponent(new HitboxComponent(new Rectangle(0,0,5,9)));
+        
+        assertTrue(HitboxComponent.checkCollides(g1,g2));
+    }
+    
+    
 }
