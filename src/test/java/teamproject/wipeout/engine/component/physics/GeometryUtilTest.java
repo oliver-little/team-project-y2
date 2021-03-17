@@ -7,6 +7,7 @@ import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.shape.Circle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.shape.Segment;
+import teamproject.wipeout.engine.component.shape.Shape;
 
 class GeometryUtilTest
 {
@@ -101,8 +102,8 @@ class GeometryUtilTest
 	
 	@Test
 	void testCirclesIntersect() {
-		Circle c1 = new Circle(0,0,10);
-		Circle c2 = new Circle(1,1,10);
+		Shape c1 = new Circle(0,0,10);
+		Shape c2 = new Circle(1,1,10);
 		assertTrue(GeometryUtil.intersects(c1, c2));
 		
 		c1 = new Circle(0,0,10);
@@ -150,8 +151,8 @@ class GeometryUtilTest
 	@Test
 	void testRectanglesIntersects()
 	{
-		Rectangle r1 = new Rectangle(10,10,10,10);
-		Rectangle r2 = new Rectangle(0,0,10,10);
+		Shape r1 = new Rectangle(10,10,10,10);
+		Shape r2 = new Rectangle(0,0,10,10);
 		//collides at top left corner of r1
 		assertTrue(GeometryUtil.intersects(r1,r2));
 		
@@ -285,5 +286,63 @@ class GeometryUtilTest
 
 	}
 	
+	@Test
+	void circleResolutionVectorTest() {
+		Shape c1 = new Circle(0,0,10);
+		Shape c2 = new Circle(18,0,10);
+		assertTrue(GeometryUtil.intersects(c1, c2));
+		Point2D rv = GeometryUtil.getResolutionVector(c1, c2);
+		//System.out.println(rv.toString());
+		Point2D expected = new Point2D(2,0);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+
+		
+		c1 = new Circle(0,0,5);
+		c2 = new Circle(3,4,5);
+		assertTrue(GeometryUtil.intersects(c1, c2));
+		rv = GeometryUtil.getResolutionVector(c1, c2);
+		System.out.println(rv.toString());
+		expected = new Point2D(3,4);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+	}
+	
+	@Test
+	void rectangleResolutionVectorTest() {
+		Shape r1 = new Rectangle(0,0,10,10);
+		Shape r2 = new Rectangle(9,0,10,10);
+		assertTrue(GeometryUtil.intersects(r1, r2));
+		Point2D rv = GeometryUtil.getResolutionVector(r1, r2);
+		//System.out.println(rv.toString());
+		Point2D expected = new Point2D(1,0);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+		
+		r1 = new Rectangle(0,0,10,10);
+		r2 = new Rectangle(8,9,10,10);
+		assertTrue(GeometryUtil.intersects(r1, r2));
+		rv = GeometryUtil.getResolutionVector(r1, r2);
+		//System.out.println(rv.toString());
+		expected = new Point2D(0,1);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+		
+		r1 = new Rectangle(0,0,10,10);
+		r2 = new Rectangle(-2,-1,4,5);
+		assertTrue(GeometryUtil.intersects(r1, r2));
+		rv = GeometryUtil.getResolutionVector(r1, r2);
+		//System.out.println(rv.toString());
+		expected = new Point2D(2,0);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+	}
+	
+	@Test
+	void rectangleCircleResolutionVectorTest() {
+		Shape r1 = new Rectangle(0,0,10,10);
+		Shape c2 = new Circle(14,10,10);
+		assertTrue(GeometryUtil.intersects(r1, c2));
+		Point2D rv = GeometryUtil.getResolutionVector(r1, c2);
+		//System.out.println(rv.toString());
+		Point2D expected = new Point2D(6,0);
+		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
+
+	}
 
 }

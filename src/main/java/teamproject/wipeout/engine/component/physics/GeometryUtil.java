@@ -299,22 +299,22 @@ public class GeometryUtil
 	
 		double minDistance = Double.MAX_VALUE;
 		double distanceToTop = calculateDistanceBetweenPointAndLine(centre, top)-c.getRadius();
-		if(distanceToTop<minDistance) {
+		if(distanceToTop<=minDistance) {
 			minDistance=distanceToTop;
 			p = new Point2D(0,minDistance);
 		}
 		double distanceToBottom = calculateDistanceBetweenPointAndLine(centre, bottom)-c.getRadius();
-		if(distanceToBottom<minDistance) {
+		if(distanceToBottom<=minDistance) {
 			minDistance=distanceToBottom;
 			p = new Point2D(0,-minDistance);
 		}
 		double distanceToLeft = calculateDistanceBetweenPointAndLine(centre, left)-c.getRadius();
-		if(distanceToLeft<minDistance) {
+		if(distanceToLeft<=minDistance) {
 			minDistance=distanceToLeft;
 			p = new Point2D(minDistance,0);
 		}
 		double distanceToRight = calculateDistanceBetweenPointAndLine(centre, right)-c.getRadius();
-		if(distanceToRight<minDistance) {
+		if(distanceToRight<=minDistance) {
 			minDistance=distanceToRight;
 			p = new Point2D(-minDistance,0);			
 		}
