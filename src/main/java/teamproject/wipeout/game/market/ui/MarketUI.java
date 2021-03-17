@@ -20,7 +20,9 @@ import javafx.scene.text.Font;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.item.components.TradableComponent;
+import teamproject.wipeout.game.item.components.UsableComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.resources.ResourceLoader;
@@ -54,13 +56,17 @@ public class MarketUI extends AnchorPane {
         List<Node> seedsList = new ArrayList<>();
         List<Node> plantsList = new ArrayList<>();
         List<Node> toolsList = new ArrayList<>();
+        List<Node> potionsList = new ArrayList<>();
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
                 seedsList.add(new MarketItemUI(item, market, player, spriteManager));
             }
-            else if (item.getComponent(TradableComponent.class).defaultSellPrice == -1) {
+            else if (item.hasComponent(UsableComponent.class)) {
                 toolsList.add(new MarketItemUI(item, market, player, spriteManager));
+            }
+            else if (item.hasComponent(SabotageComponent.class)) {
+                potionsList.add(new MarketItemUI(item, market, player, spriteManager));
             }
             else {
                 plantsList.add(new MarketItemUI(item, market, player, spriteManager));
@@ -70,8 +76,9 @@ public class MarketUI extends AnchorPane {
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));
         Tab tools = new Tab("Tools", new ScrollableTileUI(toolsList));
+        Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList));
         //Tab tasks = new Tab("Tasks", new Label("Purchasable Tasks")); -- Implement later.
-        tabPane.getTabs().addAll(seeds, plants, tools);
+        tabPane.getTabs().addAll(seeds, plants, tools, potions);
 
         Button close = new Button("X");
 

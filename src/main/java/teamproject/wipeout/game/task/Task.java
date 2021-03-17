@@ -26,6 +26,6 @@ public class Task {
         this.reward = reward;
         this.condition = condition;
         this.completed = false;
-        this.priceToBuy = reward - 10;
+        this.priceToBuy = reward/5;
     }
 }

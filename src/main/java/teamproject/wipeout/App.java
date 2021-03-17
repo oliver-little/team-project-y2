@@ -150,10 +150,10 @@ public class App implements Controller {
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
-        player.acquireItem(6, 98); //for checking stack/inventory limits
-        player.acquireItem(1, 2);
-        player.acquireItem(28, 98);
-        player.acquireItem( 43, 2);
+        //player.acquireItem(6, 98); //for checking stack/inventory limits
+        //player.acquireItem(1, 2);
+        //player.acquireItem(28, 98);
+        //player.acquireItem( 43, 2);
 
 
         try {
@@ -259,11 +259,12 @@ public class App implements Controller {
         }
 
         int nrOfTask = 0;
-        // Collect taskk
+        // Collect tasks
+        Integer reward = 5;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
-            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name + " ($" + reward.toString() + ")", reward * quantityCollected,
                     (Player inputPlayer) ->
                     {
                     	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
@@ -281,10 +282,11 @@ public class App implements Controller {
         }
 
         // Sell tasks
+        reward = 2;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, 10 * quantitySold,
+            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name + " ($" + reward.toString() + ")", reward * quantitySold,
                     (Player inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
@@ -367,6 +369,8 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-animals-and-food-descriptor.json", "inventory/AnimalsAndFood.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
         spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
     }
