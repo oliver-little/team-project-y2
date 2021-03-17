@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
@@ -44,7 +45,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public InventoryUI invUI;
     public ItemStore itemStore;
-    public GameClient client;
 
     public Integer size;
 
@@ -57,6 +57,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private DoubleProperty money;
 
+    private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
     private final Transform position;
     private final MovementComponent physics;
@@ -115,6 +116,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public DoubleProperty moneyProperty() {
         return this.money;
+    }
+
+    public void setClientSupplier(Supplier<GameClient> supplier) {
+        this.clientSupplier = supplier;
     }
 
     /**
@@ -521,9 +526,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     private void sendPlayerStateUpdate() {
-        if (this.client != null) {
+        if (this.clientSupplier == null) {
+            return;
+        }
+        GameClient client = this.clientSupplier.get();
+        if (client != null) {
             try {
-                this.client.send(this.playerState);
+                client.send(this.playerState);
 
             } catch (IOException exception) {
                 exception.printStackTrace();

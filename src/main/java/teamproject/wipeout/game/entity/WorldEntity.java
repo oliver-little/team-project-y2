@@ -21,26 +21,28 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.networking.client.GameClient;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class WorldEntity extends GameEntity {
 
-	public Networker networker;
 	public final MarketPriceUpdater marketUpdater;
 	public final MarketEntity market;
 	public final Map<Integer, FarmEntity> farms;
 
-	private Player myPlayer;
+	private final Player myPlayer;
 	private AnimalEntity myAnimal;
 	private FarmEntity myFarm;
 	private NavigationMesh navMesh;
 
 	private InputHandler inputHandler;
+
+	private Supplier<GameClient> clientSupplier;
 
 	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
 		super(gameScene);
@@ -49,6 +51,7 @@ public class WorldEntity extends GameEntity {
 		this.inputHandler = input;
 
 		this.addComponent(new Transform(0,0));
+
 		//grass background
 		GameEntity grass = new GameEntity(gameScene);
 		grass.setParent(this);
@@ -67,16 +70,13 @@ public class WorldEntity extends GameEntity {
 		this.addComponent(new HitboxComponent(hitboxes));
 		this.addComponent(new CollisionResolutionComponent(false));
 		
-		try
-		{
+		try {
 			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,0), spriteManager);
 			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,750), spriteManager);
 			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,600), new Point2D(800,0), spriteManager);
 			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(800,-100), new Point2D(0,750), spriteManager);
-		}
-		catch (FileNotFoundException e)
-		{
-			// TODO Auto-generated catch block
+
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		//TreeEntity tree = new TreeEntity(gameScene, -50,-100, spriteManager);
@@ -110,9 +110,9 @@ public class WorldEntity extends GameEntity {
 
 		List<Rectangle> rectangles = new ArrayList<>();
 
-		Point2D marketPos = market.getComponent(Transform.class).getWorldPosition();
+		Point2D marketPos = this.market.getComponent(Transform.class).getWorldPosition();
 
-		for (Shape shape : market.getComponent(HitboxComponent.class).getHitboxes()) {
+		for (Shape shape : this.market.getComponent(HitboxComponent.class).getHitboxes()) {
 			if (shape instanceof Rectangle) {
 				Rectangle rect = (Rectangle) shape;
 				Rectangle newRect = new Rectangle(marketPos.add(rect.getX(), rect.getY()), rect.getWidth(), rect.getHeight());
@@ -120,9 +120,9 @@ public class WorldEntity extends GameEntity {
 			}
 		}
 
-        navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
+        this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
-		myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
+		this.myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
 
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
@@ -144,24 +144,27 @@ public class WorldEntity extends GameEntity {
 		return this.navMesh;
 	}
 
-	public void setMyPlayer(Player myPlayer) {
-		this.myPlayer = myPlayer;
-	}
-
-	public void setupFarmPickingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
-			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+	public void setClientSupplier(Supplier<GameClient> supplier) {
+		this.clientSupplier = supplier;
+		this.myPlayer.setClientSupplier(supplier);
+		this.market.getMarket().setClientSupplier(supplier);
+		this.myAnimal.setClientSupplier(supplier);
 	}
 
 	public void setMyFarm(FarmEntity farm) {
 		this.myFarm = farm;
 		if (farm != null) {
 			this.myPlayer.getCurrentState().assignFarm(farm.farmID);
-			farm.assignPlayer(this.myPlayer.playerID, true, () -> this.networker.getClient());
+			farm.assignPlayer(this.myPlayer.playerID, true, this.clientSupplier);
 		} else {
 			this.myPlayer.getCurrentState().assignFarm(null);
 		}
+	}
+
+	protected void setupFarmPickingKey() {
+		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
+			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
 	}
 
 }

@@ -28,7 +28,8 @@ public class Market implements StateUpdatable<MarketState> {
 
     public Supplier<Integer> serverIDGetter;
     public Consumer<GameUpdate> serverUpdater;
-    public GameClient client;
+
+    private Supplier<GameClient> clientSupplier;
 
     private boolean isLocal;
     private boolean waitingForResponse;
@@ -51,6 +52,10 @@ public class Market implements StateUpdatable<MarketState> {
 
         isLocal = local;
         waitingForResponse = false;
+    }
+
+    public void setClientSupplier(Supplier<GameClient> clientSupplier) {
+        this.clientSupplier = clientSupplier;
     }
 
     /**
@@ -225,6 +230,10 @@ public class Market implements StateUpdatable<MarketState> {
      * @param request Request for the server
      */
     private void sendRequest(MarketOperationRequest request) {
+        if (this.clientSupplier == null) {
+            return;
+        }
+        GameClient client = this.clientSupplier.get();
         if (client != null) {
             try {
                 client.send(new GameUpdate(GameUpdateType.REQUEST, client.id, request));

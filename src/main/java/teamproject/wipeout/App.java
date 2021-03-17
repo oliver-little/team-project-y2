@@ -180,9 +180,8 @@ public class App implements Controller {
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
-        world.networker = networker;
-        world.setMyPlayer(player);
-        networker.worldEntity = world;
+        world.setClientSupplier(this.networker.clientSupplier);
+        this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);
 
