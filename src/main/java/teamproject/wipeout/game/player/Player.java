@@ -468,7 +468,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param quantity of items to be removed
      * @return true if successfully removed, false if unable to remove
      */
-    private boolean removeItemFromSelectedSlot(Integer itemID, int quantity) {
+    public boolean removeItemFromSelectedSlot(Integer itemID, int quantity) {
         invPair pair = inventory.get(selectedSlot);
         if((pair != null) && (pair.quantity - quantity) >= 0) {
             if ((pair.quantity - quantity) == 0) {
@@ -621,6 +621,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	for (int i = 0; i < MAX_SIZE; i++) {
             inventory.set(i, null);
         }
+    	this.occupiedSlots = 0;
     }
 
     private void sendPlayerStateUpdate() {
