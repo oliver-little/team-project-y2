@@ -4,6 +4,7 @@ package teamproject.wipeout.game.player;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,6 +80,55 @@ public class PlayerTest {
 			Assertions.assertTrue(player.acquireItem(i, 1));
 		}
 		Assertions.assertFalse(player.acquireItem(MAX_SIZE/2 + 1, 1));
+	}
+	
+	//items are rearranged only when items are sold to ensure items are arranged efficiently.
+	//when items are sold, the removeItem method is called with the item's ID and quantity to be removed
+	
+	@Test
+	void testRemovingItems() {
+		for(int i = 1; i <= MAX_SIZE; i++) {
+			Assertions.assertTrue(player.acquireItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit));
+		}
+		for(int i = 0; i < MAX_SIZE; i++) {
+			player.selectSlot(i);
+			Assertions.assertEquals(player.dropItem(), i+1); //checks itemID of individual item dropped returned
+		}
+		for(int i = 0; i < MAX_SIZE; i++) {
+			player.selectSlot(i);
+			Assertions.assertTrue(player.removeItemFromSelectedSlot(i, itemStore.getItem(i+1).getComponent(InventoryComponent.class).stackSizeLimit - 1)); //checks multiple items dropped
+		}
+		
+		Assertions.assertEquals(0, player.occupiedSlots); //checks slots are all unoccupied
+		
+		ArrayList<invPair> inventory = player.getInventory();
+		for(invPair pair : inventory) {
+			Assertions.assertNull(pair); //checks slots are all null
+		}
+		
+		
+	}
+	
+	@Test
+	void testSlotRearrangement1() {
+		//tests when slot to be rearranged is before other slots with the same itemID
+		//adds 3 types of item to 9 slots
+		Assertions.assertTrue(player.acquireItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(2, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(3, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		
+	}
+	@Test
+	void testSlotRearrangement2() {
+		//tests when slot to be rearranged is in the middle of other slots with the same itemID
+		
+		
+	}
+	@Test
+	void testSlotRearrangement3() {
+		//tests when slot to be rearranged is after other slots with the same itemID
+		
+		
 	}
 	
 	
