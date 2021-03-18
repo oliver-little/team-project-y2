@@ -38,13 +38,15 @@ public class GameClient {
     protected ObjectInputStream in;
 
     public NewPlayerAction newPlayerAction;
+
     public final HashMap<Integer, Player> players;
     public AnimalEntity myAnimal;
-    protected Map<Integer, FarmEntity> farmEntities;
     public Market market;
 
     public Consumer<Long> clockCalibration;
     public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
+
+    protected Map<Integer, FarmEntity> farmEntities;
 
     /**
      * Default initializer for {@code GameClient}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 
 /**
  * Defines a navigable mesh which AI characters can traverse.

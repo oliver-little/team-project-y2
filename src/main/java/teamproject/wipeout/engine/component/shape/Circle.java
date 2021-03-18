@@ -1,12 +1,23 @@
-package teamproject.wipeout.engine.component.physics;
+package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.physics.GeometryUtil;
+import teamproject.wipeout.engine.component.shape.Shape;
 
 public class Circle extends Shape
 {
 
+	/**
+	 * x coordinate of centre of circle
+	 */
 	private double centreX;
+	/**
+	 * y coordinate of centre of circle
+	 */
 	private double centreY;
+	/**
+	 * radius of circle
+	 */
 	private double radius;
 	
 	public Circle(double radius) {
@@ -74,6 +85,25 @@ public class Circle extends Shape
     	}
     	return false;
     }
+    
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Circle other = (Circle) obj;
+		if (Double.doubleToLongBits(centreX) != Double.doubleToLongBits(other.centreX))
+			return false;
+		if (Double.doubleToLongBits(centreY) != Double.doubleToLongBits(other.centreY))
+			return false;
+		if (Double.doubleToLongBits(radius) != Double.doubleToLongBits(other.radius))
+			return false;
+		return true;
+	}
 	
     
 }

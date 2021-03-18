@@ -9,7 +9,7 @@ import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
@@ -27,10 +27,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final int MAX_SIZE = 10; //no. of inventory slots
+    public final int INITIAL_MONEY = 25; //initial amount of money
 
     public final Integer playerID;
     public String playerName;
@@ -39,11 +41,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public int selectedSlot;
 
-    private ArrayList<invPair> inventory = new ArrayList<>(); //ArrayList used to store inventory
+    private ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
 
     public InventoryUI invUI;
     public ItemStore itemStore;
-    public GameClient client;
 
     public Integer size;
 
@@ -56,6 +57,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private DoubleProperty money;
 
+    private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
     private final Transform position;
     private final MovementComponent physics;
@@ -69,7 +71,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
-        this.money = new SimpleDoubleProperty(100.0);
+        this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
@@ -114,6 +116,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public DoubleProperty moneyProperty() {
         return this.money;
+    }
+
+    public void setClientSupplier(Supplier<GameClient> supplier) {
+        this.clientSupplier = supplier;
     }
 
     /**
@@ -220,7 +226,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public int countItems(Integer itemID) {
     	int counter = 0;
-    	for(invPair pair : inventory) {
+    	for(InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			counter += pair.quantity;
     		}
@@ -236,7 +242,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private int countFreeItemSpaces(Integer itemID) {
     	int counter = 0;
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
-    	for(invPair pair : inventory) {
+    	for(InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			counter += stackLimit - pair.quantity;
     		}else if(pair == null) {
@@ -259,7 +265,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	
     	int i = 0;
         int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
-        for (invPair pair : inventory) { //adding to item's existing slots 
+        for (InventoryItem pair : inventory) { //adding to item's existing slots
             if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
                 pair.quantity += quantity;
                 inventory.set(i, pair);
@@ -275,15 +281,15 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
         if(quantity != 0) { 
 	        i = 0;
-	        for (invPair pair : inventory) { //adding to separate slot(s) to hold remaining items
+	        for (InventoryItem pair : inventory) { //adding to separate slot(s) to hold remaining items
 	            if ((pair == null) && (quantity <= stackLimit)) {
-	                pair = new invPair(itemID, quantity);
+	                pair = new InventoryItem(itemID, quantity);
 	                inventory.set(i, pair);
 	                occupiedSlots++;
 	                this.invUI.updateUI(inventory, i);
 	                return true; //returns index of change
 	            }else if(pair == null) {
-	            	pair = new invPair(itemID, stackLimit);
+	            	pair = new InventoryItem(itemID, stackLimit);
 	            	quantity -= stackLimit;
 	                inventory.set(i, pair);
 	                occupiedSlots++;
@@ -305,7 +311,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	int index = -1;
     	int current = stackLimit;
     	int i = 0;
-    	for (invPair pair : inventory) {
+    	for (InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			if(pair.quantity < current) {
     				current = i;
@@ -332,7 +338,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	int indexOfExtraSlot = findIndexOfLeast(itemID, stackLimit);
     	System.out.println("index of extra slot = " + indexOfExtraSlot);
-    	invPair withSpacePair = inventory.get(slotWithSpace);
+    	InventoryItem withSpacePair = inventory.get(slotWithSpace);
     	withSpacePair.quantity += inventory.get(indexOfExtraSlot).quantity;
     	inventory.set(slotWithSpace, withSpacePair);
     	invUI.updateUI(inventory, slotWithSpace);
@@ -348,7 +354,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public int countSlotsOccupiedBy(Integer itemID) {
     	int count = 0;
-    	for (invPair pair : inventory) {
+    	for (InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			count++;
     		}
@@ -372,7 +378,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	}
     	int endQuantity = noOfThisItem - quantity;
     	int slotWithSpace = -1;
-    	invPair pair;
+    	InventoryItem pair;
         for (int i = MAX_SIZE - 1; i >= 0; i--) {
         	pair = inventory.get(i);
             if((pair != null) && (pair.itemID == itemID)) {
@@ -409,7 +415,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @return true if successfully removed, false if unable to remove
      */
     public boolean removeItemFromSelectedSlot(int quantity) {
-        invPair pair = inventory.get(selectedSlot);
+        InventoryItem pair = inventory.get(selectedSlot);
         if((pair != null) && (pair.quantity - quantity) >= 0) {
             if ((pair.quantity - quantity) == 0) {
                 inventory.set(selectedSlot, null); //free inventory slot
@@ -463,21 +469,21 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         selectedSlot = slot;
         invUI.selectSlot(slot);
 
-        invPair selectedItem = this.inventory.get(slot);
+        InventoryItem selectedItem = this.inventory.get(slot);
         if (selectedItem != null) {
             return selectedItem.itemID;
         }
         return -1;
     }
 
-    public ArrayList<invPair> getInventory() {
+    public ArrayList<InventoryItem> getInventory() {
         return inventory;
     }
 
     //for checking
     private void printInventory() {
         int i = 0;
-        for(invPair pair : inventory) {
+        for(InventoryItem pair : inventory) {
             if (pair == null) {
                 System.out.println(i + ": empty");
             }else {
@@ -494,7 +500,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public int containsItem(int itemID) {
         int i = 0;
-        for(invPair pair : inventory) {
+        for(InventoryItem pair : inventory) {
             if((pair != null ) && (pair.itemID == itemID)) {
                 return i;
             }
@@ -577,9 +583,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     private void sendPlayerStateUpdate() {
-        if (this.client != null) {
+        if (this.clientSupplier == null) {
+            return;
+        }
+        GameClient client = this.clientSupplier.get();
+        if (client != null) {
             try {
-                this.client.send(this.playerState);
+                client.send(this.playerState);
 
             } catch (IOException exception) {
                 exception.printStackTrace();

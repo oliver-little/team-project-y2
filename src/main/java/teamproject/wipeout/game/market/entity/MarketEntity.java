@@ -10,8 +10,8 @@ import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.EntityClickAction;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
-import teamproject.wipeout.engine.component.physics.Shape;
+import teamproject.wipeout.engine.component.shape.Rectangle;
+import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.component.input.*;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -28,6 +28,7 @@ import teamproject.wipeout.game.player.Player;
 public class MarketEntity extends GameEntity {
 
     public static final double PLAYER_INTERACTION_DISTANCE = 250;
+    public static final double Y_OFFSET = -44;
 
     protected MarketUI marketUI;
     protected Market market;
@@ -38,9 +39,9 @@ public class MarketEntity extends GameEntity {
 
     // Hover and click variables
     protected Transform playerTransform;
-    protected Transform marketTransform;
-    protected Point2D marketEnd;
-    protected Point2D marketCentre;
+    protected Point2D clickableTopLeft;
+    protected Point2D clickableBottomRight;
+    protected Point2D clickableCentre;
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
@@ -50,61 +51,60 @@ public class MarketEntity extends GameEntity {
         this.uiContainer = uiContainer;
         this.playerTransform = player.getComponent(Transform.class);
 
-        this.marketTransform = new Transform(x, y, 1);
-        this.addComponent(this.marketTransform);
-        
-        double yOffset = 44;
+        this.addComponent(new Transform(x, y, 1));
+
+        // Create child component for hoverable so it displays behind everything
+        GameEntity child = new GameEntity(scene);
+        child.setParent(this);
+        Transform childTransform = new Transform(0, Y_OFFSET);
+        child.addComponent(childTransform);
+        child.addComponent(new Hoverable(this.onHover));
+        child.addComponent(new Clickable(this.onClick));
+        child.addComponent(new ScriptComponent(this.onStep));
 
         try {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             Image marketSprite = spriteManager.getSpriteSet("market", "market")[0];
 
-            
+            this.addComponent(new RenderComponent(new Point2D(0, Y_OFFSET), new SpriteRenderable(marketSprite), new RectRenderable(Color.BLACK, 1, 1)));
 
-            this.addComponent(new RenderComponent(new Point2D(0, -yOffset), new SpriteRenderable(marketSprite)));
+            RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
+            this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
+            this.hoverRect.alpha = 0;
+            this.hoverRect.radius = 50;
 
-            marketEnd = new Point2D(x + marketSprite.getWidth(), y + marketSprite.getHeight());
-            marketCentre = this.playerTransform.getPosition().add(marketEnd).multiply(0.5);
+            child.addComponent(new RenderComponent(hoverRect));
+
+            // Set up interaction areas
+            clickableTopLeft = childTransform.getWorldPosition();
+            clickableBottomRight = clickableTopLeft.add(marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
+            clickableCentre = clickableTopLeft.add(clickableBottomRight).multiply(0.5);
         }
         catch (Exception exception) {
             exception.printStackTrace();
         }
-        this.addComponent(new Clickable(this.onClick));
 
+        // Physics
         Shape[] hitboxes = {
                 // Main body right
-        		new Rectangle(96, 44 - yOffset, 159, 95),
+        		new Rectangle(96, 44 + Y_OFFSET, 159, 95),
                 // Main body left
-                new Rectangle(49, 46 - yOffset, 47, 106),
+                new Rectangle(49, 46 + Y_OFFSET, 47, 106),
                 // Sign and wood pile left
-                new Rectangle(22, 152 - yOffset, 65, 32),
+                new Rectangle(22, 152 + Y_OFFSET, 65, 32),
                 // Planters and half of spears
-                new Rectangle(16, 78 - yOffset, 37, 74),
+                new Rectangle(16, 78 + Y_OFFSET, 37, 74),
                 // Rest of spears
-                new Rectangle(5, 127 - yOffset, 18, 29),
+                new Rectangle(5, 127 + Y_OFFSET, 18, 29),
                 // Bows arrows and green plant
-                new Rectangle(172, 138 - yOffset, 75, 29),
+                new Rectangle(172, 138 + Y_OFFSET, 75, 29),
                 // Wood pile bottom
-                new Rectangle(225, 166 - yOffset, 22, 17),
+                new Rectangle(225, 166 + Y_OFFSET, 22, 17),
                 // Target and scarecrow
-                new Rectangle(246, 68 - yOffset, 46, 84)
+                new Rectangle(246, 68 + Y_OFFSET, 46, 84)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
-
-        // Create child component for hoverable so it displays behind everything
-        GameEntity child = new GameEntity(scene);
-        child.setParent(this);
-        child.addComponent(new Transform(0, 0));
-        child.addComponent(new Hoverable(this.onHover));
-        child.addComponent(new ScriptComponent(this.onStep));
-
-        RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
-        this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
-        this.hoverRect.alpha = 0;
-        this.hoverRect.radius = 50;
-
-        child.addComponent(new RenderComponent(new Point2D(0, -yOffset), hoverRect));
 
         // Create logic market
         market = new Market(items, false);
@@ -135,8 +135,7 @@ public class MarketEntity extends GameEntity {
     };
 
     private InputHoverableAction onHover = (x, y) -> {
-        Point2D position = this.marketTransform.getPosition();
-        if (position.getX() < x && position.getY() < y && this.marketEnd.getX() > x && this.marketEnd.getY() > y) {
+        if (clickableTopLeft.getX() < x && clickableTopLeft.getY() < y && clickableBottomRight.getX() > x && clickableBottomRight.getY() > y) {
             this.mouseIn = true;
         }
         else {
@@ -154,6 +153,6 @@ public class MarketEntity extends GameEntity {
     };
 
     private double getPlayerDistance() {
-        return marketCentre.distance(playerTransform.getPosition());
+        return clickableCentre.distance(playerTransform.getPosition());
     }
 }

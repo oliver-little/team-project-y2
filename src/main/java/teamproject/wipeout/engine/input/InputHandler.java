@@ -175,7 +175,7 @@ public class InputHandler {
     public void onMouseClick(InputClickableAction action) {
         this.onMouseClickExists = true;
         // Register inputScene's listener
-        this.inputScene.addEventFilter(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
+        this.inputScene.addEventHandler(MouseEvent.MOUSE_CLICKED, (mouseClick) -> {
             // Do nothing when input is disabled.
             if (this.disableInput) {
                 return;
@@ -220,7 +220,7 @@ public class InputHandler {
                             InputMouseAction dragAction,
                             InputMouseAction releaseAction) {
         // Register inputScene's listener which covers start of the mouse drag and the dragging itself.
-        this.inputScene.addEventFilter(MouseEvent.MOUSE_DRAGGED, (mouseClick) -> {
+        this.inputScene.addEventHandler(MouseEvent.MOUSE_DRAGGED, (mouseClick) -> {
             // Do nothing when input is disabled.
             if (this.disableInput) {
                 return;
@@ -243,7 +243,7 @@ public class InputHandler {
         });
 
         // Register inputScene's listener which covers end of the mouse drag.
-        this.inputScene.addEventFilter(MouseEvent.MOUSE_RELEASED, (mouseRelease) -> {
+        this.inputScene.addEventHandler(MouseEvent.MOUSE_RELEASED, (mouseRelease) -> {
             // Do nothing when input is disabled.
             if (this.disableInput) {
                 return;
@@ -278,7 +278,7 @@ public class InputHandler {
                 hoverAction.performMouseHoverAction(mouseMove.getSceneX(), mouseMove.getSceneY());
             }
         };
-        this.inputScene.addEventFilter(MouseEvent.MOUSE_MOVED, this.mouseHovering);
+        this.inputScene.addEventHandler(MouseEvent.MOUSE_MOVED, this.mouseHovering);
     }
 
     public void removeMouseHover() {

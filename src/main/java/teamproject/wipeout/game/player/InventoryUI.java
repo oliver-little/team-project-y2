@@ -4,6 +4,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -70,30 +71,29 @@ public class InventoryUI extends StackPane {
 	 * @param items updated inventory arraylist
 	 * @param index slot where change happened so only one slot needs to be updated.
 	 */
-	public void updateUI(ArrayList<invPair> items, Integer index) {
+	public void updateUI(ArrayList<InventoryItem> items, Integer index) {
 		if(items.get(index) != null) {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);
-			Image frame;
 			quantityTexts[index].setText("" + items.get(index).quantity);
-			try
-			{
-				frame = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
-				spriteViews[index].setImage(frame);
-				spriteViews[index].setX(67*index + (32 - frame.getWidth()/2));
-				spriteViews[index].setY(32 - frame.getHeight()/2);
+			try {
+				Image sprite = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
+				spriteViews[index].setImage(sprite);
+				spriteViews[index].setX(67*index + (32 - sprite.getWidth()/2));
+				if (sprite.getHeight() > 64) {
+					spriteViews[index].setY(32 - sprite.getHeight() / 1.3);
+				} else {
+					spriteViews[index].setY(32 - sprite.getHeight() / 2);
+				}
 				
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else {
+		} else {
 			quantityTexts[index].setText("");
 			spriteViews[index].setImage(null);
 		}
-		
 	}
 	
 	/**
@@ -115,7 +115,9 @@ public class InventoryUI extends StackPane {
 	public void onMouseClick(WorldEntity world) {
 		for(int i = 0; i < MAX_SIZE; i++) {
 			int hold = i;
-			rectangles[i].setOnMouseClicked((event) -> {
+			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
+				event.consume();
+
 				FarmEntity myFarm = world.getMyFarm();
 				Player myPlayer = world.getMyPlayer();
 
@@ -147,6 +149,44 @@ public class InventoryUI extends StackPane {
 			});
 		}
 	}
+	
+	/**
+	 * Selects a slot and then starts/stops placing item
+	 * @param slot Index of the slot selected
+	 * @param world
+	 */
+	public void useSlot(int slot, WorldEntity world) {
+		this.selectSlot(slot);
+		
+		FarmEntity myFarm = world.getMyFarm();
+		Player myPlayer = world.getMyPlayer();
+
+		if (myFarm.isPlacingItem()) {
+			myFarm.stopPlacingItem(false);
+			if (slot == myPlayer.selectedSlot) {
+				return;
+			}
+		}
+		
+		int selectedItemID = myPlayer.selectSlot(currentSelection);
+		if (selectedItemID < 0) {
+			return;
+		}
+
+		try {
+			Item selectedItem = itemStore.getItem(selectedItemID);
+			if (!selectedItem.hasComponent(PlantComponent.class)) {
+				return;
+			}
+			myPlayer.dropItem();
+			myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
+				myPlayer.acquireItem(item.id);
+			});
+
+		} catch (FileNotFoundException exception) {
+			exception.printStackTrace();
+		}
+	}
 
 	/**
 	 * Sets up the inventory key input.
@@ -163,7 +203,7 @@ public class InventoryUI extends StackPane {
 				GameEntity e = gameScene.createEntity();
 				Transform tr = player.getComponent(Transform.class);
 				e.addComponent(new Transform (tr.getPosition().getX(), tr.getPosition().getY()));
-				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.physics.Rectangle(0, -20, 20, 20)));
+				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.shape.Rectangle(0, -20, 20, 20)));
 				Item eItem = itemStore.getItem(id);
 				e.addComponent(new PickableComponent(eItem));
 				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);

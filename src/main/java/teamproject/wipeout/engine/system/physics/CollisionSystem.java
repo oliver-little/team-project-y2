@@ -1,21 +1,18 @@
-package teamproject.wipeout.engine.system;
+package teamproject.wipeout.engine.system.physics;
+
+import javafx.util.Pair;
+import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.shape.Shape;
+import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.engine.system.GameSystem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Pair;
-import teamproject.wipeout.engine.component.physics.Shape;
-import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
-import teamproject.wipeout.engine.component.physics.FacingDirection;
-import teamproject.wipeout.engine.component.physics.GeometryUtil;
-import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
 /**
  * System that checks and resolves collisions between entities with the collision component
@@ -42,7 +39,7 @@ public class CollisionSystem implements GameSystem {
             for(int j=i+1; j < entities.size(); j++) {
             	if(i!=j) {
                 	ArrayList<Pair<Shape, Shape>> p = null;
-					if((p = HitboxComponent.collides2(entities.get(i), entities.get(j))) != null) {
+					if((p = HitboxComponent.collides(entities.get(i), entities.get(j))) != null) {
                 		//System.out.println("Collision");
 						CollisionResolutionComponent.resolveCollision2(entities.get(i),entities.get(j), p);
                                         

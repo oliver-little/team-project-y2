@@ -3,7 +3,7 @@ package teamproject.wipeout.engine.component.ai;
 import java.util.ArrayList;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 
 /**
  * Stores a square that can be navigated by an AI. Stores the top left and bottom right co-ordinates, including edges which intersect adjacent squares.

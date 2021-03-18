@@ -1,0 +1,17 @@
+{
+	"fileType": "SpritesheetDescriptor",
+	"version": "1.0.0",
+	"name": "inventory-animals-and-food",
+	"sprites": [
+		{
+			"name": "cheese",
+			"type": "sprite",
+			"parameters" : {
+				"x": 132,
+				"y": 0,
+				"width": 32,
+				"height": 32
+			}
+		}
+    ]
+}

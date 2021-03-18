@@ -26,6 +26,11 @@ import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.entity.gameclock.ClockUI;
+import teamproject.wipeout.engine.system.audio.AudioSystem;
+import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
+import teamproject.wipeout.engine.system.physics.CollisionSystem;
+import teamproject.wipeout.engine.system.physics.MovementSystem;
+import teamproject.wipeout.engine.system.render.CameraFollowSystem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
@@ -41,10 +46,9 @@ import teamproject.wipeout.game.item.ItemStore;
 import java.io.IOException;
 
 import teamproject.wipeout.game.market.Market;
-//import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.game.player.invPair;
+import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
@@ -143,14 +147,13 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
-        addInvUIInput(input, invUI);
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
-        player.acquireItem(6, 98); //for checking stack/inventory limits
-        player.acquireItem(1, 2);
-        player.acquireItem(28, 98);
-        player.acquireItem( 43, 2);
+        //player.acquireItem(6, 98); //for checking stack/inventory limits
+        //player.acquireItem(1, 2);
+        //player.acquireItem(28, 98);
+        //player.acquireItem( 43, 2);
 
 
         try {
@@ -177,9 +180,10 @@ public class App implements Controller {
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
-        world.networker = networker;
-        world.setMyPlayer(player);
-        networker.worldEntity = world;
+        world.setClientSupplier(this.networker.clientSupplier);
+        this.networker.worldEntity = world;
+        
+        addInvUIInput(input, invUI, world);
 
         // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
@@ -254,14 +258,15 @@ public class App implements Controller {
         }
 
         int nrOfTask = 0;
-        // Collect taskk
+        // Collect tasks
+        Integer reward = 5;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
-            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, 5 * quantityCollected,
+            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name + " ($" + reward.toString() + ")", reward * quantityCollected,
                     (Player inputPlayer) ->
                     {
-                    	ArrayList<invPair> inventoryList = inputPlayer.getInventory();
+                    	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
                         //LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();  //inventory is now an ArrayList
                     	int index = inputPlayer.containsItem(itemId);
                     	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
@@ -276,10 +281,11 @@ public class App implements Controller {
         }
 
         // Sell tasks
+        reward = 2;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, 10 * quantitySold,
+            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name + " ($" + reward.toString() + ")", reward * quantitySold,
                     (Player inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
@@ -362,40 +368,43 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-animals-and-food-descriptor.json", "inventory/AnimalsAndFood.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
         spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
     }
     
-    private void addInvUIInput(InputHandler input, InventoryUI invUI) {
+
+    private void addInvUIInput(InputHandler input, InventoryUI invUI, WorldEntity world) {
         input.addKeyAction(KeyCode.DIGIT1,
-                () -> invUI.selectSlot(0),
+                () -> invUI.useSlot(0, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT2,
-                () -> invUI.selectSlot(1),
+                () -> invUI.useSlot(1, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT3,
-                () -> invUI.selectSlot(2),
+                () -> invUI.useSlot(2, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT4,
-                () -> invUI.selectSlot(3),
+                () -> invUI.useSlot(3, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT5,
-                () -> invUI.selectSlot(4),
+                () -> invUI.useSlot(4, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT6,
-                () -> invUI.selectSlot(5),
+                () -> invUI.useSlot(5, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT7,
-                () -> invUI.selectSlot(6),
+                () -> invUI.useSlot(6, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT8,
-                () -> invUI.selectSlot(7),
+                () -> invUI.useSlot(7, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT9,
-                () -> invUI.selectSlot(8),
+                () -> invUI.useSlot(8, world),
                 () -> {});
         input.addKeyAction(KeyCode.DIGIT0,
-                () -> invUI.selectSlot(9),
+                () -> invUI.useSlot(9, world),
                 () -> {});
     }
 

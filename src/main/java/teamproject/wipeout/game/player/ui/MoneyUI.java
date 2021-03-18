@@ -27,7 +27,7 @@ public class MoneyUI extends Label {
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "game-ui.css");
         this.setId("money");
 
-        this.textProperty().bind(Bindings.concat("Money: ").concat(Bindings.createStringBinding(() -> {
+        this.textProperty().bind(Bindings.concat("Money: $").concat(Bindings.createStringBinding(() -> {
             return String.format("%.2f",  player.moneyProperty().getValue());
         }, player.moneyProperty())));
     }

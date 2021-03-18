@@ -5,7 +5,7 @@ import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
@@ -53,6 +53,13 @@ public class Networker {
     public InputKeyAction startServer(String serverName) {
         return () -> {
             if (this.serverRunner.isServerActive()) {
+                try {
+                    this.serverRunner.stopServer();
+                    System.out.println("Stopped server");
+
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
                 return;
             }
 
@@ -125,12 +132,10 @@ public class Networker {
             Consumer<Pair<GameClient, Integer>> farmHandler = (farmPair) -> {
                 GameClient currentClient = farmPair.getKey();
                 Integer newFarmID = farmPair.getValue();
-                myPlayer.client = currentClient;
-                this.worldEntity.getMyAnimal().clientSupplier = () -> currentClient;
+
                 currentClient.myAnimal = this.worldEntity.getMyAnimal();
                 currentClient.market = this.worldEntity.market.getMarket();
 
-                myMarket.client = currentClient;
                 myMarket.setIsLocal(true);
                 this.worldEntity.marketUpdater.stop();
 

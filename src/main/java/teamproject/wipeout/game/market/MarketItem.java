@@ -8,9 +8,11 @@ public class MarketItem {
     
     public static final int INITIAL_QUANTITY_DEVIATION = 0;
 
-    public static final double GLOBALDAMPINGFACTOR = 2;
+    public static final double GLOBAL_DAMPING_FACTOR = 1;
 
-    public static final double LOCALDAMPINGFACTOR = 0.05;
+    public static final double BUY_LOCAL_DAMPING_FACTOR = 0.14;
+
+    public static final double SELL_LOCAL_DAMPING_FACTOR = 0.12;
 
     private int id;
     private DoubleProperty quantityDeviation;
@@ -164,8 +166,9 @@ public class MarketItem {
      */
     public static double costFunction(double x) {
 
-        double exponent = LOCALDAMPINGFACTOR * x;
+        double buyexponent = BUY_LOCAL_DAMPING_FACTOR * x;
+        double sellexponent = SELL_LOCAL_DAMPING_FACTOR * x;
 
-        return (Math.exp(exponent) - Math.exp(-exponent))/GLOBALDAMPINGFACTOR;
+        return (Math.exp(buyexponent) - Math.exp(-sellexponent))/GLOBAL_DAMPING_FACTOR;
     }
 }

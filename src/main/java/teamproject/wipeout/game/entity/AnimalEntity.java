@@ -19,7 +19,7 @@ import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.physics.Rectangle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -38,8 +38,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
-    public Supplier<GameClient> clientSupplier;
-
     private boolean isPuppet;
 
     private NavigationMesh navMesh;
@@ -47,10 +45,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private Transform transformComponent;
     private MovementComponent movementComponent;
 
-    private AnimalState animalState;
-
     private ScheduledExecutorService executor;
 
+    private Supplier<GameClient> clientSupplier;
+    private AnimalState animalState;
     private List<FarmEntity> farms;
 
     /**
@@ -89,6 +87,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         }
 
         this.aiDecisionAlgorithm.run();
+    }
+
+    public void setClientSupplier(Supplier<GameClient> clientSupplier) {
+        this.clientSupplier = clientSupplier;
     }
 
     public AnimalState getCurrentState() {

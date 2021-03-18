@@ -1,6 +1,11 @@
 package teamproject.wipeout.engine.component.physics;
 
 import javafx.geometry.Point2D;
+import teamproject.wipeout.engine.component.shape.Circle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
+import teamproject.wipeout.engine.component.shape.Segment;
+import teamproject.wipeout.engine.component.shape.Shape;
+
 /**
  * Class containing functions related to geometry in 2D space
  *
@@ -61,7 +66,7 @@ public class GeometryUtil
      * @param r1 the rectangle
      * @return true if the circle and rectangle intersect, false otherwise
      */
-    public static boolean intersects(Circle c1, Rectangle r1) {    	
+    public static boolean intersects(Circle c1, Rectangle r1) {
     	Point2D centre = new Point2D(c1.getCentreX(), c1.getCentreY());
     	
     	//System.out.println("centre: "+centre);
@@ -294,22 +299,22 @@ public class GeometryUtil
 	
 		double minDistance = Double.MAX_VALUE;
 		double distanceToTop = calculateDistanceBetweenPointAndLine(centre, top)-c.getRadius();
-		if(distanceToTop<minDistance) {
+		if(distanceToTop<=minDistance) {
 			minDistance=distanceToTop;
 			p = new Point2D(0,minDistance);
 		}
 		double distanceToBottom = calculateDistanceBetweenPointAndLine(centre, bottom)-c.getRadius();
-		if(distanceToBottom<minDistance) {
+		if(distanceToBottom<=minDistance) {
 			minDistance=distanceToBottom;
 			p = new Point2D(0,-minDistance);
 		}
 		double distanceToLeft = calculateDistanceBetweenPointAndLine(centre, left)-c.getRadius();
-		if(distanceToLeft<minDistance) {
+		if(distanceToLeft<=minDistance) {
 			minDistance=distanceToLeft;
 			p = new Point2D(minDistance,0);
 		}
 		double distanceToRight = calculateDistanceBetweenPointAndLine(centre, right)-c.getRadius();
-		if(distanceToRight<minDistance) {
+		if(distanceToRight<=minDistance) {
 			minDistance=distanceToRight;
 			p = new Point2D(-minDistance,0);			
 		}

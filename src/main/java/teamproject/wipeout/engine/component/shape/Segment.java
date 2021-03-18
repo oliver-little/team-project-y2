@@ -1,10 +1,14 @@
-package teamproject.wipeout.engine.component.physics;
+package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Line;
+import teamproject.wipeout.engine.component.physics.GeometryUtil;
 
+/**
+ * Class for a line that connects two points
+ */
 public class Segment extends Shape
 {
+
 	private Point2D start;
 	private Point2D end;
 	
@@ -224,6 +228,33 @@ public class Segment extends Shape
 			return null;
 		}
 		return p;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Segment other = (Segment) obj;
+		if (end == null)
+		{
+			if (other.end != null)
+				return false;
+		}
+		else if (!end.equals(other.end))
+			return false;
+		if (start == null)
+		{
+			if (other.start != null)
+				return false;
+		}
+		else if (!start.equals(other.start))
+			return false;
+		return true;
 	}
 	
 }

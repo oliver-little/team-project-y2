@@ -11,6 +11,7 @@ public class SpriteRenderable implements Renderable {
     
     public Image sprite;
     public Point2D spriteScale;
+    public Point2D offset;
 
     /**
      * Creates an instance of SpriteRenderable
@@ -20,17 +21,7 @@ public class SpriteRenderable implements Renderable {
     public SpriteRenderable(Image sprite) {
         this.sprite = sprite;
         this.spriteScale = new Point2D(1, 1);
-    }
-
-    /**
-     * Creates an instance of SpriteRenderable
-     * 
-     * @param sprite The sprite image to render
-     * @param offset An offset position to display at, from the top left of this object
-     */
-    public SpriteRenderable(Image sprite, Point2D offset) {
-        this.sprite = sprite;
-        this.spriteScale = new Point2D(1, 1);
+        this.offset = Point2D.ZERO;
     }
 
     /**
@@ -65,6 +56,6 @@ public class SpriteRenderable implements Renderable {
     }
 
     public void render(GraphicsContext gc, double x, double y, double scale){
-        gc.drawImage(this.sprite, x * scale, y * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
+        gc.drawImage(this.sprite, (x + this.offset.getX()) * scale, (y + this.offset.getY()) * scale, sprite.getWidth() * scale * this.spriteScale.getX(), sprite.getHeight() * scale * this.spriteScale.getY());
     }
 }

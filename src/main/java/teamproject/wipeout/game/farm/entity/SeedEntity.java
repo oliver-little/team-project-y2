@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.farm.entity;
 
+import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.render.RectRenderable;
@@ -45,6 +46,9 @@ public class SeedEntity extends GameEntity {
         this.seedArea.alpha = 0.4;
 
         SpriteRenderable seedRenderable = new SpriteRenderable(seedImage);
+        if (plant.height != 1) {
+            seedRenderable.offset = new Point2D(0.0, -1 * (seedImage.getHeight() / 1.5));
+        }
 
         this.renderComponent = new RenderComponent(seedRenderable);
         this.addComponent(this.renderComponent);
