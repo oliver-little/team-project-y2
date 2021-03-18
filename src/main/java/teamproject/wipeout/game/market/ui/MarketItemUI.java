@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -16,11 +17,15 @@ import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketItem;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.util.ImageUtil;
 
 /**
  * Creates the UI for a single item in the market
  */
 public class MarketItemUI extends VBox {
+
+    public static final int IMAGE_SIZE = 48;
+
     public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
@@ -41,9 +46,16 @@ public class MarketItemUI extends VBox {
 
         ImageView iconView = null;
         try {
-            iconView = new ImageView(spriteManager.getSpriteSet(ic.spriteSheetName, ic.spriteSetName)[0]);
-            iconView.setFitWidth(48);
-            iconView.setFitHeight(48);
+            Image sprite = spriteManager.getSpriteSet(ic.spriteSheetName, ic.spriteSetName)[0];
+
+            // Scale the sprite up if it is too small (JavaFX attempts to anti-alias it)
+            if (sprite.getWidth() < 48) {
+                sprite = ImageUtil.scaleImage(sprite, IMAGE_SIZE / sprite.getWidth());
+            }
+
+            iconView = new ImageView(sprite);
+            iconView.setFitWidth(IMAGE_SIZE);
+            iconView.setFitHeight(IMAGE_SIZE);
             iconView.setSmooth(false);
             iconView.setPreserveRatio(true);
         }
