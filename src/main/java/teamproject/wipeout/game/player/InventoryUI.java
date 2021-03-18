@@ -7,9 +7,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 
@@ -30,6 +33,8 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
 public class InventoryUI extends StackPane {
 
@@ -201,14 +206,26 @@ public class InventoryUI extends StackPane {
 	 * Creates text nodes ready to display quantities in the inventory
 	 */
 	private void createTexts() {
-		for(int i = 0; i < MAX_SIZE; i++) {
-			Text text = new Text("");
-			text.setX(i*67 + 5);
-			text.setY(13);
-			text.setFill(Color.MAROON);
-			text.setMouseTransparent(true);
-			root.getChildren().add(text);
-			quantityTexts[i] = text;
+		InputStream path;
+		try
+		{
+			path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
+			Font font = Font.loadFont(path, 13);
+			for(int i = 0; i < MAX_SIZE; i++) {
+				Text text = new Text("");
+				text.setX(i*67 + 5);
+				text.setY(15);
+				text.setFill(Color.MAROON);
+				text.setFont(font);
+				text.setMouseTransparent(true);
+				root.getChildren().add(text);
+				quantityTexts[i] = text;
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
