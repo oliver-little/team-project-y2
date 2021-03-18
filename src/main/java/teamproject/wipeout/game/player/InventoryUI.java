@@ -70,26 +70,25 @@ public class InventoryUI extends StackPane {
 		if(items.get(index) != null) {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);
-			Image frame;
 			quantityTexts[index].setText("" + items.get(index).quantity);
-			try
-			{
-				frame = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
-				spriteViews[index].setImage(frame);
-				spriteViews[index].setX(67*index + (32 - frame.getWidth()/2));
-				spriteViews[index].setY(32 - frame.getHeight()/2);
+			try {
+				Image sprite = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
+				spriteViews[index].setImage(sprite);
+				spriteViews[index].setX(67*index + (32 - sprite.getWidth()/2));
+				if (sprite.getHeight() > 64) {
+					spriteViews[index].setY(32 - sprite.getHeight() / 1.3);
+				} else {
+					spriteViews[index].setY(32 - sprite.getHeight() / 2);
+				}
 				
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else {
+		} else {
 			quantityTexts[index].setText("");
 			spriteViews[index].setImage(null);
 		}
-		
 	}
 	
 	/**
