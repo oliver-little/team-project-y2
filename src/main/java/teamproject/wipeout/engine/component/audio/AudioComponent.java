@@ -52,8 +52,7 @@ public class AudioComponent implements GameComponent {
 			audioClip.open(audioStream);
 			audioClip.start();
 			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
-			float dB = (float) (Math.log(volume) / Math.log(10.0) * 20.0);
-	        gainControl.setValue(dB);
+			gainControl.setValue(20f * (float) Math.log10(volume)); //converts volume to decibels
 		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

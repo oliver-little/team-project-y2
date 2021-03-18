@@ -37,7 +37,7 @@ public class GameAudio {
      */
     public GameAudio(String audioFileName, boolean loop) {
     	fileName = audioFileName;
-    	this.volume = 0.05f;
+    	this.volume = 0.05f; //initialised to 5% volume
     	playing = false;
     	this.toLoop = loop;
     	this.muted = false;
@@ -96,10 +96,14 @@ public class GameAudio {
      * @param volume  double value between 0.0 (inaudible) and 1.0 (full volume).
      */
     public void setVolume(double volume) {
+    	if(volume < 0) {
+    		volume = 0;
+    	}else if(volume > 1) {
+    		volume = 1.0f;
+    	}
     	if(playing) {
 	    	FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
-	        float dB = (float) (Math.log(volume) / Math.log(10.0) * 20.0);
-	        gainControl.setValue(dB);
+	        gainControl.setValue(20f * (float) Math.log10(volume)); //converts volume to decibels
     	}
     	this.volume = volume;
     }
