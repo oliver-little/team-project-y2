@@ -3,7 +3,6 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
@@ -41,7 +40,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public int selectedSlot;
 
     private ArrayList<invPair> inventory = new ArrayList<>(); //ArrayList used to store inventory
-    //private LinkedHashMap<Integer, Integer> inventory = new LinkedHashMap<>();
 
     public InventoryUI invUI;
     public ItemStore itemStore;
@@ -144,8 +142,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.playerState.updateStateFrom(newState);
     }
 
-    // When called with a market item, purchases an item for a player and returns true,
-    // otherwise if player has not enough money, returns false
+    /**
+     * When called with a market item, purchases an item for a player and returns true, otherwise if player has not enough money, returns false
+     * @param market - from which item is bought
+     * @param id - of item to buy
+     * @param quantity - of items to buy
+     * @return true if successful, false if unsuccessful
+     */
     public boolean buyItem(Market market, int id, int quantity) {
         if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
             return false;
@@ -167,8 +170,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return true;
     }
 
-    // if the player has the item, removes a single copy of it from the backpack, adds money and returns true
-    // if the player does not have the item return false
+    /**
+     * if the player has the item(s), removes them from the inventory, adds money and returns true, otherwise returns false
+     * @param market - to which item is sold
+     * @param id - of item to sell
+     * @param quantity - of item to sell
+     * @return true if successful, false if unsuccessful
+     */
     public boolean sellItem(Market market, int id, int quantity) {
         if (removeItem(id, quantity) < 0) {
             return false;
@@ -181,7 +189,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return true;
     }
 
-    // Adds single item to inventory
+    /**
+     * Adds a single item to the inventory
+     * @param itemID
+     * @return true if successful, false if unsuccessful (e.g. no space)
+     */
     public boolean acquireItem(Integer itemID) {
         return acquireItem(itemID, 1);
     }
@@ -281,29 +293,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 	        }
         }
     	return false;
-    	/*
-    	int i = 0;
-        int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
-        for (invPair pair : inventory) {
-            if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
-                pair.quantity += quantity;
-                inventory.set(i, pair);
-                return i; //returns index of change
-            }
-            i++;
-        }
-        i = 0;
-        for (invPair pair : inventory) {
-            if (pair == null) {
-                pair = new invPair(itemID, quantity);
-                inventory.set(i, pair);
-                occupiedSlots++;
-                return i; //returns index of change
-            }
-            i++;
-        }
-        return -1;
-        */
     }
     
     /**
@@ -340,7 +329,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     		System.out.println("logic issue - wasted slots but no slot with space");
     		return;
     	}
-    	int i = 0;
     	stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	int indexOfExtraSlot = findIndexOfLeast(itemID, stackLimit);
     	System.out.println("index of extra slot = " + indexOfExtraSlot);
@@ -353,7 +341,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	
     }
     
-    private int countSlotsOccupiedBy(Integer itemID) {
+    /**
+     * counts the number of slots occupied by items with a specific id
+     * @param itemID - of item of interest
+     * @return - number of slots occupied by this item
+     */
+    public int countSlotsOccupiedBy(Integer itemID) {
     	int count = 0;
     	for (invPair pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
@@ -369,15 +362,16 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param quantity of items to be removed
      * @return itemID if successfully removed, negative int if unable to remove
      */
-    private int removeItem(int itemID, int quantity) {
+    public int removeItem(int itemID, int quantity) {
     	int noOfThisItem = countItems(itemID);
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	if(quantity > noOfThisItem) {
+    		System.out.println("There isn't " + quantity + " of itemID " + itemID + " in the inventory");
+    		
     		return -1;
     	}
     	int endQuantity = noOfThisItem - quantity;
     	int slotWithSpace = -1;
-    	//int i = MAX_SIZE - 1;
     	invPair pair;
         for (int i = MAX_SIZE - 1; i >= 0; i--) {
         	pair = inventory.get(i);
@@ -389,7 +383,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                     occupiedSlots--; //inventory slot is freed
                     if(quantity == 0) {
                     	break;
-                    	//return itemID;
                     }
             	}else {
             		pair.quantity -= quantity;
@@ -397,7 +390,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                     invUI.updateUI(inventory, i);
                     slotWithSpace = i;
                     break;
-                    //return itemID;
             	}
             }
         }
@@ -407,82 +399,33 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         	System.out.println("items being rearranged");
         	rearrangeItems(itemID, endQuantity, slotWithSpace, stackLimit); //rearranges items if slots are being wasted
         }
+        System.out.println("Removed " + (noOfThisItem - endQuantity) + " of itemID " + itemID);
     	return itemID;
-    	
-    	/*
-    	int noOfThisItem = countItems(itemID);
-    	if(quantity > noOfThisItem) {
-    		return -1;
-    	}
-    	int hold = quantity;
-    	int i = 0;
-        for (invPair pair : inventory) {
-            if((pair != null) && (pair.itemID == itemID)) {
-            	if(quantity >= pair.quantity) {
-            		quantity -= pair.quantity;
-            		inventory.set(i, null); //free inventory slot
-                    invUI.updateUI(inventory, i);
-                    occupiedSlots--; //inventory slot is freed
-                    if(quantity == 0) {
-                    	break;
-                    	//return itemID;
-                    }
-            	}else {
-            		pair.quantity -= quantity;
-                    inventory.set(i, pair);
-                    invUI.updateUI(inventory, i);
-                    break;
-                    //return itemID;
-            	}
-            }
-            i++;
-        }
-        rearrangeItems(itemID, noOfThisItem - hold);
-    	return itemID;
-    	*/
-    	
-    	/*
-        int i = 0;
-        for (invPair pair : inventory) {
-            if((pair != null) && (pair.itemID == itemID) && ((pair.quantity - quantity) >= 0)) {
-                if ((pair.quantity - quantity) == 0) {
-                    inventory.set(i, null); //free inventory slot
-                    invUI.updateUI(inventory, i);
-                    occupiedSlots--; //inventory slot is freed
-                }else {
-                    pair.quantity -= quantity;
-                    inventory.set(i, pair);
-                    invUI.updateUI(inventory, i);
-                }
-                return itemID;
-            }
-            i++;
-        }
-        return -1;
-        */
     }
 
     /**
      * removes item(s) from the inventory from the selected slot
-     * @param itemID for item to be removed
      * @param quantity of items to be removed
      * @return true if successfully removed, false if unable to remove
      */
-    public boolean removeItemFromSelectedSlot(Integer itemID, int quantity) {
+    public boolean removeItemFromSelectedSlot(int quantity) {
         invPair pair = inventory.get(selectedSlot);
         if((pair != null) && (pair.quantity - quantity) >= 0) {
             if ((pair.quantity - quantity) == 0) {
                 inventory.set(selectedSlot, null); //free inventory slot
                 invUI.updateUI(inventory, selectedSlot);
                 occupiedSlots--; //inventory slot is freed
+                System.out.println("Removed " + quantity + " items from selected slot");
                 return true;
             }else {
                 pair.quantity -= quantity;
                 inventory.set(selectedSlot, pair);
                 invUI.updateUI(inventory, selectedSlot);
+                System.out.println("Removed " + quantity + " items from selected slot");
                 return true;
             }
         }
+        System.out.println("There isn't " + quantity + " items in the selected slot");
         return false;
     }
 
@@ -495,7 +438,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             return -1;
         }
         int id = inventory.get(selectedSlot).itemID;
-        removeItemFromSelectedSlot(inventory.get(selectedSlot).itemID, 1); //drops one item from inventory
+        removeItemFromSelectedSlot(1); //drops one item from selected slot in inventory
         return id;
     }
 
@@ -543,7 +486,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             i++;
         }
     }
-
+    
+    /**
+     * Checks if the inventory contains item(s) with a specific id
+     * @param itemID - of item to be checked
+     * @return - index of the first occurence of this item
+     */
     public int containsItem(int itemID) {
         int i = 0;
         for(invPair pair : inventory) {
@@ -583,13 +531,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             entities.remove(ge);
             ge.destroy();
         }
-        //System.out.println("Inventory itemID to count:" + this.getInventory().toString());
-        //printInventory();
+
         this.checkTasks();
         System.out.println("Inventory itemID to count:" + this.getInventory().toString());
     }
 
-    //check what tasks have been completed
+    /**
+     * Checks what tasks have been completed
+     */
     public void checkTasks() {
         System.out.println("Checking tasks");
         for(Task task : tasks) {
@@ -604,9 +553,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
         taskUI.showTasks(tasks);
     }
+    
 
-    // get number of completed tasks
-    // in the future we can check when all tasks have been completed, to always add new ones
     public int getNumberOfCompletedTasks() {
         int completedTasks = 0;
         for(Task task : tasks) {
@@ -617,9 +565,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return completedTasks;
     }
     
+    /**
+     * method to clear/empty the inventory
+     */
     public void clearInventory() {
     	for (int i = 0; i < MAX_SIZE; i++) {
             inventory.set(i, null);
+            invUI.updateUI(inventory, i);
         }
     	this.occupiedSlots = 0;
     }

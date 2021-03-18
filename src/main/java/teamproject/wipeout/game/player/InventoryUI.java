@@ -66,7 +66,7 @@ public class InventoryUI extends StackPane {
 	}
 	
 	/**
-	 * Used to update the UI when a change is made (called by Player class).
+	 * Used to update the UI when a change is made at a specific index
 	 * @param items updated inventory arraylist
 	 * @param index slot where change happened so only one slot needs to be updated.
 	 */
@@ -228,13 +228,4 @@ public class InventoryUI extends StackPane {
 			e.printStackTrace();
 		}
 	}
-	
-	/*
-	public Image getSquare() throws IOException {
-		this.spriteManager.loadSpriteSheet("tile-descriptor.json", "tile.png");
-		return this.spriteManager.getSpriteSet("tile", "tile1")[0];
-		
-	}
-	*/
-	
 }
