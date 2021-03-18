@@ -1,7 +1,5 @@
 package teamproject.wipeout.game.player;
 
-
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,8 +17,6 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-
-
 
 public class PlayerTest {
 	private static Player player;
@@ -61,6 +57,12 @@ public class PlayerTest {
 		for(int i = (MAX_SIZE + 1); i <= (2*MAX_SIZE); i++) {
 			Assertions.assertFalse(player.acquireItem(i, 1));
 		}
+		Assertions.assertEquals(MAX_SIZE, player.occupiedSlots);
+		
+		ArrayList<invPair> inventory = player.getInventory();
+		for(invPair pair : inventory) {
+			Assertions.assertNotNull(pair); //checks slots are all not null
+		}
 	}
 	
 	@Test
@@ -82,21 +84,43 @@ public class PlayerTest {
 		Assertions.assertFalse(player.acquireItem(MAX_SIZE/2 + 1, 1));
 	}
 	
-	//items are rearranged only when items are sold to ensure items are arranged efficiently.
-	//when items are sold, the removeItem method is called with the item's ID and quantity to be removed
+	@Test
+	void testOccupiedSlotsCounter() {
+		for(int i = 1; i <= MAX_SIZE; i++) {
+			Assertions.assertTrue(player.acquireItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit));
+			Assertions.assertEquals(i, player.occupiedSlots);
+		}
+		for(int i = 1; i <= MAX_SIZE; i++) {
+			Assertions.assertEquals(i, player.removeItem(i, 1));
+			Assertions.assertEquals(MAX_SIZE, player.occupiedSlots);
+		}
+		for(int i = 1; i <= MAX_SIZE; i++) {
+			Assertions.assertEquals(i, player.removeItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit - 1));
+			Assertions.assertEquals(MAX_SIZE - i, player.occupiedSlots);
+		}
+	}
 	
 	@Test
-	void testRemovingItems() {
+	void testRemovingItemsFromSelectedSlot() {
+		//fill inventory
 		for(int i = 1; i <= MAX_SIZE; i++) {
 			Assertions.assertTrue(player.acquireItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit));
 		}
+		//remove individual items
 		for(int i = 0; i < MAX_SIZE; i++) {
 			player.selectSlot(i);
-			Assertions.assertEquals(player.dropItem(), i+1); //checks itemID of individual item dropped returned
+			Assertions.assertEquals(i+1, player.dropItem()); //checks itemID of individual item dropped returned
 		}
+		//remove rest of items
 		for(int i = 0; i < MAX_SIZE; i++) {
 			player.selectSlot(i);
-			Assertions.assertTrue(player.removeItemFromSelectedSlot(i, itemStore.getItem(i+1).getComponent(InventoryComponent.class).stackSizeLimit - 1)); //checks multiple items dropped
+			Assertions.assertTrue(player.removeItemFromSelectedSlot(itemStore.getItem(i+1).getComponent(InventoryComponent.class).stackSizeLimit - 1)); //checks multiple items dropped
+		}
+		
+		//check no more items can be removed
+		for(int i = 0; i < MAX_SIZE; i++) {
+			player.selectSlot(i);
+			Assertions.assertFalse(player.removeItemFromSelectedSlot(1));
 		}
 		
 		Assertions.assertEquals(0, player.occupiedSlots); //checks slots are all unoccupied
@@ -105,32 +129,59 @@ public class PlayerTest {
 		for(invPair pair : inventory) {
 			Assertions.assertNull(pair); //checks slots are all null
 		}
-		
-		
 	}
-	
+
+	//items are rearranged only when items are sold to ensure items are arranged efficiently.
+	//when items are sold, the removeItem method is called with the item's ID and quantity to be removed
 	@Test
-	void testSlotRearrangement1() {
-		//tests when slot to be rearranged is before other slots with the same itemID
-		//adds 3 types of item to 9 slots
+	void testRemovingItems1() {
+		//tests when slot to be merged from is after other slots with the same itemID
 		Assertions.assertTrue(player.acquireItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(1, 2));
+		
 		Assertions.assertTrue(player.acquireItem(2, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		Assertions.assertTrue(player.acquireItem(3, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
+		Assertions.assertEquals(1, player.removeItem(1, 2)); //will remove from first slot -> next check this moves items from 4th slot into the first
+		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
+		ArrayList<invPair> inventory = player.getInventory();
+		Assertions.assertNull(inventory.get(3)); //ensures slot merged from is emptied
+		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
 	@Test
-	void testSlotRearrangement2() {
-		//tests when slot to be rearranged is in the middle of other slots with the same itemID
+	void testRemovingItems2() {
+		//tests when slot to be merged from is in the middle of other slots with the same itemID
+		Assertions.assertTrue(player.acquireItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit));
+		Assertions.assertTrue(player.acquireItem(2, 2));
+		Assertions.assertTrue(player.acquireItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit * 2));
+		Assertions.assertTrue(player.acquireItem(3, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(4, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
+		Assertions.assertEquals(2, player.removeItem(2, 2)); 
+		Assertions.assertTrue(player.acquireItem(1, 2));
+		Assertions.assertEquals(1, player.removeItem(1, 2));
 		
+		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
+		ArrayList<invPair> inventory = player.getInventory();
+		Assertions.assertNull(inventory.get(1)); //ensures slot merged from is emptied
+		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
 	@Test
-	void testSlotRearrangement3() {
-		//tests when slot to be rearranged is after other slots with the same itemID
+	void testRemovingItems3() {
+		//tests when slot to be merged from is before other slots with the same itemID
+		Assertions.assertTrue(player.acquireItem(2, 2));
+		Assertions.assertTrue(player.acquireItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(3, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
+		Assertions.assertTrue(player.acquireItem(4, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
+		Assertions.assertEquals(2, player.removeItem(2, 2)); 
+		Assertions.assertTrue(player.acquireItem(1, 2));
+		Assertions.assertEquals(1, player.removeItem(1, 2));
 		
+		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
+		ArrayList<invPair> inventory = player.getInventory();
+		Assertions.assertNull(inventory.get(0)); //ensures slot merged from is emptied
+		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
-	
-	
 	
 }
