@@ -59,8 +59,8 @@ public class PlayerTest {
 		}
 		Assertions.assertEquals(MAX_SIZE, player.occupiedSlots);
 		
-		ArrayList<invPair> inventory = player.getInventory();
-		for(invPair pair : inventory) {
+		ArrayList<InventoryItem> inventory = player.getInventory();
+		for(InventoryItem pair : inventory) {
 			Assertions.assertNotNull(pair); //checks slots are all not null
 		}
 	}
@@ -125,8 +125,8 @@ public class PlayerTest {
 		
 		Assertions.assertEquals(0, player.occupiedSlots); //checks slots are all unoccupied
 		
-		ArrayList<invPair> inventory = player.getInventory();
-		for(invPair pair : inventory) {
+		ArrayList<InventoryItem> inventory = player.getInventory();
+		for(InventoryItem pair : inventory) {
 			Assertions.assertNull(pair); //checks slots are all null
 		}
 	}
@@ -144,7 +144,7 @@ public class PlayerTest {
 		
 		Assertions.assertEquals(1, player.removeItem(1, 2)); //will remove from first slot -> next check this moves items from 4th slot into the first
 		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
-		ArrayList<invPair> inventory = player.getInventory();
+		ArrayList<InventoryItem> inventory = player.getInventory();
 		Assertions.assertNull(inventory.get(3)); //ensures slot merged from is emptied
 		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
@@ -162,7 +162,7 @@ public class PlayerTest {
 		Assertions.assertEquals(1, player.removeItem(1, 2));
 		
 		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
-		ArrayList<invPair> inventory = player.getInventory();
+		ArrayList<InventoryItem> inventory = player.getInventory();
 		Assertions.assertNull(inventory.get(1)); //ensures slot merged from is emptied
 		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
@@ -179,7 +179,7 @@ public class PlayerTest {
 		Assertions.assertEquals(1, player.removeItem(1, 2));
 		
 		Assertions.assertEquals(3, player.countSlotsOccupiedBy(1));
-		ArrayList<invPair> inventory = player.getInventory();
+		ArrayList<InventoryItem> inventory = player.getInventory();
 		Assertions.assertNull(inventory.get(0)); //ensures slot merged from is emptied
 		Assertions.assertEquals(-1, player.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
 	}
