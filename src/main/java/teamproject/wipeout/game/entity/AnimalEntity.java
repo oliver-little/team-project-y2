@@ -121,7 +121,15 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         Point2D wp = transformComponent.getWorldPosition();
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
-        this.addComponent(new SteeringComponent(path, callback, 250));
+
+        SteeringComponent newSteering = new SteeringComponent(path, callback, 250);
+
+        SteeringComponent currentSteering = this.getComponent(SteeringComponent.class);
+        if (currentSteering == null) {
+            this.addComponent(newSteering);
+        } else {
+            currentSteering.subsequentSteering = newSteering;
+        }
     }
 
     /**

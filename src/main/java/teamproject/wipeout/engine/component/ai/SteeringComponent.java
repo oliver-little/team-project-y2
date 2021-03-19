@@ -15,10 +15,13 @@ public class SteeringComponent implements GameComponent {
     public Runnable onArrive;
     public double accelerationMultiplier;
 
+    public SteeringComponent subsequentSteering;
+
     public SteeringComponent(List<Point2D> path) {
         this.path = path;
         this.currentPoint = 0;
         this.accelerationMultiplier = 10;
+        this.subsequentSteering = null;
     }
 
     public SteeringComponent(List<Point2D> path, Runnable onArrive) {
@@ -26,6 +29,7 @@ public class SteeringComponent implements GameComponent {
         this.currentPoint = 0;
         this.onArrive = onArrive;
         this.accelerationMultiplier = 10;
+        this.subsequentSteering = null;
     }
 
     public SteeringComponent(List<Point2D> path, Runnable onArrive, double accelerationMultiplier) {
@@ -33,6 +37,7 @@ public class SteeringComponent implements GameComponent {
         this.currentPoint = 0;
         this.onArrive = onArrive;
         this.accelerationMultiplier = accelerationMultiplier;
+        this.subsequentSteering = null;
     }
 
     public String getType() {

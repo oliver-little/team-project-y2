@@ -66,7 +66,10 @@ public class SteeringSystem implements GameSystem{
             SteeringComponent s = entity.removeComponent(SteeringComponent.class);
             if (s.onArrive != null) {
                 s.onArrive.run(); 
-            };
+            }
+            if (s.subsequentSteering != null) {
+                entity.addComponent(s.subsequentSteering);
+            }
         }
     }
 }
