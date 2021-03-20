@@ -389,8 +389,8 @@
           "grownItemID" : 1,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "maxDrop" : 1,
-          "minDrop" : 2
+          "minDrop" : 1,
+          "maxDrop" : 2
         }
       }
     },
@@ -413,8 +413,8 @@
           "grownItemID" : 2,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "maxDrop" : 1,
-          "minDrop" : 2
+          "minDrop" : 1,
+          "maxDrop" : 2
         }
       }
     },
@@ -437,8 +437,8 @@
           "grownItemID" : 3,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -461,8 +461,8 @@
           "grownItemID" : 4,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -485,8 +485,8 @@
           "grownItemID" : 5,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -509,8 +509,8 @@
           "grownItemID" : 6,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -533,8 +533,8 @@
           "grownItemID" : 7,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -557,8 +557,8 @@
           "grownItemID" : 8,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -581,8 +581,8 @@
           "grownItemID" : 9,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -605,8 +605,8 @@
           "grownItemID" : 10,
           "maxGrowthStage" : 3,
           "growthRate" : 7.00,
-          "maxDrop" : 1,
-          "minDrop" : 1
+          "minDrop" : 1,
+          "maxDrop" : 1
         }
       }
     },
@@ -629,8 +629,8 @@
           "grownItemID" : 11,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -655,8 +655,8 @@
           "growthRate" : 3.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 1,
-          "minDrop" : 2
+          "minDrop" : 1,
+          "maxDrop" : 2
         }
       }
     },
@@ -679,8 +679,8 @@
           "grownItemID" : 12,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -703,8 +703,8 @@
           "grownItemID" : 13,
           "maxGrowthStage" : 3,
           "growthRate" : 4.00,
-          "maxDrop" : 1,
-          "minDrop" : 3
+          "minDrop" : 1,
+          "maxDrop" : 3
         }
       }
     },
@@ -727,8 +727,8 @@
           "grownItemID" : 14,
           "maxGrowthStage" : 3,
           "growthRate" : 5.00,
-          "maxDrop" : 2,
-          "minDrop" : 4
+          "minDrop" : 2,
+          "maxDrop" : 4
         }
       }
     },
@@ -753,8 +753,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -779,8 +779,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -805,8 +805,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -831,8 +831,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -857,8 +857,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -883,8 +883,8 @@
           "growthRate" : 8.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 3,
-          "minDrop" : 8
+          "minDrop" : 3,
+          "maxDrop" : 8
         }
       }
     },
@@ -909,8 +909,8 @@
           "growthRate" : 10.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 5,
-          "minDrop" : 12
+          "minDrop" : 5,
+          "maxDrop" : 12
         }
       }
     },
@@ -935,8 +935,8 @@
           "growthRate" : 10.00,
           "width": 2,
           "height": 2,
-          "maxDrop" : 5,
-          "minDrop" : 12
+          "minDrop" : 5,
+          "maxDrop" : 12
         }
       }
     },
