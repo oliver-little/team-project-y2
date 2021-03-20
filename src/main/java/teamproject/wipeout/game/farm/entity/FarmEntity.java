@@ -542,8 +542,8 @@ public class FarmEntity extends GameEntity {
         for(int i = 0; i < numberOfPickables; i++) {
             GameEntity entity = this.scene.createEntity();
             entity.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
-            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(100);
-            entity.addComponent(new Transform(centrePos, 0.0, 2));
+            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(10.0, 250.0));
+            entity.addComponent(new Transform(centrePos, 0.0, 1));
             entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth(), sprite.getHeight())));
             entity.addComponent(new MovementComponent(velocityVector, Point2D.ZERO));
             entity.addComponent(new PickableComponent(item));
