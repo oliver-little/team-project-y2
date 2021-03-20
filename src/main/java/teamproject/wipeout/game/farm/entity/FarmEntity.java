@@ -354,23 +354,48 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+        
+        double pickableRow = row;
+        double pickableColumn = column;
 
-        Item pickedItem = this.data.pickItemAt(row, column);
+        // Get the farmItem
+        FarmItem itemToPick = this.data.itemAt(row, column);
+        if (itemToPick == null) {
+            return;
+        }
+
+        Item pickedItem = itemToPick.get();
+        PlantComponent pickedPlantComponent = pickedItem.getComponent(PlantComponent.class);
+
+        // Check if oversized plant, adjust row and column if it is for pickable generation
+        if (pickedPlantComponent.width > 1 || pickedPlantComponent.height > 1) {
+            int[] pos = this.data.positionForItem(itemToPick);
+            pickableRow = pos[0] + pickedPlantComponent.height / 4.0;
+            pickableColumn = pos[1] + pickedPlantComponent.width / 4.0;
+        }
+
+        // Actually try to pick the item
+        pickedItem = this.data.pickItemAt(row, column);
         if (pickedItem == null) {
             return;
         }
 
         if (makePickable) {
             // Player picking the farm item
-            PlantComponent pickedPlantComponent = pickedItem.getComponent(PlantComponent.class);
+
+            // Get the middle of the plant in scene coordinates
+            Point2D scenePlantMiddle = this.rescaleCoordinatesToScene(pickableColumn, pickableRow);
+
             int inventoryID = pickedPlantComponent.grownItemID;
             ThreadLocalRandom randomiser = ThreadLocalRandom.current();
+            int numberOfPickables = pickedPlantComponent.minDrop;
+            if (pickedPlantComponent.maxDrop > pickedPlantComponent.minDrop) {
+                numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
+            }
 
-            int numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
             Item inventoryItem = this.itemStore.getItem(inventoryID);
-
             try {
-                this.createPickablesFor(inventoryItem, x, y, numberOfPickables);
+                this.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();
             }
@@ -542,7 +567,7 @@ public class FarmEntity extends GameEntity {
         for(int i = 0; i < numberOfPickables; i++) {
             GameEntity entity = this.scene.createEntity();
             entity.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
-            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(10.0, 250.0));
+            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(40.0, 100.0));
             entity.addComponent(new Transform(centrePos, 0.0, 1));
             entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth(), sprite.getHeight())));
             entity.addComponent(new MovementComponent(velocityVector, Point2D.ZERO));
