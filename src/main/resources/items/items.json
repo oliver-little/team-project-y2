@@ -754,7 +754,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -780,7 +781,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -806,7 +808,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -832,7 +835,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -858,7 +862,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -884,7 +889,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 3,
-          "maxDrop" : 8
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     },
@@ -910,7 +916,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 5,
-          "maxDrop" : 12
+          "maxDrop" : 12,
+          "isTree" : true
         }
       }
     },
@@ -936,7 +943,8 @@
           "width": 2,
           "height": 2,
           "minDrop" : 5,
-          "maxDrop" : 12
+          "maxDrop" : 12,
+          "isTree" : true
         }
       }
     },
@@ -950,8 +958,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 50.00,
+          "defaultSellPrice" : 30.00
         },
         "SabotageComponent" : {
           "usage" : "NONE",
@@ -969,8 +977,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -988,8 +996,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -1007,8 +1015,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -1026,8 +1034,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -1045,8 +1053,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -1064,8 +1072,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "FARM",
@@ -1083,8 +1091,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",
@@ -1102,8 +1110,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",
@@ -1121,8 +1129,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",
@@ -1140,8 +1148,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",
@@ -1159,8 +1167,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",
@@ -1178,8 +1186,8 @@
           "stackSizeLimit" : 5
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 18.00,
-          "defaultSellPrice" : 12.00
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
         },
         "SabotageComponent" : {
           "usage" : "PLAYER",

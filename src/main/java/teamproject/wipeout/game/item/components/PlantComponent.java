@@ -17,6 +17,7 @@ public class PlantComponent implements ItemComponent {
 
     public final int width;
     public final int height;
+    public final boolean isTree;
 
     /**
      * Creates a {@code PlantComponent} from a given {@code JSON Map} data.
@@ -34,6 +35,8 @@ public class PlantComponent implements ItemComponent {
 
         Double width = (Double) data.get("width");
         Double height = (Double) data.get("height");
+        Boolean isTree = (Boolean) data.get("isTree");
+
         if (width == null) {
             this.width = 1;
         } else {
@@ -43,6 +46,11 @@ public class PlantComponent implements ItemComponent {
             this.height = 1;
         } else {
             this.height = height.intValue();
+        }
+        if (isTree == null) {
+            this.isTree = false;
+        } else {
+            this.isTree = true;
         }
     }
 
