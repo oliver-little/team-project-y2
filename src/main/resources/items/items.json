@@ -954,7 +954,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "NONE",
+          "sabotage-type" : "AI",
           "duration" : 60         
         }
       }
@@ -973,7 +973,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
+          "sabotage-type" : "AI",
           "duration" : 30        
         }
       }
@@ -992,7 +992,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
+          "sabotage-type" : "AI",
           "duration" : 120        
         }
       }
@@ -1011,8 +1011,8 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
-          "duration" : 30        
+          "sabotage-type" : "GROWTHRATE",
+          "duration" : 30       
         }
       }
     },
@@ -1030,7 +1030,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
+          "sabotage-type" : "GROWTHRATE",
           "duration" : 120        
         }
       }
@@ -1049,7 +1049,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
+          "sabotage-type" : "GROWTHRATE",
           "duration" : 30        
         }
       }
@@ -1068,7 +1068,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "FARM",
+          "sabotage-type" : "GROWTHRATE",
           "duration" : 120        
         }
       }
@@ -1087,7 +1087,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "SPEED",
           "duration" : 30        
         }
       }
@@ -1106,7 +1106,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "SPEED",
           "duration" : 120        
         }
       }
@@ -1125,7 +1125,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "REPUTATION",
           "duration" : 30        
         }
       }
@@ -1144,7 +1144,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "REPUTATION",
           "duration" : 120        
         }
       }
@@ -1163,7 +1163,7 @@
           "defaultSellPrice" : 3.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "REPUTATION",
           "duration" : 30        
         }
       }
@@ -1182,7 +1182,7 @@
           "defaultSellPrice" : 12.00
         },
         "SabotageComponent" : {
-          "usage" : "PLAYER",
+          "sabotage-type" : "REPUTATION",
           "duration" : 120        
         }
       }

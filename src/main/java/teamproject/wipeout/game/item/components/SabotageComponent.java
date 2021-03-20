@@ -2,21 +2,24 @@ package teamproject.wipeout.game.item.components;
 
 import java.util.Map;
 
+import teamproject.wipeout.engine.component.GameComponent;
+
 /**
  * Defines sabotage/potion properties.
  */
-public class SabotageComponent implements ItemComponent {
+public class SabotageComponent implements GameComponent, ItemComponent {
 
     /**
      * Where can the sabotage effect/potion be used.
      */
-    public enum Usage {
-        FARM,
-        PLAYER,
-        NONE
+    public enum SabotageType {
+        SPEED,
+        GROWTHRATE,
+        REPUTATION,
+        AI
     }
 
-    public final Usage usage;
+    public final SabotageType type;
     public final double duration; //In seconds
 
     /**
@@ -25,7 +28,7 @@ public class SabotageComponent implements ItemComponent {
      * @param data {@code JSON Map} data
      */
     public SabotageComponent(Map<String, Object> data) {
-        this.usage = Usage.valueOf(data.get("usage").toString());
+        this.type = SabotageType.valueOf(data.get("sabotage-type").toString());
         this.duration = (Double) data.get("duration");
     }
 
