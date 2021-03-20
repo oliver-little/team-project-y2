@@ -13,8 +13,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.75
+          "defaultBuyPrice" : 3.25,
+          "defaultSellPrice" : 2.50
         }
       }
     },
@@ -29,8 +29,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.75
+          "defaultBuyPrice" : 3.25,
+          "defaultSellPrice" : 2.50
         }
       }
     },
@@ -45,8 +45,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 4.00,
+          "defaultSellPrice" : 2.50
         }
       }
     },
@@ -61,8 +61,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 4.00,
+          "defaultSellPrice" : 2.50
         }
       }
     },
@@ -77,8 +77,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -93,8 +93,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -109,8 +109,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -125,8 +125,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -141,8 +141,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -173,8 +173,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -189,8 +189,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -205,8 +205,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 9.00,
-          "defaultSellPrice" : 6.25
+          "defaultBuyPrice" : 4.50,
+          "defaultSellPrice" : 3.00
         }
       }
     },
@@ -221,8 +221,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 15.00,
-          "defaultSellPrice" : 10.00
+          "defaultBuyPrice" : 5.00,
+          "defaultSellPrice" : 3.50
         }
       }
     },
@@ -237,8 +237,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
+          "defaultBuyPrice" : 5.50,
+          "defaultSellPrice" : 3.50
         }
       }
     },
@@ -253,8 +253,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
+          "defaultBuyPrice" : 5.50,
+          "defaultSellPrice" : 3.50
         }
       }
     },
@@ -269,8 +269,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 37.50,
-          "defaultSellPrice" : 25.00
+          "defaultBuyPrice" : 6.75,
+          "defaultSellPrice" : 4.50
         }
       }
     },
@@ -285,8 +285,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 37.50,
-          "defaultSellPrice" : 25.00
+          "defaultBuyPrice" : 6.75,
+          "defaultSellPrice" : 4.50
         }
       }
     },
@@ -301,8 +301,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
+          "defaultBuyPrice" : 5.50,
+          "defaultSellPrice" : 3.50
         }
       }
     },
@@ -317,8 +317,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
+          "defaultBuyPrice" : 5.50,
+          "defaultSellPrice" : 3.50
         }
       }
     },
@@ -333,8 +333,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 5.00,
-          "defaultSellPrice" : 3.75
+          "defaultBuyPrice" : 3.25,
+          "defaultSellPrice" : 2.50
         }
       }
     },
@@ -349,8 +349,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 55.00,
-          "defaultSellPrice" : 37.50
+          "defaultBuyPrice" : 6.50,
+          "defaultSellPrice" : 4.50
         }
       }
     },
@@ -365,8 +365,8 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 55.00,
-          "defaultSellPrice" : 37.50
+          "defaultBuyPrice" : 6.50,
+          "defaultSellPrice" : 4.50
         }
       }
     },
@@ -388,7 +388,9 @@
           "spriteSetName" : "tomato",
           "grownItemID" : 1,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "maxDrop" : 1,
+          "minDrop" : 2
         }
       }
     },
@@ -410,7 +412,9 @@
           "spriteSetName" : "lettuce",
           "grownItemID" : 2,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "maxDrop" : 1,
+          "minDrop" : 2
         }
       }
     },
@@ -432,7 +436,9 @@
           "spriteSetName" : "yellow-pepper",
           "grownItemID" : 3,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -454,7 +460,9 @@
           "spriteSetName" : "hot-pepper",
           "grownItemID" : 4,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -476,7 +484,9 @@
           "spriteSetName" : "onion",
           "grownItemID" : 5,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -498,7 +508,9 @@
           "spriteSetName" : "potato",
           "grownItemID" : 6,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -520,7 +532,9 @@
           "spriteSetName" : "carrot",
           "grownItemID" : 7,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -542,7 +556,9 @@
           "spriteSetName" : "broccoli",
           "grownItemID" : 8,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -564,7 +580,9 @@
           "spriteSetName" : "beetroot",
           "grownItemID" : 9,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -586,7 +604,9 @@
           "spriteSetName" : "pumpkin",
           "grownItemID" : 10,
           "maxGrowthStage" : 3,
-          "growthRate" : 7.00
+          "growthRate" : 7.00,
+          "maxDrop" : 1,
+          "minDrop" : 1
         }
       }
     },
@@ -608,7 +628,9 @@
           "spriteSetName" : "cauliflower",
           "grownItemID" : 11,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -632,7 +654,9 @@
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 1,
+          "minDrop" : 2
         }
       }
     },
@@ -654,7 +678,9 @@
           "spriteSetName" : "leek",
           "grownItemID" : 12,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -676,7 +702,9 @@
           "spriteSetName" : "parsnip",
           "grownItemID" : 13,
           "maxGrowthStage" : 3,
-          "growthRate" : 4.00
+          "growthRate" : 4.00,
+          "maxDrop" : 1,
+          "minDrop" : 3
         }
       }
     },
@@ -698,7 +726,9 @@
           "spriteSetName" : "sweetcorn",
           "grownItemID" : 14,
           "maxGrowthStage" : 3,
-          "growthRate" : 5.00
+          "growthRate" : 5.00,
+          "maxDrop" : 2,
+          "minDrop" : 4
         }
       }
     },
@@ -722,7 +752,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -746,7 +778,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -770,7 +804,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -794,7 +830,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -818,7 +856,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -842,7 +882,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 8.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 3,
+          "minDrop" : 8
         }
       }
     },
@@ -866,7 +908,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 10.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 5,
+          "minDrop" : 12
         }
       }
     },
@@ -890,7 +934,9 @@
           "maxGrowthStage" : 4,
           "growthRate" : 10.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "maxDrop" : 5,
+          "minDrop" : 12
         }
       }
     },
@@ -909,8 +955,7 @@
         },
         "SabotageComponent" : {
           "usage" : "NONE",
-          "duration" : 60,
-          "counteractIDs" : [52, 53]          
+          "duration" : 60         
         }
       }
     },
