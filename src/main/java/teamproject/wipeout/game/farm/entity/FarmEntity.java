@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PickableComponent;
+import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
@@ -566,12 +567,23 @@ public class FarmEntity extends GameEntity {
 
         for(int i = 0; i < numberOfPickables; i++) {
             GameEntity entity = this.scene.createEntity();
-            entity.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
-            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(40.0, 100.0));
+            SpriteRenderable spriteRenderable = new SpriteRenderable(sprite, 0.01);
+            entity.addComponent(new RenderComponent(spriteRenderable));
+            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(40.0, 175.0));
             entity.addComponent(new Transform(centrePos, 0.0, 1));
-            entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth(), sprite.getHeight())));
+            entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth() * 0.75, sprite.getHeight() * 0.75)));
             entity.addComponent(new MovementComponent(velocityVector, Point2D.ZERO));
             entity.addComponent(new PickableComponent(item));
+            // Growing animation
+            entity.addComponent(new ScriptComponent((timeStep) -> {
+                if (spriteRenderable.spriteScale.getX() < 0.75) {
+                    double step = timeStep * 10;
+                    spriteRenderable.spriteScale = spriteRenderable.spriteScale.add(step, step);
+                }
+                else {
+                    entity.getComponent(ScriptComponent.class).requestDeletion = true;
+                }
+            }));
         }
     }
 
