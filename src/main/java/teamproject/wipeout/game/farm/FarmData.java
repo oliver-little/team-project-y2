@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**
@@ -26,6 +27,7 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     public final Integer farmID;
     public final Integer playerID;
+    public final double TREE_GROWTH_HARVEST_PERCENTAGE = 0.75; //Sets the growth percentage to return a tree to when harvested.
 
     protected final ArrayList<ArrayList<FarmItem>> items;
 
@@ -235,19 +237,40 @@ public class FarmData implements StateUpdatable<FarmState> {
         }
         Item pickedItem = farmItem.get();
 
-        // Handles oversized items
         PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
-        int plantWidth = plant.width;
-        int plantHeight= plant.height;
-        if (plantWidth > 1 || plantHeight > 1) {
-            int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
-            if (actualPosition == null) {
-                this.fillSquares(null, row, column, plantWidth, plantHeight);
+
+        if (plant.isTree) {
+            // Handles trees being harvested
+            int plantWidth = plant.width;
+            int plantHeight= plant.height;
+            if (plantWidth > 1 || plantHeight > 1) {
+                double maxGrowth = plant.maxGrowthStage * plant.growthRate;
+                double newGrowth = TREE_GROWTH_HARVEST_PERCENTAGE * maxGrowth;
+                FarmItem newFarmTree = new FarmItem(pickedItem, newGrowth);
+                int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
+                if (actualPosition == null) {
+                    this.fillSquares(newFarmTree, row, column, plantWidth, plantHeight);
+                } else {
+                    this.fillSquares(newFarmTree, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
+                }
             } else {
-                this.fillSquares(null, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
+                throw new NoSuchElementException("Harvesting failed: A tree was attempted to be harvested, but had incorrect height and width parameters.");
             }
-        } else {
-            this.items.get(row).set(column, null);
+        }
+        else {
+            // Handles oversized items
+            int plantWidth = plant.width;
+            int plantHeight= plant.height;
+            if (plantWidth > 1 || plantHeight > 1) {
+                int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
+                if (actualPosition == null) {
+                    this.fillSquares(null, row, column, plantWidth, plantHeight);
+                } else {
+                    this.fillSquares(null, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
+                }
+            } else {
+                this.items.get(row).set(column, null);
+            }
         }
     }
 

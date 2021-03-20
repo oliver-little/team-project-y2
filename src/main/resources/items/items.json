@@ -604,7 +604,7 @@
           "spriteSetName" : "pumpkin",
           "grownItemID" : 10,
           "maxGrowthStage" : 3,
-          "growthRate" : 7.00,
+          "growthRate" : 10.00,
           "minDrop" : 1,
           "maxDrop" : 1
         }

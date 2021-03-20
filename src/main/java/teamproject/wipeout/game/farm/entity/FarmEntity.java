@@ -245,9 +245,9 @@ public class FarmEntity extends GameEntity {
                     //...NO :( there is no item
                     dTransform.setPosition(point);
                     this.destroyerEntity.adaptToFarmItem(null);
-
                 } else {
                     //...YES :) there is an item
+                    
                     int[] itemFarmPosition = this.data.positionForItem(pickingItem.getKey());
                     dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
                     this.destroyerEntity.adaptToFarmItem(pickingItem);
@@ -270,7 +270,7 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
-     * Stops picking an item form the farm and removes the {@link Hoverable} component.
+     * Stops picking an item from the farm and removes the {@link Hoverable} component.
      */
     public void stopPickingItem() {
         this.removeComponent(Hoverable.class);
@@ -366,7 +366,15 @@ public class FarmEntity extends GameEntity {
             int inventoryID = pickedPlantComponent.grownItemID;
             ThreadLocalRandom randomiser = ThreadLocalRandom.current();
 
-            int numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
+            int numberOfPickables;
+
+            if (pickedPlantComponent.minDrop == pickedPlantComponent.maxDrop) {
+                numberOfPickables = pickedPlantComponent.minDrop;
+            }
+            else {
+                numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
+            }
+            
             Item inventoryItem = this.itemStore.getItem(inventoryID);
 
             try {
