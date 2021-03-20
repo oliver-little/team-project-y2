@@ -1,5 +1,7 @@
 package teamproject.wipeout.game.market.entity;
 
+import java.util.function.Consumer;
+
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
@@ -143,7 +145,7 @@ public class MarketEntity extends GameEntity {
         }
     };
 
-    private Runnable onStep = () -> {
+    private Consumer<Double> onStep = (step) -> {
         if (this.mouseIn && this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE) {
             this.hoverRect.alpha = 0.2;
         }
