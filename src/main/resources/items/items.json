@@ -742,15 +742,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 20.00,
+          "defaultSellPrice" : 15.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "apple-tree",
           "grownItemID" : 15,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -769,15 +769,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 20.00,
+          "defaultSellPrice" : 15.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pear-tree",
           "grownItemID" : 16,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -796,15 +796,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 10.00,
-          "defaultSellPrice" : 6.50
+          "defaultBuyPrice" : 22.50,
+          "defaultSellPrice" : 17.50
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "lemon-tree",
           "grownItemID" : 17,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -823,15 +823,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 10.00,
-          "defaultSellPrice" : 6.50
+          "defaultBuyPrice" : 22.50,
+          "defaultSellPrice" : 17.50
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "orange-tree",
           "grownItemID" : 18,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -850,15 +850,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 20.00,
+          "defaultSellPrice" : 15.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "strawberry-tree",
           "grownItemID" : 19,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -877,15 +877,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 8.00,
-          "defaultSellPrice" : 5.00
+          "defaultBuyPrice" : 20.00,
+          "defaultSellPrice" : 15.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "cherry-tree",
           "grownItemID" : 20,
           "maxGrowthStage" : 4,
-          "growthRate" : 8.00,
+          "growthRate" : 15.00,
           "width": 2,
           "height": 2,
           "minDrop" : 3,
@@ -904,15 +904,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 15.00,
-          "defaultSellPrice" : 10.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "pineapple-tree",
           "grownItemID" : 22,
           "maxGrowthStage" : 4,
-          "growthRate" : 10.00,
+          "growthRate" : 18.00,
           "width": 2,
           "height": 2,
           "minDrop" : 5,
@@ -931,15 +931,15 @@
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
-          "defaultBuyPrice" : 15.00,
-          "defaultSellPrice" : 10.00
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
         },
         "PlantComponent" : {
           "spriteSheetName" : "fruit-tree",
           "spriteSetName" : "banana-tree",
           "grownItemID" : 23,
           "maxGrowthStage" : 4,
-          "growthRate" : 10.00,
+          "growthRate" : 18.00,
           "width": 2,
           "height": 2,
           "minDrop" : 5,
