@@ -8,6 +8,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -361,11 +362,15 @@ public class FarmEntity extends GameEntity {
 
         if (makePickable) {
             // Player picking the farm item
-            int inventoryID = pickedItem.getComponent(PlantComponent.class).grownItemID;
+            PlantComponent pickedPlantComponent = pickedItem.getComponent(PlantComponent.class);
+            int inventoryID = pickedPlantComponent.grownItemID;
+            ThreadLocalRandom randomiser = ThreadLocalRandom.current();
+
+            int numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
             Item inventoryItem = this.itemStore.getItem(inventoryID);
 
             try {
-                this.createPickablesFor(inventoryItem, x, y);
+                this.createPickablesFor(inventoryItem, x, y, numberOfPickables);
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();
             }
@@ -525,17 +530,24 @@ public class FarmEntity extends GameEntity {
      * @param item Harvested {@link Item}
      * @param x X scene coordinate
      * @param y Y scene coordinate
+     * @param numberOfPickables The number of pickables to generate
      * @throws FileNotFoundException Thrown if the inventory sprites cannot be found for the given {@code Item}.
      */
-    private void createPickablesFor(Item item, double x, double y) throws FileNotFoundException {
-        GameEntity entity = this.scene.createEntity();
+    private void createPickablesFor(Item item, double x, double y, int numberOfPickables) throws FileNotFoundException {
         InventoryComponent invComponent = item.getComponent(InventoryComponent.class);
         Image sprite = this.spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName)[0];
-        entity.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
 
-        entity.addComponent(new Transform(this.giveRandomPositionAround(x, y), 0.0, 2));
-        entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth(), sprite.getHeight())));
-        entity.addComponent(new PickableComponent(item));
+        Point2D centrePos = new Point2D(x, y);
+
+        for(int i = 0; i < numberOfPickables; i++) {
+            GameEntity entity = this.scene.createEntity();
+            entity.addComponent(new RenderComponent(new SpriteRenderable(sprite)));
+            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(100);
+            entity.addComponent(new Transform(centrePos, 0.0, 2));
+            entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth(), sprite.getHeight())));
+            entity.addComponent(new MovementComponent(velocityVector, Point2D.ZERO));
+            entity.addComponent(new PickableComponent(item));
+        }
     }
 
     /**
