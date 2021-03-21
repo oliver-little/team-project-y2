@@ -332,7 +332,7 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
-        return this.data.placeItem(item, row, column);
+        return this.data.placeItem(item, 0.0, row, column);
     }
 
     /**

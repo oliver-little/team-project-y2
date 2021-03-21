@@ -5,7 +5,6 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.networking.state.FarmState;
-import teamproject.wipeout.networking.state.MarketState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.util.ArrayList;
@@ -77,23 +76,26 @@ public class FarmData implements StateUpdatable<FarmState> {
      * @param farmState New state of the farm
      */
     public void updateFromState(FarmState farmState) {
-        List<List<Integer>> newItems = farmState.items;
+        List<List<Pair<Integer, Double>>> newItems = farmState.items;
         for (int r = 0; r < this.items.size(); r++) {
             for (int c = 0; c < this.items.get(r).size(); c++) {
 
                 FarmItem currentFarmItem = this.items.get(r).get(c);
-                Integer newItemID = newItems.get(r).get(c);
+                Pair<Integer, Double> newItemPair = newItems.get(r).get(c);
 
-                if (currentFarmItem != null && newItemID == null) {
+                if (currentFarmItem != null) {
                     Item currentItem = currentFarmItem.get();
 
-                    if (currentItem != null) {
+                    if (currentItem != null && newItemPair != null && currentItem.id == newItemPair.getKey()) {
+                        currentFarmItem.growth = newItemPair.getValue();
+                        continue;
+                    } else if (currentItem != null) {
                         this.destroyItemAt(r, c);
                     }
                 }
 
-                if (newItemID != null) {
-                    this.placeItem(this.itemStore.getItem(newItemID), r, c);
+                if (newItemPair != null) {
+                    this.placeItem(this.itemStore.getItem(newItemPair.getKey()), newItemPair.getValue(), r, c);
                 }
             }
         }
@@ -201,11 +203,12 @@ public class FarmData implements StateUpdatable<FarmState> {
      * Places a given {@code Item} into a given position.
      *
      * @param item {@link Item} to be placed
+     * @param growth Current growth of the item
      * @param row Farm row
      * @param column Farm column
      * @return {@code true} if the {@code Item} was placed, <br> otherwise {@code false}.
      */
-    public boolean placeItem(Item item, int row, int column) {
+    public boolean placeItem(Item item, double growth, int row, int column) {
         PlantComponent plant = item.getComponent(PlantComponent.class);
         int plantWidth = plant.width;
         int plantHeight= plant.height;
@@ -213,6 +216,7 @@ public class FarmData implements StateUpdatable<FarmState> {
             return false;
         }
         FarmItem placingItem = new FarmItem(item);
+        placingItem.growth = growth;
 
         // Handles oversized items
         if (plantWidth > 1 || plantHeight > 1) {
