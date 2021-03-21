@@ -126,6 +126,7 @@ public class WorldEntity extends GameEntity {
 
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
+		this.setupFarmDestroyingKey();
 	}
 
 	public Player getMyPlayer() {
@@ -164,6 +165,12 @@ public class WorldEntity extends GameEntity {
 	protected void setupFarmPickingKey() {
 		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	protected void setupFarmDestroyingKey() {
+		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
+			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
 
