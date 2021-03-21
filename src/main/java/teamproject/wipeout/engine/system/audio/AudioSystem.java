@@ -43,10 +43,19 @@ public class AudioSystem implements GameSystem {
 		List<GameEntity> entities = this.entityCollector.getEntities();
 		for (GameEntity entity : entities) { //iterates through all entities with AudioComponents
 			AudioComponent s = entity.getComponent(AudioComponent.class);
+			for(String key : s.sounds.keySet()){
+				if(s.sounds.get(key)){
+					s.setVolume(spotEffectsVolume);
+					s.playSound(key);
+				}
+			}
+			
+			/*
 			if (s.toPlay()) {
 				s.setVolume(spotEffectsVolume); //applies the spot effects volume to component before playing
 				s.playSound();
 			}
+			*/
 		}
 	}
 	

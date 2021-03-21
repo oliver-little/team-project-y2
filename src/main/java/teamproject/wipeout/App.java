@@ -206,10 +206,7 @@ public class App implements Controller {
         StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
 
-        AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
-        player.addComponent(playerSound);
-
-        input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
+        input.onKeyRelease(KeyCode.D, () -> player.playSound("glassSmashing2.wav")); //example - pressing the D key will trigger the sound
         
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start

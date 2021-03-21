@@ -207,7 +207,7 @@ public class InventoryUI extends StackPane {
 				Item eItem = itemStore.getItem(id);
 				e.addComponent(new PickableComponent(eItem));
 				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);
-
+				player.playSound("thud.wav");
 				try {
 					Image[] images = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
 					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));

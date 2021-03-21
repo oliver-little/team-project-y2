@@ -2,6 +2,8 @@ package teamproject.wipeout.engine.component.audio;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -18,20 +20,23 @@ import teamproject.wipeout.util.resources.ResourceType;
 
 public class AudioComponent implements GameComponent {
 
-	private Boolean play; //set to True when the sound needs to be played
-    private String fileName;
+	//private Boolean play; //set to True when the sound needs to be played
+    //private String fileName;
     private AudioInputStream audioStream;
     private double volume;
+
+	public HashMap<String, Boolean> sounds = new HashMap<>();
 	
 	/**
 	 * This is a component class for adding sound effects to entities.
 	 * The AudioSystem checks the boolean attribute {@link #play} to decide if the sound needs to play.
-	 * @param audioFileName	name of the audio file inside /resources/audio/
 	 */
-	public AudioComponent(String audioFileName) {
-		fileName = audioFileName;
-    	//volume = 1.0f;
-    	play = false;
+	public AudioComponent() {
+    	//play = false;
+	}
+
+	public void addSound(String audioFileName){
+		sounds.put(audioFileName, false);
 	}
 	   
 	public String getType()
@@ -42,10 +47,10 @@ public class AudioComponent implements GameComponent {
 	/**
 	 * called by the AudioSystem to play sound.
 	 */
-	public void playSound() {
+	public void playSound(String fileName) {
 		try {
 			File audioFile = ResourceLoader.get(ResourceType.AUDIO, fileName); //file read each time to allow for the same sounds to overlap - possibly inefficient
-    		audioStream = AudioSystem.getAudioInputStream(audioFile); 
+			audioStream = AudioSystem.getAudioInputStream(audioFile); 
     		AudioFormat format = audioStream.getFormat();			  
     		DataLine.Info info = new DataLine.Info(Clip.class, format);
 			Clip audioClip = (Clip) AudioSystem.getLine(info);
@@ -54,21 +59,16 @@ public class AudioComponent implements GameComponent {
 			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
 			gainControl.setValue(20f * (float) Math.log10(volume)); //converts volume to decibels
 		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	play = false;
+    	sounds.put(fileName, false);
 	}
 	
 	/**
 	 * called by any class when it wants the sound to play.
 	 */
-	public void play() {
-		play = true; //sets the Boolean attribute to true which SoundSystem will pick up on.
-	}
-	
-	public boolean toPlay() {
-		return play; //used to see if the sound needs to be played.
+	public void play(String audioFileName) {
+		sounds.put(audioFileName, true);
 	}
 	
 	/**
