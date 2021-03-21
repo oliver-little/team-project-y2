@@ -47,22 +47,36 @@ public class StartMenu implements Controller {
     private VBox menuBox = new VBox(30);
     private VBox buttonBox;
     private Text title;
-    
-    private List<Pair<String, Runnable>> menuData = Arrays.asList(
-            new Pair<String, Runnable>("Play", () -> {
-                App app = new App();
-                Window window = root.getScene().getWindow();
-                Parent content = app.init(window.widthProperty(), window.heightProperty());
-                root.getScene().setRoot(content);
-                app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-            //new Pair<String, Runnable>("TODO", () -> {}), // Commented out until implemented
-            //new Pair<String, Runnable>("TODO", () -> {}),
-            //new Pair<String, Runnable>("TODO", () -> {}),
-            new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
-    );
 
     public void cleanup() {
         
+    }
+
+    private void createMultiplayerMenu(){
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        addTitle("Multiplayer");
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Join Game", () -> {}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
+                new Pair<String, Runnable>("Host Game", () -> {}), // Commented out until implemented
+                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+        );
+        addMenu(menuData);
+        root.getChildren().add(menuBox);
+    }
+
+    private void createMainMenu(){
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        addTitle("Farmageddon");
+        addMenu(getMainMenuData());
+
+        root.getChildren().add(menuBox);
+
+        //startAnimation();
     }
 
     /**
@@ -78,12 +92,26 @@ public class StartMenu implements Controller {
 
         addBackground();
 
-        addTitle();
-        addMenu();
-
-        root.getChildren().add(menuBox);
-
+        createMainMenu();
         startAnimation();
+    }
+
+    private List<Pair<String, Runnable>> getMainMenuData(){
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Singleplayer", () -> {
+                    App app = new App();
+                    Window window = root.getScene().getWindow();
+                    Parent content = app.init(window.widthProperty(), window.heightProperty());
+                    root.getScene().setRoot(content);
+                    app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
+                new Pair<String, Runnable>("Multiplayer", () -> {
+                    createMultiplayerMenu();
+                }), // Commented out until implemented
+                new Pair<String, Runnable>("Settings", () -> {}),
+                //new Pair<String, Runnable>("TODO", () -> {}),
+                new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
+        );
+        return menuData;
     }
 
     /**
@@ -111,8 +139,8 @@ public class StartMenu implements Controller {
     /**
      * A method to add the title to the menu.
      */
-    private void addTitle() {
-    	title = new Text("Farmageddon");
+    private void addTitle(String t) {
+    	title = new Text(t);
 
         try {
             InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
@@ -155,14 +183,14 @@ public class StartMenu implements Controller {
         full.setInterpolator(Interpolator.EASE_BOTH);
         full.play();
     }
-    
+
     /**
      * A method to add the menu items to the menu.
-     * @param x x-position of the menu.
-     * @param y y-position of the menu.
+     * @param menuData
      */
-    private void addMenu() {
+    private void addMenu(List<Pair<String, Runnable>> menuData) {
         buttonBox = new VBox(10);
+        //menuBox = new VBox(30);
         buttonBox.setAlignment(Pos.CENTER);
         
         menuData.forEach(data -> {
