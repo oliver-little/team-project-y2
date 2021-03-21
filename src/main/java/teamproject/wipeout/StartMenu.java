@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.BoxBlur;
@@ -12,10 +14,7 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -73,7 +72,53 @@ public class StartMenu implements Controller {
 
         addTitle("Host Game");
 
+        VBox hostPane = new VBox();
+        hostPane.setAlignment(Pos.CENTER);
+
+        HBox nameBox = new HBox();
+        nameBox.setAlignment(Pos.CENTER);
+        Label nameLabel = new Label("Name: ");
+        TextField nameTF = new TextField();
+        nameBox.getChildren().addAll(nameLabel,nameTF);
+
+        HBox serverNameBox = new HBox();
+        serverNameBox.setAlignment(Pos.CENTER);
+        Label serverNameLabel = new Label("Server Name: ");
+        TextField serverNameTF = new TextField();
+        nameBox.getChildren().addAll(serverNameLabel,serverNameTF);
+
+        Button hostButton = new Button("Host Server");
+        hostButton.setOnAction(((event) -> {createLobbyMenu(serverNameTF.getText(), nameTF.getText());}));
+
+
+        hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
+
+
+        menuBox.getChildren().addAll(hostPane);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+        );
+        addMenu(menuData);
+
+        root.getChildren().addAll(menuBox);
+    }
+
+    private void createLobbyMenu(String serverName, String serverHost){
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        //addTitle("Lobby");
+        addTitle(serverName);
+        VBox players = new VBox();
+        players.setAlignment(Pos.CENTER);
+        Label host = new Label(serverHost+" (HOST)");
+
+        players.getChildren().addAll(host);
+
+        menuBox.getChildren().addAll(players);
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Start Game", () -> {createMainMenu();}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
         addMenu(menuData);
@@ -87,7 +132,24 @@ public class StartMenu implements Controller {
 
         addTitle("Join Game");
 
+        HBox playerInfoBox = new HBox();
+        HBox nameBox = new HBox();
+        nameBox.setAlignment(Pos.CENTER);
+        Label nameLabel = new Label("Name: ");
+        TextField nameTF = new TextField();
+        nameBox.getChildren().addAll(nameLabel,nameTF);
+
+        playerInfoBox.getChildren().addAll(nameBox);
+
+        VBox serverBox = new VBox();
+        Label serverExample = new Label("example server");
+        serverBox.getChildren().addAll(serverExample);
+
+        menuBox.getChildren().addAll(playerInfoBox, serverBox);
+
+
         List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Join Server", () -> {}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
         addMenu(menuData);
