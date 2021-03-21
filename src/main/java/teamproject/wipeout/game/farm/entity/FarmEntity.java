@@ -146,6 +146,9 @@ public class FarmEntity extends GameEntity {
         if (this.isPickingItem()) {
             this.stopPickingItem();
         }
+        if (this.isDestroyingItem()) {
+            this.stopPickingItem();
+        }
     }
 
     public void updateFromState(FarmState farmState) {
@@ -269,6 +272,58 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
+     * Starts destroying an item from the farm through creating a {@link Hoverable} component.
+     *
+     * @param mousePosition Current {@link Point2D} position of the mouse cursor
+     */
+    public void startDestroyingItem(Point2D mousePosition) {
+        // Create destroyer entity for the "tool" used to destroy items and display it at the mouse coordinates
+        this.destroyerEntity = new DestroyerEntity(this.scene, true);
+        Transform destroyerTransform = new Transform(mousePosition.getX(), mousePosition.getY(), 0.0, 0);
+        this.destroyerEntity.addComponent(destroyerTransform);
+
+        // Activates a Hoverable component which updates the position of the destroyer "tool"
+        // based on the position of the mouse cursor
+        InputHoverableAction hoverableAction = (x, y) -> {
+            Point2D point = this.isWithinFarm(x, y);
+            Transform dTransform = this.destroyerEntity.getComponent(Transform.class);
+
+            if (point == null) {
+                // Is NOT within the farm
+                dTransform.setPosition(new Point2D(x, y));
+                this.destroyerEntity.adaptToDestroyFarmItem(null);
+            } else {
+                // Is within the farm. But is there any item at that coordinates?...
+                Pair<FarmItem, Boolean> pickingItem = this.canBePicked(x, y);
+                if (pickingItem == null) {
+                    //...NO :( there is no item
+                    dTransform.setPosition(point);
+                    this.destroyerEntity.adaptToDestroyFarmItem(null);
+                } else {
+                    //...YES :) there is an item
+                    
+                    int[] itemFarmPosition = this.data.positionForItem(pickingItem.getKey());
+                    dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
+                    this.destroyerEntity.adaptToDestroyFarmItem(pickingItem);
+
+                    // Set up a delegate so that the destroyer tool gets updates about the item's growth progress
+                    this.destroyerDelegate = (updatedFarmItem) -> {
+                        if (this.destroyerEntity == null) {
+                            return;
+                        }
+                        if (pickingItem.getKey() == updatedFarmItem) {
+                            this.destroyerEntity.setColorForPickable(true);
+                        }
+                    };
+                    this.data.addGrowthDelegate(this.destroyerDelegate);
+                }
+            }
+        };
+        hoverableAction.performMouseHoverAction(mousePosition.getX(), mousePosition.getY());
+        this.makeHoverable(hoverableAction);
+    }
+
+    /**
      * Stops picking an item from the farm and removes the {@link Hoverable} component.
      */
     public void stopPickingItem() {
@@ -287,6 +342,18 @@ public class FarmEntity extends GameEntity {
      */
     public boolean isPickingItem() {
         return this.destroyerEntity != null;
+    }
+
+    /**
+     * @return {@code true} if the player is destroying an item, otherwise {@code false}.
+     */
+    public boolean isDestroyingItem() {
+        if (this.destroyerEntity == null) {
+            return false;
+        }
+        else {
+            return this.destroyerEntity.getDestroyMode();
+        }
     }
 
     /**
@@ -373,8 +440,16 @@ public class FarmEntity extends GameEntity {
             pickableColumn = pos[1] + pickedPlantComponent.width / 4.0;
         }
 
-        // Actually try to pick the item
-        pickedItem = this.data.pickItemAt(row, column);
+        // Actually try to pick/destroy the item
+        if (isDestroyingItem()) {
+            this.data.destroyItemAt(row, column);
+            pickedItem = null;
+        }
+        else {
+            pickedItem = this.data.pickItemAt(row, column);
+        }
+
+        
         if (pickedItem == null) {
             return;
         }
@@ -473,11 +548,34 @@ public class FarmEntity extends GameEntity {
                 this.stopPlacingItem(false);
             }
 
-            if (this.isPickingItem()) {
+            if (this.isDestroyingItem()) {
+                this.stopPickingItem();
+                this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
+            
+            } else if (this.isPickingItem()) {
                 this.stopPickingItem();
 
             } else {
                 this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
+            }
+        };
+    }
+
+    public InputKeyAction onKeyPickActionDestroy(MouseHoverSystem mouseHoverSystem) {
+        return () -> {
+            if (this.isPlacingItem()) {
+                this.stopPlacingItem(false);
+            }
+
+            if (this.isDestroyingItem()) {
+                this.stopPickingItem();
+            
+            } else if (this.isPickingItem()) {
+                this.stopPickingItem();
+                this.startDestroyingItem(mouseHoverSystem.getCurrentMousePosition());
+
+            } else {
+                this.startDestroyingItem(mouseHoverSystem.getCurrentMousePosition());
             }
         };
     }
@@ -511,8 +609,13 @@ public class FarmEntity extends GameEntity {
         Clickable clickable = new Clickable((x, y, button, entity) -> {
             boolean stateChanged = false;
 
-            if (this.isPickingItem()) {
-                this.pickItemAt(x, y);
+            if (this.isPickingItem()) { 
+                this.pickItemAt(x, y); //Picking a plant
+                this.stopPickingItem();
+                stateChanged = true;
+            
+            } else if (this.isDestroyingItem()) {
+                this.pickItemAt(x, y, true); //Destroying a plant
                 this.stopPickingItem();
                 stateChanged = true;
 

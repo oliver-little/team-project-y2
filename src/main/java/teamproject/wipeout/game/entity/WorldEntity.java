@@ -133,6 +133,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
+		this.setupFarmDestroyingKey();
 	}
 
 	public FarmEntity getMyFarm() {
@@ -171,6 +172,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	protected void setupFarmPickingKey() {
 		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	protected void setupFarmDestroyingKey() {
+		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
+			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
 

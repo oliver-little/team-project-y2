@@ -219,7 +219,7 @@ public class App implements Controller {
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
 
-        input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
+        input.onKeyRelease(KeyCode.G, playerSound::play); //example - pressing the D key will trigger the sound
         
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
