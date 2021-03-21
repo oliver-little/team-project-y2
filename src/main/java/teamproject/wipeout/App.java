@@ -53,6 +53,7 @@ import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -189,16 +190,24 @@ public class App implements Controller {
         camPos.bind(camPosBinding);
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
-        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        ArrayList<Task> playerTasks = new ArrayList<>();
+        for(int t = 0; t < 7; t++) {
+            playerTasks.add(allTasks.get(t));
+        }
+        player.setTasks(playerTasks);
+
+        ArrayList<Task> purchasableTasks = allTasks;
+
+        //World Entity
+        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
         world.setClientSupplier(this.networker.clientSupplier);
         this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);
 
-        // Create tasks
-        ArrayList<Task> allTasks = createAllTasks(itemStore);
-        player.tasks = allTasks;
-
+        // Task UI
         TaskUI taskUI = new TaskUI(player);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
         player.setTaskUI(taskUI);
@@ -263,8 +272,10 @@ public class App implements Controller {
 
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
-        for(int i = 1; i < 7; i++) {
-            itemIds.add(i);
+        for(int i = 1; i < 25; i++) {
+            if(itemStore.getItem(i) != null) {
+                itemIds.add(i);
+            }
         }
 
         int nrOfTask = 0;
@@ -273,18 +284,17 @@ public class App implements Controller {
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
-            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name + " ($" + reward.toString() + ")", reward * quantityCollected,
+            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, reward * quantityCollected,
                     (Player inputPlayer) ->
                     {
                     	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
-                        //LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();  //inventory is now an ArrayList
                     	int index = inputPlayer.containsItem(itemId);
                     	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
                     		return true;
                     	}
                     	return false;
-                        //return inventory.containsKey(itemId) && inventory.get(itemId) == quantityCollected;
-                    }
+                    },
+                    itemStore.getItem(itemId)
             );
             tasks.add(currentTask);
             nrOfTask += 1;
@@ -295,11 +305,12 @@ public class App implements Controller {
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name + " ($" + reward.toString() + ")", reward * quantitySold,
+            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
                     (Player inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
-                    }
+                    },
+                    itemStore.getItem(itemId)
             );
             tasks.add(currentTask);
             nrOfTask += 1;

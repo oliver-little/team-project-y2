@@ -23,10 +23,7 @@ import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
@@ -49,6 +46,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public Integer size;
 
     public ArrayList<Task> tasks;
+    public LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
     private TaskUI taskUI;
 
     private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
@@ -542,6 +540,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         System.out.println("Inventory itemID to count:" + this.getInventory().toString());
     }
 
+    // Tasks
+
     /**
      * Checks what tasks have been completed
      */
@@ -553,6 +553,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
             if(task.condition.apply(this)) {
                 task.completed = true;
+                currentAvailableTasks.remove(task.id);
                 this.money.set(this.money.getValue() + task.reward);
                 System.out.println("Task is completed");
             }
@@ -563,14 +564,29 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public int getNumberOfCompletedTasks() {
         int completedTasks = 0;
-        for(Task task : tasks) {
+        for(Task task : this.tasks) {
             if(task.completed) {
                 completedTasks += 1;
             }
         }
         return completedTasks;
     }
-    
+
+    public void setTasks(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+        for (Task task: this.tasks) {
+            currentAvailableTasks.putIfAbsent(task.id, 1);
+        }
+    }
+
+    public void addNewTask(Task task) {
+        if(currentAvailableTasks.containsKey(task.id)) {
+            return;
+        }
+        this.currentAvailableTasks.putIfAbsent(task.id, 1);
+        this.tasks.add(task);
+        this.checkTasks();
+    }
     /**
      * method to clear/empty the inventory
      */
