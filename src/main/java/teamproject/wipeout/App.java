@@ -248,12 +248,11 @@ public class App implements Controller {
         									 audioSys.muteUnmute();});
 
         invUI.onMouseClick(world);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
-        
-        input.addKeyAction(KeyCode.X,
-                () -> {player.pickup();
-                	   },
-                () -> {});
+        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, world.pickables));
+
+        input.onKeyRelease(KeyCode.X, () -> {
+            world.pickables.picked(player.pickup());
+        });
 
         gl.start();
     }

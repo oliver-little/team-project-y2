@@ -13,20 +13,18 @@ import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
@@ -516,30 +514,28 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     /**
      * Scan all entities for items the player is standing over, and pick them up, and delete them from the map
      */
-    public void pickup() {
+    public Set<Pickables.Pickable> pickup() {
         List<GameEntity> entities = this.pickableCollector.getEntities();
-        List<GameEntity> removedItems = new ArrayList<>();
+        HashSet<Pickables.Pickable> picked = new HashSet<Pickables.Pickable>();
+
         for (GameEntity ge: entities){
             // Check if entity is pickable
             if (ge.hasComponent(PickableComponent.class)){
                 if(HitboxComponent.checkCollides(this, ge)) {
-                	PickableComponent item = ge.getComponent(PickableComponent.class);
-                    if (!this.acquireItem(item.item.id)) {
-                    	System.out.println("No space for item with id: " + item.item.id);
-                    }else {
-                    	removedItems.add(ge);
+                    Pickables.Pickable pickable = ge.getComponent(PickableComponent.class).pickable;
+                    if (!this.acquireItem(pickable.getID())) {
+                    	System.out.println("No space for item with id: " + pickable.getID());
+                    } else {
+                        picked.add(pickable);
                     }
                 }
             }
         }
-        //cleanup
-        for (GameEntity ge: removedItems) {
-            entities.remove(ge);
-            ge.destroy();
-        }
 
         this.checkTasks();
         System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+
+        return picked;
     }
 
     /**

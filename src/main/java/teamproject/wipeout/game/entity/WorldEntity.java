@@ -15,6 +15,7 @@ import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
@@ -22,32 +23,38 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
+import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.state.StateUpdatable;
+import teamproject.wipeout.networking.state.WorldState;
+
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Supplier;
 
-public class WorldEntity extends GameEntity {
+public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
 	public final MarketPriceUpdater marketUpdater;
 	public final MarketEntity market;
 	public final Map<Integer, FarmEntity> farms;
+	public final Player myPlayer;
+	public final AnimalEntity myAnimal;
+	public final Pickables pickables;
 
-	private final Player myPlayer;
-	private AnimalEntity myAnimal;
 	private FarmEntity myFarm;
 	private NavigationMesh navMesh;
 
 	private InputHandler inputHandler;
-
 	private Supplier<GameClient> clientSupplier;
 
 	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
 		super(gameScene);
 
 		this.farms = new HashMap<Integer, FarmEntity>();
+		this.pickables = new Pickables(gameScene, itemStore, spriteManager);
+		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
+
 		this.inputHandler = input;
 
 		this.addComponent(new Transform(0,0));
@@ -85,10 +92,10 @@ public class WorldEntity extends GameEntity {
 		this.myPlayer = player;
 
 		if (numberOfPlayers == 4) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 50), spriteManager, itemStore);
-			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(50, 400), spriteManager, itemStore);
-			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(500, 400), spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 50), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(50, 400), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(500, 400), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
@@ -96,8 +103,8 @@ public class WorldEntity extends GameEntity {
 			this.farms.put(farmEntity4.farmID, farmEntity4);
 
 		} else if (numberOfPlayers == 2) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 400), spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 400), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
@@ -128,14 +135,6 @@ public class WorldEntity extends GameEntity {
 		this.setupFarmPickingKey();
 	}
 
-	public Player getMyPlayer() {
-		return this.myPlayer;
-	}
-
-	public AnimalEntity getMyAnimal() {
-		return this.myAnimal;
-	}
-
 	public FarmEntity getMyFarm() {
 		return this.myFarm;
 	}
@@ -161,10 +160,37 @@ public class WorldEntity extends GameEntity {
 		}
 	}
 
+	public WorldState getCurrentState() {
+		return new WorldState(this.pickables.get());
+	}
+
+	public void updateFromState(WorldState newState) {
+		this.pickables.updateFrom(newState.getPickables());
+	}
+
 	protected void setupFarmPickingKey() {
 		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
+	}
+
+	/**
+	 * If possible, sends an updated state of the world to the server.
+	 */
+	private void sendStateUpdate() {
+		if (this.clientSupplier == null) {
+			return;
+		}
+
+		GameClient client = this.clientSupplier.get();
+		if (client != null) {
+			try {
+				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.id, this.getCurrentState()));
+
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
 	}
 
 }

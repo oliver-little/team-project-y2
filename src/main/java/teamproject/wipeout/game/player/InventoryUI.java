@@ -29,6 +29,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -118,8 +119,8 @@ public class InventoryUI extends StackPane {
 			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
 				event.consume();
 
+				Player myPlayer = world.myPlayer;
 				FarmEntity myFarm = world.getMyFarm();
-				Player myPlayer = world.getMyPlayer();
 
 				if (myFarm.isPlacingItem()) {
 					myFarm.stopPlacingItem(false);
@@ -157,9 +158,9 @@ public class InventoryUI extends StackPane {
 	 */
 	public void useSlot(int slot, WorldEntity world) {
 		this.selectSlot(slot);
-		
+
+		Player myPlayer = world.myPlayer;
 		FarmEntity myFarm = world.getMyFarm();
-		Player myPlayer = world.getMyPlayer();
 
 		if (myFarm.isPlacingItem()) {
 			myFarm.stopPlacingItem(false);
@@ -191,31 +192,20 @@ public class InventoryUI extends StackPane {
 	/**
 	 * Sets up the inventory key input.
 	 *
-	 * @param gameScene {@link GameScene} of the {@code InventoryUI}
 	 * @param player {@link Player} who owns the inventory
+	 * @param pickables {@link Pickables} class in the {@link WorldEntity}
 	 * @return {@link InputKeyAction} executed on a specified key event.
 	 */
-	public InputKeyAction dropOnKeyRelease(GameScene gameScene, Player player) {
+	public InputKeyAction dropOnKeyRelease(Player player, Pickables pickables) {
 		return () -> {
 			int id = player.dropItem();
 			System.out.println("***itemID: " + id);
-			if(id != -1) {
-				GameEntity e = gameScene.createEntity();
-				Transform tr = player.getComponent(Transform.class);
-				e.addComponent(new Transform (tr.getPosition().getX(), tr.getPosition().getY()));
-				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.shape.Rectangle(0, -20, 20, 20)));
-				Item eItem = itemStore.getItem(id);
-				e.addComponent(new PickableComponent(eItem));
-				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);
-
-				try {
-					Image[] images = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
-					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));
-
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			if (id != -1) {
+				Transform transform = player.getComponent(Transform.class);
+				RenderComponent renderComponent = player.getComponent(RenderComponent.class);
+				double centreX = transform.getPosition().getX() + (renderComponent.getWidth() / 2);
+				double centreY = transform.getPosition().getY() + (renderComponent.getHeight() / 2);
+				pickables.createPickablesFor(this.itemStore.getItem(id), centreX, centreY, 1);
 			}
 		};
 	}
