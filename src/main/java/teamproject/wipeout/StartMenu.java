@@ -74,6 +74,7 @@ public class StartMenu implements Controller {
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
+        hostPane.getStyleClass().add("pane");
 
         HBox nameBox = new HBox();
         nameBox.setAlignment(Pos.CENTER);
@@ -110,6 +111,7 @@ public class StartMenu implements Controller {
         //addTitle("Lobby");
         addTitle(serverName);
         VBox players = new VBox();
+        players.getStyleClass().add("pane");
         players.setAlignment(Pos.CENTER);
         Label host = new Label(serverHost+" (HOST)");
 
@@ -133,6 +135,8 @@ public class StartMenu implements Controller {
         addTitle("Join Game");
 
         HBox playerInfoBox = new HBox();
+        playerInfoBox.getStyleClass().add("pane");
+        playerInfoBox.setAlignment(Pos.CENTER);
         HBox nameBox = new HBox();
         nameBox.setAlignment(Pos.CENTER);
         Label nameLabel = new Label("Name: ");
@@ -142,6 +146,8 @@ public class StartMenu implements Controller {
         playerInfoBox.getChildren().addAll(nameBox);
 
         VBox serverBox = new VBox();
+        serverBox.getStyleClass().add("pane");
+        serverBox.setAlignment(Pos.CENTER);
         Label serverExample = new Label("example server");
         serverBox.getChildren().addAll(serverExample);
 
