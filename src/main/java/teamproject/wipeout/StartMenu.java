@@ -59,11 +59,39 @@ public class StartMenu implements Controller {
         addTitle("Multiplayer");
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Join Game", () -> {}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Host Game", () -> {}), // Commented out until implemented
+                new Pair<String, Runnable>("Join Game", () -> {createJoinGameMenu();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
+                new Pair<String, Runnable>("Host Game", () -> {createHostGameMenu();}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
         addMenu(menuData);
+        root.getChildren().add(menuBox);
+    }
+
+    private void createHostGameMenu(){
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        addTitle("Host Game");
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+        );
+        addMenu(menuData);
+
+        root.getChildren().add(menuBox);
+    }
+
+    private void createJoinGameMenu(){
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        addTitle("Join Game");
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+        );
+        addMenu(menuData);
+
         root.getChildren().add(menuBox);
     }
 
@@ -76,7 +104,6 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        //startAnimation();
     }
 
     /**
@@ -108,7 +135,6 @@ public class StartMenu implements Controller {
                     createMultiplayerMenu();
                 }), // Commented out until implemented
                 new Pair<String, Runnable>("Settings", () -> {}),
-                //new Pair<String, Runnable>("TODO", () -> {}),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
@@ -138,6 +164,7 @@ public class StartMenu implements Controller {
 
     /**
      * A method to add the title to the menu.
+     * @param t The text to be displayed in the title
      */
     private void addTitle(String t) {
     	title = new Text(t);
