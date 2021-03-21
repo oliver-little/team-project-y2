@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
@@ -70,6 +71,8 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
+    private AudioComponent audio;
+
     /**
      * Creates a new instance of {@code FarmEntity}
      *
@@ -99,6 +102,9 @@ public class FarmEntity extends GameEntity {
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, spriteManager)));
+
+        audio = new AudioComponent();
+        this.addComponent(audio);
 
         this.data = new FarmData(-13, null, this.itemStore);
 
@@ -332,6 +338,7 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+        this.audio.play("shovel.wav");
         return this.data.placeItem(item, row, column);
     }
 
@@ -381,6 +388,8 @@ public class FarmEntity extends GameEntity {
             return;
         }
 
+        this.audio.play("shovel.wav");
+        
         if (makePickable) {
             // Player picking the farm item
 
