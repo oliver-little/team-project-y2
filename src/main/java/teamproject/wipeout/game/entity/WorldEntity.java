@@ -21,6 +21,7 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -44,7 +45,18 @@ public class WorldEntity extends GameEntity {
 
 	private Supplier<GameClient> clientSupplier;
 
-	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
+	public WorldEntity(
+			GameScene gameScene,
+			double width,
+			double height,
+			int numberOfPlayers,
+			Player player,
+			ItemStore itemStore,
+			SpriteManager spriteManager,
+			StackPane uiContainer,
+			InputHandler input,
+			ArrayList<Task> purchasableTasks
+	) {
 		super(gameScene);
 
 		this.farms = new HashMap<Integer, FarmEntity>();
@@ -103,7 +115,7 @@ public class WorldEntity extends GameEntity {
 			this.farms.put(farmEntity2.farmID, farmEntity2);
 		}
 
-		this.market = new MarketEntity(gameScene, 260, 250, itemStore, player, spriteManager, uiContainer);
+		this.market = new MarketEntity(gameScene, 260, 250, itemStore, player, spriteManager, uiContainer, purchasableTasks);
 		this.market.setOnUIOpen(() -> input.setDisableInput(true));
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);
