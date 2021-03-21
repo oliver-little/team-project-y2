@@ -31,7 +31,6 @@ import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
 import teamproject.wipeout.engine.system.physics.CollisionSystem;
 import teamproject.wipeout.engine.system.physics.MovementSystem;
 import teamproject.wipeout.engine.system.render.CameraFollowSystem;
-import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.ai.SteeringSystem;
@@ -45,13 +44,13 @@ import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
+import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 
 import java.util.ArrayList;
@@ -78,13 +77,10 @@ public class App implements Controller {
 
     // Temporarily placed variables
     ItemStore itemStore;
-    Market market;
-    FarmEntity farmEntity;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
     private SpriteManager spriteManager;
-
 
     // Store systems for cleanup
     Networker networker;
@@ -96,6 +92,20 @@ public class App implements Controller {
         this.widthProperty = widthProperty;
         this.heightProperty = heightProperty;
         Parent contentRoot = this.getContent();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                GameClient client = this.networker.getClient();
+                if (client != null) {
+                    client.closeConnection(true);
+                }
+                this.networker.stopServer();
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }));
+
         return contentRoot;
     }
 
@@ -338,14 +348,6 @@ public class App implements Controller {
 	}
 
     public void cleanup() {
-        try {
-            this.networker.getClient().closeConnection(true);
-            this.networker.stopServer();
-
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
         if (renderer != null) {
             renderer.cleanup();
         }
