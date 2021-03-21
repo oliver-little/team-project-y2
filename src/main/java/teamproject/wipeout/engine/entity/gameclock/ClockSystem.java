@@ -1,16 +1,19 @@
 package teamproject.wipeout.engine.entity.gameclock;
 
+import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.system.GameSystem;
 
 public class ClockSystem implements GameSystem {
 
     public final ClockUI clockUI;
+    public final GameOverUI gameOverUI;
     public final Long gameStartTime;
 
     private double timeDifference;
 
     public ClockSystem(Double time) {
-        this.clockUI = new ClockUI(time);
+        this.gameOverUI = new GameOverUI();
+        this.clockUI = new ClockUI(time, gameOverUI);
         this.gameStartTime = System.currentTimeMillis();
         this.timeDifference = 0.0;
     }

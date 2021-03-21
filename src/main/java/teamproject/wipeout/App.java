@@ -26,6 +26,7 @@ import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.entity.gameclock.ClockUI;
+import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.system.audio.AudioSystem;
 import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
 import teamproject.wipeout.engine.system.physics.CollisionSystem;
@@ -74,7 +75,7 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    Double TIME_FOR_GAME = 500.0;
+    Double TIME_FOR_GAME = 200.0;
 
     // Temporarily placed variables
     ItemStore itemStore;
@@ -203,8 +204,11 @@ public class App implements Controller {
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;
+        GameOverUI gameOverUI = clockSystem.gameOverUI;
+        gameOverUI.setVisible(false);
+        StackPane.setAlignment(gameOverUI, Pos.CENTER);
         StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI, gameOverUI);
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
@@ -248,7 +252,7 @@ public class App implements Controller {
         gl.start();
     }
 
-    
+
     public ArrayList<Task> createAllTasks(ItemStore itemStore) {
 
         ArrayList<Task> tasks = new ArrayList<>();
