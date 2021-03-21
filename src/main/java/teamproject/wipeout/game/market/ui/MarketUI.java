@@ -10,6 +10,7 @@ import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
@@ -24,6 +25,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.item.components.TradableComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -36,7 +38,7 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager) {
+    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, ArrayList<Task> purchasableTasks) {
         super();
 
         try {
@@ -55,6 +57,7 @@ public class MarketUI extends AnchorPane {
         List<Node> seedsList = new ArrayList<>();
         List<Node> plantsList = new ArrayList<>();
         List<Node> potionsList = new ArrayList<>();
+        List<Node> tasksList = new ArrayList<>();
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
@@ -68,11 +71,19 @@ public class MarketUI extends AnchorPane {
             }
         }
 
+        for (Task purchasableTask: purchasableTasks) {
+            if(player.currentAvailableTasks.containsKey(purchasableTask.id)) {
+                continue;
+            }
+            Item relatedItem = purchasableTask.relatedItem;
+            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, player, spriteManager));
+        }
+
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));
         Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList));
-        //Tab tasks = new Tab("Tasks", new Label("Purchasable Tasks")); -- Implement later.
-        tabPane.getTabs().addAll(seeds, plants, potions);
+        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList));
+        tabPane.getTabs().addAll(seeds, plants, potions, tasks);
 
         Button close = new Button("X");
 

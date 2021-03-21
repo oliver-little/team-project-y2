@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.market.entity;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import javafx.geometry.Point2D;
@@ -26,6 +27,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
 import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.task.Task;
 
 public class MarketEntity extends GameEntity {
 
@@ -47,7 +49,7 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer, ArrayList<Task> purchasableTasks) {
         super(scene);
 
         this.uiContainer = uiContainer;
@@ -111,7 +113,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);
+        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 
