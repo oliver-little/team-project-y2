@@ -36,8 +36,8 @@ public class DestroyerEntity extends GameEntity {
 
     /**
      * Creates a new instance of {@code DestroyerEntity}.
-     *
      * @param scene The GameScene this entity is part of
+     * @param destroyMode Specifies whether the entity a destroyer, TRUE for destroy, FALSE for harvest.
      */
     public DestroyerEntity(GameScene scene, boolean destroyMode) {
         super(scene);
@@ -79,6 +79,8 @@ public class DestroyerEntity extends GameEntity {
     /**
      * Adapts (= resizes and changes color) the {@code DestroyerEntity}
      * to the {@code FarmItem} it is currently pointing to.
+     * 
+     * Called for destroyer entities with the destroyMode of TRUE.
      *
      * @param farmItemPair {@link Pair} of {@link FarmItem} and {@code Boolean}(= is grown?) that the entity
      * is currently pointing to. Pass {@code null} to reset the {@code DestroyerEntity} to default state.
@@ -109,6 +111,10 @@ public class DestroyerEntity extends GameEntity {
         this.destroyerArea.height = plant.height * FarmEntity.SQUARE_SIZE;
     }
 
+    /**
+     * Getter for destroy mode.
+     * @return {@code true} if the player is destroying an item or {@code false} if the player is harvesting an item.
+     */
     public boolean getDestroyMode() {
         return this.destroyMode;
     }

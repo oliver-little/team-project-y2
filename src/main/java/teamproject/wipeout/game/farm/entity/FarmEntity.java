@@ -274,12 +274,12 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
-     * Starts picking an item from the farm through creating a {@link Hoverable} component.
+     * Starts destroying an item from the farm through creating a {@link Hoverable} component.
      *
      * @param mousePosition Current {@link Point2D} position of the mouse cursor
      */
     public void startDestroyingItem(Point2D mousePosition) {
-        // Create destroyer entity for the "tool" used to pick items and display it at the mouse coordinates
+        // Create destroyer entity for the "tool" used to destroy items and display it at the mouse coordinates
         this.destroyerEntity = new DestroyerEntity(this.scene, true);
         Transform destroyerTransform = new Transform(mousePosition.getX(), mousePosition.getY(), 0.0, 0);
         this.destroyerEntity.addComponent(destroyerTransform);
@@ -442,7 +442,7 @@ public class FarmEntity extends GameEntity {
             pickableColumn = pos[1] + pickedPlantComponent.width / 4.0;
         }
 
-        // Actually try to pick the item
+        // Actually try to pick/destroy the item
         if (isDestroyingItem()) {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
