@@ -42,7 +42,8 @@ import java.util.List;
  */
 public class StartMenu implements Controller {
     
-    private Pane root = new StackPane();
+    private Pane root_back = new StackPane();
+    private Pane foreground = new StackPane();
     private VBox menuBox = new VBox(30);
     private VBox buttonBox;
     private Text title;
@@ -52,25 +53,26 @@ public class StartMenu implements Controller {
     }
 
     private void createMultiplayerMenu(){
-        root.getChildren().remove(menuBox);
+        foreground.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        addTitle("Multiplayer");
+        menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Game", () -> {createJoinGameMenu();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Host Game", () -> {createHostGameMenu();}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
-        addMenu(menuData);
-        root.getChildren().add(menuBox);
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().add(buttonBox);
+        foreground.getChildren().add(menuBox);
     }
 
     private void createHostGameMenu(){
-        root.getChildren().remove(menuBox);
+        foreground.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        addTitle("Host Game");
+        menuBox.getChildren().addAll(UIUtil.createTitle("Host Game"));
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
@@ -99,17 +101,19 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
-        addMenu(menuData);
 
-        root.getChildren().addAll(menuBox);
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().add(buttonBox);
+
+        foreground.getChildren().addAll(menuBox);
     }
 
     private void createLobbyMenu(String serverName, String serverHost){
-        root.getChildren().remove(menuBox);
+        foreground.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         //addTitle("Lobby");
-        addTitle(serverName);
+        menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
         VBox players = new VBox();
         players.getStyleClass().add("pane");
         players.setAlignment(Pos.CENTER);
@@ -123,16 +127,17 @@ public class StartMenu implements Controller {
                 new Pair<String, Runnable>("Start Game", () -> {createMainMenu();}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
-        addMenu(menuData);
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        foreground.getChildren().add(menuBox);
     }
 
     private void createJoinGameMenu(){
-        root.getChildren().remove(menuBox);
+        foreground.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        addTitle("Join Game");
+        menuBox.getChildren().addAll(UIUtil.createTitle("Join Game"));
 
         HBox playerInfoBox = new HBox();
         playerInfoBox.getStyleClass().add("pane");
@@ -145,11 +150,8 @@ public class StartMenu implements Controller {
 
         playerInfoBox.getChildren().addAll(nameBox);
 
-        VBox serverBox = new VBox();
-        serverBox.getStyleClass().add("pane");
-        serverBox.setAlignment(Pos.CENTER);
-        Label serverExample = new Label("example server");
-        serverBox.getChildren().addAll(serverExample);
+        String[] servers = {"example 1", "test server"};
+        VBox serverBox = UIUtil.createServerBox(servers);
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
@@ -158,19 +160,23 @@ public class StartMenu implements Controller {
                 new Pair<String, Runnable>("Join Server", () -> {}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
-        addMenu(menuData);
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        foreground.getChildren().add(menuBox);
     }
 
     private void createMainMenu(){
-        root.getChildren().remove(menuBox);
+        foreground.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        addTitle("Farmageddon");
-        addMenu(getMainMenuData());
+        title = UIUtil.createTitle("Farmageddon");
+        menuBox.getChildren().addAll(title);
 
-        root.getChildren().add(menuBox);
+        buttonBox = UIUtil.createMenu(getMainMenuData());
+        menuBox.getChildren().add(buttonBox);
+
+        foreground.getChildren().add(menuBox);
 
     }
 
@@ -178,14 +184,24 @@ public class StartMenu implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     private void createContent() {
-        root.setPrefSize(800, 600);
+        root_back.setPrefSize(800, 600);
 
-        root.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
+        root_back.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
+
+        FileInputStream imgFile = null;
+        try {
+            imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
+            ImageView imageView = UIUtil.createBackground(imgFile, root_back);
+            root_back.getChildren().add(imageView);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        foreground.setPrefSize(800, 600);
+        root_back.getChildren().addAll(foreground);
 
         menuBox.setAlignment(Pos.CENTER);
         StackPane.setAlignment(menuBox, Pos.CENTER);
-
-        addBackground();
 
         createMainMenu();
         startAnimation();
@@ -195,61 +211,19 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Singleplayer", () -> {
                     App app = new App();
-                    Window window = root.getScene().getWindow();
+                    Window window = foreground.getScene().getWindow();
                     Parent content = app.init(window.widthProperty(), window.heightProperty());
-                    root.getScene().setRoot(content);
+                    foreground.getScene().setRoot(content);
                     app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Multiplayer", () -> {
                     createMultiplayerMenu();
-                }), // Commented out until implemented
+                }),
                 new Pair<String, Runnable>("Settings", () -> {}),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
     }
 
-    /**
-     * A method to add the background to the menu.
-     */
-    private void addBackground() {
-        ImageView imageView;
-		try {
-		    FileInputStream imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
-			imageView = new ImageView(new Image(imgFile));
-            ColorAdjust brightness = new ColorAdjust();
-            brightness.setBrightness(-0.2);
-            brightness.setInput(new GaussianBlur(30));
-            imageView.setEffect(brightness);
-            imageView.setPreserveRatio(true);
-            imageView.fitWidthProperty().bind(Bindings.add(root.widthProperty(), 50));
-
-	        root.getChildren().add(imageView);
-
-		} catch (FileNotFoundException exception) {
-            exception.printStackTrace();
-		}
-    }
-
-    /**
-     * A method to add the title to the menu.
-     * @param t The text to be displayed in the title
-     */
-    private void addTitle(String t) {
-    	title = new Text(t);
-
-        try {
-            InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
-            Font.loadFont(path, 12);
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-    	title.setFont(Font.font("Kalam", 40));
-    	title.setFill(Color.WHITE);
-
-        menuBox.getChildren().addAll(title);
-    }
 
     /**
      * A method to animate the menu items.
@@ -279,22 +253,6 @@ public class StartMenu implements Controller {
         full.play();
     }
 
-    /**
-     * A method to add the menu items to the menu.
-     * @param menuData
-     */
-    private void addMenu(List<Pair<String, Runnable>> menuData) {
-        buttonBox = new VBox(10);
-        //menuBox = new VBox(30);
-        buttonBox.setAlignment(Pos.CENTER);
-        
-        menuData.forEach(data -> {
-            Button button = new Button(data.getKey());
-            button.setOnAction(((event) -> data.getValue().run()));
-            buttonBox.getChildren().add(button);
-        });
-        menuBox.getChildren().add(buttonBox); //menu box added to the root node.
-    }
 	
     /**
      * Creates the content of the menu and then gets the root node of this class.
@@ -304,6 +262,6 @@ public class StartMenu implements Controller {
 	public Parent getContent()
 	{
 		createContent();
-		return root;
+		return root_back;
 	}
 }
