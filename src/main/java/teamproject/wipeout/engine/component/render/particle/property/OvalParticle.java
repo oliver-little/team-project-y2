@@ -4,9 +4,16 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
 import teamproject.wipeout.engine.component.render.particle.type.ParticleRender;
 
+/**
+ * Represents an Oval (or circular) particle
+ */
 public class OvalParticle implements ParticleType {
     public Paint color;
 
+    /**
+     * Creates a new instance of OvalParticle
+     * @param color The color to draw the particle as
+     */
     public OvalParticle(Paint color) {
         this.color = color;
     }

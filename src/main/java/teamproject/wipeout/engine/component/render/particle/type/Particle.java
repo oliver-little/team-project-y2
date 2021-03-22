@@ -61,22 +61,42 @@ public class Particle {
         this.aliveTime = 0;
     }
 
+    /**
+     * Gets the initial value of the lifetime for this particle
+     * @return The lifetime value (s)
+     */
     public double getLifetime() {
         return this.lifetime;
     }
 
+    /**
+     * Gets the initial value of the velocity for this particle
+     * @return A Point2D object representing the initial velocity of this particle
+     */
     public Point2D getStartVelocity() {
         return this.startVelocity;
     }
 
+    /**
+     * Gets the initial width of this particle
+     * @return The width (game units)
+     */
     public double getStartWidth() {
         return this.startWidth;
     }
 
+    /**
+     * Gets the initial height of this particle
+     * @return The height (game units)
+     */
     public double getStartHeight() {
         return this.startHeight;
     }
 
+    /**
+     * Gets the initial opacity of this particle
+     * @return The initial opacity
+     */
     public double getStartOpacity() {
         return this.startOpacity;
     }

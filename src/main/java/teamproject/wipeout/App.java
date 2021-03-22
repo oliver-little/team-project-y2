@@ -24,8 +24,7 @@ import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.particle.ParticleComponent;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
-import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
-import teamproject.wipeout.engine.component.render.particle.property.RectParticle;
+import teamproject.wipeout.engine.component.render.particle.property.*;
 import teamproject.wipeout.engine.component.render.particle.type.Particle;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
@@ -167,9 +166,10 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
-        ParticleParameters parameters = new ParticleParameters(new RectParticle(Color.BLUE), new Point2D(300, 5), SupplierGenerator.doubleRangeSupplier(2.0, 5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(1.0), SupplierGenerator.pointRangeSupplier(new Point2D(-5, -50), new Point2D(5, -5)));
-        parameters.setEmissionRate(200);
-        parameters.setMaxParticles(1000);
+        ParticleParameters parameters = new ParticleParameters(5, true, new RectParticle(Color.BLUE), SupplierGenerator.rangeSupplier(2.0, 5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(1.0), SupplierGenerator.rangeSupplier(new Point2D(-5, -50), new Point2D(5, -5)));
+        parameters.setEmissionRate(800);
+        parameters.setEmissionArea(new Point2D(500, 5));
+        parameters.setMaxParticles(10000);
         EaseCurve curve = new EaseCurve(EaseCurve.EaseType.INVERSE_EASE_IN_OUT);
         parameters.addUpdateFunction((Particle particle, double percentage) -> {
             double size = particle.getStartWidth() * curve.apply(percentage);
@@ -250,7 +250,6 @@ public class App implements Controller {
         
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
         input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
-
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),
                 () -> player.addAcceleration(500f, 0f));

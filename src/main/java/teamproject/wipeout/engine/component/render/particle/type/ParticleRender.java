@@ -13,7 +13,8 @@ public interface ParticleRender {
      * @param gc The GraphicsContext to render to
      * @param x The x coordinate to offset rendering from
      * @param y The y coordinate to offset rendering from
-     * @param scale The scale to render at
+     * @param width The width to render at
+     * @param height The height to render at
      */
     void render(GraphicsContext gc, double x, double y, double width, double height);
 }

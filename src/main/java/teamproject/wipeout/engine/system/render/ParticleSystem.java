@@ -30,6 +30,10 @@ public class ParticleSystem implements GameSystem {
 
     private Random randomGenerator;
 
+    /**
+     * Creates a new instance of ParticleSystem
+     * @param scene The scene this particle system is part of
+     */
     public ParticleSystem(GameScene scene) {
         entityCollector = new FunctionalSignatureCollector(scene, Set.of(Transform.class, ParticleComponent.class), add, remove, remove);
         trackedEntities = new HashMap<>();
@@ -39,6 +43,9 @@ public class ParticleSystem implements GameSystem {
         randomGenerator = new Random();
     }
 
+    /**
+     * Cleans up the entity collector when the ParticleSystem is destroyed
+     */
     public void cleanup() {
         entityCollector.cleanup();
     }
@@ -54,6 +61,30 @@ public class ParticleSystem implements GameSystem {
             ParticleParameters parameters = pc.parameters;
             ParticleRenderable renderable = entry.getValue();
             pc.time += timeStep;
+
+            if (pc.time > parameters.getRuntime()) {
+                if (parameters.doesLoop()) {
+                    pc.time = 0;
+                    pc.lastEmissionTime = 0;
+                    
+                    if (parameters.getBurstsEnabled()) {
+                        pc.nextBurst = 0;
+                    }
+                }
+                else {
+                    for (Particle p : renderable.particles) {
+                        particlePool.returnInstance(p);
+                    }
+                    renderable.particles.clear();
+                    
+                    System.out.println("stopping");
+                    pc.stop();
+                    continue;
+                }
+            }
+
+            double maxX = Double.NEGATIVE_INFINITY;
+            double maxY = Double.NEGATIVE_INFINITY;
 
             // Increment particles by timeStep
             int index = 0;
@@ -71,9 +102,18 @@ public class ParticleSystem implements GameSystem {
                         function.update(particle, percentage);
                     }
                     particle.position = particle.position.add(particle.velocity.multiply(timeStep));
+                    if (particle.position.getX() > maxX) {
+                        maxX = particle.position.getX();
+                    }
+                    if (particle.position.getY() > maxY) {
+                        maxY = particle.position.getY();
+                    }
                     index++;
                 }
             }
+
+            renderable.setWidth(maxX);
+            renderable.setHeight(maxY);
             
             // Generate new particles
             if (parameters.getEmissionEnabled()) {
@@ -85,10 +125,8 @@ public class ParticleSystem implements GameSystem {
                         numberOfEmissions = parameters.getMaxParticles() - renderable.particles.size();
                     }
 
-                    Transform t = entry.getKey().getComponent(Transform.class);
-
                     for (int i = 0; i < numberOfEmissions; i++) {
-                        Particle p = initialiseParticle(t.getWorldPosition(), parameters);
+                        Particle p = initialiseParticle(parameters);
                         renderable.particles.add(p);
                     }
 
@@ -96,18 +134,15 @@ public class ParticleSystem implements GameSystem {
                 }
             }
             // Generate bursts
-            if (parameters.getBurstsEnabled() && pc.nextBurst != -1 && parameters.getBursts().get(pc.nextBurst).burstTime > pc.time) {
-
+            if (parameters.getBurstsEnabled() && pc.nextBurst != -1 && parameters.getBursts().get(pc.nextBurst).burstTime < pc.time) {
                 int numberOfEmissions = (int) parameters.getBursts().get(pc.nextBurst).burstAmount.get();
 
                 if (numberOfEmissions + renderable.particles.size() > parameters.getMaxParticles()) {
                     numberOfEmissions = parameters.getMaxParticles() - renderable.particles.size();
                 }
 
-                Transform t = entry.getKey().getComponent(Transform.class);
-
                 for (int i = 0; i < numberOfEmissions; i++) {
-                    Particle p = initialiseParticle(t.getWorldPosition(), parameters);
+                    Particle p = initialiseParticle(parameters);
                     renderable.particles.add(p);
                 }
 
@@ -122,6 +157,10 @@ public class ParticleSystem implements GameSystem {
         }
     }
 
+    /**
+     * Consumer function called when an entity with a Transform and ParticleComponent is added to the scene
+     * @param entity The entity that was added
+     */
     public Consumer<GameEntity> add = (entity) -> {
         if (!trackedEntities.containsKey(entity)) {
             if (!entity.hasComponent(RenderComponent.class)) {
@@ -137,6 +176,10 @@ public class ParticleSystem implements GameSystem {
         }
     };
 
+    /**
+     * Consumer function called when an entity that does not meet the requirements is removed, or has a component removed
+     * @param entity The entity that was removed
+     */
     public Consumer<GameEntity> remove = (entity) -> {
         if (trackedEntities.containsKey(entity)) {
             if (entity.hasComponent(RenderComponent.class)) {
@@ -148,11 +191,19 @@ public class ParticleSystem implements GameSystem {
                     particlePool.returnInstance(p);
                 }
 
+                renderable.particles.clear();
+
             }
             trackedEntities.remove(entity);
         }
     };
 
+    /**
+     * Gets a random position within a given bounding box
+     * @param topLeft The top left position to get a random point from
+     * @param widthHeight The width and height of the box
+     * @return The random position within the box
+     */
     private Point2D getRandomPositionInArea(Point2D topLeft, Point2D widthHeight) {
         double x = topLeft.getX() + randomGenerator.nextInt((int) widthHeight.getX());
         double y = topLeft.getY() + randomGenerator.nextInt((int) widthHeight.getY());
@@ -160,8 +211,18 @@ public class ParticleSystem implements GameSystem {
         return new Point2D(x, y);
     }
 
-    private Particle initialiseParticle(Point2D startPosition, ParticleParameters parameters) {
-        Point2D startPos = this.getRandomPositionInArea(startPosition, parameters.getEmissionArea());
+    /**
+     * Initialises a new particle from the pool
+     * @param parameters The particle parameter object to reference for initialisation
+     * @return The newly initialised particle
+     */
+    private Particle initialiseParticle(ParticleParameters parameters) {
+        Point2D startPos = Point2D.ZERO;
+        Point2D emissionArea = parameters.getEmissionArea();
+        if (emissionArea != null && emissionArea.getX() > 0 && emissionArea.getY() > 0) {
+            startPos = this.getRandomPositionInArea(startPos, parameters.getEmissionArea());
+        }
+
         Particle p = particlePool.getInstance();
         p.initialise(startPos, parameters.getVelocity().get(), parameters.getLifetime().get(), parameters.getWidth().get(), parameters.getHeight().get(), parameters.getOpacity().get(), parameters.getEmissionType().renderFactory());
         return p;
