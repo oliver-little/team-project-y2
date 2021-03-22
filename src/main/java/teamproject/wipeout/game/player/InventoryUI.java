@@ -37,6 +37,9 @@ import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+/**
+ * Creates the player's inventory bar as a StackPane
+ */
 public class InventoryUI extends StackPane {
 
 	public Point2D size;
@@ -213,7 +216,6 @@ public class InventoryUI extends StackPane {
 					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));
 
 				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
@@ -264,7 +266,6 @@ public class InventoryUI extends StackPane {
 		}
 		catch (FileNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

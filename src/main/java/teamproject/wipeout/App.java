@@ -50,6 +50,7 @@ import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
+import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.util.Networker;
@@ -59,7 +60,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-
+import javafx.application.Platform;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
@@ -204,12 +205,17 @@ public class App implements Controller {
 
         ClockUI clockUI = clockSystem.clockUI;
         StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
+
+        GameAudio ga = new GameAudio("backingTrack2.wav", true);
+        ga.play();
+        //input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
+
+        SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
+        StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI, settingsUI);
 
         input.onKeyRelease(KeyCode.D, () -> player.playSound("glassSmashing2.wav")); //example - pressing the D key will trigger the sound
-        
-        GameAudio ga = new GameAudio("backingTrack2.wav", true);
-        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
 
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),
@@ -230,10 +236,11 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
         input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
+        /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
-
+        */
         invUI.onMouseClick(world);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
         

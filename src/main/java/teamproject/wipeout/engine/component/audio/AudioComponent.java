@@ -33,6 +33,7 @@ public class AudioComponent implements GameComponent {
 	 */
 	public AudioComponent() {
     	//play = false;
+		this.volume = 0.05f;
 	}
 
 	public void addSound(String audioFileName){
@@ -68,6 +69,9 @@ public class AudioComponent implements GameComponent {
 	 * called by any class when it wants the sound to play.
 	 */
 	public void play(String audioFileName) {
+		if(volume == 0){
+			return; //stops sounds queueing when system is muted
+		}
 		sounds.put(audioFileName, true);
 	}
 	
