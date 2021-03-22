@@ -4,9 +4,7 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.BoxBlur;
@@ -42,8 +40,7 @@ import java.util.List;
  */
 public class StartMenu implements Controller {
     
-    private Pane root_back = new StackPane();
-    private Pane foreground = new StackPane();
+    private Pane root = new StackPane();
     private VBox menuBox = new VBox(30);
     private VBox buttonBox;
     private Text title;
@@ -53,7 +50,7 @@ public class StartMenu implements Controller {
     }
 
     private void createMultiplayerMenu(){
-        foreground.getChildren().remove(menuBox);
+        root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
@@ -65,11 +62,11 @@ public class StartMenu implements Controller {
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
-        foreground.getChildren().add(menuBox);
+        root.getChildren().add(menuBox);
     }
 
     private void createHostGameMenu(){
-        foreground.getChildren().remove(menuBox);
+        root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Host Game"));
@@ -105,11 +102,11 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        foreground.getChildren().addAll(menuBox);
+        root.getChildren().addAll(menuBox);
     }
 
     private void createLobbyMenu(String serverName, String serverHost){
-        foreground.getChildren().remove(menuBox);
+        root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         //addTitle("Lobby");
@@ -130,11 +127,11 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        foreground.getChildren().add(menuBox);
+        root.getChildren().add(menuBox);
     }
 
     private void createJoinGameMenu(){
-        foreground.getChildren().remove(menuBox);
+        root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Join Game"));
@@ -151,23 +148,41 @@ public class StartMenu implements Controller {
         playerInfoBox.getChildren().addAll(nameBox);
 
         String[] servers = {"example 1", "test server"};
-        VBox serverBox = UIUtil.createServerBox(servers);
+
+        VBox serverBox = new VBox();
+        serverBox.getStyleClass().add("pane");
+        serverBox.setAlignment(Pos.CENTER);
+        //toggle groups are so only one can be selected at a time
+        ToggleGroup serverGroup = new ToggleGroup();
+        for(int i=0; i<servers.length;i++) {
+            ToggleButton server = new ToggleButton(servers[i]);
+            server.setUserData(servers[i]);
+            server.setToggleGroup(serverGroup);
+            serverBox.getChildren().add(server);
+        }
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Join Server", () -> {}),
+                new Pair<String, Runnable>("Join Server", () -> {
+                    Toggle s = serverGroup.getSelectedToggle();
+                    System.out.println(s.getProperties());
+                    if(s  !=null){
+                        System.out.println(s.getUserData());
+                        createLobbyMenu(s.getUserData().toString(), "test host");
+                    }
+                }),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        foreground.getChildren().add(menuBox);
+        root.getChildren().add(menuBox);
     }
 
     private void createMainMenu(){
-        foreground.getChildren().remove(menuBox);
+        root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         title = UIUtil.createTitle("Farmageddon");
@@ -176,7 +191,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(getMainMenuData());
         menuBox.getChildren().add(buttonBox);
 
-        foreground.getChildren().add(menuBox);
+        root.getChildren().add(menuBox);
 
     }
 
@@ -184,21 +199,19 @@ public class StartMenu implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     private void createContent() {
-        root_back.setPrefSize(800, 600);
+        root.setPrefSize(800, 600);
 
-        root_back.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
+        root.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
 
         FileInputStream imgFile = null;
         try {
             imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
-            ImageView imageView = UIUtil.createBackground(imgFile, root_back);
-            root_back.getChildren().add(imageView);
+            ImageView imageView = UIUtil.createBackground(imgFile, root);
+            root.getChildren().add(imageView);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        foreground.setPrefSize(800, 600);
-        root_back.getChildren().addAll(foreground);
+        
 
         menuBox.setAlignment(Pos.CENTER);
         StackPane.setAlignment(menuBox, Pos.CENTER);
@@ -211,9 +224,9 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Singleplayer", () -> {
                     App app = new App();
-                    Window window = foreground.getScene().getWindow();
+                    Window window = root.getScene().getWindow();
                     Parent content = app.init(window.widthProperty(), window.heightProperty());
-                    foreground.getScene().setRoot(content);
+                    root.getScene().setRoot(content);
                     app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Multiplayer", () -> {
                     createMultiplayerMenu();
@@ -262,6 +275,6 @@ public class StartMenu implements Controller {
 	public Parent getContent()
 	{
 		createContent();
-		return root_back;
+		return root;
 	}
 }

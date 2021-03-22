@@ -82,18 +82,4 @@ public class UIUtil {
     }
 
 
-    public static VBox createServerBox(String[] servers) {
-        VBox serverBox = new VBox();
-        serverBox.getStyleClass().add("pane");
-        serverBox.setAlignment(Pos.CENTER);
-        //toggle groups are so only one can be selected at a time
-        ToggleGroup serverGroup = new ToggleGroup();
-        for(int i=0; i<servers.length;i++){
-            ToggleButton server = new ToggleButton(servers[i]);
-            server.setToggleGroup(serverGroup);
-            serverBox.getChildren().add(server);
-        }
-
-        return serverBox;
-    }
 }
