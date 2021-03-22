@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -19,7 +20,13 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
+import teamproject.wipeout.engine.component.render.particle.property.RectParticle;
+import teamproject.wipeout.engine.component.render.particle.type.Particle;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -31,6 +38,7 @@ import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
 import teamproject.wipeout.engine.system.physics.CollisionSystem;
 import teamproject.wipeout.engine.system.physics.MovementSystem;
 import teamproject.wipeout.engine.system.render.CameraFollowSystem;
+import teamproject.wipeout.engine.system.render.ParticleSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.ai.SteeringSystem;
@@ -52,6 +60,7 @@ import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.util.SupplierGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -131,6 +140,7 @@ public class App implements Controller {
         AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
+        systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
@@ -157,6 +167,23 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
+        ParticleParameters parameters = new ParticleParameters(new RectParticle(Color.BLUE), new Point2D(300, 5), SupplierGenerator.doubleRangeSupplier(2.0, 5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(1.0), SupplierGenerator.pointRangeSupplier(new Point2D(-5, -50), new Point2D(5, -5)));
+        parameters.setEmissionRate(200);
+        parameters.setMaxParticles(1000);
+        EaseCurve curve = new EaseCurve(EaseCurve.EaseType.INVERSE_EASE_IN_OUT);
+        parameters.addUpdateFunction((Particle particle, double percentage) -> {
+            double size = particle.getStartWidth() * curve.apply(percentage);
+            particle.width = size;
+            particle.height = size;
+        });
+
+        GameEntity particle = new GameEntity(gameScene);
+        particle.addComponent(new Transform(0, 50, 10));
+        particle.addComponent(new RenderComponent(new RectRenderable(Color.WHITE, 2, 2)));
+        ParticleComponent pc = new ParticleComponent(parameters);
+        particle.addComponent(pc);
+        pc.play();
+
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
