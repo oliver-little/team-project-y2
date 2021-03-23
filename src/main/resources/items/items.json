@@ -1083,6 +1083,44 @@
     },
     {
       "id" : 58,
+      "name": "Speed Potion (S)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "small-speed-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 30.00,
+          "defaultSellPrice" : 20.00
+        },
+        "SabotageComponent" : {
+          "sabotage-type" : "SPEED",
+          "duration" : 30        
+        }
+      }
+    },
+    {
+      "id" : 59,
+      "name": "Speed Potion (L)",
+      "components" : {
+        "InventoryComponent" : {
+          "spriteSheetName" : "inventory-potions",
+          "spriteSetName" : "large-speed-booster",
+          "stackSizeLimit" : 5
+        },
+        "TradableComponent" : {
+          "defaultBuyPrice" : 100.00,
+          "defaultSellPrice" : 70.00
+        },
+        "SabotageComponent" : {
+          "sabotage-type" : "SPEED",
+          "duration" : 120        
+        }
+      }
+    },
+    {
+      "id" : 60,
       "name": "Slowness Potion (S)",
       "components" : {
         "InventoryComponent" : {
@@ -1101,7 +1139,7 @@
       }
     },
     {
-      "id" : 59,
+      "id" : 61,
       "name": "Slowness Potion (L)",
       "components" : {
         "InventoryComponent" : {
@@ -1115,82 +1153,6 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "SPEED",
-          "duration" : 120        
-        }
-      }
-    },
-    {
-      "id" : 60,
-      "name": "Reputation Boost (S)",
-      "components" : {
-        "InventoryComponent" : {
-          "spriteSheetName" : "inventory-potions",
-          "spriteSetName" : "small-reputation-booster",
-          "stackSizeLimit" : 5
-        },
-        "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
-        },
-        "SabotageComponent" : {
-          "sabotage-type" : "REPUTATION",
-          "duration" : 30        
-        }
-      }
-    },
-    {
-      "id" : 61,
-      "name": "Reputation Boost (L)",
-      "components" : {
-        "InventoryComponent" : {
-          "spriteSheetName" : "inventory-potions",
-          "spriteSetName" : "large-reputation-booster",
-          "stackSizeLimit" : 5
-        },
-        "TradableComponent" : {
-          "defaultBuyPrice" : 100.00,
-          "defaultSellPrice" : 70.00
-        },
-        "SabotageComponent" : {
-          "sabotage-type" : "REPUTATION",
-          "duration" : 120        
-        }
-      }
-    },
-    {
-      "id" : 62,
-      "name": "Reputation Poison (S)",
-      "components" : {
-        "InventoryComponent" : {
-          "spriteSheetName" : "inventory-potions",
-          "spriteSetName" : "small-reputation-poison",
-          "stackSizeLimit" : 5
-        },
-        "TradableComponent" : {
-          "defaultBuyPrice" : 30.00,
-          "defaultSellPrice" : 20.00
-        },
-        "SabotageComponent" : {
-          "sabotage-type" : "REPUTATION",
-          "duration" : 30        
-        }
-      }
-    },
-    {
-      "id" : 63,
-      "name": "Reputation Poison (L)",
-      "components" : {
-        "InventoryComponent" : {
-          "spriteSheetName" : "inventory-potions",
-          "spriteSetName" : "large-reputation-poison",
-          "stackSizeLimit" : 5
-        },
-        "TradableComponent" : {
-          "defaultBuyPrice" : 100.00,
-          "defaultSellPrice" : 70.00
-        },
-        "SabotageComponent" : {
-          "sabotage-type" : "REPUTATION",
           "duration" : 120        
         }
       }

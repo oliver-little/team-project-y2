@@ -1,16 +1,16 @@
 package teamproject.wipeout.engine.component;
 
-import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.farm.Pickables;
 
 public class PickableComponent implements GameComponent {
 
-    public Item item;
+    public final Pickables.Pickable pickable;
 
-    public PickableComponent(Item item) {
-        this.item = item;
+    public PickableComponent(Pickables.Pickable pickable) {
+        this.pickable = pickable;
     }
 
     public String getType() {
-        return "item";
+        return "pickable";
     }
 }

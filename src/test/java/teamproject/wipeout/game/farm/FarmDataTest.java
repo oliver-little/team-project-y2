@@ -187,13 +187,13 @@ class FarmDataTest {
 
     @Test
     void testPlacingRegularItem() {
-        boolean placed = farmData.placeItem(item, -1, 0);
+        boolean placed = farmData.placeItem(item, 0.0, -1, 0);
         Assertions.assertFalse(placed);
 
-        placed = farmData.placeItem(item, 0, 0);
+        placed = farmData.placeItem(item, 0.0, 0, 0);
         Assertions.assertFalse(placed);
 
-        placed = farmData.placeItem(item, 1, 0);
+        placed = farmData.placeItem(item, 0.0, 1, 0);
         Assertions.assertTrue(placed);
 
         FarmItem newFarmItem = farmData.items.get(1).get(0);
@@ -205,16 +205,16 @@ class FarmDataTest {
 
     @Test
     void testPlacingOversizedItem() {
-        boolean placed = farmData.placeItem(finishedItem, -2, -2);
+        boolean placed = farmData.placeItem(finishedItem, 0.0, -2, -2);
         Assertions.assertFalse(placed);
 
-        placed = farmData.placeItem(finishedItem, 0, 2);
+        placed = farmData.placeItem(finishedItem, 0.0, 0, 2);
         Assertions.assertFalse(placed);
 
-        placed = farmData.placeItem(finishedItem, 1, 2);
+        placed = farmData.placeItem(finishedItem, 0.0, 1, 2);
         Assertions.assertFalse(placed);
 
-        placed = farmData.placeItem(finishedItem, 0, 3);
+        placed = farmData.placeItem(finishedItem, 0.0, 0, 3);
         Assertions.assertTrue(placed);
 
         FarmItem newFarmItem = farmData.items.get(0).get(3);
@@ -323,7 +323,7 @@ class FarmDataTest {
         Assertions.assertEquals(item.id, pickedItem2.id);
         Assertions.assertEquals(item.name, pickedItem2.name);
 
-        Assertions.assertTrue(farmData.placeItem(finishedItem, FarmData.FARM_ROWS - 2, FarmData.FARM_COLUMNS - 2));
+        Assertions.assertTrue(farmData.placeItem(finishedItem, 0.0, FarmData.FARM_ROWS - 2, FarmData.FARM_COLUMNS - 2));
         finishedFarmItem = farmData.items.get(FarmData.FARM_ROWS - 2).get(FarmData.FARM_COLUMNS - 2);
         finishedFarmItem.growth = finishedFarmItem.getGrowthRate() * finishedFarmItem.getMaxGrowthStage();
         Item pickedItem4 = farmData.pickItem(finishedFarmItem);

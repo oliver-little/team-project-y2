@@ -1,5 +1,6 @@
 package teamproject.wipeout.networking.state;
 
+import javafx.util.Pair;
 import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.Item;
 
@@ -21,7 +22,7 @@ public class FarmState implements Serializable {
 
     private Integer farmID;
 
-    public List<List<Integer>> items;
+    public List<List<Pair<Integer, Double>>> items;
 
     private long timestamp;
 
@@ -37,7 +38,7 @@ public class FarmState implements Serializable {
             return row.stream().map((item) -> {
                 if (item != null) {
                     Item currentItem = item.get();
-                    return currentItem == null ? null : currentItem.id;
+                    return currentItem == null ? null : new Pair<Integer, Double>(currentItem.id, item.growth);
                 }
                 return null;
             }).collect(Collectors.toList());
@@ -52,7 +53,7 @@ public class FarmState implements Serializable {
      * @param items  Items at the farm
      * @param timestamp Timestamp of the state
      */
-    protected FarmState(Integer farmID, List<List<Integer>> items, long timestamp) {
+    protected FarmState(Integer farmID, List<List<Pair<Integer, Double>>> items, long timestamp) {
         this.farmID = farmID;
         this.items = items;
         this.timestamp = timestamp;
@@ -100,7 +101,7 @@ public class FarmState implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         this.farmID = in.readInt();
 
-        this.items = (List<List<Integer>>) in.readObject();
+        this.items = (List<List<Pair<Integer, Double>>>) in.readObject();
 
         this.timestamp = in.readLong();
     }

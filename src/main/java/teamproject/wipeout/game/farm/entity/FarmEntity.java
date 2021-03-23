@@ -1,20 +1,13 @@
 package teamproject.wipeout.game.farm.entity;
 
 import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
 import javafx.util.Pair;
-import teamproject.wipeout.engine.component.PickableComponent;
-import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
-import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
@@ -23,9 +16,9 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.FarmItem;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
@@ -35,6 +28,7 @@ import teamproject.wipeout.networking.state.FarmState;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -73,6 +67,8 @@ public class FarmEntity extends GameEntity {
 
     private AudioComponent audio;
 
+    private final Pickables pickables;
+
     /**
      * Creates a new instance of {@code FarmEntity}
      *
@@ -81,7 +77,7 @@ public class FarmEntity extends GameEntity {
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowEntity}
      * @param itemStore {@link ItemStore} for the {@link ItemsRowEntity}
      */
-    public FarmEntity(GameScene scene, Integer farmID, Point2D location, SpriteManager spriteManager, ItemStore itemStore) {
+    public FarmEntity(GameScene scene, Integer farmID, Point2D location, Pickables pickables, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
         this.farmID = farmID;
 
@@ -101,7 +97,7 @@ public class FarmEntity extends GameEntity {
         this.destroyerDelegate = null;
 
         this.addComponent(this.transform);
-        this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, spriteManager)));
+        this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
 
         audio = new AudioComponent();
         this.addComponent(audio);
@@ -118,6 +114,8 @@ public class FarmEntity extends GameEntity {
             this.addChild(rowEntity);
             this.rowEntities.add(rowEntity);
         }
+
+        this.pickables = pickables;
     }
 
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
@@ -152,6 +150,9 @@ public class FarmEntity extends GameEntity {
             this.stopPlacingItem(false);
         }
         if (this.isPickingItem()) {
+            this.stopPickingItem();
+        }
+        if (this.isDestroyingItem()) {
             this.stopPickingItem();
         }
     }
@@ -277,6 +278,58 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
+     * Starts destroying an item from the farm through creating a {@link Hoverable} component.
+     *
+     * @param mousePosition Current {@link Point2D} position of the mouse cursor
+     */
+    public void startDestroyingItem(Point2D mousePosition) {
+        // Create destroyer entity for the "tool" used to destroy items and display it at the mouse coordinates
+        this.destroyerEntity = new DestroyerEntity(this.scene, true);
+        Transform destroyerTransform = new Transform(mousePosition.getX(), mousePosition.getY(), 0.0, 0);
+        this.destroyerEntity.addComponent(destroyerTransform);
+
+        // Activates a Hoverable component which updates the position of the destroyer "tool"
+        // based on the position of the mouse cursor
+        InputHoverableAction hoverableAction = (x, y) -> {
+            Point2D point = this.isWithinFarm(x, y);
+            Transform dTransform = this.destroyerEntity.getComponent(Transform.class);
+
+            if (point == null) {
+                // Is NOT within the farm
+                dTransform.setPosition(new Point2D(x, y));
+                this.destroyerEntity.adaptToDestroyFarmItem(null);
+            } else {
+                // Is within the farm. But is there any item at that coordinates?...
+                Pair<FarmItem, Boolean> pickingItem = this.canBePicked(x, y);
+                if (pickingItem == null) {
+                    //...NO :( there is no item
+                    dTransform.setPosition(point);
+                    this.destroyerEntity.adaptToDestroyFarmItem(null);
+                } else {
+                    //...YES :) there is an item
+                    
+                    int[] itemFarmPosition = this.data.positionForItem(pickingItem.getKey());
+                    dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
+                    this.destroyerEntity.adaptToDestroyFarmItem(pickingItem);
+
+                    // Set up a delegate so that the destroyer tool gets updates about the item's growth progress
+                    this.destroyerDelegate = (updatedFarmItem) -> {
+                        if (this.destroyerEntity == null) {
+                            return;
+                        }
+                        if (pickingItem.getKey() == updatedFarmItem) {
+                            this.destroyerEntity.setColorForPickable(true);
+                        }
+                    };
+                    this.data.addGrowthDelegate(this.destroyerDelegate);
+                }
+            }
+        };
+        hoverableAction.performMouseHoverAction(mousePosition.getX(), mousePosition.getY());
+        this.makeHoverable(hoverableAction);
+    }
+
+    /**
      * Stops picking an item from the farm and removes the {@link Hoverable} component.
      */
     public void stopPickingItem() {
@@ -295,6 +348,18 @@ public class FarmEntity extends GameEntity {
      */
     public boolean isPickingItem() {
         return this.destroyerEntity != null;
+    }
+
+    /**
+     * @return {@code true} if the player is destroying an item, otherwise {@code false}.
+     */
+    public boolean isDestroyingItem() {
+        if (this.destroyerEntity == null) {
+            return false;
+        }
+        else {
+            return this.destroyerEntity.getDestroyMode();
+        }
     }
 
     /**
@@ -339,7 +404,7 @@ public class FarmEntity extends GameEntity {
         int row = (int) coors.getY();
         int column = (int) coors.getX();
         this.audio.play("shovel.wav");
-        return this.data.placeItem(item, row, column);
+        return this.data.placeItem(item, 0.0, row, column);
     }
 
     /**
@@ -382,8 +447,17 @@ public class FarmEntity extends GameEntity {
             pickableColumn = pos[1] + pickedPlantComponent.width / 4.0;
         }
 
-        // Actually try to pick the item
-        pickedItem = this.data.pickItemAt(row, column);
+        // Actually try to pick/destroy the item
+        if (isDestroyingItem()) {
+            this.data.destroyItemAt(row, column);
+            pickedItem = null;
+            this.audio.play("slice.wav");
+        }
+        else {
+            pickedItem = this.data.pickItemAt(row, column);
+        }
+
+        
         if (pickedItem == null) {
             return;
         }
@@ -404,11 +478,8 @@ public class FarmEntity extends GameEntity {
             }
 
             Item inventoryItem = this.itemStore.getItem(inventoryID);
-            try {
-                this.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
-            } catch (FileNotFoundException exception) {
-                exception.printStackTrace();
-            }
+            this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
+
         } else {
             // Animal eating the farm item
             this.sendStateUpdate();
@@ -487,11 +558,34 @@ public class FarmEntity extends GameEntity {
                 this.stopPlacingItem(false);
             }
 
-            if (this.isPickingItem()) {
+            if (this.isDestroyingItem()) {
+                this.stopPickingItem();
+                this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
+            
+            } else if (this.isPickingItem()) {
                 this.stopPickingItem();
 
             } else {
                 this.startPickingItem(mouseHoverSystem.getCurrentMousePosition());
+            }
+        };
+    }
+
+    public InputKeyAction onKeyPickActionDestroy(MouseHoverSystem mouseHoverSystem) {
+        return () -> {
+            if (this.isPlacingItem()) {
+                this.stopPlacingItem(false);
+            }
+
+            if (this.isDestroyingItem()) {
+                this.stopPickingItem();
+            
+            } else if (this.isPickingItem()) {
+                this.stopPickingItem();
+                this.startDestroyingItem(mouseHoverSystem.getCurrentMousePosition());
+
+            } else {
+                this.startDestroyingItem(mouseHoverSystem.getCurrentMousePosition());
             }
         };
     }
@@ -522,11 +616,16 @@ public class FarmEntity extends GameEntity {
     private Clickable makeClickable(Supplier<GameClient> clientFunction) {
         this.clientSupplier = clientFunction;
 
-        Clickable clickable = new Clickable((x, y, button, entity) -> {
+        Clickable clickable = new Clickable((x, y, button) -> {
             boolean stateChanged = false;
 
-            if (this.isPickingItem()) {
-                this.pickItemAt(x, y);
+            if (this.isPickingItem()) { 
+                this.pickItemAt(x, y); //Picking a plant
+                this.stopPickingItem();
+                stateChanged = true;
+            
+            } else if (this.isDestroyingItem()) {
+                this.pickItemAt(x, y, true); //Destroying a plant
                 this.stopPickingItem();
                 stateChanged = true;
 
@@ -556,66 +655,6 @@ public class FarmEntity extends GameEntity {
         Hoverable hoverable = new Hoverable(hoverableAction);
         hoverable.setEntity(this);
         this.addComponent(hoverable);
-    }
-
-    /**
-     * Creates pickable entity(/entities) for a given item after it was harvested.
-     * The entity(/entities) are rendered around a given X, Y scene coordinates.
-     *
-     * @param item Harvested {@link Item}
-     * @param x X scene coordinate
-     * @param y Y scene coordinate
-     * @param numberOfPickables The number of pickables to generate
-     * @throws FileNotFoundException Thrown if the inventory sprites cannot be found for the given {@code Item}.
-     */
-    private void createPickablesFor(Item item, double x, double y, int numberOfPickables) throws FileNotFoundException {
-        InventoryComponent invComponent = item.getComponent(InventoryComponent.class);
-        Image sprite = this.spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName)[0];
-
-        Point2D centrePos = new Point2D(x, y);
-
-        for(int i = 0; i < numberOfPickables; i++) {
-            GameEntity entity = this.scene.createEntity();
-            SpriteRenderable spriteRenderable = new SpriteRenderable(sprite, 0.01);
-            entity.addComponent(new RenderComponent(spriteRenderable));
-            Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(40.0, 175.0));
-            entity.addComponent(new Transform(centrePos, 0.0, 1));
-            entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth() * 0.75, sprite.getHeight() * 0.75)));
-            entity.addComponent(new MovementComponent(velocityVector, Point2D.ZERO));
-            entity.addComponent(new PickableComponent(item));
-            // Growing animation
-            entity.addComponent(new ScriptComponent((timeStep) -> {
-                if (spriteRenderable.spriteScale.getX() < 0.75) {
-                    double step = timeStep * 10;
-                    spriteRenderable.spriteScale = spriteRenderable.spriteScale.add(step, step);
-                }
-                else {
-                    entity.getComponent(ScriptComponent.class).requestDeletion = true;
-                }
-            }));
-        }
-    }
-
-    /**
-     * Gives random X, Y coordinates centered around a given X, Y scene coordinates
-     *
-     * @param x X scene coordinate
-     * @param y Y scene coordinate
-     * @return Randomised X, Y coordinates in form of a {@link Point2D}
-     */
-    private Point2D giveRandomPositionAround(double x, double y) {
-        ThreadLocalRandom randomiser = ThreadLocalRandom.current();
-
-        double randX;
-        double randY;
-        if (randomiser.nextBoolean()) {
-            randX = randomiser.nextDouble(x - (2 * SQUARE_SIZE), x);
-            randY = randomiser.nextDouble(y - (2 * SQUARE_SIZE), y);
-        } else {
-            randX = randomiser.nextDouble(x, x + (SQUARE_SIZE / 4.0));
-            randY = randomiser.nextDouble(y, y + (SQUARE_SIZE / 4.0));
-        }
-        return new Point2D(randX, randY);
     }
 
     /**
