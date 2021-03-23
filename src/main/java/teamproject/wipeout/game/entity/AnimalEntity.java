@@ -221,7 +221,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             return;
         }
 
-        //Is the animal on a farm, if so, try to harvest some vegetables.
+        
 
         double probability = Math.random();
 

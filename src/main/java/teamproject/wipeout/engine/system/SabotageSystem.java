@@ -26,13 +26,19 @@ public class SabotageSystem implements EventSystem{
         SabotageComponent sabotageComponent = entity.getComponent(SabotageComponent.class);
 
         if (sabotageComponent.type == SabotageComponent.SabotageType.SPEED) {
-            //TODO - This needs to apply a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
+            //This needs to apply a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
+            //The code for the player is done, it already calculates acceleration (speed) based on the speed multiplier.
+            //TODO - Need to apply the potion's multiplier to the selected player for the potion's duration.
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE) {
-            //TODO - This needs to apply a growth rate multiplier to a farm to which the potion is thrown at to either increase or decrease the growth rate of all the items on the farm for a set period of tiem (defined in items.JSON)
+            //This needs to apply a growth rate multiplier to a farm to which the potion is thrown at to either increase or decrease the growth rate of all the items on the farm for a set period of tiem (defined in items.JSON)
+            //The multiplier for growth rate has been added into FarmEntity but does NOT do anything at the moment.
+            //TODO - Need to apply the potion's multiplier to the selected farm AND need to implement code to change the growth rate of every item for the potion's duration.
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.AI) {
-            //TODO - Jamie & Ollie.
+            //This needs to apply an AI mutliplier to a farm to which the potion is thrown at to either increase or decrease the likelihood of the rat visiting the farm.
+            //The code for the rat is done, it already can look at all the FarmEntity's AI multipliers and make decisions based on it.
+            //TODO - Need to apply the potion's multiplier to the selected farm (FarmEntity) for the potion's duration.
         }
         else {
             throw new NoSuchElementException("Sabotage system failed: An item did not have a valid sabotage type.");
