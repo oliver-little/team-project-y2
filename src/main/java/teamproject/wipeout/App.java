@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
@@ -222,6 +223,9 @@ public class App implements Controller {
         this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
+        VBox topRight = new VBox();
+        topRight.setAlignment(Pos.TOP_RIGHT);
+
         ClockUI clockUI = clockSystem.clockUI;
         StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
 
@@ -232,7 +236,8 @@ public class App implements Controller {
         SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
         StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
 
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI, settingsUI);
+        topRight.getChildren().addAll(clockUI, settingsUI);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
 
         input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the D key will trigger the sound
 
