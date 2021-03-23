@@ -15,7 +15,6 @@ public class SabotageComponent implements GameComponent, ItemComponent {
     public enum SabotageType {
         SPEED,
         GROWTHRATE,
-        REPUTATION,
         AI
     }
 

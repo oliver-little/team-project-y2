@@ -31,9 +31,6 @@ public class SabotageSystem implements EventSystem{
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE) {
             //TODO - This needs to apply a growth rate multiplier to a farm to which the potion is thrown at to either increase or decrease the growth rate of all the items on the farm for a set period of tiem (defined in items.JSON)
         }
-        else if (sabotageComponent.type == SabotageComponent.SabotageType.REPUTATION) {
-            //TODO - This needs to apply a reputation multiplier to a player to which the potion is thrown at to either increase/decrease the market prices for that player by a constant multiplier for a set period of time (defined in items.JSON)
-        }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.AI) {
             //TODO - Jamie & Ollie.
         }
