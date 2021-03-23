@@ -52,6 +52,7 @@ public class FarmEntity extends GameEntity {
     private final ItemStore itemStore;
 
     private double growthMultiplier;
+    private double AIMultiplier;
 
     private final List<ItemsRowEntity> rowEntities;
 
@@ -96,6 +97,7 @@ public class FarmEntity extends GameEntity {
         this.destroyerDelegate = null;
 
         this.growthMultiplier = 1;
+        this.AIMultiplier = 1;
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
@@ -670,12 +672,36 @@ public class FarmEntity extends GameEntity {
         }
     }
 
+    /**
+     * Getter for the global growth multiplier for a farm, this multiplies the growth rate of all plants in a farm.
+     * @return The growth multiplier for a farm.
+     */
     public double getGrowthMultiplier() {
         return this.growthMultiplier;
     }
 
+    /**
+     * Setter for the global growth multiplier for a farm, this multiplies the growth rate of all plants in a farm by the given constant.
+     * @param growthMultiplier The new growth multiplier for a farm.
+     */
     public void setGrowthMultiplier(double growthMultiplier) {
         this.growthMultiplier = growthMultiplier;
+    }
+
+    /**
+     * Getter for the AI multiplier for a farm, the higher the value, the higher the chance of the AI stealing plants from a farm.
+     * @return The AI multiplier
+     */
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
+    /**
+     * Setter for the AI multiplier for a farm, the higher the value, the higher the chance of the AI stealing plants from a farm.
+     * @param AIMultiplier The new AI multiplier for a farm.
+     */
+    public void setAIMultiplier(double AIMultiplier) {
+        this.AIMultiplier = AIMultiplier;
     }
 
 }
