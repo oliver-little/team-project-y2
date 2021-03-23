@@ -12,30 +12,24 @@ import teamproject.wipeout.engine.entity.collector.CameraEntityCollector;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.input.InputHoverableAction;
-import teamproject.wipeout.engine.system.EventSystem;
+import teamproject.wipeout.engine.system.GameSystem;
 
 import java.util.List;
 import java.util.Set;
 
-public class MouseHoverSystem implements EventSystem {
+public class MouseHoverSystem implements GameSystem {
 
     private final SignatureEntityCollector collector;
     private final CameraEntityCollector cameraCollector;
 
     private double currentMouseX;
     private double currentMouseY;
+    private double lastFrameWorldX;
+    private double lastFrameWorldY;
 
     protected final InputHoverableAction onHover = (x, y) -> {
         this.currentMouseX = x;
         this.currentMouseY = y;
-
-        Pair<List<GameEntity>, Point2D> hovering = this.getHovered(x, y);
-        for (GameEntity entity : hovering.getKey()) {
-            Hoverable hoverable = entity.getComponent(Hoverable.class);
-            if (hoverable != null) {
-                hoverable.onClick.performMouseHoverAction(hovering.getValue().getX(), hovering.getValue().getY());
-            }
-        }
     };
 
     public MouseHoverSystem(GameScene scene, InputHandler input) {
@@ -55,7 +49,7 @@ public class MouseHoverSystem implements EventSystem {
         this.collector.cleanup();
     }
 
-    protected Pair<List<GameEntity>, Point2D> getHovered(double x, double y) {
+    public void accept(Double timeStep) {
         // Transform mouse click position by camera position and zoom
         double zoom = 1;
         Point2D position = Point2D.ZERO;
@@ -64,10 +58,18 @@ public class MouseHoverSystem implements EventSystem {
             position = this.cameraCollector.getCameraTransform().getWorldPosition();
         }
 
-        x = (x / zoom) + position.getX();
-        y = (y / zoom) + position.getY();
+        double x = (this.currentMouseX / zoom) + position.getX();
+        double y = (this.currentMouseY / zoom) + position.getY();
 
-        return new Pair<List<GameEntity>, Point2D>(this.collector.getEntities(), new Point2D(x, y));
+        if (x != lastFrameWorldX || y != lastFrameWorldY) {
+            List<GameEntity> entities = this.collector.getEntities();
+
+            for (GameEntity entity : entities) {
+                Hoverable hoverable = entity.getComponent(Hoverable.class);
+                if (hoverable != null) {
+                    hoverable.onClick.performMouseHoverAction(x, y);
+                }
+            }
+        }
     }
-
 }

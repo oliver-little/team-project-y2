@@ -132,29 +132,30 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
+        systemUpdater.addSystem(mhs);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
-        systemUpdater.addSystem(new ScriptSystem(gameScene));
         systemUpdater.addSystem(mas);
         systemUpdater.addSystem(new SteeringSystem(gameScene));
+        systemUpdater.addSystem(new ScriptSystem(gameScene));
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
-
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
-        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
-        eventSystems = List.of(mcs, mhs, pas);
+        eventSystems = List.of(mcs, pas);
 
         input.mouseHoverSystem = mhs;
 
