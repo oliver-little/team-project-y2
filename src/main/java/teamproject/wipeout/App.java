@@ -51,6 +51,7 @@ import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
@@ -61,10 +62,7 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.SupplierGenerator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -155,7 +153,8 @@ public class App implements Controller {
 
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
         PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
-        eventSystems = List.of(mcs, pas);
+        SabotageSystem sas = new SabotageSystem(gameScene);
+        eventSystems = List.of(mcs, pas, sas);
 
         input.mouseHoverSystem = mhs;
 
@@ -168,6 +167,7 @@ public class App implements Controller {
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
+        sas.player = player;
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -260,6 +260,14 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.X, () -> {
             world.pickables.picked(player.pickup());
+        });
+
+        input.onKeyRelease(KeyCode.Q, () -> {
+            HashMap<String, Object> sabotage = new HashMap<String, Object>();
+            sabotage.put("sabotage-type", SabotageComponent.SabotageType.SPEED);
+            sabotage.put("duration", 3000.0);
+            sabotage.put("multiplier", 0.2);
+            player.addComponent(new SabotageComponent(sabotage));
         });
 
         gl.start();

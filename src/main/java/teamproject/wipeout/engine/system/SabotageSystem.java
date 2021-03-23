@@ -2,15 +2,19 @@ package teamproject.wipeout.engine.system;
 
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.EntityCollector;
 import teamproject.wipeout.engine.entity.collector.FunctionalSignatureCollector;
 import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.player.Player;
 
-public class SabotageSystem implements EventSystem{
+public class SabotageSystem implements EventSystem {
+
+    public Player player;
 
     private FunctionalSignatureCollector entityCollector;
 
@@ -29,6 +33,21 @@ public class SabotageSystem implements EventSystem{
             //This needs to apply a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
             //The code for the player is done, it already calculates acceleration (speed) based on the speed multiplier.
             //TODO - Need to apply the potion's multiplier to the selected player for the potion's duration.
+
+            Timer timer = new Timer();
+            TimerTask speedTask = new TimerTask() {
+                public void run() {
+                    cancel();
+                    player.setSpeedMultiplier(1.0);
+                    player.removeTimer(timer);
+                }
+            };
+
+            player.setSpeedMultiplier(sabotageComponent.multiplier);
+
+            timer.schedule(speedTask, (long) sabotageComponent.duration);
+            player.addTimer(timer);
+            entity.removeComponent(SabotageComponent.class);
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE) {
             //This needs to apply a growth rate multiplier to a farm to which the potion is thrown at to either increase or decrease the growth rate of all the items on the farm for a set period of tiem (defined in items.JSON)

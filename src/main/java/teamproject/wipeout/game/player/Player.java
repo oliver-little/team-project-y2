@@ -56,6 +56,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private DoubleProperty money;
     
     private double speedMultiplier;
+    private final HashSet<Timer> timers;
 
     private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
@@ -73,7 +74,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.playerName = playerName;
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
-        this.speedMultiplier = 1;
+        this.speedMultiplier = 1.0;
+        this.timers = new HashSet<Timer>();
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
 
@@ -129,6 +131,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public void setSpeedMultiplier(double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
+    }
+
+    public void addTimer(Timer newTimer) {
+        timers.add(newTimer);
+    }
+
+    public void removeTimer(Timer oldTimer) {
+        timers.remove(oldTimer);
     }
 
     /**
