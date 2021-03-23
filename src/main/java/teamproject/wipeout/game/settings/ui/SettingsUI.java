@@ -41,6 +41,13 @@ public class SettingsUI extends VBox{
     private boolean opened = false;
     private Button openCloseButton = new Button();
 
+
+    /**
+     * Creates the UI for the in-game settings menu
+     * @param audioSys - audio system for volume changes
+     * @param mas - movement-audio system for volume changes
+     * @param backingTrack - GameAudio object for backing track volume
+     */
     public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, GameAudio backingTrack){
         super();
 
@@ -85,7 +92,7 @@ public class SettingsUI extends VBox{
         box.setSpacing(7);
 
         HBox backingBox = new HBox();
-        Slider backingSlider = new Slider();
+        Slider backingSlider = new Slider(); //slider for music volume
         backingSlider.setValue(5);
         backingSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -96,8 +103,7 @@ public class SettingsUI extends VBox{
                 backingTrack.setVolume((double) newValue/100.0f);
             }
         });
-
-        CheckBox muteMusic = new CheckBox("Mute");
+        CheckBox muteMusic = new CheckBox("Mute"); //checkbox for muting music
         muteMusic.selectedProperty().addListener(
             (ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) -> {
                 if(new_val){
@@ -120,7 +126,7 @@ public class SettingsUI extends VBox{
         
         
         HBox effectsBox = new HBox();
-        Slider effectsSlider = new Slider();
+        Slider effectsSlider = new Slider(); //slider for effects volume
         effectsSlider.setValue(as.getSpotEffectsVolume() * 100);
         effectsSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -132,7 +138,7 @@ public class SettingsUI extends VBox{
                 as.setSpotEffectsVolume((double) newValue/100.0f);
             }
         });
-        CheckBox muteEffects = new CheckBox("Mute");
+        CheckBox muteEffects = new CheckBox("Mute"); //checkbox for muting effects volume
         muteEffects.selectedProperty().addListener(
             (ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) -> {
                 if(new_val){
@@ -157,9 +163,13 @@ public class SettingsUI extends VBox{
         box.getChildren().addAll(title1, backingBox, title2, effectsBox);
         scrollPane.setContent(box);
         this.getChildren().add(scrollPane);
-        setMenuVisible(false);
+        setMenuVisible(false); //hides menu by default on game start-up
     }
 
+    /**
+     * Shows/hides the menu using animation
+     * @param visible
+     */
     private void setMenuVisible(boolean visible){
         KeyValue goalWidth = null;
         if (visible) {
