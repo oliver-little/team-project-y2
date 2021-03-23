@@ -606,7 +606,7 @@ public class FarmEntity extends GameEntity {
     private Clickable makeClickable(Supplier<GameClient> clientFunction) {
         this.clientSupplier = clientFunction;
 
-        Clickable clickable = new Clickable((x, y, button, entity) -> {
+        Clickable clickable = new Clickable((x, y, button) -> {
             boolean stateChanged = false;
 
             if (this.isPickingItem()) { 

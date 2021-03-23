@@ -75,12 +75,13 @@ public class MarketEntity extends GameEntity {
             this.hoverRect.alpha = 0;
             this.hoverRect.radius = 50;
 
-            child.addComponent(new RenderComponent(hoverRect));
-
             // Set up interaction areas
             clickableTopLeft = childTransform.getWorldPosition();
             clickableBottomRight = clickableTopLeft.add(marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
             clickableCentre = clickableTopLeft.add(clickableBottomRight).multiply(0.5);
+
+            child.addComponent(new RenderComponent(hoverRect));
+            
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -127,7 +128,7 @@ public class MarketEntity extends GameEntity {
         this.marketUI.onUIClose = onClose;
     }
 
-    private EntityClickAction onClick = (x, y, button, entity) -> {
+    private EntityClickAction onClick = (x, y, button) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
             if (this.onUIOpen != null) {
                 this.onUIOpen.run();

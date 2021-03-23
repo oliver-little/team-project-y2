@@ -38,6 +38,9 @@ public class MouseHoverSystem implements GameSystem {
         this.currentMouseX = 0;
         this.currentMouseY = 0;
 
+        // Setup function to immediately update hoverable when added
+        this.collector.onAdd = (entity) -> entity.getComponent(Hoverable.class).onClick.performMouseHoverAction(this.currentMouseX, this.currentMouseY);
+
         input.onMouseHover(this.onHover);
     }
 
@@ -70,6 +73,9 @@ public class MouseHoverSystem implements GameSystem {
                     hoverable.onClick.performMouseHoverAction(x, y);
                 }
             }
+
+            lastFrameWorldX = x;
+            lastFrameWorldY = y;
         }
     }
 }
