@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javafx.application.Platform;
+import javafx.css.StyleableLongProperty;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -37,6 +38,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     public static final int IDLE_TIME_SCALING_FACTOR = 5;
 
     public static final int IDLE_TIME_MINIMUM = 2;
+
+    public static final double DOUBLE_COMPARE = 0.0000001;
 
     private boolean isPuppet;
 
@@ -107,7 +110,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             if (eatAt < 0) {
                 this.aiTraverse(traverseTo[0], traverseTo[1], () -> {});
             } else {
-                this.aiStealCrops(new int[]{eatAt, traverseTo[0], traverseTo[1]});
+                this.aiStealCrops(new int[]{eatAt, traverseTo[0], traverseTo[1]}, null);
             }
         }
         this.animalState.updateStateFrom(newState);
@@ -147,9 +150,11 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     }
 
     /**
-     * Finds a random farm to steal crops from.
+     * Steals crops from a given farm.
+     * @param eatAt Location used for networking.
+     * @param randFarm The farm to steal crops from.
      */
-    private void aiStealCrops(int[] eatAt) {
+    private void aiStealCrops(int[] eatAt, FarmEntity randFarm) {
         if (eatAt != null) {
             FarmEntity theFarm = (FarmEntity) farms.stream().filter((farm) -> farm.farmID.equals(eatAt[0])).toArray()[0];
             int theX = eatAt[1];
@@ -162,8 +167,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             return;
         }
         List<Point2D> fullyGrownItems = new ArrayList<>();
-
-        FarmEntity randFarm = farms.get(randomInteger(0, farms.size()));
 
         fullyGrownItems = randFarm.getGrownItemPositions();
 
@@ -221,17 +224,45 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             return;
         }
 
-        
+        //Establish whether rat repellent or cheese has been used on a farm.
+        double totalWeight = 0;
 
+        double stealProbability = 0.6; //Probability of stealing crops.
+
+        FarmEntity selectedFarm;
+
+        for (FarmEntity farm : farms) {
+            totalWeight += farm.getAIMultiplier();
+        }
+
+        //If at least one farm has cheese on it, calculate a farm to visit.
+        if (!(Math.abs(totalWeight - farms.size()) < DOUBLE_COMPARE)) {
+            double farmProbability = Math.random() * totalWeight;
+            double weightTracker = 0;
+            int farmIndex = -1;
+
+            while (weightTracker < farmProbability && farmIndex < farms.size()) {
+                farmIndex++;
+                weightTracker += farms.get(farmIndex).getAIMultiplier();
+            }
+
+            stealProbability = 0.9; //80% chance of stealing crops.
+            selectedFarm = farms.get(farmIndex);
+
+        } else {
+            selectedFarm = farms.get(randomInteger(0, farms.size()));
+        }
+        
+        //Make decision on what to do next.
         double probability = Math.random();
 
-        if (probability <= 0.2) {
+        if (probability <= 0.1) {
             //Idle
             aiIdle();
 
-        } else if (probability <= 0.6) {
+        } else if (probability <= stealProbability) {
             //Steal plants
-            aiStealCrops(null);
+            aiStealCrops(null, selectedFarm);
 
         } else {
             //Pick random point
