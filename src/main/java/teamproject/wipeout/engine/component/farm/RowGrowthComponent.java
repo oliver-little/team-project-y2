@@ -6,15 +6,18 @@ import teamproject.wipeout.game.item.Item;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RowGrowthComponent implements GameComponent {
 
-    protected final Consumer<FarmItem> growthUpdater;
+    private final Supplier<Double> growthMultiplier;
+    private final Consumer<FarmItem> growthUpdater;
 
     private List<FarmItem> farmRow;
 
-    public RowGrowthComponent(List<FarmItem> farmRow, Consumer<FarmItem> updater) {
+    public RowGrowthComponent(List<FarmItem> farmRow, Supplier<Double> growthMultiplier, Consumer<FarmItem> updater) {
         this.farmRow = farmRow;
+        this.growthMultiplier = growthMultiplier;
         this.growthUpdater = updater;
     }
 
@@ -36,7 +39,7 @@ public class RowGrowthComponent implements GameComponent {
             return;
         }
 
-        farmItem.growth += increment;
+        farmItem.growth += increment * this.growthMultiplier.get();
         this.growthUpdater.accept(farmItem);
     }
 

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -53,6 +54,7 @@ public class FarmEntity extends GameEntity {
 
     private double growthMultiplier;
     private double AIMultiplier;
+    private final HashSet<Timer> timers;
 
     private final List<ItemsRowEntity> rowEntities;
 
@@ -68,6 +70,8 @@ public class FarmEntity extends GameEntity {
     private Supplier<GameClient> clientSupplier;
 
     private final Pickables pickables;
+
+    private final Supplier<Double> growthMultiplierSupplier = () -> this.growthMultiplier;
 
     /**
      * Creates a new instance of {@code FarmEntity}
@@ -96,8 +100,9 @@ public class FarmEntity extends GameEntity {
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
 
-        this.growthMultiplier = 1;
-        this.AIMultiplier = 1;
+        this.growthMultiplier = 0.1;
+        this.AIMultiplier = 1.0;
+        this.timers = new HashSet<Timer>();
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
@@ -106,7 +111,7 @@ public class FarmEntity extends GameEntity {
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
