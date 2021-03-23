@@ -165,25 +165,6 @@ public class App implements Controller {
         
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-        
-        ParticleParameters parameters = new ParticleParameters(5, true, new RectParticle(Color.BLUE), SupplierGenerator.rangeSupplier(2.0, 5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(5.0), SupplierGenerator.staticSupplier(1.0), SupplierGenerator.rangeSupplier(new Point2D(-5, -50), new Point2D(5, -5)));
-        parameters.setEmissionRate(800);
-        parameters.setEmissionArea(new Point2D(500, 5));
-        parameters.setMaxParticles(10000);
-        EaseCurve curve = new EaseCurve(EaseCurve.EaseType.INVERSE_EASE_IN_OUT);
-        parameters.addUpdateFunction((Particle particle, double percentage) -> {
-            double size = particle.getStartWidth() * curve.apply(percentage);
-            particle.width = size;
-            particle.height = size;
-        });
-
-        GameEntity particle = new GameEntity(gameScene);
-        particle.addComponent(new Transform(0, 50, 10));
-        particle.addComponent(new RenderComponent(new RectRenderable(Color.WHITE, 2, 2)));
-        ParticleComponent pc = new ParticleComponent(parameters);
-        particle.addComponent(pc);
-        pc.play();
-
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
