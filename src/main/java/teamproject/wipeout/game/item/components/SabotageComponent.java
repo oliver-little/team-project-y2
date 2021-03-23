@@ -20,6 +20,7 @@ public class SabotageComponent implements GameComponent, ItemComponent {
 
     public final SabotageType type;
     public final double duration; //In seconds
+    public final double multiplier;
 
     /**
      * Creates a {@code SabotageComponent} from a given {@code JSON Map} data.
@@ -29,6 +30,7 @@ public class SabotageComponent implements GameComponent, ItemComponent {
     public SabotageComponent(Map<String, Object> data) {
         this.type = SabotageType.valueOf(data.get("sabotage-type").toString());
         this.duration = (Double) data.get("duration");
+        this.multiplier = (Double) data.get("multiplier");
     }
 
     /**

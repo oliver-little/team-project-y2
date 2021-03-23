@@ -51,6 +51,8 @@ public class FarmEntity extends GameEntity {
     private final SpriteManager spriteManager;
     private final ItemStore itemStore;
 
+    private double growthMultiplier;
+
     private final List<ItemsRowEntity> rowEntities;
 
     //private FarmUI farmUI;
@@ -92,6 +94,8 @@ public class FarmEntity extends GameEntity {
         this.seedEntity = null;
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
+
+        this.growthMultiplier = 1;
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
@@ -664,6 +668,14 @@ public class FarmEntity extends GameEntity {
                 exception.printStackTrace();
             }
         }
+    }
+
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    public void setGrowthMultiplier(double growthMultiplier) {
+        this.growthMultiplier = growthMultiplier;
     }
 
 }

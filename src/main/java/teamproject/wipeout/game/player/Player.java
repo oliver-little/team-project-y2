@@ -54,6 +54,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private SignatureEntityCollector pickableCollector;
 
     private DoubleProperty money;
+    
+    private double speedMultiplier;
 
     private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
@@ -71,6 +73,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.playerName = playerName;
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
+        this.speedMultiplier = 1;
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
 
@@ -120,6 +123,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.clientSupplier = supplier;
     }
 
+    public double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
+    public void setSpeedMultiplier(double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
     /**
      * Adds acceleration to the physics component of the Player
      *
@@ -127,7 +138,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param y Y axis acceleration
      */
     public void addAcceleration(float x, float y) {
-        this.physics.acceleration = this.physics.acceleration.add(x, y);
+        this.physics.acceleration = this.physics.acceleration.add(x * speedMultiplier, y * speedMultiplier);
         this.playerState.setPosition(this.position.getWorldPosition());
         this.playerState.setAcceleration(this.physics.acceleration);
         this.sendPlayerStateUpdate();
