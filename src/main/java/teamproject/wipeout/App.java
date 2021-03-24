@@ -168,7 +168,6 @@ public class App implements Controller {
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
-        sas.player = player;
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -202,9 +201,6 @@ public class App implements Controller {
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
         world.setClientSupplier(this.networker.clientSupplier);
         this.networker.worldEntity = world;
-
-        FarmEntity farm = world.getMyFarm();
-        sas.farm = farm;
         
         addInvUIInput(input, invUI, world);
 
@@ -266,6 +262,7 @@ public class App implements Controller {
             world.pickables.picked(player.pickup());
         });
 
+        //FOR TESTING PURPOSES ONLY
         input.onKeyRelease(KeyCode.Q, () -> {
             HashMap<String, Object> sabotage = new HashMap<String, Object>();
             sabotage.put("sabotage-type", SabotageComponent.SabotageType.SPEED);

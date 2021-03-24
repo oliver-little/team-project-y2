@@ -27,9 +27,7 @@ import teamproject.wipeout.networking.state.FarmState;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -54,7 +52,6 @@ public class FarmEntity extends GameEntity {
 
     private double growthMultiplier;
     private double AIMultiplier;
-    private final HashSet<Timer> timers;
 
     private final List<ItemsRowEntity> rowEntities;
 
@@ -100,9 +97,8 @@ public class FarmEntity extends GameEntity {
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
 
-        this.growthMultiplier = 0.1;
+        this.growthMultiplier = 1.0;
         this.AIMultiplier = 1.0;
-        this.timers = new HashSet<Timer>();
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
@@ -708,21 +704,4 @@ public class FarmEntity extends GameEntity {
     public void setAIMultiplier(double AIMultiplier) {
         this.AIMultiplier = AIMultiplier;
     }
-
-    /**
-     * Setter to add a new potion timer to a farm.
-     * @param newTimer The timer.
-     */
-    public void addTimer(Timer newTimer) {
-        timers.add(newTimer);
-    }
-
-    /**
-     * Function to remove the timer once the potion effects have finished.
-     * @param oldTimer The old timer.
-     */
-    public void removeTimer(Timer oldTimer) {
-        timers.remove(oldTimer);
-    }
-
 }

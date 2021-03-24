@@ -13,6 +13,7 @@ public class MovementComponent implements GameComponent {
     public Point2D acceleration;
     public FacingDirection facingDirection;
     public BasicEvent<FacingDirection> facingDirectionChanged;
+    public double speedMultiplier = 1.0;
 
     public Consumer<Point2D> stopCallback;
 
@@ -74,7 +75,7 @@ public class MovementComponent implements GameComponent {
      * @param timestep each timestep when the velocity should get updated
      */
     public void updateVelocity(Double timestep){
-        this.velocity = this.velocity.add(this.acceleration.multiply(timestep));
+        this.velocity = this.velocity.add(this.acceleration.multiply(timestep * this.speedMultiplier));
         this.decayVelocity(timestep);
         this.capVelocity();
     }

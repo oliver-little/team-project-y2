@@ -188,7 +188,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			HashMap<String, Object> sabotage = new HashMap<String, Object>();
 			sabotage.put("sabotage-type", SabotageComponent.SabotageType.GROWTHRATE);
 			sabotage.put("duration", 3000.0);
-			sabotage.put("multiplier", 4.00);
+			sabotage.put("multiplier", 2.00);
 			for (FarmEntity farm : farms.values()) {
 				farm.addComponent(new SabotageComponent(sabotage));
 		
