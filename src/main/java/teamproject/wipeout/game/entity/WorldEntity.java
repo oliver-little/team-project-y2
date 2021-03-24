@@ -135,7 +135,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
 		this.setupFarmDestroyingKey();
-		this.setupAITest();
 	}
 
 	public FarmEntity getMyFarm() {
