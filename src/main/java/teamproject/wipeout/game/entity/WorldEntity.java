@@ -183,19 +183,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		});
 	}
 
-	protected void setupAITest() {
-		this.inputHandler.onKeyRelease(KeyCode.L, () -> {
-			HashMap<String, Object> sabotage = new HashMap<String, Object>();
-			sabotage.put("sabotage-type", SabotageComponent.SabotageType.GROWTHRATE);
-			sabotage.put("duration", 3000.0);
-			sabotage.put("multiplier", 2.00);
-			for (FarmEntity farm : farms.values()) {
-				farm.addComponent(new SabotageComponent(sabotage));
-		
-			}
-		});
-	}
-
 	/**
 	 * If possible, sends an updated state of the world to the server.
 	 */

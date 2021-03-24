@@ -262,15 +262,6 @@ public class App implements Controller {
             world.pickables.picked(player.pickup());
         });
 
-        //FOR TESTING PURPOSES ONLY
-        input.onKeyRelease(KeyCode.Q, () -> {
-            HashMap<String, Object> sabotage = new HashMap<String, Object>();
-            sabotage.put("sabotage-type", SabotageComponent.SabotageType.SPEED);
-            sabotage.put("duration", 3000.0);
-            sabotage.put("multiplier", 4.00);
-            player.addComponent(new SabotageComponent(sabotage));
-        });
-
         gl.start();
     }
 
