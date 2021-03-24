@@ -97,7 +97,7 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().addAll(hostPane);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
 
         buttonBox = UIUtil.createMenu(menuData);
@@ -109,13 +109,12 @@ public class StartMenu implements Controller {
     private boolean createServer(String serverName, String hostName){
         InetSocketAddress serverAddress = networker.startServer(serverName);
 
-        createLobbyMenu(serverName, hostName, serverAddress);
+        createLobbyMenu(serverName, hostName, serverAddress, true);
 
         return true;
     }
 
-    private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress) {
-    private void createLobbyMenu(String serverName, String serverHost, boolean isHost){
+    private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress, boolean isHost) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
@@ -144,6 +143,13 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+
+        try {
+            Thread.sleep(100);
+            networker.connectClient(serverAddress);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createJoinGameMenu(){
@@ -193,7 +199,7 @@ public class StartMenu implements Controller {
                         joinServer(s.getText(), "test player", (InetSocketAddress) s.getUserData());
                     }
                 }),
-                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
@@ -214,7 +220,7 @@ public class StartMenu implements Controller {
      * @return true if player joins successfully, false otherwise
      */
     private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress){
-        createLobbyMenu(serverName, username, serverAddress);
+        createLobbyMenu(serverName, username, serverAddress, false);
 
         return true;
     }
