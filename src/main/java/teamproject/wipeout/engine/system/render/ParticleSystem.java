@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.render.particle.*;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 import teamproject.wipeout.engine.component.render.particle.type.Particle;
 import teamproject.wipeout.engine.component.render.particle.type.ParticleUpdateFunction;
 import teamproject.wipeout.engine.component.Transform;
@@ -77,7 +78,6 @@ public class ParticleSystem implements GameSystem {
                     }
                     renderable.particles.clear();
                     
-                    System.out.println("stopping");
                     pc.stop();
                     continue;
                 }
@@ -125,8 +125,10 @@ public class ParticleSystem implements GameSystem {
                         numberOfEmissions = parameters.getMaxParticles() - renderable.particles.size();
                     }
 
+                    Transform particleTransform = entry.getKey().getComponent(Transform.class);
+
                     for (int i = 0; i < numberOfEmissions; i++) {
-                        Particle p = initialiseParticle(parameters);
+                        Particle p = initialiseParticle(parameters, particleTransform.getWorldPosition());
                         renderable.particles.add(p);
                     }
 
@@ -141,8 +143,10 @@ public class ParticleSystem implements GameSystem {
                     numberOfEmissions = parameters.getMaxParticles() - renderable.particles.size();
                 }
 
+                Transform particleTransform = entry.getKey().getComponent(Transform.class);
+
                 for (int i = 0; i < numberOfEmissions; i++) {
-                    Particle p = initialiseParticle(parameters);
+                    Particle p = initialiseParticle(parameters, particleTransform.getWorldPosition());
                     renderable.particles.add(p);
                 }
 
@@ -216,15 +220,25 @@ public class ParticleSystem implements GameSystem {
      * @param parameters The particle parameter object to reference for initialisation
      * @return The newly initialised particle
      */
-    private Particle initialiseParticle(ParticleParameters parameters) {
+    private Particle initialiseParticle(ParticleParameters parameters, Point2D particleEntityPos) {
         Point2D startPos = Point2D.ZERO;
+        if (parameters.getSimulationSpace() == ParticleSimulationSpace.WORLD) {
+            startPos = particleEntityPos;
+        }
+
         Point2D emissionArea = parameters.getEmissionArea();
         if (emissionArea != null && emissionArea.getX() > 0 && emissionArea.getY() > 0) {
             startPos = this.getRandomPositionInArea(startPos, parameters.getEmissionArea());
         }
 
+        double width = parameters.getWidth().get();
+        double height = width;
+        if (parameters.getHeight() != null) {
+            height = parameters.getHeight().get();
+        }
+
         Particle p = particlePool.getInstance();
-        p.initialise(startPos, parameters.getVelocity().get(), parameters.getLifetime().get(), parameters.getWidth().get(), parameters.getHeight().get(), parameters.getOpacity().get(), parameters.getEmissionType().renderFactory());
+        p.initialise(startPos, parameters.getSimulationSpace(), parameters.getVelocity().get(), parameters.getLifetime().get(), width, height, parameters.getOpacity().get(), parameters.getEmissionType().renderFactory());
         return p;
     }
 }

@@ -2,6 +2,7 @@ package teamproject.wipeout.engine.component.render.particle.type;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 
 /**
  * Represents an individual particle in a particle system
@@ -26,6 +27,7 @@ public class Particle {
 
     private double lifetime;
 
+    private ParticleSimulationSpace simulationSpace;
     private Point2D startVelocity;
     private double startWidth;
     private double startHeight;
@@ -42,8 +44,10 @@ public class Particle {
      * @param opacity The starting opacity
      * @param render The render function to use, determines how this particle will appear on the screen
      */
-    public void initialise(Point2D position, Point2D velocity, double lifetime, double width, double height, double opacity, ParticleRender render) {
+    public void initialise(Point2D position, ParticleSimulationSpace simulationSpace, Point2D velocity, double lifetime, double width, double height, double opacity, ParticleRender render) {
         this.position = position;
+        this.simulationSpace = simulationSpace;
+
         this.startVelocity = velocity;
         this.velocity = velocity;
 
@@ -59,6 +63,13 @@ public class Particle {
 
         this.renderFunction = render;
         this.aliveTime = 0;
+    }
+
+    /**
+     * Gets the simulation space for this particle
+     */
+    public ParticleSimulationSpace getSimulationSpace() {
+        return this.simulationSpace;
     }
 
     /**
@@ -105,11 +116,21 @@ public class Particle {
         if (opacity != 1) {
             double globalOpacity = gc.getGlobalAlpha();
             gc.setGlobalAlpha(this.opacity);
-            this.renderFunction.render(gc, (x + this.position.getX()) * scale, (y + this.position.getY()) * scale, width * scale, height * scale);
+            if (this.simulationSpace == ParticleSimulationSpace.LOCAL) {
+                this.renderFunction.render(gc, (x + this.position.getX()) * scale, (y + this.position.getY()) * scale, width * scale, height * scale);
+            }
+            else {
+                this.renderFunction.render(gc, this.position.getX() * scale, this.position.getY() * scale, width * scale, height * scale);
+            }
             gc.setGlobalAlpha(globalOpacity);
         }
         else {
-            this.renderFunction.render(gc, (x + this.position.getX()) * scale, (y + this.position.getY()) * scale, width * scale, height * scale);
+            if (this.simulationSpace == ParticleSimulationSpace.LOCAL) {
+                this.renderFunction.render(gc, (x + this.position.getX()) * scale, (y + this.position.getY()) * scale, width * scale, height * scale);
+            }
+            else {
+                this.renderFunction.render(gc, this.position.getX() * scale, this.position.getY() * scale, width * scale, height * scale);
+            }
         }
     }
 }
