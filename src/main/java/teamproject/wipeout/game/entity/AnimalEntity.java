@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javafx.application.Platform;
-import javafx.css.StyleableLongProperty;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;

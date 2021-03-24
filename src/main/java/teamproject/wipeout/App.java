@@ -47,6 +47,7 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
@@ -201,6 +202,9 @@ public class App implements Controller {
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
         world.setClientSupplier(this.networker.clientSupplier);
         this.networker.worldEntity = world;
+
+        FarmEntity farm = world.getMyFarm();
+        sas.farm = farm;
         
         addInvUIInput(input, invUI, world);
 
@@ -266,7 +270,7 @@ public class App implements Controller {
             HashMap<String, Object> sabotage = new HashMap<String, Object>();
             sabotage.put("sabotage-type", SabotageComponent.SabotageType.SPEED);
             sabotage.put("duration", 3000.0);
-            sabotage.put("multiplier", 0.2);
+            sabotage.put("multiplier", 4.00);
             player.addComponent(new SabotageComponent(sabotage));
         });
 

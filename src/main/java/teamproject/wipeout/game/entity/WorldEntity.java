@@ -22,6 +22,7 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -134,6 +135,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
 		this.setupFarmDestroyingKey();
+		this.setupAITest();
 	}
 
 	public FarmEntity getMyFarm() {
@@ -178,6 +180,19 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	protected void setupFarmDestroyingKey() {
 		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
 			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	protected void setupAITest() {
+		this.inputHandler.onKeyRelease(KeyCode.L, () -> {
+			HashMap<String, Object> sabotage = new HashMap<String, Object>();
+			sabotage.put("sabotage-type", SabotageComponent.SabotageType.GROWTHRATE);
+			sabotage.put("duration", 3000.0);
+			sabotage.put("multiplier", 4.00);
+			for (FarmEntity farm : farms.values()) {
+				farm.addComponent(new SabotageComponent(sabotage));
+		
+			}
 		});
 	}
 

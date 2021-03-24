@@ -709,4 +709,20 @@ public class FarmEntity extends GameEntity {
         this.AIMultiplier = AIMultiplier;
     }
 
+    /**
+     * Setter to add a new potion timer to a farm.
+     * @param newTimer The timer.
+     */
+    public void addTimer(Timer newTimer) {
+        timers.add(newTimer);
+    }
+
+    /**
+     * Function to remove the timer once the potion effects have finished.
+     * @param oldTimer The old timer.
+     */
+    public void removeTimer(Timer oldTimer) {
+        timers.remove(oldTimer);
+    }
+
 }
