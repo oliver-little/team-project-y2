@@ -44,7 +44,7 @@ public class TextRenderable implements Renderable {
 
 	public double getHeight()
 	{
-		double height = text.getLayoutBounds().getHeight()*font.getSize()/20f;
+		double height = text.getLayoutBounds().getHeight()*font.getSize()/17.5f;
 		//System.out.println("textHeight "+ height);
 		return height;
 	}
