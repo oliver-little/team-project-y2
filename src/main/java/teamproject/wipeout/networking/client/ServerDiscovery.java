@@ -1,5 +1,9 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.beans.property.MapProperty;
+import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.threads.UtilityThread;
 
@@ -19,7 +23,7 @@ public class ServerDiscovery {
     protected MulticastSocket multicastSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
-    protected final HashMap<String, InetSocketAddress> foundServers;
+    protected final SimpleMapProperty<String, InetSocketAddress> foundServers;
     protected final NewServerDiscovery onDiscovery;
 
     /**
@@ -30,11 +34,9 @@ public class ServerDiscovery {
      * @throws UnknownHostException {@code ServerDiscovery} instance cannot be initialized properly.
      */
     public ServerDiscovery(NewServerDiscovery onDiscovery) throws UnknownHostException {
-        this.foundServers = new HashMap<String, InetSocketAddress>();
+        this.foundServers = new SimpleMapProperty<String, InetSocketAddress>(FXCollections.observableHashMap());
 
-        this.searchGroup = new InetSocketAddress(
-                InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT
-        );
+        this.searchGroup = new InetSocketAddress(InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT);
         this.isActive = new AtomicBoolean(false);
 
         this.onDiscovery = onDiscovery;
@@ -52,10 +54,10 @@ public class ServerDiscovery {
     /**
      * {@code foundServers} variable getter
      *
-     * @return {@code HashMap<String, InetAddress>} of a particular server name and its address
+     * @return {@code ObservableMap<String, InetAddress>} of a particular server name and its address
      */
-    public HashMap<String, InetSocketAddress> getFoundServers() {
-        return this.foundServers;
+    public ObservableMap<String, InetSocketAddress> getFoundServers() {
+        return this.foundServers.get();
     }
 
     public static ArrayList<NetworkInterface> getNetworkInterfaces() throws SocketException {

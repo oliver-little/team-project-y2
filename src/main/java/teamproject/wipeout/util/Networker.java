@@ -25,6 +25,7 @@ import teamproject.wipeout.networking.server.GameServerRunner;
 import teamproject.wipeout.networking.server.ServerRunningException;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -40,6 +41,18 @@ public class Networker {
 
     public Networker() {
         this.serverRunner = new GameServerRunner();
+        try {
+            this.serverDiscovery = new ServerDiscovery((name, address) -> {
+                System.out.println(name);
+            });
+
+        } catch (UnknownHostException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public ServerDiscovery getServerDiscovery() {
+        return this.serverDiscovery;
     }
 
     public final Supplier<GameClient> clientSupplier = () -> {
@@ -73,9 +86,14 @@ public class Networker {
         };
     }
 
-    public void stopServer() throws IOException {
+    public void stopServer() {
         if (this.serverRunner.isServerActive()) {
-            this.serverRunner.stopServer();
+            try {
+                this.serverRunner.stopServer();
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
         }
     }
 

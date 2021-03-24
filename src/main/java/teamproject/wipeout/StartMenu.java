@@ -2,6 +2,8 @@ package teamproject.wipeout;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableMap;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -33,8 +35,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
@@ -116,7 +120,7 @@ public class StartMenu implements Controller {
     }
 
     private boolean createServer(String serverName, String hostName){
-        networker.startServer(serverName);
+        networker.startServer(serverName).performKeyAction();
 
         createLobbyMenu(serverName, hostName);
 
@@ -140,7 +144,10 @@ public class StartMenu implements Controller {
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Start Game", () -> {}),
-                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+                new Pair<String, Runnable>("Back", () -> {
+                    networker.stopServer();
+                    createMainMenu();
+                })
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
@@ -165,22 +172,28 @@ public class StartMenu implements Controller {
 
         playerInfoBox.getChildren().addAll(nameBox);
 
-        String[] servers = {"example 1", "test server"};
+        ObservableMap<String, InetSocketAddress> servers = this.networker.getServerDiscovery().getFoundServers();
 
         VBox serverBox = new VBox();
         serverBox.getStyleClass().add("pane");
         serverBox.setAlignment(Pos.CENTER);
         //toggle groups are so only one can be selected at a time
         ToggleGroup serverGroup = new ToggleGroup();
-        for(int i=0; i<servers.length;i++) {
-            ToggleButton server = new ToggleButton(servers[i]);
-            server.setUserData(servers[i]);
-            server.setToggleGroup(serverGroup);
-            serverBox.getChildren().add(server);
-        }
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
+        servers.addListener((MapChangeListener<? super String, ? super InetSocketAddress>) (change) -> {
+            Platform.runLater(() -> {
+                serverBox.getChildren().clear();
+
+                for (Map.Entry<String, InetSocketAddress> entry : servers.entrySet()) {
+                    ToggleButton serverButton = new ToggleButton(entry.getKey());
+                    serverButton.setUserData(entry.getValue());
+                    serverButton.setToggleGroup(serverGroup);
+                    serverBox.getChildren().add(serverButton);
+                }
+            });
+        });
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
@@ -195,6 +208,12 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+
+        try {
+            this.networker.getServerDiscovery().startLookingForServers();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
