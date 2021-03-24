@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
@@ -57,6 +58,7 @@ import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
+import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
@@ -65,7 +67,7 @@ import teamproject.wipeout.util.SupplierGenerator;
 
 import java.util.*;
 
-
+import javafx.application.Platform;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
@@ -140,13 +142,13 @@ public class App implements Controller {
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
         MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
-        systemUpdater.addSystem(mhs);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
+        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(mhs);
         systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
-        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
         systemUpdater.addSystem(mas);
         systemUpdater.addSystem(new SteeringSystem(gameScene));
         systemUpdater.addSystem(new ScriptSystem(gameScene));
@@ -221,17 +223,24 @@ public class App implements Controller {
         this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
+        VBox topRight = new VBox();
+        topRight.setAlignment(Pos.TOP_RIGHT);
+
         ClockUI clockUI = clockSystem.clockUI;
         StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
 
-        AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
-        player.addComponent(playerSound);
-
-        input.onKeyRelease(KeyCode.G, playerSound::play); //example - pressing the D key will trigger the sound
-        
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
-        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
+        ga.play();
+        //input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
+
+        SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
+        StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+
+        topRight.getChildren().addAll(clockUI, settingsUI);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
+
+        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the D key will trigger the sound
+
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),
                 () -> player.addAcceleration(500f, 0f));
@@ -251,10 +260,11 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
         input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
+        /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
-
+        */
         invUI.onMouseClick(world);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, world.pickables));
 

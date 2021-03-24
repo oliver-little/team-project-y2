@@ -9,7 +9,10 @@ import java.util.function.Consumer;
 
 public class MovementComponent implements GameComponent {
 
+    public static final double ZERO_VELOCITY_THRESHOLD = 25.0;
+
     public Point2D velocity;
+    public double velocityDecayRate = 0.95;
     public Point2D acceleration;
     public FacingDirection facingDirection;
     public BasicEvent<FacingDirection> facingDirectionChanged;
@@ -32,9 +35,27 @@ public class MovementComponent implements GameComponent {
         this.updateFacingDirection();
     }
 
+    public MovementComponent(Point2D velocity, Point2D acceleration, double velocityDecayRate) {
+        this.facingDirectionChanged = new BasicEvent<>();
+        this.velocity = velocity;
+        this.velocityDecayRate = velocityDecayRate;
+        this.acceleration = acceleration;
+        this.facingDirection = FacingDirection.NONE;
+        this.updateFacingDirection();
+    }
+
     public MovementComponent(float xVelocity, float yVelocity, float xAcceleration, float yAcceleration) {
         this.facingDirectionChanged = new BasicEvent<>();
         this.velocity = new Point2D(xVelocity, yVelocity);
+        this.acceleration = new Point2D(xAcceleration, yAcceleration);
+        this.facingDirection = FacingDirection.NONE;
+        this.updateFacingDirection();
+    }
+
+    public MovementComponent(float xVelocity, float yVelocity, float xAcceleration, float yAcceleration, double velocityDecayRate) {
+        this.facingDirectionChanged = new BasicEvent<>();
+        this.velocity = new Point2D(xVelocity, yVelocity);
+        this.velocityDecayRate = velocityDecayRate;
         this.acceleration = new Point2D(xAcceleration, yAcceleration);
         this.facingDirection = FacingDirection.NONE;
         this.updateFacingDirection();
@@ -71,7 +92,7 @@ public class MovementComponent implements GameComponent {
     }
 
     /**
-     * Update the velociy based on accelaration
+     * Update the velocity based on accelaration
      * @param timestep each timestep when the velocity should get updated
      */
     public void updateVelocity(Double timestep){
@@ -85,21 +106,18 @@ public class MovementComponent implements GameComponent {
      * @param timestep each timestep when the velocity should get updated
      */
     public void decayVelocity(Double timestep){
-        Double decay_rate = 1f -Math.min(timestep, 1f);
-        this.velocity = this.velocity.multiply(decay_rate*0.95);
+        double decay_rate = 1f - Math.min(timestep, 1f);
+        this.velocity = this.velocity.multiply(decay_rate * velocityDecayRate);
     }
 
     /** Cap is making sure that the speed of the object won't become too long with time */
     public void capVelocity(){
-        Double threshold = 25.0;
-        Double xVelocity = this.velocity.getX();
-        Double yVelocity = this.velocity.getY();
-        Double xAcceleration = this.acceleration.getX();
-        Double yAcceleration = this.acceleration.getY();
-        if (Math.abs(xAcceleration) == 0.0 && Math.abs(xVelocity) < threshold){
+        double xVelocity = this.velocity.getX();
+        double yVelocity = this.velocity.getY();
+        if (this.acceleration.getX() == 0 && Math.abs(xVelocity) < ZERO_VELOCITY_THRESHOLD){
             xVelocity = 0.0;
         }
-        if (Math.abs(yAcceleration) == 0.0 &&Math.abs(yVelocity) < threshold){
+        if (this.acceleration.getY() == 0 && Math.abs(yVelocity) < ZERO_VELOCITY_THRESHOLD){
             yVelocity = 0.0;
         }
         this.velocity = new Point2D(xVelocity, yVelocity);

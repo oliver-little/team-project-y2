@@ -12,6 +12,7 @@ public class ParticleComponent implements GameComponent {
     public double time;
     public double lastEmissionTime;
     public int nextBurst;
+    public Runnable onStop;
 
     private boolean playing;
     
@@ -39,6 +40,10 @@ public class ParticleComponent implements GameComponent {
      */
     public void stop() {
         this.playing = false;
+
+        if (this.onStop != null) {
+            this.onStop.run();
+        }
     }
 
     /**

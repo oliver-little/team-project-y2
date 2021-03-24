@@ -15,6 +15,11 @@ import teamproject.wipeout.engine.component.render.particle.type.ParticleUpdateF
 public class ParticleParameters {
     public static final int DEFAULT_MAX_PARTICLES = 1000;
 
+    public enum ParticleSimulationSpace {
+        LOCAL,
+        WORLD
+    }
+
     private ParticleType emissionType;
 
     private boolean emissionEnabled = false;
@@ -28,6 +33,8 @@ public class ParticleParameters {
     private Point2D emissionArea;
 
     private boolean burstsEnabled = false;
+
+    private ParticleSimulationSpace simulationSpace;
 
     private List<ParticleBurst> bursts;
 
@@ -45,10 +52,11 @@ public class ParticleParameters {
 
     private List<ParticleUpdateFunction> updaters;
 
-    public ParticleParameters(double runtime, boolean loop, ParticleType emissionType, Supplier<Double> lifetime, Supplier<Double> width, Supplier<Double> height, Supplier<Double> opacity, Supplier<Point2D> velocity) {
+    public ParticleParameters(double runtime, boolean loop, ParticleType emissionType, ParticleSimulationSpace simulationSpace, Supplier<Double> lifetime, Supplier<Double> width, Supplier<Double> height, Supplier<Double> opacity, Supplier<Point2D> velocity) {
         this.runtime = runtime;
         this.loop = loop;
         
+        this.simulationSpace = simulationSpace;
         this.emissionType = emissionType;
         this.lifetime = lifetime;
         this.width = width;
@@ -105,6 +113,22 @@ public class ParticleParameters {
      */
     public void setEmissionType(ParticleType type) {
         this.emissionType = type;
+    }
+
+    /**
+     * Gets the simulation space of this particle effect.
+     * @return The simulation space of the particle (local or world)
+     */
+    public ParticleSimulationSpace getSimulationSpace() {
+        return this.simulationSpace;
+    }
+
+    /**
+     * Sets the simulation space for this particle effect
+     * @param simulationSpace The new simulation space
+     */
+    public void setSimulationSpace(ParticleSimulationSpace simulationSpace) {
+        this.simulationSpace = simulationSpace;
     }
 
     /**

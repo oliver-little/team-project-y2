@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
@@ -59,6 +60,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private final PlayerState playerState;
     private final Transform position;
     private final MovementComponent physics;
+    private final AudioComponent audio;
 
     /**
      * Creates a new instance of GameEntity
@@ -86,6 +88,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.addComponent(new HitboxComponent(new Rectangle(20, 12, 24, 16)));
         this.addComponent(new CollisionResolutionComponent());
+
+        audio = new AudioComponent();
+        this.addComponent(audio);
 
         this.invUI = invUI;
         if (invUI != null) {
@@ -161,6 +166,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         	return false;
         };
         this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
+        this.playSound("coins.wav");
         return true;
     }
 
@@ -170,6 +176,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             return false;
         }
         tasks.add(task);
+        this.playSound("coins.wav");
         this.setMoney(this.money.getValue() - task.priceToBuy);
         return true;
     }
@@ -186,7 +193,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             return false;
         }
         this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
-
+        this.playSound("coins.wav");
         this.soldItems.putIfAbsent(id, 0);
         this.soldItems.put(id, this.soldItems.get(id) + quantity);
         checkTasks();
@@ -527,6 +534,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                     	System.out.println("No space for item with id: " + pickable.getID());
                     } else {
                         picked.add(pickable);
+                        this.playSound("pop.wav");
                     }
                 }
             }
@@ -550,6 +558,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             if(task.condition.apply(this)) {
                 task.completed = true;
                 this.money.set(this.money.getValue() + task.reward);
+                this.playSound("coinPrize.wav");
                 System.out.println("Task is completed");
             }
         }
@@ -565,6 +574,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
         }
         return completedTasks;
+    }
+
+    public void playSound(String fileName){
+        audio.play(fileName);
     }
     
     /**

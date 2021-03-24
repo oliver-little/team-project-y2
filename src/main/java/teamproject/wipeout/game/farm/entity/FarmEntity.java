@@ -3,6 +3,7 @@ package teamproject.wipeout.game.farm.entity;
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
@@ -66,6 +67,8 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
+    private final AudioComponent audio;
+
     private final Pickables pickables;
 
     private final Supplier<Double> growthMultiplierSupplier = () -> this.growthMultiplier;
@@ -102,6 +105,9 @@ public class FarmEntity extends GameEntity {
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
+
+        audio = new AudioComponent();
+        this.addComponent(audio);
 
         this.data = new FarmData(-13, null, this.itemStore);
 
@@ -404,6 +410,7 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+        this.audio.play("shovel.wav");
         return this.data.placeItem(item, 0.0, row, column);
     }
 
@@ -451,6 +458,7 @@ public class FarmEntity extends GameEntity {
         if (isDestroyingItem()) {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
+            this.audio.play("slice.wav");
         }
         else {
             pickedItem = this.data.pickItemAt(row, column);
@@ -461,6 +469,8 @@ public class FarmEntity extends GameEntity {
             return;
         }
 
+        this.audio.play("shovel.wav");
+        
         if (makePickable) {
             // Player picking the farm item
 
@@ -613,7 +623,7 @@ public class FarmEntity extends GameEntity {
     private Clickable makeClickable(Supplier<GameClient> clientFunction) {
         this.clientSupplier = clientFunction;
 
-        Clickable clickable = new Clickable((x, y, button, entity) -> {
+        Clickable clickable = new Clickable((x, y, button) -> {
             boolean stateChanged = false;
 
             if (this.isPickingItem()) { 
