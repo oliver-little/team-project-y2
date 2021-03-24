@@ -37,15 +37,16 @@ public class TextRenderable implements Renderable {
 	
 	public double getWidth()
 	{
-		//text.applyCss();
-		//System.out.println("textWidth "+ text.getLayoutBounds().getWidth());
-		return text.getLayoutBounds().getWidth();
+		double width = text.getLayoutBounds().getWidth()*font.getSize()/17.5f;
+		//System.out.println("textWidth "+ width);
+		return width;
 	}
 
 	public double getHeight()
 	{
-		//System.out.println("textHeight "+ this.text.getLayoutBounds().getHeight());
-		return this.text.getLayoutBounds().getHeight();
+		double height = text.getLayoutBounds().getHeight()*font.getSize()/20f;
+		//System.out.println("textHeight "+ height);
+		return height;
 	}
 
 	public void setFont(Font font){
