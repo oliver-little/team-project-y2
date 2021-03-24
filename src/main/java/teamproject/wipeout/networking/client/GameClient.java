@@ -29,8 +29,6 @@ import java.util.function.Consumer;
  */
 public class GameClient {
 
-    public final Integer id;
-
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
@@ -45,20 +43,25 @@ public class GameClient {
 
     public Consumer<Long> clockCalibration;
     public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
+    public Integer myFarmID;
 
     protected Map<Integer, FarmEntity> farmEntities;
 
+    private Integer id;
+
     /**
      * Default initializer for {@code GameClient}
-     *
-     * @param id ID of the current player (= client)
      */
-    protected GameClient(Integer id) {
-        this.id = id;
+    protected GameClient() {
+        this.id = null;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
         this.players = new HashMap<Integer, Player>();
         this.farmEntities = null;
+    }
+
+    public Integer getID() {
+        return this.id;
     }
 
     /**
@@ -75,18 +78,17 @@ public class GameClient {
      * listening for incoming updates({@link GameUpdate}) from the game server.
      * It does not allow the client to connect to multiple game servers simultaneously.
      *
-     * @param player Current player in the form of a {@link PlayerState}.
      * @param server {@link InetAddress} of the game server you want to connect to.
      * @throws IOException Problem with establishing a connection to the given server.
      */
-    public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Pair<GameClient, Integer>> myFarmIDReceived, NewPlayerAction newPlayerAction)
+    public static GameClient openConnection(InetSocketAddress server)
             throws IOException, ClassNotFoundException {
 
-        GameClient client = new GameClient(player.playerID);
-        client.myFarmIDReceived = myFarmIDReceived;
+        GameClient client = new GameClient();
+        /*client.myFarmIDReceived = myFarmIDReceived;
         client.newPlayerAction = newPlayerAction;
         client.players.put(player.playerID, player);
-        client.farmEntities = farms;
+        client.farmEntities = farms;*/
 
         // Connect the socket
         client.clientSocket.connect(server, 3000); // 3s timeout
@@ -94,12 +96,13 @@ public class GameClient {
         client.in = new ObjectInputStream(client.clientSocket.getInputStream());
         client.out = new ObjectOutputStream(client.clientSocket.getOutputStream());
 
-        GameUpdateType acceptedStatus = ((GameUpdate) client.in.readObject()).type;
+        GameUpdate receivedUpdate = (GameUpdate) client.in.readObject();
 
-        if (acceptedStatus == GameUpdateType.DECLINE) {
+        if (receivedUpdate.type == GameUpdateType.DECLINE) {
             return null;
         }
 
+        client.id = (Integer) receivedUpdate.content;
         client.isActive.set(true);
 
         // Send my ID and my latest playerState
@@ -196,8 +199,8 @@ public class GameClient {
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
                         case FARM_ID:
-                            Integer farmID = (Integer) receivedUpdate.content;
-                            this.myFarmIDReceived.accept(new Pair<GameClient, Integer>(this, farmID));
+                            this.myFarmID = (Integer) receivedUpdate.content;
+                            //this.myFarmIDReceived.accept(new Pair<GameClient, Integer>(this, farmID));
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;

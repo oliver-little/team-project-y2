@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,6 +64,8 @@ public class GameServer {
 
     protected final Market serverMarket;
 
+    private final HashSet<Integer> generatedIDs;
+
     // Atomic variables above used because of multi-threading
 
     /**
@@ -104,6 +107,8 @@ public class GameServer {
         };
         new MarketPriceUpdater(this.serverMarket, false);
 
+        this.generatedIDs = new HashSet<Integer>();
+
         this.handleNewConnections();
     }
 
@@ -118,11 +123,11 @@ public class GameServer {
             String serverName = args[0];
             GameServer server = new GameServer(serverName);
 
-            // Start multicasting the server's IP address and accepting new client connections
-            server.startClientSearch();
-
             // Listen to the child process' input(= ProcessMessages send by the parent process)
             GameServer.listenToProcessMessages(server);
+
+            // Start multicasting the server's IP address and accepting new client connections
+            server.startClientSearch();
 
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
@@ -209,6 +214,7 @@ public class GameServer {
         this.handleFarmStateDelete(deleteClientID);
 
         this.connectedClients.setRelease(clientHandlers);
+        this.generatedIDs.remove(deleteClientID);
     }
 
     /**
@@ -225,6 +231,7 @@ public class GameServer {
         this.stopGame();
 
         this.connectedClients.setRelease(new HashSet<GameClientHandler>());
+        this.generatedIDs.clear();
     }
 
     /**
@@ -455,7 +462,7 @@ public class GameServer {
 
                     // (1.) Game session is not active and the number of clients is under the limit
                     if (!this.isActive.get() && clientHandlers.size() < MAX_CONNECTIONS) {
-                        GameClientHandler client = GameClientHandler.allowConnection(this.id, clientSocket, this::clientUpdateArrived);
+                        GameClientHandler client = GameClientHandler.allowConnection(this.id, this.generateClientID(), clientSocket, this::clientUpdateArrived);
 
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
 
@@ -484,6 +491,15 @@ public class GameServer {
             }
         });
         this.newConnectionsThread.start();
+    }
+
+    private int generateClientID() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int randID = random.nextInt(128);
+        while (this.generatedIDs.contains(randID)) {
+            randID = random.nextInt(128);
+        }
+        return randID;
     }
 
     /**

@@ -21,10 +21,13 @@ import teamproject.wipeout.networking.client.NewServerDiscovery;
 import teamproject.wipeout.networking.client.ServerDiscovery;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.networking.server.GameServerRunner;
 import teamproject.wipeout.networking.server.ServerRunningException;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -55,35 +58,24 @@ public class Networker {
         return this.serverDiscovery;
     }
 
-    public final Supplier<GameClient> clientSupplier = () -> {
-        return this.client;
-    };
+    public final Supplier<GameClient> clientSupplier = () -> this.client;
 
     public GameClient getClient() {
         return this.client;
     }
 
-    public InputKeyAction startServer(String serverName) {
-        return () -> {
-            if (this.serverRunner.isServerActive()) {
-                try {
-                    this.serverRunner.stopServer();
-                    System.out.println("Stopped server");
+    public InetSocketAddress startServer(String serverName) {
+        try {
+            this.serverRunner.startServer(serverName);
+            System.out.println("Started server");
 
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                }
-                return;
-            }
+            return new InetSocketAddress(InetAddress.getLocalHost(), GameServer.GAME_PORT);
 
-            try {
-                this.serverRunner.startServer(serverName);
-                System.out.println("Started server");
+        } catch (ServerRunningException | IOException exception) {
+            exception.printStackTrace();
+        }
 
-            } catch (ServerRunningException | IOException exception) {
-                exception.printStackTrace();
-            }
-        };
+        return null;
     }
 
     public void stopServer() {
@@ -95,18 +87,6 @@ public class Networker {
                 exception.printStackTrace();
             }
         }
-    }
-
-    public InputKeyAction initiateClient(GameScene gameScene, SpriteManager spriteManager) {
-        return () -> {
-            try {
-                this.serverDiscovery = new ServerDiscovery(this.onServerDiscovery(gameScene, spriteManager));
-                this.serverDiscovery.startLookingForServers();
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        };
     }
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
@@ -140,9 +120,22 @@ public class Networker {
         };
     }
 
+    public void connectClient(InetSocketAddress address) {
+        try {
+            this.client = GameClient.openConnection(address);
+            this.client.clockCalibration = (originalGameStart) -> {
+                double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
+                this.clockSystem.setTimeDifference(timeDifference);
+            };
+
+        } catch (IOException | ClassNotFoundException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     protected NewServerDiscovery onServerDiscovery(GameScene gameScene, SpriteManager spriteManager) {
         return (name, address) -> {
-            this.serverDiscovery.stopLookingForServers();
+            /*this.serverDiscovery.stopLookingForServers();
 
             Player myPlayer = this.worldEntity.getMyPlayer();
             Market myMarket = this.worldEntity.market.getMarket();
@@ -160,11 +153,11 @@ public class Networker {
                 FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
                 this.worldEntity.setMyFarm(myFarm);
 
-                System.out.println("Connected client with ID: " + currentClient.id);
+                System.out.println("Connected client with ID: " + currentClient.getID());
 
                 try {
                     currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
-                    currentClient.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentClient.id, this.clockSystem.gameStartTime));
+                    currentClient.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentClient.getID(), this.clockSystem.gameStartTime));
 
                 } catch (IOException exception) {
                     exception.printStackTrace();
@@ -180,7 +173,7 @@ public class Networker {
 
             } catch (IOException | ClassNotFoundException exception) {
                 exception.printStackTrace();
-            }
+            }*/
         };
     }
 }

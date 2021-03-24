@@ -94,9 +94,11 @@ public class App implements Controller {
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
+    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty, Networker networker) {
         this.widthProperty = widthProperty;
         this.heightProperty = heightProperty;
+        this.networker = networker;
+
         Parent contentRoot = this.getContent();
         return contentRoot;
     }
@@ -105,8 +107,6 @@ public class App implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     public void createContent() {
-        this.networker = new Networker();
-
         try {
             this.itemStore = new ItemStore("items.json");
             this.spriteManager = new SpriteManager();
@@ -190,8 +190,8 @@ public class App implements Controller {
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
-        world.setClientSupplier(this.networker.clientSupplier);
-        this.networker.worldEntity = world;
+        //world.setClientSupplier(this.networker.clientSupplier);
+        //this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);
 
@@ -209,7 +209,7 @@ public class App implements Controller {
 
         //Time left
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
-        this.networker.clockSystem = clockSystem;
+        //this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;
@@ -241,8 +241,6 @@ public class App implements Controller {
                 () -> player.addAcceleration(0f, -500f));
 
 
-        input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
-        input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});

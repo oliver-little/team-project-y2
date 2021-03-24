@@ -27,6 +27,7 @@ import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
+import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -35,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -102,7 +104,7 @@ public class StartMenu implements Controller {
         nameBox.getChildren().addAll(serverNameLabel,serverNameTF);
 
         Button hostButton = new Button("Host Server");
-        hostButton.setOnAction(((event) -> {createServer(serverNameTF.getText(), nameTF.getText());}));
+        hostButton.setOnAction(((event) -> createServer(serverNameTF.getText(), nameTF.getText())));
 
 
         hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
@@ -120,14 +122,14 @@ public class StartMenu implements Controller {
     }
 
     private boolean createServer(String serverName, String hostName){
-        networker.startServer(serverName).performKeyAction();
+        InetSocketAddress serverAddress = networker.startServer(serverName);
 
-        createLobbyMenu(serverName, hostName);
+        createLobbyMenu(serverName, hostName, serverAddress);
 
         return true;
     }
 
-    private void createLobbyMenu(String serverName, String serverHost){
+    private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
@@ -143,7 +145,7 @@ public class StartMenu implements Controller {
         menuBox.getChildren().addAll(players);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> {}),
+                new Pair<String, Runnable>("Start Game", () -> this.startGame(this.networker)),
                 new Pair<String, Runnable>("Back", () -> {
                     networker.stopServer();
                     createMainMenu();
@@ -153,6 +155,13 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+
+        try {
+            Thread.sleep(50);
+            networker.connectClient(serverAddress);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createJoinGameMenu(){
@@ -197,9 +206,9 @@ public class StartMenu implements Controller {
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
-                    Toggle s = serverGroup.getSelectedToggle();
-                    if(s !=null){
-                        joinServer(s.getUserData().toString(), "test player");
+                    ToggleButton s = (ToggleButton) serverGroup.getSelectedToggle();
+                    if(s != null){
+                        joinServer(s.getText(), "test player", (InetSocketAddress) s.getUserData());
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
@@ -222,8 +231,8 @@ public class StartMenu implements Controller {
      * @param username
      * @return true if player joins successfully, false otherwise
      */
-    private boolean joinServer(String serverName, String username){
-        createLobbyMenu(serverName, username);
+    private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress){
+        createLobbyMenu(serverName, username, serverAddress);
 
         return true;
     }
@@ -269,19 +278,21 @@ public class StartMenu implements Controller {
 
     private List<Pair<String, Runnable>> getMainMenuData(){
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Singleplayer", () -> {
-                    App app = new App();
-                    Window window = root.getScene().getWindow();
-                    Parent content = app.init(window.widthProperty(), window.heightProperty());
-                    root.getScene().setRoot(content);
-                    app.createContent();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Multiplayer", () -> {
-                    createMultiplayerMenu();
-                }),
+                // (creating content is called separately after so InputHandler has a scene to add listeners to.)
+                new Pair<String, Runnable>("Singleplayer", () -> this.startGame(null)),
+                new Pair<String, Runnable>("Multiplayer", this::createMultiplayerMenu),
                 new Pair<String, Runnable>("Settings", () -> {}),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
+    }
+
+    private void startGame(Networker givenNetworker) {
+        App app = new App();
+        Window window = root.getScene().getWindow();
+        Parent content = app.init(window.widthProperty(), window.heightProperty(), givenNetworker);
+        root.getScene().setRoot(content);
+        app.createContent();
     }
 
 
