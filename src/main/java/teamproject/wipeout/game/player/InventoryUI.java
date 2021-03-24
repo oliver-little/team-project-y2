@@ -15,7 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-
+import java.util.List;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -36,6 +36,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent.SabotageType;
 import teamproject.wipeout.game.potion.PotionThrowEntity;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -172,6 +173,17 @@ public class InventoryUI extends StackPane {
 				});
 			}
 			else if (selectedItem.hasComponent(SabotageComponent.class)) {
+				SabotageComponent sc = selectedItem.getComponent(SabotageComponent.class);
+
+				List<GameEntity> possibleEffectEntities = null;
+
+				if (sc.type == SabotageType.SPEED) {
+					possibleEffectEntities = List.of(world.myPlayer, world.myAnimal);
+				}
+				else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
+					possibleEffectEntities = List.of(world.getMyFarm());
+				}
+
 				Runnable onComplete = () -> {
 					state = InventoryState.NONE;
 					currentPotion = null;
@@ -182,8 +194,9 @@ public class InventoryUI extends StackPane {
 					myPlayer.acquireItem(selectedItem.id);
 				};
 
+				state = InventoryState.THROWING;
 				myPlayer.dropItem();
-				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myPlayer, selectedItem, onComplete, onAbort);
+				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
 			}
 			else {
 				return;

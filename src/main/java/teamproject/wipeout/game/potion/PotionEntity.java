@@ -1,14 +1,19 @@
 package teamproject.wipeout.game.potion;
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.physics.GeometryUtil;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.OvalRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -20,20 +25,24 @@ import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
 import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
 import teamproject.wipeout.engine.component.render.particle.property.ParticleBurst;
 import teamproject.wipeout.engine.component.render.particle.property.EaseCurve.EaseType;
+import teamproject.wipeout.engine.component.shape.Circle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.util.SupplierGenerator;
 
 public class PotionEntity extends GameEntity {
-
+    public static final double POTION_EFFECT_RADIUS = 100.0;
     public static final double THROW_SPEED = 600.0;
     public static final double EXPLOSION_CONE_ANGLE = 20.0;
-    public static final EaseCurve EASE_CURVE = new EaseCurve(EaseType.EASE_OUT);
+    public static final EaseCurve EASE_CURVE = new EaseCurve(EaseType.INVERSE_EASE_IN_OUT);
 
     private Item potion;
+    private Collection<GameEntity> possibleEffectEntities;
 
     private double throwDistance;
     private Point2D startPosition;
@@ -41,10 +50,11 @@ public class PotionEntity extends GameEntity {
     private ParticleComponent trail;
     private ParticleComponent explosion;
 
-    public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Point2D startPosition, Point2D endPosition) {
+    public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, Point2D startPosition, Point2D endPosition) {
         super(scene);
 
         this.potion = potion;
+        this.possibleEffectEntities = possibleEffectEntities;
         this.startPosition = startPosition;
         this.throwDistance = endPosition.subtract(startPosition).magnitude();
 
@@ -102,20 +112,22 @@ public class PotionEntity extends GameEntity {
             double val = particle.getStartWidth() * EASE_CURVE.apply(percentage);
             particle.width = val;
             particle.height = val;
-
         });
 
         return parameters;
     }
 
     public static ParticleParameters potionExplosionFactory(Color particleColor) {
-        ParticleParameters parameters = new ParticleParameters(3.0, false, new OvalParticle(particleColor), ParticleSimulationSpace.WORLD, SupplierGenerator.rangeSupplier(0.1, 1), SupplierGenerator.rangeSupplier(1.0, 4.0), null, SupplierGenerator.staticSupplier(1.0), SupplierGenerator.circlePointSupplier(20, 150));
-        parameters.setBursts(List.of(new ParticleBurst(0.0, SupplierGenerator.staticSupplier(400))));
+
+        ExplosionSupplier velocitySupplier = new ExplosionSupplier(20, 380);
+
+        ParticleParameters parameters = new ParticleParameters(3.0, false, new OvalParticle(particleColor), ParticleSimulationSpace.WORLD, SupplierGenerator.rangeSupplier(3.5, 4.0), SupplierGenerator.rangeSupplier(1.0, 4.0), null, SupplierGenerator.staticSupplier(1.0), velocitySupplier);
+        parameters.setBursts(List.of(new ParticleBurst(0.0, SupplierGenerator.staticSupplier(600))));
         parameters.addUpdateFunction((particle, percentage) -> {
             double val = particle.getStartWidth() * EASE_CURVE.apply(percentage);
             particle.width = val;
             particle.height = val;
-            particle.velocity = particle.getStartVelocity().multiply(EASE_CURVE.apply(percentage));
+            particle.velocity = particle.velocity.multiply(0.952);
         });
         return parameters;
     }
@@ -125,12 +137,39 @@ public class PotionEntity extends GameEntity {
             this.getComponent(ScriptComponent.class).requestDeletion = true;
             this.removeComponent(MovementComponent.class);
             this.removeComponent(RenderComponent.class);
+
+            Point2D hitPosition = this.getComponent(Transform.class).getWorldPosition();
+            Circle potionArea = new Circle(hitPosition.getX(), hitPosition.getY(), POTION_EFFECT_RADIUS);
+
+            for (GameEntity entity : possibleEffectEntities) {
+                if (entity.hasComponent(Transform.class)) {
+                    Transform transform = entity.getComponent(Transform.class);
+
+                    if (entity.hasComponent(RenderComponent.class)) {
+                        RenderComponent rc = entity.getComponent(RenderComponent.class);
+
+                        Rectangle r = new Rectangle(transform.getWorldPosition().getX(), transform.getWorldPosition().getY(), rc.getWidth(), rc.getHeight());
+                        
+                        if (GeometryUtil.intersects(potionArea, r)) {
+                            entity.addComponent(potion.getComponent(SabotageComponent.class));
+                        }
+                    }
+                }
+            }
+
             if (!potion.name.equals("Cheese")) {
                 trail.parameters.setEmissionRate(0);
 
                 explosion.onStop = () -> {
-                    this.destroy();
+                    Platform.runLater(() -> this.destroy());
                 };
+
+                explosion.parameters.addUpdateFunction((particle, percentage) -> {
+                    if (particle.position.distance(hitPosition) > POTION_EFFECT_RADIUS){
+                        particle.position = hitPosition.add(particle.position.subtract(hitPosition).normalize().multiply(POTION_EFFECT_RADIUS));
+                    }
+                });
+
                 explosion.play();
             }
             else {

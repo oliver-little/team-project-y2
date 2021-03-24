@@ -83,6 +83,15 @@ public class SupplierGenerator {
         };
     }
 
+    public static Supplier<Point2D> perspectiveCircleSupplier(double min, double max) {
+        return () -> {
+            Random r = new Random();
+            double x = ((r.nextDouble() - 0.5) * 2) * ((r.nextDouble() * (max - min)) + min);
+            double y = ((r.nextDouble() - 0.5) * 2) * ((r.nextDouble() * (max - min)) + min) * 0.7;
+            return new Point2D(x, y);
+        };
+    }
+
     /**
      * Generates a supplier function of Point2D vectors in a random angle about a vector
      * @param vector A normalised vector to generate points about
@@ -115,7 +124,7 @@ public class SupplierGenerator {
         };
     }
 
-    private static Point2D rotateVector(Point2D toRotate, double angleDegrees) {
+    public static Point2D rotateVector(Point2D toRotate, double angleDegrees) {
         return rotateVectorRads(toRotate, Math.toRadians(angleDegrees));
     }
 

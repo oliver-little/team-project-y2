@@ -2,6 +2,7 @@ package teamproject.wipeout.game.potion;
 
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
 
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
@@ -32,15 +33,16 @@ public class PotionThrowEntity extends GameEntity {
     public Item potion;
 
     private Transform potionTransform;
-
+    private Collection<GameEntity> possibleEffectEntities;
     private SpriteManager spriteManager;
 
     private Runnable onComplete;
     private Runnable onAbort;
 
-    public PotionThrowEntity(GameScene scene, SpriteManager sm, Player throwingPlayer, Item potion, Runnable onComplete, Runnable onAbort) {
+    public PotionThrowEntity(GameScene scene, SpriteManager sm, Player throwingPlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
         super(scene);
 
+        this.possibleEffectEntities = possibleEffectEntities;
         this.throwingPlayer = throwingPlayer;
         this.potion = potion;
         this.onComplete = onComplete;
@@ -85,7 +87,7 @@ public class PotionThrowEntity extends GameEntity {
                 endPos = startPos.add(vector);
             }
 
-            new PotionEntity(this.getScene(), spriteManager, potion, startPos, endPos);
+            new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
             this.onComplete.run();
             this.destroy();
         }
