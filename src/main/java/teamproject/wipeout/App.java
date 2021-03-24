@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Font;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -20,6 +21,7 @@ import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -167,6 +169,14 @@ public class App implements Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        TextRenderable tag= new TextRenderable("Daniel", 20);
+        GameEntity nameTag = new GameEntity(gameScene);
+        nameTag.addComponent(new RenderComponent(tag));
+        RenderComponent playerRender = player.getComponent(RenderComponent.class);
+        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
+        nameTag.setParent(player);
+
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;

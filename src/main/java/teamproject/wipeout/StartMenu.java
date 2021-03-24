@@ -25,11 +25,13 @@ import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
+import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -45,8 +47,16 @@ public class StartMenu implements Controller {
     private VBox buttonBox;
     private Text title;
 
+    Networker networker = new Networker();
+
     public void cleanup() {
-        
+        try {
+            this.networker.getClient().closeConnection(true);
+            this.networker.stopServer();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     private void createMultiplayerMenu(){
@@ -88,7 +98,7 @@ public class StartMenu implements Controller {
         nameBox.getChildren().addAll(serverNameLabel,serverNameTF);
 
         Button hostButton = new Button("Host Server");
-        hostButton.setOnAction(((event) -> {createLobbyMenu(serverNameTF.getText(), nameTF.getText());}));
+        hostButton.setOnAction(((event) -> {createServer(serverNameTF.getText(), nameTF.getText());}));
 
 
         hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
@@ -103,6 +113,14 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().addAll(menuBox);
+    }
+
+    private boolean createServer(String serverName, String hostName){
+        networker.startServer(serverName);
+
+        createLobbyMenu(serverName, hostName);
+
+        return true;
     }
 
     private void createLobbyMenu(String serverName, String serverHost){
@@ -121,7 +139,7 @@ public class StartMenu implements Controller {
         menuBox.getChildren().addAll(players);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> {createMainMenu();}),
+                new Pair<String, Runnable>("Start Game", () -> {}),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
         );
         buttonBox = UIUtil.createMenu(menuData);
@@ -167,10 +185,8 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
                     Toggle s = serverGroup.getSelectedToggle();
-                    System.out.println(s.getProperties());
-                    if(s  !=null){
-                        System.out.println(s.getUserData());
-                        createLobbyMenu(s.getUserData().toString(), "test host");
+                    if(s !=null){
+                        joinServer(s.getUserData().toString(), "test player");
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> {createMainMenu();})
@@ -179,6 +195,18 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+    }
+
+    /**
+     * connects player to server
+     * @param serverName
+     * @param username
+     * @return true if player joins successfully, false otherwise
+     */
+    private boolean joinServer(String serverName, String username){
+        createLobbyMenu(serverName, username);
+
+        return true;
     }
 
     private void createMainMenu(){
