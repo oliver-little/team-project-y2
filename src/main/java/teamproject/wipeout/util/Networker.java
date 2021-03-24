@@ -120,9 +120,9 @@ public class Networker {
         };
     }
 
-    public void connectClient(InetSocketAddress address) {
+    public void connectClient(InetSocketAddress address, String clientName) {
         try {
-            this.client = GameClient.openConnection(address);
+            this.client = GameClient.openConnection(address, clientName);
             this.client.clockCalibration = (originalGameStart) -> {
                 double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
                 this.clockSystem.setTimeDifference(timeDifference);

@@ -33,6 +33,8 @@ import java.util.function.Consumer;
  */
 public class GameClient {
 
+    public final String clientName;
+
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
@@ -57,8 +59,9 @@ public class GameClient {
     /**
      * Default initializer for {@code GameClient}
      */
-    protected GameClient() {
+    protected GameClient(String clientName) {
         this.id = null;
+        this.clientName = clientName;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
         this.connectedClients = new SimpleListProperty<String>(FXCollections.observableList(new ArrayList<String>()));
@@ -85,12 +88,13 @@ public class GameClient {
      * It does not allow the client to connect to multiple game servers simultaneously.
      *
      * @param server {@link InetAddress} of the game server you want to connect to.
+     * @param clientName Player's name
      * @throws IOException Problem with establishing a connection to the given server.
      */
-    public static GameClient openConnection(InetSocketAddress server)
+    public static GameClient openConnection(InetSocketAddress server, String clientName)
             throws IOException, ClassNotFoundException {
 
-        GameClient client = new GameClient();
+        GameClient client = new GameClient(clientName);
         /*client.myFarmIDReceived = myFarmIDReceived;
         client.newPlayerAction = newPlayerAction;
         client.players.put(player.playerID, player);
@@ -112,7 +116,7 @@ public class GameClient {
         client.isActive.set(true);
 
         // Send my ID and my latest playerState
-        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id));
+        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id, client.clientName));
 
         client.startReceivingUpdates();
 

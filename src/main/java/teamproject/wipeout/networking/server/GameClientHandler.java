@@ -26,6 +26,7 @@ import java.util.Collection;
 public class GameClientHandler {
 
     public final Integer clientID;
+    public final String clientName;
 
     protected final Socket clientSocket;
     protected final ObjectInputStream in;
@@ -61,6 +62,7 @@ public class GameClientHandler {
         if (!this.clientID.equals(handshake.originClientID)) {
             throw new IOException("Client connection has been altered");
         }
+        this.clientName = (String) handshake.content;
     }
 
     /**

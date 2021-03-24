@@ -74,7 +74,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
 
-        this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
+        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
 
         this.position = new Transform(position, 0.0, 1);
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);

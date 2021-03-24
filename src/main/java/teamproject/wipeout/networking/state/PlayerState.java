@@ -17,6 +17,8 @@ import java.io.Serializable;
 public class PlayerState implements Serializable {
 
     private Integer playerID;
+    private String playerName;
+
     private Integer farmID;
 
     private Point2D position;
@@ -30,11 +32,14 @@ public class PlayerState implements Serializable {
      * Default initializer for a {@link PlayerState}.
      *
      * @param playerID Player's ID
+     * @param playerName Player's name
+     * @param money Player's money balance
      * @param position Player's position represented by {@link Point2D}.
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    public PlayerState(Integer playerID, Point2D position, Point2D acceleration, Double money) {
+    public PlayerState(Integer playerID, String playerName, Double money, Point2D position, Point2D acceleration) {
         this.playerID = playerID;
+        this.playerName = playerName;
         this.farmID = -1;
         this.position = position;
         this.acceleration = acceleration;
@@ -50,8 +55,9 @@ public class PlayerState implements Serializable {
      * @param position Player's position represented by {@link Point2D}
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, Double money, long timestamp) {
+    protected PlayerState(Integer playerID, String playerName, Integer farmID, Point2D position, Point2D acceleration, Double money, long timestamp) {
         this.playerID = playerID;
+        this.playerName = playerName;
         this.farmID = farmID;
         this.position = position;
         this.acceleration = acceleration;
@@ -66,6 +72,15 @@ public class PlayerState implements Serializable {
      */
     public Integer getPlayerID() {
         return this.playerID;
+    }
+
+    /**
+     * Player's name getter
+     *
+     * @return Player's name associated with the {@link PlayerState}.
+     */
+    public String getPlayerName() {
+        return this.playerName;
     }
 
     /**
@@ -171,7 +186,7 @@ public class PlayerState implements Serializable {
      * @return {@link PlayerState} copy
      */
     public PlayerState carbonCopy() {
-        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.money, this.timestamp);
+        return new PlayerState(this.playerID, this.playerName, this.farmID, this.position, this.acceleration, this.money, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented

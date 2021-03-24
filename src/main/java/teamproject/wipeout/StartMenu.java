@@ -131,7 +131,7 @@ public class StartMenu implements Controller {
         menuBox.getChildren().addAll(players);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> this.startGame(this.networker)),
+                new Pair<String, Runnable>("Start Game", () -> startGame(networker)),
                 new Pair<String, Runnable>("Back", () -> {
                     if(isHost){
                         networker.stopServer();
@@ -146,7 +146,7 @@ public class StartMenu implements Controller {
 
         try {
             Thread.sleep(100);
-            networker.connectClient(serverAddress);
+            networker.connectClient(serverAddress, serverHost);
 
             ObservableList<String> observablePlayers = networker.getClient().connectedClients.get();
 
@@ -212,7 +212,7 @@ public class StartMenu implements Controller {
                 new Pair<String, Runnable>("Join Server", () -> {
                     ToggleButton s = (ToggleButton) serverGroup.getSelectedToggle();
                     if(s != null){
-                        joinServer(s.getText(), "test player", (InetSocketAddress) s.getUserData());
+                        joinServer(s.getText(), nameTF.getText(), (InetSocketAddress) s.getUserData());
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> createMainMenu())

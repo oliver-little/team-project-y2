@@ -468,7 +468,7 @@ public class GameServer {
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
                             for (GameClientHandler connectedClient : clientHandlers) {// TODO send as a list
-                                client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, connectedClient.clientID, connectedClient.clientID.toString()));
+                                client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, connectedClient.clientID, connectedClient.clientName));
                             }
 
                             client.updateWith(this.playerStates.get().values());
@@ -479,7 +479,7 @@ public class GameServer {
                             }
                         }
 
-                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, client.clientID.toString()));
+                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, client.clientName));
 
                     } else { // (2.) Otherwise deny attempts to connect
                         GameClientHandler.denyConnection(clientSocket, this.id);
