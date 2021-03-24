@@ -2,7 +2,9 @@ package teamproject.wipeout;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -13,7 +15,9 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.geometry.Pos;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.server.GameServer;
+import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -123,10 +127,6 @@ public class StartMenu implements Controller {
         VBox players = new VBox();
         players.getStyleClass().add("pane");
         players.setAlignment(Pos.CENTER);
-        // TODO get all players connected
-        Label host = new Label(serverHost+" (HOST)");
-
-        players.getChildren().addAll(host);
 
         menuBox.getChildren().addAll(players);
 
@@ -147,6 +147,22 @@ public class StartMenu implements Controller {
         try {
             Thread.sleep(100);
             networker.connectClient(serverAddress);
+
+            ObservableList<String> observablePlayers = networker.getClient().connectedClients.get();
+
+            observablePlayers.addListener((ListChangeListener<? super String>) (change) -> {
+                Platform.runLater(() -> {
+                    players.getChildren().clear();
+                    //Label host = new Label(serverHost+" (HOST)");
+                    //players.getChildren().addAll(host);
+
+                    for (String player : observablePlayers) {
+                        Label playerLabel = new Label(player);
+                        players.getChildren().add(playerLabel);
+                    }
+                });
+            });
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

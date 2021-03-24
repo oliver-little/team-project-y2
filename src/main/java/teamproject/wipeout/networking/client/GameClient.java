@@ -1,5 +1,8 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
 import javafx.util.Pair;
 import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -15,6 +18,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +41,7 @@ public class GameClient {
 
     public NewPlayerAction newPlayerAction;
 
+    public final SimpleListProperty<String> connectedClients;
     public final HashMap<Integer, Player> players;
     public AnimalEntity myAnimal;
     public Market market;
@@ -56,6 +61,7 @@ public class GameClient {
         this.id = null;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
+        this.connectedClients = new SimpleListProperty<String>(FXCollections.observableList(new ArrayList<String>()));
         this.players = new HashMap<Integer, Player>();
         this.farmEntities = null;
     }
@@ -186,6 +192,9 @@ public class GameClient {
                     }
 
                     switch (receivedUpdate.type) {
+                        case CONNECTED:
+                            this.connectedClients.add((String) receivedUpdate.content);
+                            break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;

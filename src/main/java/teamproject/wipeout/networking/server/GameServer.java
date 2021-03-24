@@ -467,12 +467,19 @@ public class GameServer {
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
+                            for (GameClientHandler connectedClient : clientHandlers) {// TODO send as a list
+                                client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, connectedClient.clientID, connectedClient.clientID.toString()));
+                            }
+
                             client.updateWith(this.playerStates.get().values());
+
                             for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
                                 GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
                                 client.updateWith(gameUpdate);
                             }
                         }
+
+                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, client.clientID.toString()));
 
                     } else { // (2.) Otherwise deny attempts to connect
                         GameClientHandler.denyConnection(clientSocket, this.id);
