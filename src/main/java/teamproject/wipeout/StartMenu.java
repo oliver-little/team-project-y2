@@ -15,17 +15,12 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.geometry.Pos;
-import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.networking.server.GameServer;
-import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
@@ -185,7 +180,7 @@ public class StartMenu implements Controller {
 
         playerInfoBox.getChildren().addAll(nameBox);
 
-        ObservableMap<String, InetSocketAddress> servers = this.networker.getServerDiscovery().getFoundServers();
+        ObservableMap<String, InetSocketAddress> servers = this.networker.getServerDiscovery().getAvailableServers();
 
         VBox serverBox = new VBox();
         serverBox.getStyleClass().add("pane");

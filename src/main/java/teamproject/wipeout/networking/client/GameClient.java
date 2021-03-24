@@ -197,7 +197,7 @@ public class GameClient {
 
                     switch (receivedUpdate.type) {
                         case CONNECTED:
-                            this.connectedClients.add((String) receivedUpdate.content);
+                            this.handleReceivedClientConnections((String[]) receivedUpdate.content);
                             break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
@@ -271,6 +271,13 @@ public class GameClient {
         } else {
             this.players.get(state.getPlayerID()).updateFromState(state);
         }
+    }
+
+    private void handleReceivedClientConnections(String[] clients) {
+        if (clients.length != 1) {
+            this.connectedClients.clear();
+        }
+        this.connectedClients.addAll(clients);
     }
 
 }

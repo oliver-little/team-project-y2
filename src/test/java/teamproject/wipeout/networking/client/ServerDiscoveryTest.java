@@ -46,13 +46,13 @@ class ServerDiscoveryTest {
         if (this.serverDiscovery.isActive.get()) {
             this.serverDiscovery.stopLookingForServers();
         }
-        this.serverDiscovery.foundServers.clear();
+        this.serverDiscovery.availableServers.clear();
     }
 
     @RepeatedTest(5)
     @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
     void testOnDiscovery() {
-        Assertions.assertTrue(this.serverDiscovery.foundServers.isEmpty());
+        Assertions.assertTrue(this.serverDiscovery.availableServers.isEmpty());
 
         String testServerName = "TestServer#123";
         InetSocketAddress testServerAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), GameServer.GAME_PORT);
@@ -61,7 +61,7 @@ class ServerDiscoveryTest {
         Assertions.assertEquals(testServerName, this.serverName.get());
         Assertions.assertEquals(testServerAddress, this.serverAddress.get());
 
-        Assertions.assertNull(this.serverDiscovery.getFoundServers().get(testServerName));
+        Assertions.assertNull(this.serverDiscovery.getAvailableServers().get(testServerName));
     }
 
     @RepeatedTest(5)
@@ -88,8 +88,8 @@ class ServerDiscoveryTest {
         Assertions.assertNotNull(this.serverAddress.get());
 
         Assertions.assertEquals(
-                this.serverDiscovery.foundServers.get(testServerName),
-                this.serverDiscovery.getFoundServers().get(testServerName)
+                this.serverDiscovery.availableServers.get(testServerName),
+                this.serverDiscovery.getAvailableServers().get(testServerName)
         );
     }
 

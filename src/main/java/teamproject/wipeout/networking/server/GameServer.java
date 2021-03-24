@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
 
 /**
  * {@code GameServer} class represents the server-part of the client-server network architecture.
@@ -51,7 +52,7 @@ public class GameServer {
     protected final AtomicBoolean isActive;
     protected ServerThread newConnectionsThread;
 
-    protected final AtomicReference<HashSet<GameClientHandler>> connectedClients;
+    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
 
     protected final AtomicReference<Pair<Integer, Long>> gameStartTime;
 
@@ -84,7 +85,7 @@ public class GameServer {
         this.serverSocket = new ServerSocket(GAME_PORT);
         this.isActive = new AtomicBoolean(false);
 
-        this.connectedClients = new AtomicReference<HashSet<GameClientHandler>>(new HashSet<GameClientHandler>());
+        this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
 
         this.gameStartTime = new AtomicReference<Pair<Integer, Long>>(null);
 
@@ -202,7 +203,7 @@ public class GameServer {
      * @throws IOException Problem with closing the connection
      */
     public void disconnectClient(Integer deleteClientID, boolean serverSide) throws IOException {
-        HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         for (GameClientHandler client : clientHandlers) {
             if (client.clientID.equals(deleteClientID)) {
@@ -223,14 +224,14 @@ public class GameServer {
      * @throws IOException Problem with closing connections
      */
     public void disconnectClients() throws IOException {
-        HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         for (GameClientHandler client : clientHandlers) {
             client.closeConnection(true);
         }
         this.stopGame();
 
-        this.connectedClients.setRelease(new HashSet<GameClientHandler>());
+        this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
         this.generatedIDs.clear();
     }
 
@@ -458,7 +459,7 @@ public class GameServer {
             while (!this.serverSocket.isClosed()) {
                 try {
                     Socket clientSocket = this.serverSocket.accept();
-                    HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+                    ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
                     // (1.) Game session is not active and the number of clients is under the limit
                     if (!this.isActive.get() && clientHandlers.size() < MAX_CONNECTIONS) {
@@ -467,9 +468,10 @@ public class GameServer {
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
-                            for (GameClientHandler connectedClient : clientHandlers) {// TODO send as a list
-                                client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, connectedClient.clientID, connectedClient.clientName));
-                            }
+                            String[] connectedClientNames = clientHandlers
+                                    .stream().map((clientHandler) -> clientHandler.clientName)
+                                    .toArray((IntFunction<String[]>) (size) ->  new String[size]);
+                            client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClientNames));
 
                             client.updateWith(this.playerStates.get().values());
 
@@ -479,7 +481,7 @@ public class GameServer {
                             }
                         }
 
-                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, client.clientName));
+                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, new String[]{client.clientName}));
 
                     } else { // (2.) Otherwise deny attempts to connect
                         GameClientHandler.denyConnection(clientSocket, this.id);
