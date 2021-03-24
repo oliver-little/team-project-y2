@@ -61,8 +61,14 @@ public class PotionThrowEntity extends GameEntity {
         }
 
         this.addComponent(new Hoverable((x, y) -> potionTransform.setPosition(new Point2D(x, y))));
+
         this.addComponent(new RenderComponent(new SpriteRenderable(potionSprite)));
-        this.addComponent(new Clickable(this.onClick));
+
+        GameEntity clickArea = new GameEntity(scene);
+        clickArea.addComponent(new Transform(-20, -20));
+        clickArea.addComponent(new RenderComponent(new RectRenderable(Color.TRANSPARENT, 40, 40)));
+        clickArea.addComponent(new Clickable(this.onClick));
+        clickArea.setParent(this);
     }
 
     public void abortThrowing() {

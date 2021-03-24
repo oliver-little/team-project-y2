@@ -39,10 +39,9 @@ public class SabotageSystem implements EventSystem {
                     entity.getComponent(MovementComponent.class).speedMultiplier /= sabotageComponent.multiplier;
                 }
             };
-            
             entity.getComponent(MovementComponent.class).speedMultiplier *= sabotageComponent.multiplier;
 
-            timer.schedule(speedTask, (long) sabotageComponent.duration);
+            timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE && entity instanceof FarmEntity) {
@@ -60,7 +59,7 @@ public class SabotageSystem implements EventSystem {
 
             farm.setGrowthMultiplier(sabotageComponent.multiplier);
 
-            timer.schedule(growthTask, (long) sabotageComponent.duration);
+            timer.schedule(growthTask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
         
         }
@@ -79,7 +78,7 @@ public class SabotageSystem implements EventSystem {
 
             farm.setAIMultiplier(sabotageComponent.multiplier);
 
-            timer.schedule(AITask, (long) sabotageComponent.duration);
+            timer.schedule(AITask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
         
         }

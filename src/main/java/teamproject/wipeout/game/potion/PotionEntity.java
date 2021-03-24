@@ -149,8 +149,8 @@ public class PotionEntity extends GameEntity {
                         RenderComponent rc = entity.getComponent(RenderComponent.class);
 
                         Rectangle r = new Rectangle(transform.getWorldPosition().getX(), transform.getWorldPosition().getY(), rc.getWidth(), rc.getHeight());
-                        
                         if (GeometryUtil.intersects(potionArea, r)) {
+                            System.out.println("hit");
                             entity.addComponent(potion.getComponent(SabotageComponent.class));
                         }
                     }
@@ -165,7 +165,7 @@ public class PotionEntity extends GameEntity {
                 };
 
                 explosion.parameters.addUpdateFunction((particle, percentage) -> {
-                    if (particle.position.distance(hitPosition) > POTION_EFFECT_RADIUS){
+                    if (particle.position.distance(hitPosition) > POTION_EFFECT_RADIUS) {
                         particle.position = hitPosition.add(particle.position.subtract(hitPosition).normalize().multiply(POTION_EFFECT_RADIUS));
                     }
                 });
