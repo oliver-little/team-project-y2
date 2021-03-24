@@ -26,7 +26,7 @@ import teamproject.wipeout.game.player.Player;
  */
 public class PotionThrowEntity extends GameEntity {
 
-    public static final double MAX_THROW_DISTANCE = 500.0;
+    public static final double MAX_THROW_DISTANCE = 250.0;
 
     public Player throwingPlayer;
     public Item potion;
@@ -76,7 +76,14 @@ public class PotionThrowEntity extends GameEntity {
             // Throw potion
             Point2D startPos = throwingPlayer.getComponent(Transform.class).getWorldPosition();
             Point2D clickPos = new Point2D(x, y);
-            Point2D endPos = startPos.add(clickPos.subtract(startPos).normalize().multiply(MAX_THROW_DISTANCE));
+            Point2D vector = clickPos.subtract(startPos);
+            Point2D endPos = null;
+            if (vector.magnitude() > MAX_THROW_DISTANCE) {
+                endPos = startPos.add(vector.normalize().multiply(MAX_THROW_DISTANCE));
+            } 
+            else {
+                endPos = startPos.add(vector);
+            }
 
             new PotionEntity(this.getScene(), spriteManager, potion, startPos, endPos);
             this.onComplete.run();

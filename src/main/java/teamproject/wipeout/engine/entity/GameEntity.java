@@ -82,7 +82,7 @@ public class GameEntity {
     }
 
     /**
-     * Sets the parent entity of this GameEntity
+     * Sets the parent entity of this GameEntity, and edits the parent's child lists. Calling addChild or removeChild is not needed.
      * 
      * @param newParent The new parent entity 
      */
@@ -112,7 +112,7 @@ public class GameEntity {
     }
 
     /**
-     * Adds a new child entity to this GameEntity
+     * Adds a new child entity to this GameEntity (also call setParent)
      * 
      * @param child The child entity to add
      */
@@ -123,7 +123,7 @@ public class GameEntity {
     }
 
     /**
-     * Removes a child entity from this GameEntity
+     * Removes a child entity from this GameEntity (also call setParent)
      * 
      * @param child The child entity to remove
      * @return Whether the child entity existed as a child of this GameEntity
@@ -136,17 +136,17 @@ public class GameEntity {
      * Destroys this Entity
      */
     public void destroy() {
-        this.componentMap = null;
+        this.componentMap.clear();
 
-        for (GameEntity entity : children) {
-            entity.destroy();
+        while (children.size() > 0) {
+            children.get(0).destroy();
         }
 
-        this.children = null;
-        this.parent = null;
-
-        this.scene.removeEntity(this);
         this.scene.entityChangeEvent.emit(new EntityChangeEvent("ENTITY_REMOVED", this));
+        this.scene.removeEntity(this);
+
+        this.setParent(null);
+        this.children = null;
     }
 
     /**

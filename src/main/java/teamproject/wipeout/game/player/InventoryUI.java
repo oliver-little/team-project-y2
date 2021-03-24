@@ -148,9 +148,8 @@ public class InventoryUI extends StackPane {
 		FarmEntity myFarm = world.getMyFarm();
 
 		if (state == InventoryState.PLANTING) {
-			myFarm.stopPlacingItem(false);
-			if (slot == myPlayer.selectedSlot) {
-				return;
+			if (myFarm.isPlacingItem()) {
+				myFarm.stopPlacingItem(false);
 			}
 		}
 		else if (state == InventoryState.THROWING) {

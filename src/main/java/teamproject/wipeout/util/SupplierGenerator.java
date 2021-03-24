@@ -82,4 +82,47 @@ public class SupplierGenerator {
             return new Point2D((r.nextDouble() - 0.5) * 2, (r.nextDouble() - 0.5) * 2).normalize().multiply(r.nextDouble() * (max - min) + min);
         };
     }
+
+    /**
+     * Generates a supplier function of Point2D vectors in a random angle about a vector
+     * @param vector A normalised vector to generate points about
+     * @param angleDegrees The angle to generate points either side of the given vector (45 will produce vectors in a 90 degree range - 45 either side)
+     */
+    public static Supplier<Point2D> angleAroundVectorSupplier(Point2D vector, double angleDegrees) {
+        Point2D leftVector = rotateVector(vector, -angleDegrees);
+        Point2D rightVector = rotateVector(vector, angleDegrees);
+        return () -> {
+            Random r = new Random();
+            double x = r.nextDouble() * (rightVector.getX() - leftVector.getX()) + leftVector.getX();
+            double y = r.nextDouble() * (rightVector.getY() - leftVector.getY()) + leftVector.getY();
+            return new Point2D(x, y);
+        };
+    }
+
+    /**
+     * Generates a supplier function of Point2D vectors in a random angle about a vector, with a length in the range min-max
+     * @param vector A normalised vector to generate points about
+     * @param angleDegrees The angle to generate points either side of the given vector (45 will produce vectors in a 90 degree range - 45 either side)
+     */
+    public static Supplier<Point2D> angleAroundVectorSupplier(Point2D vector, double angleDegrees, double min, double max) {
+        Point2D leftVector = rotateVector(vector, -angleDegrees);
+        Point2D rightVector = rotateVector(vector, angleDegrees);
+        return () -> {
+            Random r = new Random();
+            double x = r.nextDouble() * (rightVector.getX() - leftVector.getX()) + leftVector.getX();
+            double y = r.nextDouble() * (rightVector.getY() - leftVector.getY()) + leftVector.getY();
+            return new Point2D(x, y).multiply(r.nextDouble() * (max - min) + min);
+        };
+    }
+
+    private static Point2D rotateVector(Point2D toRotate, double angleDegrees) {
+        return rotateVectorRads(toRotate, Math.toRadians(angleDegrees));
+    }
+
+    private static Point2D rotateVectorRads(Point2D toRotate, double angleRadians) {
+        return new Point2D(
+            toRotate.getX() * Math.cos(angleRadians) - toRotate.getY() * Math.sin(angleRadians),
+            toRotate.getX() * Math.sin(angleRadians) + toRotate.getY() * Math.cos(angleRadians)
+        );
+    }
 }

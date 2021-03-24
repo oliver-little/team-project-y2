@@ -54,15 +54,17 @@ public class ParticleSystem implements GameSystem {
     public void accept(Double timeStep) {
         for (Map.Entry<GameEntity, ParticleRenderable> entry : trackedEntities.entrySet()) {
             ParticleComponent pc = entry.getKey().getComponent(ParticleComponent.class);
+            ParticleRenderable renderable = entry.getValue();
 
             if (!pc.isPlaying()) {
+                if (renderable.particles.size() > 0) {
+                    renderable.particles.clear();
+                }
                 continue;
             }
 
             ParticleParameters parameters = pc.parameters;
-            ParticleRenderable renderable = entry.getValue();
             pc.time += timeStep;
-
             if (pc.time > parameters.getRuntime()) {
                 if (parameters.doesLoop()) {
                     pc.time = 0;
@@ -181,7 +183,7 @@ public class ParticleSystem implements GameSystem {
     };
 
     /**
-     * Consumer function called when an entity that does not meet the requirements is removed, or has a component removed
+     * Consumer function called when an entity that does not meet the requirements has a component removed
      * @param entity The entity that was removed
      */
     public Consumer<GameEntity> remove = (entity) -> {
