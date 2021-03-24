@@ -4,34 +4,19 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Effect;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Polygon;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Scale;
 import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -130,6 +115,7 @@ public class StartMenu implements Controller {
     }
 
     private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress) {
+    private void createLobbyMenu(String serverName, String serverHost, boolean isHost){
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
@@ -138,6 +124,7 @@ public class StartMenu implements Controller {
         VBox players = new VBox();
         players.getStyleClass().add("pane");
         players.setAlignment(Pos.CENTER);
+        // TODO get all players connected
         Label host = new Label(serverHost+" (HOST)");
 
         players.getChildren().addAll(host);
@@ -147,7 +134,9 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Start Game", () -> this.startGame(this.networker)),
                 new Pair<String, Runnable>("Back", () -> {
-                    networker.stopServer();
+                    if(isHost){
+                        networker.stopServer();
+                    }
                     createMainMenu();
                 })
         );
@@ -155,13 +144,6 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
-
-        try {
-            Thread.sleep(50);
-            networker.connectClient(serverAddress);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void createJoinGameMenu(){
