@@ -35,6 +35,8 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.potion.PotionThrowEntity;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -42,6 +44,12 @@ import teamproject.wipeout.util.resources.ResourceType;
  * Creates the player's inventory bar as a StackPane
  */
 public class InventoryUI extends StackPane {
+
+	public enum InventoryState {
+		NONE,
+		PLANTING,
+		THROWING
+	}
 
 	public Point2D size;
 	Group root;
@@ -51,11 +59,14 @@ public class InventoryUI extends StackPane {
 	
 	SpriteManager spriteManager;
 	
-	//Temporarily placed
 	private Rectangle[] rectangles = new Rectangle[MAX_SIZE];
 	private ImageView[] spriteViews = new ImageView[MAX_SIZE];
 	private Text[] quantityTexts = new Text[MAX_SIZE];
 	private int currentSelection = 0;
+
+	private InventoryState state = InventoryState.NONE;
+
+	private PotionThrowEntity currentPotion;
 
 	public InventoryUI(SpriteManager spriteManager, ItemStore itemStore) {
 		super();
@@ -117,38 +128,10 @@ public class InventoryUI extends StackPane {
 	 */
 	public void onMouseClick(WorldEntity world) {
 		for(int i = 0; i < MAX_SIZE; i++) {
-			int hold = i;
+			final int count = i;
 			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
 				event.consume();
-
-				Player myPlayer = world.myPlayer;
-				FarmEntity myFarm = world.getMyFarm();
-
-				if (myFarm.isPlacingItem()) {
-					myFarm.stopPlacingItem(false);
-					if (hold == myPlayer.selectedSlot) {
-						return;
-					}
-				}
-
-				int selectedItemID = myPlayer.selectSlot(hold);
-				if (selectedItemID < 0) {
-					return;
-				}
-
-				try {
-					Item selectedItem = itemStore.getItem(selectedItemID);
-					if (!selectedItem.hasComponent(PlantComponent.class)) {
-						return;
-					}
-					myPlayer.dropItem();
-					myFarm.startPlacingItem(selectedItem, new Point2D(event.getSceneX(), event.getSceneY()), (item) -> {
-						myPlayer.acquireItem(item.id);
-					});
-
-				} catch (FileNotFoundException exception) {
-					exception.printStackTrace();
-				}
+				this.useSlot(count, world);
 			});
 		}
 	}
@@ -164,11 +147,14 @@ public class InventoryUI extends StackPane {
 		Player myPlayer = world.myPlayer;
 		FarmEntity myFarm = world.getMyFarm();
 
-		if (myFarm.isPlacingItem()) {
+		if (state == InventoryState.PLANTING) {
 			myFarm.stopPlacingItem(false);
 			if (slot == myPlayer.selectedSlot) {
 				return;
 			}
+		}
+		else if (state == InventoryState.THROWING) {
+			currentPotion.abortThrowing();
 		}
 		
 		int selectedItemID = myPlayer.selectSlot(currentSelection);
@@ -178,14 +164,31 @@ public class InventoryUI extends StackPane {
 
 		try {
 			Item selectedItem = itemStore.getItem(selectedItemID);
-			if (!selectedItem.hasComponent(PlantComponent.class)) {
+			if (selectedItem.hasComponent(PlantComponent.class)) {
+				myPlayer.dropItem();
+				state = InventoryState.PLANTING;
+				myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
+					myPlayer.acquireItem(item.id);
+					state = InventoryState.NONE;
+				});
+			}
+			else if (selectedItem.hasComponent(SabotageComponent.class)) {
+				Runnable onComplete = () -> {
+					state = InventoryState.NONE;
+					currentPotion = null;
+				};
+				Runnable onAbort = () -> {
+					state = InventoryState.NONE; 
+					currentPotion = null;
+					myPlayer.acquireItem(selectedItem.id);
+				};
+
+				myPlayer.dropItem();
+				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myPlayer, selectedItem, onComplete, onAbort);
+			}
+			else {
 				return;
 			}
-			myPlayer.dropItem();
-			myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
-				myPlayer.acquireItem(item.id);
-			});
-
 		} catch (FileNotFoundException exception) {
 			exception.printStackTrace();
 		}

@@ -142,6 +142,9 @@ public class GameEntity {
             entity.destroy();
         }
 
+        this.children = null;
+        this.parent = null;
+
         this.scene.removeEntity(this);
         this.scene.entityChangeEvent.emit(new EntityChangeEvent("ENTITY_REMOVED", this));
     }
