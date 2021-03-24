@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final int MAX_SIZE = 10; //no. of inventory slots
-    public final int INITIAL_MONEY = 25; //initial amount of money
+    public final int INITIAL_MONEY = 2500; //initial amount of money
 
     public final Integer playerID;
     public String playerName;
