@@ -75,14 +75,18 @@ public class ItemsRowRenderer implements Renderable {
             }
 
             Point2D spriteSize = this.rescaleToFitWidth(plant.width, sprite.getWidth(), sprite.getHeight());
-            double itemY = (y - spriteSize.getY() * 0.5);
+            double itemY = (y - spriteSize.getY() * (0.5 / plant.height));
 
             gc.drawImage(sprite, itemX * scale, itemY * scale, spriteSize.getX() * scale, spriteSize.getY() * scale);
         }
     }
 
-    protected Point2D rescaleToFitWidth(int squareScale, double w, double h) {
-        double scaleFactor = squareScale * FarmEntity.SQUARE_SIZE / w;
+    public static double scaleFactorToFitWidth(int squareScale, double w, double h) {
+        return squareScale * FarmEntity.SQUARE_SIZE / w;
+    }
+
+    private Point2D rescaleToFitWidth(int squareScale, double w, double h) {
+        double scaleFactor = scaleFactorToFitWidth(squareScale, w, h);
         return new Point2D(w * scaleFactor, h * scaleFactor);
     }
 

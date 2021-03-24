@@ -65,7 +65,7 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
-    private AudioComponent audio;
+    private final AudioComponent audio;
 
     private final Pickables pickables;
 

@@ -653,8 +653,6 @@
           "grownItemID" : 21,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "width": 2,
-          "height": 2,
           "minDrop" : 1,
           "maxDrop" : 2
         }

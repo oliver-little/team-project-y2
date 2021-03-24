@@ -85,7 +85,7 @@ public class InventoryUI extends StackPane {
 				spriteViews[index].setImage(sprite);
 				spriteViews[index].setX(67*index + (32 - sprite.getWidth()/2));
 				if (sprite.getHeight() > 64) {
-					spriteViews[index].setY(32 - sprite.getHeight() / 1.3);
+					spriteViews[index].setY(32 - sprite.getHeight() / 1.4);
 				} else {
 					spriteViews[index].setY(32 - sprite.getHeight() / 2);
 				}
