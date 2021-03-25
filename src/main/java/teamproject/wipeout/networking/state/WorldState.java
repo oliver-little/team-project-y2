@@ -40,19 +40,6 @@ public class WorldState implements Serializable {
     }
 
     /**
-     * Protected initializer for a {@link WorldState}.
-     *
-     * @param pickables Set of pickable items
-     * @param potions Map of potions
-     * @param timestamp Timestamp of the state
-     */
-    protected WorldState(Set<Pickables.Pickable> pickables, HashMap<Integer, Point2D[]> potions, long timestamp) {
-        this.pickables = pickables;
-        this.potions = potions;
-        this.timestamp = timestamp;
-    }
-
-    /**
      * {@code pickables} getter
      *
      * @return Set of pickables
@@ -77,15 +64,6 @@ public class WorldState implements Serializable {
      */
     public long getTimestamp() {
         return this.timestamp;
-    }
-
-    /**
-     * Creates a copy of the WorldState
-     *
-     * @return {@link WorldState} copy
-     */
-    public WorldState carbonCopy() {
-        return new WorldState(this.pickables, this.potions, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented

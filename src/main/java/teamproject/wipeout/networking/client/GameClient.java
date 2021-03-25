@@ -137,7 +137,7 @@ public class GameClient {
         this.out.writeObject(new GameUpdate(updatedState));
         this.out.reset();
 
-        this.handlePlayerStateUpdate(updatedState.carbonCopy());
+        this.handlePlayerStateUpdate(updatedState);
     }
 
     /**

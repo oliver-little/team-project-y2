@@ -46,24 +46,6 @@ public class PlayerState implements Serializable {
     }
 
     /**
-     * Protected initializer for a {@link PlayerState}.
-     *
-     * @param playerID Player's ID
-     * @param timestamp Timestamp of the state
-     * @param position Player's position represented by {@link Point2D}
-     * @param acceleration Player's acceleration represented by {@link Point2D}
-     */
-    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, Double speedMultiplier, Double money, long timestamp) {
-        this.playerID = playerID;
-        this.farmID = farmID;
-        this.position = position;
-        this.acceleration = acceleration;
-        this.speedMultiplier = speedMultiplier;
-        this.money = money;
-        this.timestamp = timestamp;
-    }
-
-    /**
      * Player's ID getter
      *
      * @return Player's ID associated with the {@link PlayerState}.
@@ -176,15 +158,6 @@ public class PlayerState implements Serializable {
         this.speedMultiplier = state.speedMultiplier;
         this.money = state.money;
         this.timestamp = state.timestamp;
-    }
-
-    /**
-     * Creates a copy of the PlayerState
-     *
-     * @return {@link PlayerState} copy
-     */
-    public PlayerState carbonCopy() {
-        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.speedMultiplier, this.money, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented

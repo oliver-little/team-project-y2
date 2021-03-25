@@ -130,10 +130,12 @@ public class FarmEntity extends GameEntity {
             row += 1;
         }
 
+        this.clientSupplier = clientFunction;
+
         if (activePlayer) {
             //this.farmUI = new FarmUI(this.data, spriteManager);
             //this.farmUI.setParent(uiContainer);
-            this.addComponent(this.makeClickable(clientFunction));
+            this.addComponent(this.makeClickable());
         }
     }
 
@@ -610,12 +612,8 @@ public class FarmEntity extends GameEntity {
 
     /**
      * Creates a {@code Clickable} component for the farm entity.
-     *
-     * @return {@link Clickable} component
      */
-    private Clickable makeClickable(Supplier<GameClient> clientFunction) {
-        this.clientSupplier = clientFunction;
-
+    private Clickable makeClickable() {
         Clickable clickable = new Clickable((x, y, button) -> {
             if (this.isPickingItem()) { 
                 this.pickItemAt(x, y); //Picking a plant

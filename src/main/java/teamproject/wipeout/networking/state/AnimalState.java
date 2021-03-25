@@ -38,20 +38,6 @@ public class AnimalState implements Serializable {
     }
 
     /**
-     * Protected initializer for a {@link PlayerState}.
-     *
-     * @param position Animal's position represented by {@link Point2D}.
-     * @param traveseTo Animal's traverse goal represented by {@code int[]}.
-     * @param timestamp Timestamp of the state
-     */
-    protected AnimalState(Point2D position, int[] traveseTo, double speedMultiplier, long timestamp) {
-        this.position = position;
-        this.traveseTo = traveseTo;
-        this.speedMultiplier = speedMultiplier;
-        this.timestamp = timestamp;
-    }
-
-    /**
      * {@code timestamp} variable getter
      *
      * @return Timestamp of the {@code AnimalState}
