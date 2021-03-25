@@ -28,6 +28,9 @@ public class FarmData implements StateUpdatable<FarmState> {
     public final Integer playerID;
     public final double TREE_GROWTH_HARVEST_PERCENTAGE = 0.75; //Sets the growth percentage to return a tree to when harvested.
 
+    private double growthMultiplier;
+    private double AIMultiplier;
+
     protected final ArrayList<ArrayList<FarmItem>> items;
 
     private final ItemStore itemStore;
@@ -45,6 +48,9 @@ public class FarmData implements StateUpdatable<FarmState> {
         this.farmID = farmID;
         this.playerID = playerID;
 
+        this.growthMultiplier = 1.0;
+        this.AIMultiplier = 1.0;
+
         this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);
         for (int i = 0; i < FARM_ROWS; i++) {
             ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
@@ -61,13 +67,29 @@ public class FarmData implements StateUpdatable<FarmState> {
         };
     }
 
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
+    public void setGrowthMultiplier(double growthMultiplier) {
+        this.growthMultiplier = growthMultiplier;
+    }
+
+    public void setAIMultiplier(double AIMultiplier) {
+        this.AIMultiplier = AIMultiplier;
+    }
+
     /**
      * Gets the current state of the farm.
      *
      * @return Current {@link FarmState}
      */
     public FarmState getCurrentState() {
-        return new FarmState(this.farmID, this.items);
+        return new FarmState(this.farmID, this.items, this.growthMultiplier, this.AIMultiplier);
     }
 
     /**
@@ -76,7 +98,10 @@ public class FarmData implements StateUpdatable<FarmState> {
      * @param farmState New state of the farm
      */
     public void updateFromState(FarmState farmState) {
-        List<List<Pair<Integer, Double>>> newItems = farmState.items;
+        this.growthMultiplier = farmState.getGrowthMultiplier();
+        this.AIMultiplier = farmState.getAIMultiplier();
+
+        List<List<Pair<Integer, Double>>> newItems = farmState.getItems();
         for (int r = 0; r < this.items.size(); r++) {
             for (int c = 0; c < this.items.get(r).size(); c++) {
 

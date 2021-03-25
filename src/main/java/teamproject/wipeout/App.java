@@ -203,6 +203,7 @@ public class App implements Controller {
 
         WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
         world.setClientSupplier(this.networker.clientSupplier);
+        player.setThrownPotion((potion) ->  world.addPotion(potion));
         this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);

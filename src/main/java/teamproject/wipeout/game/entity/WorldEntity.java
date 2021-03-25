@@ -16,13 +16,15 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -43,18 +45,27 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	public final AnimalEntity myAnimal;
 	public final Pickables pickables;
 
+	private HashMap<Integer, Point2D[]> potions;
+
 	private FarmEntity myFarm;
 	private NavigationMesh navMesh;
 
 	private InputHandler inputHandler;
 	private Supplier<GameClient> clientSupplier;
 
+	private SpriteManager spriteManager;
+	private ItemStore itemStore;
+
 	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
 		super(gameScene);
+		this.spriteManager = spriteManager;
+		this.itemStore = itemStore;
 
 		this.farms = new HashMap<Integer, FarmEntity>();
 		this.pickables = new Pickables(gameScene, itemStore, spriteManager);
 		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
+
+		this.potions = new HashMap<Integer, Point2D[]>();
 
 		this.inputHandler = input;
 
@@ -137,6 +148,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.setupFarmDestroyingKey();
 	}
 
+	public void addPotion(PotionEntity potionEntity) {
+		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
+		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
+		this.potions.put(potionEntity.getPotionID(), pointPoints);
+		this.sendStateUpdate();
+	}
+
 	public FarmEntity getMyFarm() {
 		return this.myFarm;
 	}
@@ -163,11 +181,29 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	public WorldState getCurrentState() {
-		return new WorldState(this.pickables.get());
+		return new WorldState(this.pickables.get(), this.potions);
 	}
 
 	public void updateFromState(WorldState newState) {
 		this.pickables.updateFrom(newState.getPickables());
+
+		Set<Map.Entry<Integer, Point2D[]>> currentEntrySet = this.potions.entrySet();
+		for (Map.Entry<Integer, Point2D[]> entry : newState.getPotions().entrySet()) {
+			if (!currentEntrySet.contains(entry)) {
+				Item potion = this.itemStore.getItem(entry.getKey());
+				SabotageComponent sc = potion.getComponent(SabotageComponent.class);
+
+				List<GameEntity> possibleEffectEntities = null;
+
+				if (sc.type == SabotageComponent.SabotageType.SPEED) {
+					possibleEffectEntities = List.of(this.myPlayer, this.myAnimal);
+				}
+				else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
+					possibleEffectEntities = List.of(this.myFarm);
+				}
+				new PotionEntity(this.getScene(), this.spriteManager, potion, possibleEffectEntities, entry.getValue()[0], entry.getValue()[1]);
+			}
+		}
 	}
 
 	protected void setupFarmPickingKey() {

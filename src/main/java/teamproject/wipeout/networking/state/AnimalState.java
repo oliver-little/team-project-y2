@@ -21,6 +21,8 @@ public class AnimalState implements Serializable {
     private int[] traveseTo;
     private int eatAt;
 
+    private Double speedMultiplier;
+
     private long timestamp;
 
     /**
@@ -34,6 +36,7 @@ public class AnimalState implements Serializable {
         this.position = position;
         this.traveseTo = traveseTo;
         this.eatAt = eatAt;
+        this.speedMultiplier = 1.0;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -45,10 +48,11 @@ public class AnimalState implements Serializable {
      * @param eatAt Animal's eat at farm represented by {@code int} farm ID.
      * @param timestamp Timestamp of the state
      */
-    protected AnimalState(Point2D position, int[] traveseTo, int eatAt, long timestamp) {
+    protected AnimalState(Point2D position, int[] traveseTo, int eatAt, double speedMultiplier, long timestamp) {
         this.position = position;
         this.traveseTo = traveseTo;
         this.eatAt = eatAt;
+        this.speedMultiplier = speedMultiplier;
         this.timestamp = timestamp;
     }
 
@@ -88,6 +92,10 @@ public class AnimalState implements Serializable {
         return this.eatAt;
     }
 
+    public Double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
     /**
      * {@code position} setter
      *
@@ -118,6 +126,10 @@ public class AnimalState implements Serializable {
         this.eatAt = newEatAt;
     }
 
+    public void setSpeedMultiplier(Double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
     /**
      * Updates this {@code AnimalState} based on another {@code AnimalState}.
      *
@@ -127,6 +139,7 @@ public class AnimalState implements Serializable {
         this.position = state.position;
         this.traveseTo = state.traveseTo;
         this.eatAt = state.eatAt;
+        this.speedMultiplier = state.speedMultiplier;
         this.timestamp = state.timestamp;
     }
 
@@ -136,7 +149,7 @@ public class AnimalState implements Serializable {
      * @return {@link AnimalState} copy
      */
     public AnimalState carbonCopy() {
-        return new AnimalState(this.position, this.traveseTo, this.eatAt, this.timestamp);
+        return new AnimalState(this.position, this.traveseTo, this.eatAt, this.speedMultiplier, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -156,6 +169,8 @@ public class AnimalState implements Serializable {
 
         out.writeInt(this.eatAt);
 
+        out.writeDouble(this.speedMultiplier);
+
         out.writeLong(this.timestamp);
     }
 
@@ -169,6 +184,8 @@ public class AnimalState implements Serializable {
         }
 
         this.eatAt = in.readInt();
+
+        this.speedMultiplier = in.readDouble();
 
         this.timestamp = in.readLong();
     }

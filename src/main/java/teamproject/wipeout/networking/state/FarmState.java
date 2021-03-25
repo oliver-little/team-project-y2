@@ -22,7 +22,9 @@ public class FarmState implements Serializable {
 
     private Integer farmID;
 
-    public List<List<Pair<Integer, Double>>> items;
+    private List<List<Pair<Integer, Double>>> items;
+    private double growthMultiplier;
+    private double AIMultiplier;
 
     private long timestamp;
 
@@ -32,7 +34,7 @@ public class FarmState implements Serializable {
      * @param farmID Farm ID
      * @param items  Items at the farm
      */
-    public FarmState(Integer farmID, ArrayList<ArrayList<FarmItem>> items) {
+    public FarmState(Integer farmID, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double AIMultiplier) {
         this.farmID = farmID;
         this.items = items.stream().map((row) -> {
             return row.stream().map((item) -> {
@@ -43,20 +45,12 @@ public class FarmState implements Serializable {
                 return null;
             }).collect(Collectors.toList());
         }).collect(Collectors.toList());
-        this.timestamp = System.currentTimeMillis();
-    }
+        System.out.println("State: "+this.items.toString());
 
-    /**
-     * Protected initializer for a {@link FarmState}.
-     *
-     * @param farmID Farm ID
-     * @param items  Items at the farm
-     * @param timestamp Timestamp of the state
-     */
-    protected FarmState(Integer farmID, List<List<Pair<Integer, Double>>> items, long timestamp) {
-        this.farmID = farmID;
-        this.items = items;
-        this.timestamp = timestamp;
+        this.growthMultiplier = growthMultiplier;
+        this.AIMultiplier = AIMultiplier;
+
+        this.timestamp = System.currentTimeMillis();
     }
 
     /**
@@ -68,6 +62,18 @@ public class FarmState implements Serializable {
         return this.farmID;
     }
 
+    public List<List<Pair<Integer, Double>>> getItems() {
+        return this.items;
+    }
+
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
     /**
      * {@code timestamp} variable getter
      *
@@ -75,16 +81,6 @@ public class FarmState implements Serializable {
      */
     public long getTimestamp() {
         return this.timestamp;
-    }
-
-
-    /**
-     * Creates a copy of the FarmState
-     *
-     * @return {@link FarmState} copy
-     */
-    public FarmState carbonCopy() {
-        return new FarmState(this.farmID, this.items, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -95,6 +91,9 @@ public class FarmState implements Serializable {
 
         out.writeObject(this.items);
 
+        out.writeDouble(this.growthMultiplier);
+        out.writeDouble(this.AIMultiplier);
+
         out.writeLong(this.timestamp);
     }
 
@@ -102,6 +101,9 @@ public class FarmState implements Serializable {
         this.farmID = in.readInt();
 
         this.items = (List<List<Pair<Integer, Double>>>) in.readObject();
+
+        this.growthMultiplier = in.readDouble();
+        this.AIMultiplier = in.readDouble();
 
         this.timestamp = in.readLong();
     }

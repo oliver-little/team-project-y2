@@ -51,9 +51,6 @@ public class FarmEntity extends GameEntity {
     private final SpriteManager spriteManager;
     private final ItemStore itemStore;
 
-    private double growthMultiplier;
-    private double AIMultiplier;
-
     private final List<ItemsRowEntity> rowEntities;
 
     //private FarmUI farmUI;
@@ -71,7 +68,7 @@ public class FarmEntity extends GameEntity {
 
     private final Pickables pickables;
 
-    private final Supplier<Double> growthMultiplierSupplier = () -> this.growthMultiplier;
+    private final Supplier<Double> growthMultiplierSupplier = () -> this.data.getGrowthMultiplier();
 
     /**
      * Creates a new instance of {@code FarmEntity}
@@ -99,9 +96,6 @@ public class FarmEntity extends GameEntity {
         this.seedEntity = null;
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
-
-        this.growthMultiplier = 1.0;
-        this.AIMultiplier = 1.0;
 
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
@@ -165,6 +159,7 @@ public class FarmEntity extends GameEntity {
     }
 
     public void updateFromState(FarmState farmState) {
+        System.out.println("Update: "+farmState.getItems().toString());
         this.data.updateFromState(farmState);
     }
 
@@ -363,8 +358,7 @@ public class FarmEntity extends GameEntity {
     public boolean isDestroyingItem() {
         if (this.destroyerEntity == null) {
             return false;
-        }
-        else {
+        } else {
             return this.destroyerEntity.getDestroyMode();
         }
     }
@@ -459,8 +453,7 @@ public class FarmEntity extends GameEntity {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
             this.audio.play("slice.wav");
-        }
-        else {
+        } else {
             pickedItem = this.data.pickItemAt(row, column);
         }
 
@@ -688,7 +681,7 @@ public class FarmEntity extends GameEntity {
      * @return The growth multiplier for a farm.
      */
     public double getGrowthMultiplier() {
-        return this.growthMultiplier;
+        return this.data.getGrowthMultiplier();
     }
 
     /**
@@ -696,7 +689,8 @@ public class FarmEntity extends GameEntity {
      * @param growthMultiplier The new growth multiplier for a farm.
      */
     public void setGrowthMultiplier(double growthMultiplier) {
-        this.growthMultiplier = growthMultiplier;
+        this.data.setGrowthMultiplier(growthMultiplier);
+        this.sendStateUpdate();
     }
 
     /**
@@ -704,7 +698,7 @@ public class FarmEntity extends GameEntity {
      * @return The AI multiplier
      */
     public double getAIMultiplier() {
-        return this.AIMultiplier;
+        return this.data.getAIMultiplier();
     }
 
     /**
@@ -712,6 +706,7 @@ public class FarmEntity extends GameEntity {
      * @param AIMultiplier The new AI multiplier for a farm.
      */
     public void setAIMultiplier(double AIMultiplier) {
-        this.AIMultiplier = AIMultiplier;
+        this.data.setAIMultiplier(AIMultiplier);
+        this.sendStateUpdate();
     }
 }

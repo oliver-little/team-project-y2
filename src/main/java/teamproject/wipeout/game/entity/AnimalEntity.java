@@ -68,6 +68,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.transformComponent = new Transform(position.getX(), position.getY(), 1);
         this.movementComponent = new MovementComponent();
+        this.movementComponent.speedMultiplierChanged = (newMultiplier) -> {
+            this.animalState.setSpeedMultiplier(newMultiplier);
+            this.sendStateUpdate();
+        };
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
@@ -101,7 +105,9 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     public void updateFromState(AnimalState newState) {
         this.isPuppet = true;
+        this.removeComponent(SteeringComponent.class);
         this.transformComponent.setPosition(newState.getPosition());
+        this.movementComponent.setSpeedMultiplier(newState.getSpeedMultiplier());
 
         int[] traverseTo = newState.getTraveseTo();
         if (traverseTo != null) {
@@ -124,14 +130,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
 
-        SteeringComponent newSteering = new SteeringComponent(path, callback, 250);
-
-        SteeringComponent currentSteering = this.getComponent(SteeringComponent.class);
-        if (currentSteering == null) {
-            this.addComponent(newSteering);
-        } else {
-            currentSteering.subsequentSteering = newSteering;
-        }
+        this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
     /**
@@ -255,18 +254,18 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         //Make decision on what to do next.
         double probability = Math.random();
 
-        if (probability <= 0.1) {
+        /*if (probability <= 0.1) {
             //Idle
             aiIdle();
 
-        } else if (probability <= stealProbability) {
+        } else if (probability <= stealProbability) {*/
             //Steal plants
             aiStealCrops(null, selectedFarm);
 
-        } else {
+        /*} else {
             //Pick random point
             aiPathFind();
-        }
+        }*/
     };
 
     /**

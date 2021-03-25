@@ -22,6 +22,8 @@ public class PlayerState implements Serializable {
     private Point2D position;
     private Point2D acceleration;
 
+    private Double speedMultiplier;
+
     private Double money;
 
     private long timestamp;
@@ -38,6 +40,7 @@ public class PlayerState implements Serializable {
         this.farmID = -1;
         this.position = position;
         this.acceleration = acceleration;
+        this.speedMultiplier = 1.0;
         this.money = money;
         this.timestamp = System.currentTimeMillis();
     }
@@ -50,11 +53,12 @@ public class PlayerState implements Serializable {
      * @param position Player's position represented by {@link Point2D}
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, Double money, long timestamp) {
+    protected PlayerState(Integer playerID, Integer farmID, Point2D position, Point2D acceleration, Double speedMultiplier, Double money, long timestamp) {
         this.playerID = playerID;
         this.farmID = farmID;
         this.position = position;
         this.acceleration = acceleration;
+        this.speedMultiplier = speedMultiplier;
         this.money = money;
         this.timestamp = timestamp;
     }
@@ -104,6 +108,10 @@ public class PlayerState implements Serializable {
         return this.acceleration;
     }
 
+    public Double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
     /**
      * {@code money} getter
      *
@@ -142,6 +150,10 @@ public class PlayerState implements Serializable {
         this.acceleration = newAcceleration;
     }
 
+    public void setSpeedMultiplier(Double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
     /**
      * {@code money} setter
      *
@@ -161,6 +173,7 @@ public class PlayerState implements Serializable {
         this.farmID = state.farmID;
         this.position = state.position;
         this.acceleration = state.acceleration;
+        this.speedMultiplier = state.speedMultiplier;
         this.money = state.money;
         this.timestamp = state.timestamp;
     }
@@ -171,7 +184,7 @@ public class PlayerState implements Serializable {
      * @return {@link PlayerState} copy
      */
     public PlayerState carbonCopy() {
-        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.money, this.timestamp);
+        return new PlayerState(this.playerID, this.farmID, this.position, this.acceleration, this.speedMultiplier, this.money, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -187,6 +200,8 @@ public class PlayerState implements Serializable {
         out.writeDouble(this.acceleration.getX());
         out.writeDouble(this.acceleration.getY());
 
+        out.writeDouble(this.speedMultiplier);
+
         out.writeDouble(this.money);
 
         out.writeLong(this.timestamp);
@@ -198,6 +213,8 @@ public class PlayerState implements Serializable {
 
         this.position = new Point2D(in.readDouble(), in.readDouble());
         this.acceleration = new Point2D(in.readDouble(), in.readDouble());
+
+        this.speedMultiplier = in.readDouble();
 
         this.money = in.readDouble();
 

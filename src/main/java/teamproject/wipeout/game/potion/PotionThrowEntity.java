@@ -93,7 +93,9 @@ public class PotionThrowEntity extends GameEntity {
                 endPos = startPos.add(vector);
             }
 
-            new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
+            PotionEntity potionEntity = new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
+            this.throwingPlayer.getThrownPotion().accept(potionEntity);
+
             this.onComplete.run();
             this.destroy();
         }

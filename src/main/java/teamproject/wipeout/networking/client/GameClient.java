@@ -191,6 +191,7 @@ public class GameClient {
                             break;
                         case FARM_STATE:
                             FarmState fState = (FarmState) receivedUpdate.content;
+                            System.out.println("Updated");
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
                         case FARM_ID:

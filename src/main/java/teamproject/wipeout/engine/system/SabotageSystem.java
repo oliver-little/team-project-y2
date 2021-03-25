@@ -36,10 +36,10 @@ public class SabotageSystem implements EventSystem {
             TimerTask speedTask = new TimerTask() {
                 public void run() {
                     cancel();
-                    entity.getComponent(MovementComponent.class).speedMultiplier /= sabotageComponent.multiplier;
+                    entity.getComponent(MovementComponent.class).divideSpeedMultiplierBy(sabotageComponent.multiplier);
                 }
             };
-            entity.getComponent(MovementComponent.class).speedMultiplier *= sabotageComponent.multiplier;
+            entity.getComponent(MovementComponent.class).multiplySpeedMultiplierBy(sabotageComponent.multiplier);
 
             timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
