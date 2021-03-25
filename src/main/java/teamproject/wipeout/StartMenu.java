@@ -40,13 +40,8 @@ public class StartMenu implements Controller {
     Networker networker = new Networker();
 
     public void cleanup() {
-        try {
-            this.networker.getClient().closeConnection(true);
-            this.networker.stopServer();
-
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
+        this.networker.getClient().closeConnection(true);
+        this.networker.stopServer();
     }
 
     private void createMultiplayerMenu(){
@@ -56,9 +51,9 @@ public class StartMenu implements Controller {
         menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Join Game", () -> {createJoinGameMenu();}), // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Host Game", () -> {createHostGameMenu();}),
-                new Pair<String, Runnable>("Back", () -> {createMainMenu();})
+                new Pair<String, Runnable>("Join Game", () -> createJoinGameMenu()),
+                new Pair<String, Runnable>("Host Game", () -> createHostGameMenu()),
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
@@ -130,6 +125,8 @@ public class StartMenu implements Controller {
                 new Pair<String, Runnable>("Back", () -> {
                     if (isHost) {
                         networker.stopServer();
+                    } else {
+                        networker.getClient().closeConnection(true);
                     }
                     createMainMenu();
                 })
@@ -141,19 +138,13 @@ public class StartMenu implements Controller {
 
         networker.connectClient(serverAddress, serverHost, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
 
-        ObservableList<String> observablePlayers = networker.getClient().connectedClients.get();
+        ObservableMap<Integer, String> observablePlayers = networker.getClient().connectedClients.get();
 
-        observablePlayers.addListener((ListChangeListener<? super String>) (change) -> {
+        observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
             Platform.runLater(() -> {
                 players.getChildren().clear();
-                String hostPlayer = observablePlayers.get(0);
-                for (String player : observablePlayers) {
-                    Label playerLabel;
-                    if (hostPlayer.equals(player)) {
-                        playerLabel = new Label(player + " (HOST)");
-                    } else {
-                        playerLabel = new Label(player);
-                    }
+                for (String player : observablePlayers.values()) {
+                    Label playerLabel = new Label(player);
                     players.getChildren().add(playerLabel);
                 }
             });
@@ -227,7 +218,9 @@ public class StartMenu implements Controller {
      * @param username
      * @return true if player joins successfully, false otherwise
      */
-    private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress){
+    private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress) {
+        this.networker.getServerDiscovery().stopLookingForServers();
+
         createLobbyMenu(serverName, username, serverAddress, false);
 
         return true;

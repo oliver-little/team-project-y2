@@ -1,6 +1,7 @@
 package teamproject.wipeout.networking.client;
 
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -40,7 +41,7 @@ public class GameClient {
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
-    public final SimpleListProperty<String> connectedClients;
+    public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
     public final HashMap<Integer, Player> players;
     public AnimalEntity myAnimal;
@@ -49,7 +50,7 @@ public class GameClient {
     public Consumer<Long> clockCalibration;
     public Integer myFarmID;
 
-    protected Map<Integer, FarmEntity> farmEntities;
+    public Map<Integer, FarmEntity> farmEntities;
 
     private NewPlayerAction newPlayerAction;
 
@@ -63,7 +64,7 @@ public class GameClient {
         this.clientName = clientName;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
-        this.connectedClients = new SimpleListProperty<String>(FXCollections.observableList(new ArrayList<String>()));
+        this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
         this.tempPlayerStates = new HashSet<PlayerState>();
         this.players = new HashMap<Integer, Player>();
         this.farmEntities = null;
@@ -169,23 +170,27 @@ public class GameClient {
      * Method which disconnects the client from the game server it is currently connected to.
      *
      * @param clientSide Specifies whether the disconnect command comes from the client's side.
-     * @throws IOException Problem with closing the connection to the server.
      */
-    public void closeConnection(boolean clientSide) throws IOException {
+    public void closeConnection(boolean clientSide) {
         if (!this.isActive.get()) {
             return;
         }
         this.isActive.set(false);
 
-        if (clientSide) {
-            this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.id));
-            this.out.reset();
-        }
+        try {
+            if (clientSide) {
+                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.id));
+                this.out.reset();
+            }
 
-        if (!this.clientSocket.isClosed()) {
-            this.out.close();
-            this.in.close();
-            this.clientSocket.close();
+            if (!this.clientSocket.isClosed()) {
+                this.out.close();
+                this.in.close();
+                this.clientSocket.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -207,7 +212,7 @@ public class GameClient {
 
                     switch (receivedUpdate.type) {
                         case CONNECTED:
-                            this.handleReceivedClientConnections((String[]) receivedUpdate.content);
+                            this.handleReceivedClientConnections((HashMap<Integer, String>) receivedUpdate.content);
                             break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
@@ -236,13 +241,7 @@ public class GameClient {
                             this.market.responseArrived(response);
                             break;
                         case DISCONNECT:
-                            Integer disconnectedClientID = receivedUpdate.originClientID;
-                            if (disconnectedClientID.equals(this.id)) {
-                                this.closeConnection(false);
-                                return;
-                            } else {
-                                this.players.remove(disconnectedClientID);
-                            }
+                            this.handleDisconnectPlayer(receivedUpdate.originClientID);
                             break;
                         default:
                             break;
@@ -289,11 +288,20 @@ public class GameClient {
         }
     }
 
-    private void handleReceivedClientConnections(String[] clients) {
-        if (clients.length != 1) {
+    private void handleReceivedClientConnections(Map<Integer, String> clients) {
+        if (clients.size() != 1) {
             this.connectedClients.clear();
         }
-        this.connectedClients.addAll(clients);
+        this.connectedClients.putAll(clients);
+    }
+
+    private void handleDisconnectPlayer(Integer disconnectedClientID) {
+        if (disconnectedClientID.equals(this.id)) {
+            this.closeConnection(false);
+        } else {
+            this.connectedClients.remove(disconnectedClientID);
+            this.players.remove(disconnectedClientID);
+        }
     }
 
 }

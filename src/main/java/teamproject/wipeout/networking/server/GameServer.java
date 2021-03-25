@@ -13,10 +13,7 @@ import teamproject.wipeout.util.threads.UtilityThread;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -464,20 +461,12 @@ public class GameServer {
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
-                            String[] connectedClientNames = clientHandlers
-                                    .stream().map((clientHandler) -> clientHandler.clientName)
-                                    .toArray((IntFunction<String[]>) (size) ->  new String[size]);
-                            client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClientNames));
-
-                            client.updateWith(this.playerStates.get().values());
-
-                            for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
-                                GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
-                                client.updateWith(gameUpdate);
-                            }
+                            this.sendFirstUpdatesToClient(client, clientHandlers);
                         }
 
-                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, new String[]{client.clientName}));
+                        HashMap<Integer, String> newClientMap = new HashMap<Integer, String>();
+                        newClientMap.put(client.clientID, client.clientName);
+                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, newClientMap));
 
                     } else { // (2.) Otherwise deny attempts to connect
                         GameClientHandler.denyConnection(clientSocket, this.id);
@@ -505,6 +494,21 @@ public class GameServer {
             randID = random.nextInt(128);
         }
         return randID;
+    }
+
+    private void sendFirstUpdatesToClient(GameClientHandler client, ArrayList<GameClientHandler> clientHandlers) throws IOException {
+        HashMap<Integer, String> connectedClients = new HashMap<Integer, String>();
+        for (GameClientHandler clientHandler : clientHandlers) {
+            connectedClients.put(clientHandler.clientID, clientHandler.clientName);
+        }
+        client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClients));
+
+        client.updateWith(this.playerStates.get().values());
+
+        for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
+            GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
+            client.updateWith(gameUpdate);
+        }
     }
 
     /**

@@ -357,14 +357,6 @@ public class App implements Controller {
 	}
 
     public void cleanup() {
-        try {
-            this.networker.getClient().closeConnection(true);
-            this.networker.stopServer();
-
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
         if (renderer != null) {
             renderer.cleanup();
         }
@@ -433,6 +425,7 @@ public class App implements Controller {
 
         GameClient currentClient = this.networker.getClient();
         currentClient.players.put(myPlayer.playerID, myPlayer);
+        currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
 
