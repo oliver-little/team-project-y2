@@ -653,8 +653,6 @@
           "grownItemID" : 21,
           "maxGrowthStage" : 3,
           "growthRate" : 3.00,
-          "width": 2,
-          "height": 2,
           "minDrop" : 1,
           "maxDrop" : 2
         }
@@ -959,11 +957,12 @@
         },
         "TradableComponent" : {
           "defaultBuyPrice" : 50.00,
-          "defaultSellPrice" : 30.00
+          "defaultSellPrice" : 35.00
         },
         "SabotageComponent" : {
           "sabotage-type" : "AI",
-          "duration" : 60         
+          "duration" : 60.00,     
+          "multiplier" : 2.00       
         }
       }
     },
@@ -982,7 +981,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "AI",
-          "duration" : 30        
+          "duration" : 30.00,     
+          "multiplier" : 0.50   
         }
       }
     },
@@ -1001,7 +1001,9 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "AI",
-          "duration" : 120        
+          "duration" : 120.00,     
+          "multiplier" : 0.25
+                  
         }
       }
     },
@@ -1020,7 +1022,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "GROWTHRATE",
-          "duration" : 30       
+          "duration" : 30.00,     
+          "multiplier" : 2.00       
         }
       }
     },
@@ -1039,7 +1042,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "GROWTHRATE",
-          "duration" : 120        
+          "duration" : 120.00,     
+          "multiplier" : 4.00        
         }
       }
     },
@@ -1058,7 +1062,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "GROWTHRATE",
-          "duration" : 30        
+          "duration" : 30.00,     
+          "multiplier" : 0.50        
         }
       }
     },
@@ -1077,7 +1082,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "GROWTHRATE",
-          "duration" : 120        
+          "duration" : 120.00,     
+          "multiplier" : 0.25        
         }
       }
     },
@@ -1096,7 +1102,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "SPEED",
-          "duration" : 30        
+          "duration" : 30.00,     
+          "multiplier" : 2.00        
         }
       }
     },
@@ -1115,7 +1122,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "SPEED",
-          "duration" : 120        
+          "duration" : 120.00,     
+          "multiplier" : 4.00        
         }
       }
     },
@@ -1134,7 +1142,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "SPEED",
-          "duration" : 30        
+          "duration" : 30.00,     
+          "multiplier" : 0.50        
         }
       }
     },
@@ -1153,7 +1162,8 @@
         },
         "SabotageComponent" : {
           "sabotage-type" : "SPEED",
-          "duration" : 120        
+          "duration" : 120.00,     
+          "multiplier" : 0.25        
         }
       }
     }

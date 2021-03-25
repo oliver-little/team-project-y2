@@ -49,10 +49,12 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
@@ -64,10 +66,7 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.SupplierGenerator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import javafx.application.Platform;
 /**
@@ -158,7 +157,8 @@ public class App implements Controller {
 
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
         PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
-        eventSystems = List.of(mcs, pas);
+        SabotageSystem sas = new SabotageSystem(gameScene);
+        eventSystems = List.of(mcs, pas, sas);
 
         input.mouseHoverSystem = mhs;
 

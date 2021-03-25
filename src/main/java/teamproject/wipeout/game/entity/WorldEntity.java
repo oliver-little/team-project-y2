@@ -22,6 +22,7 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;

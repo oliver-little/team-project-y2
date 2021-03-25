@@ -28,7 +28,6 @@ import teamproject.wipeout.networking.state.FarmState;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -52,6 +51,9 @@ public class FarmEntity extends GameEntity {
     private final SpriteManager spriteManager;
     private final ItemStore itemStore;
 
+    private double growthMultiplier;
+    private double AIMultiplier;
+
     private final List<ItemsRowEntity> rowEntities;
 
     //private FarmUI farmUI;
@@ -65,9 +67,11 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
-    private AudioComponent audio;
+    private final AudioComponent audio;
 
     private final Pickables pickables;
+
+    private final Supplier<Double> growthMultiplierSupplier = () -> this.growthMultiplier;
 
     /**
      * Creates a new instance of {@code FarmEntity}
@@ -96,6 +100,9 @@ public class FarmEntity extends GameEntity {
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
 
+        this.growthMultiplier = 1.0;
+        this.AIMultiplier = 1.0;
+
         this.addComponent(this.transform);
         this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
 
@@ -106,7 +113,7 @@ public class FarmEntity extends GameEntity {
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.data.getGrowthDelegate(), this.spriteManager);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
@@ -676,4 +683,35 @@ public class FarmEntity extends GameEntity {
         }
     }
 
+    /**
+     * Getter for the global growth multiplier for a farm, this multiplies the growth rate of all plants in a farm.
+     * @return The growth multiplier for a farm.
+     */
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    /**
+     * Setter for the global growth multiplier for a farm, this multiplies the growth rate of all plants in a farm by the given constant.
+     * @param growthMultiplier The new growth multiplier for a farm.
+     */
+    public void setGrowthMultiplier(double growthMultiplier) {
+        this.growthMultiplier = growthMultiplier;
+    }
+
+    /**
+     * Getter for the AI multiplier for a farm, the higher the value, the higher the chance of the AI stealing plants from a farm.
+     * @return The AI multiplier
+     */
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
+    /**
+     * Setter for the AI multiplier for a farm, the higher the value, the higher the chance of the AI stealing plants from a farm.
+     * @param AIMultiplier The new AI multiplier for a farm.
+     */
+    public void setAIMultiplier(double AIMultiplier) {
+        this.AIMultiplier = AIMultiplier;
+    }
 }
