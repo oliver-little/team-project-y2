@@ -189,6 +189,8 @@ public class GameClient {
                 this.clientSocket.close();
             }
 
+            this.connectedClients.clear();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

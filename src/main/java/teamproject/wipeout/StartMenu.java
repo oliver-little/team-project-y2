@@ -141,6 +141,11 @@ public class StartMenu implements Controller {
         ObservableMap<Integer, String> observablePlayers = networker.getClient().connectedClients.get();
 
         observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
+            if (!networker.getClient().getIsActive()) {
+                Platform.runLater(() -> createMainMenu());
+                return;
+            }
+
             Platform.runLater(() -> {
                 players.getChildren().clear();
                 for (String player : observablePlayers.values()) {
