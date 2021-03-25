@@ -15,6 +15,7 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import javafx.geometry.Pos;
+import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -32,16 +33,28 @@ import java.util.Map;
  */
 public class StartMenu implements Controller {
     
-    private Pane root = new StackPane();
-    private VBox menuBox = new VBox(30);
+    private Pane root;
+    private VBox menuBox;
     private VBox buttonBox;
     private Text title;
 
-    Networker networker = new Networker();
+    Networker networker;
+
+    public StartMenu() {
+        this.root = new StackPane();
+        this.menuBox = new VBox(30);
+        this.networker = new Networker();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            GameClient client = this.networker.getClient();
+            if (client != null) {
+                client.closeConnection(true);
+            }
+            this.networker.stopServer();
+        }));
+    }
 
     public void cleanup() {
-        this.networker.getClient().closeConnection(true);
-        this.networker.stopServer();
     }
 
     private void createMultiplayerMenu(){

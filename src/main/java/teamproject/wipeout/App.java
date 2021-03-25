@@ -262,7 +262,9 @@ public class App implements Controller {
                 	   },
                 () -> {});
 
-        this.setUpNetworking();
+        if (this.networker != null) {
+            this.setUpNetworking();
+        }
 
         gl.start();
     }
