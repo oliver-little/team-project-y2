@@ -20,6 +20,7 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -62,6 +63,7 @@ public class SettingsUI extends VBox{
         } catch (FileNotFoundException e){
             e.printStackTrace();
         }
+        this.setMaxSize(250, 350);
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         
         VBox box = new VBox();
@@ -82,7 +84,6 @@ public class SettingsUI extends VBox{
         openCloseButton.setOnAction(e -> {
             opened = !opened;
             this.setMenuVisible(opened);
-            
         });
         buttonBox.getChildren().add(openCloseButton);
         buttonBox.setAlignment(Pos.BASELINE_RIGHT);

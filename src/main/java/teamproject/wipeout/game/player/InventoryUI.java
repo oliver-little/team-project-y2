@@ -119,7 +119,7 @@ public class InventoryUI extends StackPane {
 		for(int i = 0; i < MAX_SIZE; i++) {
 			int hold = i;
 			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
-				event.consume();
+				//event.consume();
 
 				Player myPlayer = world.myPlayer;
 				FarmEntity myFarm = world.getMyFarm();

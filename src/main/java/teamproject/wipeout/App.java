@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -225,16 +226,19 @@ public class App implements Controller {
 
         VBox topRight = new VBox();
         topRight.setAlignment(Pos.TOP_RIGHT);
+        topRight.setPickOnBounds(false);
+        topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         ClockUI clockUI = clockSystem.clockUI;
-        StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
+        //StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
 
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
         ga.play();
-        //input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
 
         SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
-        StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+        //StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+
+        StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
 
         topRight.getChildren().addAll(clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
