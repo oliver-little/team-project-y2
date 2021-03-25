@@ -37,7 +37,6 @@ public class Networker {
     public final GameServerRunner serverRunner;
 
     public WorldEntity worldEntity;
-    public ClockSystem clockSystem;
 
     protected ServerDiscovery serverDiscovery;
     protected GameClient client;
@@ -66,10 +65,10 @@ public class Networker {
 
     public InetSocketAddress startServer(String serverName) {
         try {
-            this.serverRunner.startServer(serverName);
-            System.out.println("Started server");
-
-            return new InetSocketAddress(InetAddress.getLocalHost(), GameServer.GAME_PORT);
+            boolean started = this.serverRunner.startServer(serverName);
+            if (started) {
+                return new InetSocketAddress(InetAddress.getLocalHost(), GameServer.GAME_PORT);
+            }
 
         } catch (ServerRunningException | IOException exception) {
             exception.printStackTrace();
@@ -120,12 +119,14 @@ public class Networker {
         };
     }
 
-    public void connectClient(InetSocketAddress address, String clientName) {
+    public void connectClient(InetSocketAddress address, String clientName, Consumer<Long> gameStart) {
         try {
             this.client = GameClient.openConnection(address, clientName);
+            // TODO client can be null
             this.client.clockCalibration = (originalGameStart) -> {
-                double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
-                this.clockSystem.setTimeDifference(timeDifference);
+                //double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
+                //this.clockSystem.setTimeDifference(timeDifference);
+                gameStart.accept(originalGameStart);
             };
 
         } catch (IOException | ClassNotFoundException exception) {
@@ -157,7 +158,6 @@ public class Networker {
 
                 try {
                     currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
-                    currentClient.send(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentClient.getID(), this.clockSystem.gameStartTime));
 
                 } catch (IOException exception) {
                     exception.printStackTrace();

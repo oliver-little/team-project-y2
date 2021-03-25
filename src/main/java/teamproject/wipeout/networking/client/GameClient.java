@@ -1,9 +1,7 @@
 package teamproject.wipeout.networking.client;
 
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
-import javafx.util.Pair;
 import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.market.Market;
@@ -20,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -41,18 +40,18 @@ public class GameClient {
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
-    public NewPlayerAction newPlayerAction;
-
     public final SimpleListProperty<String> connectedClients;
+    public final HashSet<PlayerState> tempPlayerStates;
     public final HashMap<Integer, Player> players;
     public AnimalEntity myAnimal;
     public Market market;
 
     public Consumer<Long> clockCalibration;
-    public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
     public Integer myFarmID;
 
     protected Map<Integer, FarmEntity> farmEntities;
+
+    private NewPlayerAction newPlayerAction;
 
     private Integer id;
 
@@ -65,6 +64,7 @@ public class GameClient {
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
         this.connectedClients = new SimpleListProperty<String>(FXCollections.observableList(new ArrayList<String>()));
+        this.tempPlayerStates = new HashSet<PlayerState>();
         this.players = new HashMap<Integer, Player>();
         this.farmEntities = null;
     }
@@ -80,6 +80,16 @@ public class GameClient {
      */
     public boolean getIsActive() {
         return this.isActive.get();
+    }
+
+    public void setNewPlayerAction(NewPlayerAction newPlayerAction) {
+        this.newPlayerAction = newPlayerAction;
+        for (PlayerState state : this.tempPlayerStates) {
+            if (!this.players.containsKey(state.getPlayerID())) {
+                this.createPlayerFromState(state);
+            }
+        }
+        this.tempPlayerStates.clear();
     }
 
     /**
@@ -213,16 +223,13 @@ public class GameClient {
                             break;
                         case FARM_ID:
                             this.myFarmID = (Integer) receivedUpdate.content;
-                            //this.myFarmIDReceived.accept(new Pair<GameClient, Integer>(this, farmID));
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
                             this.market.updateFromState(mState);
                             break;
                         case CLOCK_CALIB:
-                            if (!receivedUpdate.originClientID.equals(this.id)) {
-                                this.clockCalibration.accept((Long) receivedUpdate.content);
-                            }
+                            this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
@@ -264,12 +271,21 @@ public class GameClient {
      */
     private void handlePlayerStateUpdate(PlayerState state) {
         if (!this.players.containsKey(state.getPlayerID())) {
-            Player newPlayer = this.newPlayerAction.createWith(state);
-            if (newPlayer != null) {
-                this.players.put(newPlayer.playerID, newPlayer);
+            if (this.newPlayerAction == null) {
+                this.tempPlayerStates.add(state);
+                return;
             }
+            this.createPlayerFromState(state);
+
         } else {
             this.players.get(state.getPlayerID()).updateFromState(state);
+        }
+    }
+
+    private void createPlayerFromState(PlayerState state) {
+        Player newPlayer = this.newPlayerAction.createWith(state);
+        if (newPlayer != null) {
+            this.players.put(newPlayer.playerID, newPlayer);
         }
     }
 

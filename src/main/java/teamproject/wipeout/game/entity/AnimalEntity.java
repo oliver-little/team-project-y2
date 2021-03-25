@@ -99,6 +99,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     public void updateFromState(AnimalState newState) {
         this.isPuppet = true;
+        this.removeComponent(SteeringComponent.class);
         this.transformComponent.setPosition(newState.getPosition());
 
         int[] traverseTo = newState.getTraveseTo();
@@ -122,14 +123,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
 
-        SteeringComponent newSteering = new SteeringComponent(path, callback, 250);
-
-        SteeringComponent currentSteering = this.getComponent(SteeringComponent.class);
-        if (currentSteering == null) {
-            this.addComponent(newSteering);
-        } else {
-            currentSteering.subsequentSteering = newSteering;
-        }
+        this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
     /**

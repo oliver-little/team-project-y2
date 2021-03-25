@@ -67,9 +67,6 @@ public class SteeringSystem implements GameSystem{
             if (s.onArrive != null) {
                 s.onArrive.run(); 
             }
-            if (s.subsequentSteering != null) {
-                entity.addComponent(s.subsequentSteering);
-            }
         }
     }
 }

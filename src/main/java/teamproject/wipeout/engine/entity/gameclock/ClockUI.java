@@ -8,7 +8,7 @@ public class ClockUI extends Label {
     private Double time;
     private final Double INITIAL_TIME;
 
-    public ClockUI(Double time) {
+    public ClockUI(double time) {
         super();
 
         this.time = time;

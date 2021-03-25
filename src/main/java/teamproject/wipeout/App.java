@@ -52,6 +52,8 @@ import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
 
 import java.util.ArrayList;
@@ -75,30 +77,37 @@ public class App implements Controller {
     private StackPane interfaceOverlay;
 
     Double TIME_FOR_GAME = 500.0;
-
-    // Temporarily placed variables
-    ItemStore itemStore;
-    Market market;
-    FarmEntity farmEntity;
+    private long gameStartTime;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
-    private SpriteManager spriteManager;
 
+    private SpriteManager spriteManager;
+    private ItemStore itemStore;
+
+    private GameScene gameScene;
+    private WorldEntity worldEntity;
 
     // Store systems for cleanup
-    Networker networker;
+    private final Networker networker;
     RenderSystem renderer;
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty, Networker networker) {
-        this.widthProperty = widthProperty;
-        this.heightProperty = heightProperty;
+    public App(Networker networker, Long givenGameStartTime) {
         this.networker = networker;
 
-        Parent contentRoot = this.getContent();
-        return contentRoot;
+        if (givenGameStartTime == null) {
+            this.gameStartTime = System.currentTimeMillis();
+        } else {
+            this.gameStartTime = givenGameStartTime;
+        }
+    }
+
+    public Parent getParentWith(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
+        this.widthProperty = widthProperty;
+        this.heightProperty = heightProperty;
+        return this.getContent();
     }
 
     /**
@@ -114,7 +123,7 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
-        GameScene gameScene = new GameScene();
+        this.gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
@@ -187,11 +196,14 @@ public class App implements Controller {
         camPos.bind(camPosBinding);
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
-        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
-        //world.setClientSupplier(this.networker.clientSupplier);
-        //this.networker.worldEntity = world;
+        this.worldEntity = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
+
+        if (this.networker != null) {
+            this.worldEntity.setClientSupplier(this.networker.clientSupplier);
+            this.networker.worldEntity = this.worldEntity;
+        }
         
-        addInvUIInput(input, invUI, world);
+        addInvUIInput(input, invUI, this.worldEntity);
 
         // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
@@ -206,8 +218,7 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
-        //this.networker.clockSystem = clockSystem;
+        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
         systemUpdater.addSystem(clockSystem);
 
         ClockUI clockUI = clockSystem.clockUI;
@@ -243,13 +254,15 @@ public class App implements Controller {
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
 
-        invUI.onMouseClick(world);
+        invUI.onMouseClick(this.worldEntity);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
         
         input.addKeyAction(KeyCode.X,
                 () -> {player.pickup();
                 	   },
                 () -> {});
+
+        this.setUpNetworking();
 
         gl.start();
     }
@@ -412,6 +425,32 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DIGIT0,
                 () -> invUI.useSlot(9, world),
                 () -> {});
+    }
+
+    private void setUpNetworking() {
+        Player myPlayer = this.worldEntity.getMyPlayer();
+        Market myMarket = this.worldEntity.market.getMarket();
+
+        GameClient currentClient = this.networker.getClient();
+        currentClient.players.put(myPlayer.playerID, myPlayer);
+        currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));
+        Integer newFarmID = currentClient.myFarmID;
+
+        currentClient.myAnimal = this.worldEntity.getMyAnimal();
+        currentClient.market = this.worldEntity.market.getMarket();
+
+        myMarket.setIsLocal(false);
+        this.worldEntity.marketUpdater.stop();
+
+        FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
+        this.worldEntity.setMyFarm(myFarm);
+
+        try {
+            currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
 }

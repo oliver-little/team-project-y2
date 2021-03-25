@@ -126,9 +126,9 @@ public class StartMenu implements Controller {
         menuBox.getChildren().addAll(players);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> startGame(networker)),
+                new Pair<String, Runnable>("Start Game", () -> startServerGame()),
                 new Pair<String, Runnable>("Back", () -> {
-                    if(isHost){
+                    if (isHost) {
                         networker.stopServer();
                     }
                     createMainMenu();
@@ -139,28 +139,25 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        try {
-            Thread.sleep(100);
-            networker.connectClient(serverAddress, serverHost);
+        networker.connectClient(serverAddress, serverHost, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
 
-            ObservableList<String> observablePlayers = networker.getClient().connectedClients.get();
+        ObservableList<String> observablePlayers = networker.getClient().connectedClients.get();
 
-            observablePlayers.addListener((ListChangeListener<? super String>) (change) -> {
-                Platform.runLater(() -> {
-                    players.getChildren().clear();
-                    //Label host = new Label(serverHost+" (HOST)");
-                    //players.getChildren().addAll(host);
-
-                    for (String player : observablePlayers) {
-                        Label playerLabel = new Label(player);
-                        players.getChildren().add(playerLabel);
+        observablePlayers.addListener((ListChangeListener<? super String>) (change) -> {
+            Platform.runLater(() -> {
+                players.getChildren().clear();
+                String hostPlayer = observablePlayers.get(0);
+                for (String player : observablePlayers) {
+                    Label playerLabel;
+                    if (hostPlayer.equals(player)) {
+                        playerLabel = new Label(player + " (HOST)");
+                    } else {
+                        playerLabel = new Label(player);
                     }
-                });
+                    players.getChildren().add(playerLabel);
+                }
             });
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     private void createJoinGameMenu(){
@@ -278,20 +275,29 @@ public class StartMenu implements Controller {
     private List<Pair<String, Runnable>> getMainMenuData(){
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Singleplayer", () -> this.startGame(null)),
-                new Pair<String, Runnable>("Multiplayer", this::createMultiplayerMenu),
+                new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),
+                new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
                 new Pair<String, Runnable>("Settings", () -> {}),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
     }
 
-    private void startGame(Networker givenNetworker) {
-        App app = new App();
+    private void startServerGame() {
+        try {
+            networker.serverRunner.startGame();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
+        App game = new App(givenNetworker, gameStartTime);
         Window window = root.getScene().getWindow();
-        Parent content = app.init(window.widthProperty(), window.heightProperty(), givenNetworker);
+        Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
         root.getScene().setRoot(content);
-        app.createContent();
+        game.createContent();
     }
 
 

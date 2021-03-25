@@ -46,15 +46,15 @@ public class GameServer {
     public final Integer id;
 
     protected DatagramSocket searchSocket;
-    protected final AtomicBoolean isSearching;
+    protected boolean isSearching;
 
     protected final ServerSocket serverSocket;
-    protected final AtomicBoolean isActive;
     protected ServerThread newConnectionsThread;
 
-    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
+    protected boolean isActive;
+    protected long gameStartTime;
 
-    protected final AtomicReference<Pair<Integer, Long>> gameStartTime;
+    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
 
     protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
 
@@ -80,14 +80,14 @@ public class GameServer {
         this.name = name;
         this.id = name.hashCode();
 
-        this.isSearching = new AtomicBoolean(false);
+        this.isSearching = false;
 
         this.serverSocket = new ServerSocket(GAME_PORT);
-        this.isActive = new AtomicBoolean(false);
+
+        this.isActive = false;
+        this.gameStartTime = -1;
 
         this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
-
-        this.gameStartTime = new AtomicReference<Pair<Integer, Long>>(null);
 
         this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
 
@@ -124,11 +124,11 @@ public class GameServer {
             String serverName = args[0];
             GameServer server = new GameServer(serverName);
 
-            // Listen to the child process' input(= ProcessMessages send by the parent process)
-            GameServer.listenToProcessMessages(server);
-
             // Start multicasting the server's IP address and accepting new client connections
             server.startClientSearch();
+
+            // Listen to the child process' input(= ProcessMessages send by the parent process)
+            GameServer.listenToProcessMessages(server);
 
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
@@ -141,10 +141,10 @@ public class GameServer {
      * @throws IOException Network problem
      */
     public void startClientSearch() throws IOException {
-        if (this.isSearching.get()) {
+        if (this.isSearching) {
             return;
         }
-        this.isSearching.set(true);
+        this.isSearching = true;
         this.searchSocket = new DatagramSocket();
         this.startMulticasting();
     }
@@ -153,7 +153,7 @@ public class GameServer {
      * Stops multicasting the server's IP address.
      */
     public void stopClientSearch() {
-        this.isSearching.set(false);
+        this.isSearching = false;
         this.searchSocket.close();
         this.searchSocket = null;
     }
@@ -162,22 +162,22 @@ public class GameServer {
      * Starts a game session and rejects all new connection attempts.
      */
     public void startNewGame() {
-        if (this.isActive.get()) {
-            return;
+        if (this.isActive) {
+            this.stopGame();
         }
-
-        this.isActive.set(true);
+        this.isActive = true;
+        this.calibrateClocks();
     }
 
     /**
      * Stops a running game session and starts accepting new connection attempts.
      */
     public void stopGame() {
-        this.isActive.set(false);
         this.playerStates.set(new HashMap<Integer, PlayerState>());
         this.farmStates.set(new HashMap<Integer, FarmState>());
         this.availableFarms.set(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
-        this.gameStartTime.set(null);
+        this.gameStartTime = -1;
+        this.isActive = false;
     }
 
     /**
@@ -241,11 +241,11 @@ public class GameServer {
      * @throws IOException Problem with closing connections
      */
     public void stopServer() throws IOException {
-        if (this.isSearching.get()) {
+        if (this.isSearching) {
             this.stopClientSearch();
         }
 
-        if (this.isActive.get()) {
+        if (this.isActive) {
             this.stopGame();
         }
 
@@ -264,6 +264,9 @@ public class GameServer {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
         new BackgroundThread(() -> {
             try {
+                writer.write(ProcessMessage.START_SERVER.rawValue + '\n');
+                writer.flush();
+
                 String line;
                 while ((line = reader.readLine()) != null) {
                     ProcessMessage message = ProcessMessage.fromRawValue(line);
@@ -293,9 +296,24 @@ public class GameServer {
                 }
 
             } catch (IOException exception) {
-                System.out.println(exception.toString());
+                exception.printStackTrace();
             }
         }).start();
+    }
+
+    /**
+     * Synchronizes client game clocks
+     */
+    private void calibrateClocks() {
+        try {
+            Long currentTime = System.currentTimeMillis();
+            this.updateClients(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.id, currentTime));
+
+            this.gameStartTime = currentTime;
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
@@ -317,9 +335,6 @@ public class GameServer {
             case FARM_ID:
                 this.handleFarmRequest(update.originClientID);
                 return;
-            case CLOCK_CALIB:
-                this.handleClockCalibration(update.originClientID, (Long) update.content);
-                return;
             case REQUEST:
                 this.handleRequest((MarketOperationRequest) update.content, update.originClientID);
                 return;
@@ -330,25 +345,6 @@ public class GameServer {
                 break;
         }
         this.updateClients(update);
-    }
-
-    /**
-     * Handles a given {@code Long} update.
-     *
-     * @param clockCalibration {@code Long} value - time of the game start.
-     */
-    private void handleClockCalibration(Integer clientID, Long clockCalibration) throws IOException {
-        Pair<Integer, Long> currentGameStartTime = this.gameStartTime.getAcquire();
-        if (currentGameStartTime == null) {
-            currentGameStartTime = new Pair<Integer, Long>(clientID, clockCalibration);
-        } else if (!currentGameStartTime.getKey().equals(clientID)) {
-            for (GameClientHandler client : this.connectedClients.get()) {
-                if (client.clientID.equals(clientID)) {
-                    client.updateWith(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentGameStartTime.getKey(), currentGameStartTime.getValue()));
-                }
-            }
-        }
-        this.gameStartTime.setRelease(currentGameStartTime);
     }
 
     /**
@@ -462,7 +458,7 @@ public class GameServer {
                     ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
                     // (1.) Game session is not active and the number of clients is under the limit
-                    if (!this.isActive.get() && clientHandlers.size() < MAX_CONNECTIONS) {
+                    if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
                         GameClientHandler client = GameClientHandler.allowConnection(this.id, this.generateClientID(), clientSocket, this::clientUpdateArrived);
 
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
@@ -516,7 +512,7 @@ public class GameServer {
      */
     private void startMulticasting() {
         new UtilityThread(() -> {
-            while (this.isSearching.get()) {
+            while (this.isSearching) {
                 try {
                     // Construct packet which will be multicasted (packet contains server name and address)
                     byte[] nameBytes = this.name.getBytes();
@@ -528,8 +524,9 @@ public class GameServer {
 
                     this.searchSocket.send(packet);
                     Thread.sleep(MULTICAST_DELAY); // == sends the packet each 0.5 second
+
                 } catch (IOException | InterruptedException exception) {
-                    if (this.isSearching.get()) {
+                    if (this.isSearching) {
                         exception.printStackTrace();
                     } else {
                         break;
