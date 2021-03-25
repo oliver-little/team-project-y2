@@ -45,7 +45,6 @@ public class FarmState implements Serializable {
                 return null;
             }).collect(Collectors.toList());
         }).collect(Collectors.toList());
-        System.out.println("State: "+this.items.toString());
 
         this.growthMultiplier = growthMultiplier;
         this.AIMultiplier = AIMultiplier;

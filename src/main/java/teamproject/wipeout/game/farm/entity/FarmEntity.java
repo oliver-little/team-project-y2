@@ -159,7 +159,6 @@ public class FarmEntity extends GameEntity {
     }
 
     public void updateFromState(FarmState farmState) {
-        System.out.println("Update: "+farmState.getItems().toString());
         this.data.updateFromState(farmState);
     }
 
@@ -404,8 +403,13 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+
         this.audio.play("shovel.wav");
-        return this.data.placeItem(item, 0.0, row, column);
+
+        boolean placed = this.data.placeItem(item, 0.0, row, column);
+
+        this.sendStateUpdate();
+        return placed;
     }
 
     /**
@@ -456,7 +460,7 @@ public class FarmEntity extends GameEntity {
         } else {
             pickedItem = this.data.pickItemAt(row, column);
         }
-
+        this.sendStateUpdate();
         
         if (pickedItem == null) {
             return;
@@ -480,11 +484,7 @@ public class FarmEntity extends GameEntity {
             Item inventoryItem = this.itemStore.getItem(inventoryID);
             this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
 
-        } else {
-            // Animal eating the farm item
-            this.sendStateUpdate();
         }
-        
     }
 
     /**
@@ -617,25 +617,16 @@ public class FarmEntity extends GameEntity {
         this.clientSupplier = clientFunction;
 
         Clickable clickable = new Clickable((x, y, button) -> {
-            boolean stateChanged = false;
-
             if (this.isPickingItem()) { 
                 this.pickItemAt(x, y); //Picking a plant
                 this.stopPickingItem();
-                stateChanged = true;
-            
+
             } else if (this.isDestroyingItem()) {
                 this.pickItemAt(x, y, true); //Destroying a plant
                 this.stopPickingItem();
-                stateChanged = true;
 
             } else if (this.placingItem != null && this.placeItem(placingItem, x, y)) {
                 this.stopPlacingItem(true);
-                stateChanged = true;
-            }
-
-            if (stateChanged) {
-                this.sendStateUpdate();
             }
         });
         clickable.setEntity(this);

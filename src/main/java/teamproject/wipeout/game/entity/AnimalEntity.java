@@ -78,7 +78,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         this.addComponent(new RenderComponent(new Point2D(-16, -16)));
         this.addComponent(new HitboxComponent(new Rectangle(-16, -16, 32, 32)));
 
-        this.animalState = new AnimalState(position, null, -1);
+        this.animalState = new AnimalState(position, null);
 
         try {
             this.addComponent(new PlayerAnimatorComponent(
@@ -111,12 +111,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         int[] traverseTo = newState.getTraveseTo();
         if (traverseTo != null) {
-            int eatAt = newState.getEatAt();
-            if (eatAt < 0) {
-                this.aiTraverse(traverseTo[0], traverseTo[1], () -> {});
-            } else {
-                this.aiStealCrops(new int[]{eatAt, traverseTo[0], traverseTo[1]}, null);
-            }
+            this.aiTraverse(traverseTo[0], traverseTo[1], null);
         }
         this.animalState.updateStateFrom(newState);
     }
@@ -141,7 +136,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(null);
-        this.animalState.setEatAt(-1);
         this.sendStateUpdate();
 
         executor.schedule(() -> Platform.runLater(aiDecisionAlgorithm), idleTime, TimeUnit.SECONDS);
@@ -149,21 +143,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     /**
      * Steals crops from a given farm.
-     * @param eatAt Location used for networking.
+     *
      * @param randFarm The farm to steal crops from.
      */
-    private void aiStealCrops(int[] eatAt, FarmEntity randFarm) {
-        if (eatAt != null) {
-            FarmEntity theFarm = (FarmEntity) farms.stream().filter((farm) -> farm.farmID.equals(eatAt[0])).toArray()[0];
-            int theX = eatAt[1];
-            int theY = eatAt[2];
-            Runnable onComplete = () ->  {
-                theFarm.pickItemAt(theX, theY, false);
-            };
-
-            aiTraverse(theX, theY, onComplete);
-            return;
-        }
+    private void aiStealCrops(FarmEntity randFarm) {
         List<Point2D> fullyGrownItems = new ArrayList<>();
 
         fullyGrownItems = randFarm.getGrownItemPositions();
@@ -187,7 +170,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(new int[]{x, y});
-        this.animalState.setEatAt(randFarm.farmID);
         this.sendStateUpdate();
 
         aiTraverse(x, y, onComplete);
@@ -208,7 +190,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.animalState.setPosition(this.transformComponent.getWorldPosition());
         this.animalState.setTraveseTo(new int[]{randX, randY});
-        this.animalState.setEatAt(-1);
         this.sendStateUpdate();
 
         aiTraverse(randX, randY, aiDecisionAlgorithm);
@@ -254,18 +235,18 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         //Make decision on what to do next.
         double probability = Math.random();
 
-        /*if (probability <= 0.1) {
+        if (probability <= 0.1) {
             //Idle
             aiIdle();
 
-        } else if (probability <= stealProbability) {*/
+        } else if (probability <= stealProbability) {
             //Steal plants
-            aiStealCrops(null, selectedFarm);
+            aiStealCrops(selectedFarm);
 
-        /*} else {
+        } else {
             //Pick random point
             aiPathFind();
-        }*/
+        }
     };
 
     /**

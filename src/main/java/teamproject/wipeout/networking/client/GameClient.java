@@ -191,7 +191,6 @@ public class GameClient {
                             break;
                         case FARM_STATE:
                             FarmState fState = (FarmState) receivedUpdate.content;
-                            System.out.println("Updated");
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
                         case FARM_ID:
@@ -228,7 +227,7 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | StreamCorruptedException ignore) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
                 } catch (EOFException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
