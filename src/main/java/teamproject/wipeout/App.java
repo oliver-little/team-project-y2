@@ -157,32 +157,13 @@ public class App implements Controller {
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
         
 
-    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
+    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
         //player.acquireItem(28, 98);
         //player.acquireItem( 43, 2);
 
-
-        try {
-            player.addComponent(new RenderComponent(new Point2D(0, -32)));
-            player.addComponent(new PlayerAnimatorComponent(
-                spriteManager.getSpriteSet("player-red", "walk-up"), 
-                spriteManager.getSpriteSet("player-red", "walk-right"), 
-                spriteManager.getSpriteSet("player-red", "walk-down"), 
-                spriteManager.getSpriteSet("player-red", "walk-left"), 
-                spriteManager.getSpriteSet("player-red", "idle")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        TextRenderable tag= new TextRenderable("Daniel", 20);
-        GameEntity nameTag = new GameEntity(gameScene);
-        nameTag.addComponent(new RenderComponent(tag));
-        RenderComponent playerRender = player.getComponent(RenderComponent.class);
-        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
-        nameTag.setParent(player);
 
         
         //camera follows player

@@ -6,6 +6,7 @@ import java.util.List;
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.BasicEvent;
@@ -30,8 +31,8 @@ public class GameScene {
         return newEntity;
     }
 
-    public Player createPlayer(Integer id, String name, Point2D position, InventoryUI invUI) {
-        Player playerEntity = new Player(this, id, name, position, invUI);
+    public Player createPlayer(Integer id, String name, Point2D position, InventoryUI invUI, SpriteManager spriteManager) {
+        Player playerEntity = new Player(this, id, name, position, invUI, spriteManager);
         this.entities.add(playerEntity);
         return playerEntity;
     }
