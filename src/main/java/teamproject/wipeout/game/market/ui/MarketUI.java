@@ -55,6 +55,7 @@ public class MarketUI extends AnchorPane {
         List<Node> seedsList = new ArrayList<>();
         List<Node> plantsList = new ArrayList<>();
         List<Node> potionsList = new ArrayList<>();
+        List<Node> farmsList = new ArrayList<>();
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
@@ -71,8 +72,9 @@ public class MarketUI extends AnchorPane {
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));
         Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList));
+        Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList));
         //Tab tasks = new Tab("Tasks", new Label("Purchasable Tasks")); -- Implement later.
-        tabPane.getTabs().addAll(seeds, plants, potions);
+        tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions);
 
         Button close = new Button("X");
 
