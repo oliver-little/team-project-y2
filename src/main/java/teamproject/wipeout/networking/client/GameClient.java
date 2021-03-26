@@ -229,6 +229,7 @@ public class GameClient {
 
                 } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
+                    ignore.printStackTrace();
                 } catch (EOFException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;

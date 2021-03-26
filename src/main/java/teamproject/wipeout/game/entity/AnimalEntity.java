@@ -104,15 +104,23 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     }
 
     public void updateFromState(AnimalState newState) {
+        if (!this.animalState.getSpeedMultiplier().equals(newState.getSpeedMultiplier())) {
+            Double newSpeedMultiplier = newState.getSpeedMultiplier();
+            this.movementComponent.setSpeedMultiplier(newSpeedMultiplier);
+            this.animalState.setSpeedMultiplier(newSpeedMultiplier);
+            return;
+        }
         this.isPuppet = true;
+
         this.removeComponent(SteeringComponent.class);
         this.transformComponent.setPosition(newState.getPosition());
         this.movementComponent.setSpeedMultiplier(newState.getSpeedMultiplier());
 
-        int[] traverseTo = newState.getTraveseTo();
-        if (traverseTo != null) {
-            this.aiTraverse(traverseTo[0], traverseTo[1], null);
+        List<Point2D> path = newState.getPath();
+        if (!path.isEmpty()) {
+            this.addComponent(new SteeringComponent(path, null, 250));
         }
+
         this.animalState.updateStateFrom(newState);
     }
 
@@ -125,6 +133,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
 
+        this.animalState.setPosition(this.transformComponent.getWorldPosition());
+        this.animalState.setPath(path);
+        this.sendStateUpdate();
+
         this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
@@ -135,7 +147,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
 
         this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(null);
+        this.animalState.setPath(null);
         this.sendStateUpdate();
 
         executor.schedule(() -> Platform.runLater(aiDecisionAlgorithm), idleTime, TimeUnit.SECONDS);
@@ -168,10 +180,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             Platform.runLater(aiDecisionAlgorithm);
         };
 
-        this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(new int[]{x, y});
-        this.sendStateUpdate();
-
         aiTraverse(x, y, onComplete);
     }
 
@@ -187,10 +195,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         int randX = randomInteger((int) randomSquare.topLeft.getX(), (int) randomSquare.bottomRight.getX());
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
-
-        this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(new int[]{randX, randY});
-        this.sendStateUpdate();
 
         aiTraverse(randX, randY, aiDecisionAlgorithm);
     }
