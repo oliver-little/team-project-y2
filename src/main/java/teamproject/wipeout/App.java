@@ -243,7 +243,7 @@ public class App implements Controller {
         topRight.getChildren().addAll(clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
 
-        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the D key will trigger the sound
+        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the G key will trigger the sound
 
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),

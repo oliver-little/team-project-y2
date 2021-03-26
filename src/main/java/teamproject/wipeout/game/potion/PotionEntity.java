@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.ScriptComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.physics.GeometryUtil;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.OvalRenderable;
@@ -50,6 +51,8 @@ public class PotionEntity extends GameEntity {
     private ParticleComponent trail;
     private ParticleComponent explosion;
 
+    private AudioComponent audio;
+
     public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, Point2D startPosition, Point2D endPosition) {
         super(scene);
 
@@ -61,6 +64,9 @@ public class PotionEntity extends GameEntity {
         this.addComponent(new Transform(startPosition, 0, 1));
 
         this.addComponent(new ScriptComponent(onStep));
+
+        audio = new AudioComponent();
+        this.addComponent(audio);
 
         Image potionSprite = null;
         InventoryComponent itemInventory = potion.getComponent(InventoryComponent.class);
@@ -170,6 +176,7 @@ public class PotionEntity extends GameEntity {
                     }
                 });
 
+                audio.play("glassSmashing2.wav");
                 explosion.play();
             }
             else {

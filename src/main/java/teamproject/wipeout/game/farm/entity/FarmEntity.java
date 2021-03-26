@@ -469,7 +469,7 @@ public class FarmEntity extends GameEntity {
             return;
         }
 
-        this.audio.play("shovel.wav");
+        
         
         if (makePickable) {
             // Player picking the farm item
@@ -486,9 +486,10 @@ public class FarmEntity extends GameEntity {
 
             Item inventoryItem = this.itemStore.getItem(inventoryID);
             this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
-
+            this.audio.play("shovel.wav");
         } else {
             // Animal eating the farm item
+            this.audio.play("chomp.wav");
             this.sendStateUpdate();
         }
         
