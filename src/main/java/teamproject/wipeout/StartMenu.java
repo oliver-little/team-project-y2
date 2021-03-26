@@ -81,19 +81,24 @@ public class StartMenu implements Controller {
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
-        hostPane.getStyleClass().add("pane");
+        hostPane.getStyleClass().add("vbox");
+        hostPane.setMaxWidth(400);
 
         HBox nameBox = new HBox();
         nameBox.setAlignment(Pos.CENTER);
+        nameBox.getStyleClass().add("hbox");
+        nameBox.setSpacing(37);
         Label nameLabel = new Label("Name: ");
         TextField nameTF = new TextField();
         nameBox.getChildren().addAll(nameLabel,nameTF);
 
         HBox serverNameBox = new HBox();
+        serverNameBox.getStyleClass().add("hbox");
+        serverNameBox.setSpacing(3);
         serverNameBox.setAlignment(Pos.CENTER);
         Label serverNameLabel = new Label("Server Name: ");
         TextField serverNameTF = new TextField();
-        nameBox.getChildren().addAll(serverNameLabel,serverNameTF);
+        serverNameBox.getChildren().addAll(serverNameLabel,serverNameTF);
 
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> createServer(serverNameTF.getText(), nameTF.getText())));
@@ -128,8 +133,9 @@ public class StartMenu implements Controller {
         //addTitle("Lobby");
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
         VBox players = new VBox();
-        players.getStyleClass().add("pane");
+        players.getStyleClass().add("vbox");
         players.setAlignment(Pos.CENTER);
+        players.setMaxWidth(400);
 
         menuBox.getChildren().addAll(players);
 
@@ -196,6 +202,8 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
+        // TODO use list view instead of toggle group
+        // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
         servers.addListener((MapChangeListener<? super String, ? super InetSocketAddress>) (change) -> {
             Platform.runLater(() -> {
                 serverBox.getChildren().clear();
