@@ -142,7 +142,16 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     /**
-     * Adds acceleration to the physics component of the Player
+     * Sets world position of the Player.
+     *
+     * @param position {@link Point2D} position of the Player
+     */
+    public void setWorldPosition(Point2D position) {
+        this.position.setPosition(position);
+    }
+
+    /**
+     * Adds acceleration to the physics component of the Player.
      *
      * @param x X axis acceleration
      * @param y Y axis acceleration

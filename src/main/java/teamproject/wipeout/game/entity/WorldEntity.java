@@ -56,7 +56,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	private SpriteManager spriteManager;
 	private ItemStore itemStore;
 
-	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
+	public WorldEntity(GameScene gameScene, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
 		super(gameScene);
 		this.spriteManager = spriteManager;
 		this.itemStore = itemStore;
@@ -70,6 +70,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.inputHandler = input;
 
 		this.addComponent(new Transform(0,0));
+
+		int width = 1461;
+		int height = 1184;
 
 		//grass background
 		GameEntity grass = new GameEntity(gameScene);
@@ -90,24 +93,22 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.addComponent(new CollisionResolutionComponent(false));
 		
 		try {
-			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,0), spriteManager);
-			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,750), spriteManager);
-			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,600), new Point2D(800,0), spriteManager);
-			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(800,-100), new Point2D(0,750), spriteManager);
+			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(1461,0), spriteManager);
+			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,1411), spriteManager);
+			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,1184), new Point2D(1461,0), spriteManager);
+			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(1461,-100), new Point2D(0,1411), spriteManager);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		//TreeEntity tree = new TreeEntity(gameScene, -50,-100, spriteManager);
-		//TreeEntity tree2 = new TreeEntity(gameScene, new Point2D(20,20));
 
 		this.myPlayer = player;
 
 		if (numberOfPlayers == 4) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 50), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(50, 400), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(500, 400), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(981, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(220, 800), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
@@ -115,14 +116,14 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			this.farms.put(farmEntity4.farmID, farmEntity4);
 
 		} else if (numberOfPlayers == 2) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 400), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
 		}
 
-		this.market = new MarketEntity(gameScene, 260, 250, itemStore, player, spriteManager, uiContainer);
+		this.market = new MarketEntity(gameScene, 576, 544, itemStore, player, spriteManager, uiContainer, this);
 		this.market.setOnUIOpen(() -> input.setDisableInput(true));
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);
@@ -141,7 +142,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
-		this.myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
+		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), navMesh, spriteManager, new ArrayList<>(farms.values()));
 
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
@@ -174,6 +175,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.myFarm = farm;
 		if (farm != null) {
 			this.myPlayer.getCurrentState().assignFarm(farm.farmID);
+			this.setMyPlayerPosition(farm);
 			farm.assignPlayer(this.myPlayer.playerID, true, this.clientSupplier);
 		} else {
 			this.myPlayer.getCurrentState().assignFarm(null);
@@ -204,6 +206,28 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				new PotionEntity(this.getScene(), this.spriteManager, potion, possibleEffectEntities, entry.getValue()[0], entry.getValue()[1]);
 			}
 		}
+	}
+
+	protected void setMyPlayerPosition(FarmEntity farm) {
+		Point2D playerPosition;
+		switch (farm.farmID) {
+			case 1:
+				playerPosition = farm.getWorldPosition().add(farm.getSize());
+				break;
+			case 2:
+				playerPosition = farm.getWorldPosition().add(-45, farm.getSize().getY());
+				break;
+			case 3:
+				playerPosition = farm.getWorldPosition().add(farm.getSize().getX(), 0);
+				break;
+			case 4:
+				playerPosition = farm.getWorldPosition().subtract(45, 0);
+				break;
+			default:
+				playerPosition = Point2D.ZERO;
+				break;
+		}
+		this.myPlayer.setWorldPosition(playerPosition);
 	}
 
 	protected void setupFarmPickingKey() {

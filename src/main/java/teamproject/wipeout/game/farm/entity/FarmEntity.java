@@ -38,6 +38,8 @@ import java.util.function.Supplier;
  */
 public class FarmEntity extends GameEntity {
 
+    public static final int MAX_EXPANSION_SIZE = 5;
+
     public static int SQUARE_SIZE = 32;
     public static double SKEW_FACTOR = 0.89;
 
@@ -62,11 +64,15 @@ public class FarmEntity extends GameEntity {
     private DestroyerEntity destroyerEntity;
     private Consumer<FarmItem> destroyerDelegate;
 
+    private int expansionLevel;
+
     private Supplier<GameClient> clientSupplier;
 
     private final AudioComponent audio;
 
     private final Pickables pickables;
+
+    private final FarmRenderer farmRenderer;
 
     private final Supplier<Double> growthMultiplierSupplier = () -> this.data.getGrowthMultiplier();
 
@@ -80,15 +86,16 @@ public class FarmEntity extends GameEntity {
      */
     public FarmEntity(GameScene scene, Integer farmID, Point2D location, Pickables pickables, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
+        this.spriteManager = spriteManager;
+        this.itemStore = itemStore;
+
         this.farmID = farmID;
+        this.data = new FarmData(-13, null, this.itemStore);
 
         this.transform = new Transform(location, 0.0, -1);
 
-        Point2D squareGrid = new Point2D(FarmData.FARM_COLUMNS, FarmData.FARM_ROWS);
+        Point2D squareGrid = new Point2D(this.data.farmColumns, this.data.farmRows);
         this.size = squareGrid.multiply(SQUARE_SIZE).add(SQUARE_SIZE * 2, SQUARE_SIZE * 2);
-
-        this.spriteManager = spriteManager;
-        this.itemStore = itemStore;
 
         this.rowEntities = new ArrayList<ItemsRowEntity>();
 
@@ -97,13 +104,15 @@ public class FarmEntity extends GameEntity {
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
 
+        this.expansionLevel = 0;
+
         this.addComponent(this.transform);
-        this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
+
+        this.farmRenderer = new FarmRenderer(this.size, this.spriteManager);
+        this.addComponent(new RenderComponent(false, this.farmRenderer));
 
         audio = new AudioComponent();
         this.addComponent(audio);
-
-        this.data = new FarmData(-13, null, this.itemStore);
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
@@ -117,6 +126,14 @@ public class FarmEntity extends GameEntity {
         }
 
         this.pickables = pickables;
+    }
+
+    public Point2D getWorldPosition() {
+        return this.transform.getWorldPosition();
+    }
+
+    public Point2D getSize() {
+        return this.size;
     }
 
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
@@ -485,8 +502,79 @@ public class FarmEntity extends GameEntity {
 
             Item inventoryItem = this.itemStore.getItem(inventoryID);
             this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
-
         }
+    }
+
+    /**
+     * Function to expand the size of a farm.
+     *
+     * @param expandBy Amount to expand by.
+     */
+    public void expandFarmBy(int expandBy) {
+        this.data.expandFarm(expandBy);
+
+        double expandByPoints = SQUARE_SIZE * expandBy;
+
+        this.size = this.size.add(expandByPoints, expandByPoints);
+        this.farmRenderer.setFarmSize(this.size);
+
+        Point2D addedDimensions;
+        int row = 1;
+        switch (this.farmID) {
+            case 1:
+                addedDimensions = new Point2D(expandByPoints, expandByPoints);
+                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                row = 1;
+                break;
+            case 2:
+                addedDimensions = new Point2D(0, expandByPoints);
+                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                row = 1;
+                break;
+            case 3:
+                addedDimensions = new Point2D(expandByPoints, 0);
+                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+            default:
+                row = 0;
+                break;
+        }
+
+        for (ItemsRowEntity rowEntity : this.rowEntities) {
+            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+            rowEntity.getComponent(Transform.class).setPosition(rowPoint);
+            rowEntity.setFarmRow(this.data.getItemsInRow(row));
+            row += 1;
+        }
+
+        Point2D newRowPoint;
+        int newRowIndex;
+        switch (this.farmID) {
+            case 1:
+            case 2:
+                newRowPoint = new Point2D(0, SQUARE_SIZE / 1.5);
+                newRowIndex = 0;
+                break;
+            default:
+                newRowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+                newRowIndex = this.data.farmRows - 1;
+                break;
+        }
+        ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
+        newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
+
+        newRowEntity.setParent(this);
+        this.addChild(newRowEntity);
+        this.rowEntities.add(0, newRowEntity);
+
+        this.expansionLevel += 1;
+    }
+
+    /**
+     * Function to check has the farm reached its maximum size.
+     * @return True if hit maximum, False if under maximum.
+     */
+    public boolean isMaxSize() {
+        return expansionLevel >= MAX_EXPANSION_SIZE;
     }
 
     /**
@@ -611,7 +699,17 @@ public class FarmEntity extends GameEntity {
     }
 
     /**
+     * Getter for the expansion level of a farm.
+     * @return The expansion level.
+     */
+    public int getExpansionLevel() {
+        return this.expansionLevel;
+    }
+
+    /**
      * Creates a {@code Clickable} component for the farm entity.
+     *
+     * @return {@link Clickable} component
      */
     private Clickable makeClickable() {
         Clickable clickable = new Clickable((x, y, button) -> {

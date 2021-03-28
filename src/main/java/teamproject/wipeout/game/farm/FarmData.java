@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.farm;
 
+import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -20,9 +21,9 @@ import java.util.function.Consumer;
 public class FarmData implements StateUpdatable<FarmState> {
 
     /** Number of rows on any farm */
-    public static int FARM_ROWS = 3;
+    public int farmRows = 3;
     /** Number of columns on any farm */
-    public static int FARM_COLUMNS = 6;
+    public int farmColumns = 6;
 
     public final Integer farmID;
     public final Integer playerID;
@@ -51,9 +52,9 @@ public class FarmData implements StateUpdatable<FarmState> {
         this.growthMultiplier = 1.0;
         this.AIMultiplier = 1.0;
 
-        this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);
-        for (int i = 0; i < FARM_ROWS; i++) {
-            ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
+        this.items = new ArrayList<ArrayList<FarmItem>>(this.farmRows);
+        for (int i = 0; i < this.farmRows; i++) {
+            ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(this.farmColumns, null));
             this.items.add(newRow);
         }
 
@@ -210,7 +211,7 @@ public class FarmData implements StateUpdatable<FarmState> {
         }
         int rowMax = row + h;
         int columnMax = column + w;
-        if (rowMax > FARM_ROWS || columnMax > FARM_COLUMNS) {
+        if (rowMax > this.farmRows || columnMax > this.farmColumns) {
             return false;
         }
 
@@ -367,6 +368,36 @@ public class FarmData implements StateUpdatable<FarmState> {
         return null;
     }
 
+    public void expandFarm(int expandBy) {
+        this.farmRows += expandBy;
+        this.farmColumns += expandBy;
+
+        switch (this.farmID) {
+            case 1:
+            case 3:
+                for (ArrayList<FarmItem> row : this.items) {
+                    row.add(0, null);
+                }
+                break;
+            default:
+                for (ArrayList<FarmItem> row : this.items) {
+                    row.add(null);
+                }
+                break;
+        }
+
+        ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(this.farmColumns, null));
+        switch (this.farmID) {
+            case 1:
+            case 2:
+                this.items.add(0, newRow);
+                break;
+            default:
+                this.items.add(newRow);
+                break;
+        }
+    }
+
     /**
      * Gets the growth delegate.
      *
@@ -404,7 +435,7 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     protected boolean areCoordinatesInvalid(int row, int column) {
         boolean lessThanZero = row < 0 || column < 0;
-        boolean lessThanBoundary = row < FARM_ROWS && column < FARM_COLUMNS;
+        boolean lessThanBoundary = row < this.farmRows && column < this.farmColumns;
         return lessThanZero || !lessThanBoundary;
     }
 

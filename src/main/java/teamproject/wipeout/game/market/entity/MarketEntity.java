@@ -22,6 +22,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
@@ -47,7 +48,7 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer, WorldEntity world) {
         super(scene);
 
         this.uiContainer = uiContainer;
@@ -68,7 +69,7 @@ public class MarketEntity extends GameEntity {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             Image marketSprite = spriteManager.getSpriteSet("market", "market")[0];
 
-            this.addComponent(new RenderComponent(new Point2D(0, Y_OFFSET), new SpriteRenderable(marketSprite), new RectRenderable(Color.BLACK, 1, 1)));
+            this.addComponent(new RenderComponent(new Point2D(0, Y_OFFSET), new SpriteRenderable(marketSprite)));
 
             RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
             this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
@@ -112,7 +113,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager);
+        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world);
         this.marketUI.setParent(uiContainer);
     }
 
