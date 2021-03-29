@@ -123,6 +123,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public void setMoney(double value) {
         this.money.set(value);
         this.playerState.setMoney(value);
+        this.sendPlayerStateUpdate();
     }
 
     public DoubleProperty moneyProperty() {
