@@ -22,6 +22,7 @@ public class FarmState implements Serializable {
 
     private Integer farmID;
 
+    private Integer expansions;
     private List<List<Pair<Integer, Double>>> items;
     private double growthMultiplier;
     private double AIMultiplier;
@@ -34,8 +35,9 @@ public class FarmState implements Serializable {
      * @param farmID Farm ID
      * @param items  Items at the farm
      */
-    public FarmState(Integer farmID, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double AIMultiplier) {
+    public FarmState(Integer farmID, Integer expansions, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double AIMultiplier) {
         this.farmID = farmID;
+        this.expansions = expansions;
         this.items = items.stream().map((row) -> {
             return row.stream().map((item) -> {
                 if (item != null) {
@@ -54,28 +56,46 @@ public class FarmState implements Serializable {
 
     /**
      * Farm ID getter
-     *
      * @return Farm ID
      */
     public Integer getFarmID() {
         return this.farmID;
     }
 
+    /**
+     * Expansions getter
+     * @return Number of expansions
+     */
+    public Integer getExpansions() {
+        return this.expansions;
+    }
+
+    /**
+     * Items getter
+     * @return {@code List<List<Pair<Integer, Double>>>} of items
+     */
     public List<List<Pair<Integer, Double>>> getItems() {
         return this.items;
     }
 
+    /**
+     * Growth multiplier getter
+     * @return Growth multiplier
+     */
     public double getGrowthMultiplier() {
         return this.growthMultiplier;
     }
 
+    /**
+     * AI multiplier getter
+     * @return AI multiplier
+     */
     public double getAIMultiplier() {
         return this.AIMultiplier;
     }
 
     /**
-     * {@code timestamp} variable getter
-     *
+     * Timestamp getter
      * @return Timestamp of the {@code FarmState}
      */
     public long getTimestamp() {
@@ -88,6 +108,8 @@ public class FarmState implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.farmID);
 
+        out.writeInt(this.expansions);
+
         out.writeObject(this.items);
 
         out.writeDouble(this.growthMultiplier);
@@ -98,6 +120,8 @@ public class FarmState implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         this.farmID = in.readInt();
+
+        this.expansions = in.readInt();
 
         this.items = (List<List<Pair<Integer, Double>>>) in.readObject();
 

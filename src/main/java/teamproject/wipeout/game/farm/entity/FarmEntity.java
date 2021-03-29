@@ -64,8 +64,6 @@ public class FarmEntity extends GameEntity {
     private DestroyerEntity destroyerEntity;
     private Consumer<FarmItem> destroyerDelegate;
 
-    private int expansionLevel;
-
     private Supplier<GameClient> clientSupplier;
 
     private final AudioComponent audio;
@@ -90,7 +88,7 @@ public class FarmEntity extends GameEntity {
         this.itemStore = itemStore;
 
         this.farmID = farmID;
-        this.data = new FarmData(-13, null, this.itemStore);
+        this.data = new FarmData(-13, null, this.expandFarmBy(), this.itemStore);
 
         this.transform = new Transform(location, 0.0, -1);
 
@@ -103,8 +101,6 @@ public class FarmEntity extends GameEntity {
         this.seedEntity = null;
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
-
-        this.expansionLevel = 0;
 
         this.addComponent(this.transform);
 
@@ -139,7 +135,7 @@ public class FarmEntity extends GameEntity {
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
         this.removePlayer();
 
-        this.data = new FarmData(this.farmID, playerID, this.itemStore);
+        this.data = new FarmData(this.farmID, playerID, this.expandFarmBy(), this.itemStore);
 
         int row = 0;
         for (ItemsRowEntity rowEntity : this.rowEntities) {
@@ -157,7 +153,7 @@ public class FarmEntity extends GameEntity {
     }
 
     private void removePlayer() {
-        this.data = new FarmData(-13, null, this.itemStore);
+        this.data = new FarmData(-13, null, this.expandFarmBy(), this.itemStore);
 
         int row = 0;
         for (ItemsRowEntity rowEntity : this.rowEntities) {
@@ -508,65 +504,73 @@ public class FarmEntity extends GameEntity {
     /**
      * Function to expand the size of a farm.
      *
-     * @param expandBy Amount to expand by.
+     * @param expandBy Amount to expand the farm by.
      */
     public void expandFarmBy(int expandBy) {
         this.data.expandFarm(expandBy);
+    }
 
-        double expandByPoints = SQUARE_SIZE * expandBy;
+    /**
+     * Function to expand the size of a farm.
+     * @return {@code Consumer<Integer>} which expands the entity.
+     */
+    public Consumer<Integer> expandFarmBy() {
+        return (expandBy) -> {
+            double expandByPoints = SQUARE_SIZE * expandBy;
 
-        this.size = this.size.add(expandByPoints, expandByPoints);
-        this.farmRenderer.setFarmSize(this.size);
+            this.size = this.size.add(expandByPoints, expandByPoints);
+            this.farmRenderer.setFarmSize(this.size);
 
-        Point2D addedDimensions;
-        int row = 1;
-        switch (this.farmID) {
-            case 1:
-                addedDimensions = new Point2D(expandByPoints, expandByPoints);
-                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
-                row = 1;
-                break;
-            case 2:
-                addedDimensions = new Point2D(0, expandByPoints);
-                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
-                row = 1;
-                break;
-            case 3:
-                addedDimensions = new Point2D(expandByPoints, 0);
-                this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
-            default:
-                row = 0;
-                break;
-        }
+            Point2D addedDimensions;
+            int row;
+            switch (this.farmID) {
+                case 1:
+                    addedDimensions = new Point2D(expandByPoints, expandByPoints);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                    row = 1;
+                    break;
+                case 2:
+                    addedDimensions = new Point2D(0, expandByPoints);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                    row = 1;
+                    break;
+                case 3:
+                    addedDimensions = new Point2D(expandByPoints, 0);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                default:
+                    row = 0;
+                    break;
+            }
 
-        for (ItemsRowEntity rowEntity : this.rowEntities) {
-            Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
-            rowEntity.getComponent(Transform.class).setPosition(rowPoint);
-            rowEntity.setFarmRow(this.data.getItemsInRow(row));
-            row += 1;
-        }
+            for (ItemsRowEntity rowEntity : this.rowEntities) {
+                Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+                rowEntity.getComponent(Transform.class).setPosition(rowPoint);
+                rowEntity.setFarmRow(this.data.getItemsInRow(row));
+                row += 1;
+            }
 
-        Point2D newRowPoint;
-        int newRowIndex;
-        switch (this.farmID) {
-            case 1:
-            case 2:
-                newRowPoint = new Point2D(0, SQUARE_SIZE / 1.5);
-                newRowIndex = 0;
-                break;
-            default:
-                newRowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
-                newRowIndex = this.data.farmRows - 1;
-                break;
-        }
-        ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
-        newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
+            Point2D newRowPoint;
+            int newRowIndex;
+            switch (this.farmID) {
+                case 1:
+                case 2:
+                    newRowPoint = new Point2D(0, SQUARE_SIZE / 1.5);
+                    newRowIndex = 0;
+                    break;
+                default:
+                    newRowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+                    newRowIndex = this.data.farmRows - 1;
+                    break;
+            }
+            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
+            newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
 
-        newRowEntity.setParent(this);
-        this.addChild(newRowEntity);
-        this.rowEntities.add(0, newRowEntity);
+            newRowEntity.setParent(this);
+            this.addChild(newRowEntity);
+            this.rowEntities.add(0, newRowEntity);
 
-        this.expansionLevel += 1;
+            this.sendStateUpdate();
+        };
     }
 
     /**
@@ -574,7 +578,7 @@ public class FarmEntity extends GameEntity {
      * @return True if hit maximum, False if under maximum.
      */
     public boolean isMaxSize() {
-        return expansionLevel >= MAX_EXPANSION_SIZE;
+        return this.data.getExpansionLevel() >= MAX_EXPANSION_SIZE;
     }
 
     /**
@@ -696,14 +700,6 @@ public class FarmEntity extends GameEntity {
         }
 
         return fullyGrownItems;
-    }
-
-    /**
-     * Getter for the expansion level of a farm.
-     * @return The expansion level.
-     */
-    public int getExpansionLevel() {
-        return this.expansionLevel;
     }
 
     /**
