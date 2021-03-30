@@ -208,11 +208,8 @@ public class App implements Controller {
 
         AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
         player.addComponent(playerSound);
-
-        input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
         
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
-        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
 
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),
@@ -229,11 +226,12 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DOWN,
                 () -> player.addAcceleration(0f, 500f),
                 () -> player.addAcceleration(0f, -500f));
-
-
+                
+        /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
+        */
 
         invUI.onMouseClick(this.worldEntity);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
