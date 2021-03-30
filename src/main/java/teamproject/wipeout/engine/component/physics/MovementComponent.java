@@ -6,6 +6,7 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.util.BasicEvent;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class MovementComponent implements GameComponent {
 
@@ -16,9 +17,11 @@ public class MovementComponent implements GameComponent {
     public Point2D acceleration;
     public FacingDirection facingDirection;
     public BasicEvent<FacingDirection> facingDirectionChanged;
-    public double speedMultiplier = 1.0;
 
     public Consumer<Point2D> stopCallback;
+    public Consumer<Double> speedMultiplierChanged;
+
+    private double speedMultiplier = 1.0;
 
     public MovementComponent() {
         this.facingDirectionChanged = new BasicEvent<>();
@@ -59,6 +62,20 @@ public class MovementComponent implements GameComponent {
         this.acceleration = new Point2D(xAcceleration, yAcceleration);
         this.facingDirection = FacingDirection.NONE;
         this.updateFacingDirection();
+    }
+
+    public void multiplySpeedMultiplierBy(double multiplier) {
+        this.speedMultiplier *= multiplier;
+        this.speedMultiplierChanged.accept(speedMultiplier);
+    }
+
+    public void divideSpeedMultiplierBy(double multiplier) {
+        this.speedMultiplier /= multiplier;
+        this.speedMultiplierChanged.accept(speedMultiplier);
+    }
+
+    public void setSpeedMultiplier(double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
     }
 
     /** Update the facing diection every timestep, based on velocity */

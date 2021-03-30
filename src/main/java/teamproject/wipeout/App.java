@@ -201,8 +201,9 @@ public class App implements Controller {
         camPos.bind(camPosBinding);
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
-        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
+        WorldEntity world = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input);
         world.setClientSupplier(this.networker.clientSupplier);
+        player.setThrownPotion((potion) ->  world.addPotion(potion));
         this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);
@@ -395,6 +396,7 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
         spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
+        spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
     }
     
 

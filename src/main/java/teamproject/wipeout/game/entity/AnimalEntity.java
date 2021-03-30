@@ -68,13 +68,17 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.transformComponent = new Transform(position.getX(), position.getY(), 1);
         this.movementComponent = new MovementComponent();
+        this.movementComponent.speedMultiplierChanged = (newMultiplier) -> {
+            this.animalState.setSpeedMultiplier(newMultiplier);
+            this.sendStateUpdate();
+        };
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
         this.addComponent(new RenderComponent(new Point2D(-16, -16)));
         this.addComponent(new HitboxComponent(new Rectangle(-16, -16, 32, 32)));
 
-        this.animalState = new AnimalState(position, null, -1);
+        this.animalState = new AnimalState(position, null);
 
         try {
             this.addComponent(new PlayerAnimatorComponent(
@@ -100,18 +104,23 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     }
 
     public void updateFromState(AnimalState newState) {
-        this.isPuppet = true;
-        this.transformComponent.setPosition(newState.getPosition());
-
-        int[] traverseTo = newState.getTraveseTo();
-        if (traverseTo != null) {
-            int eatAt = newState.getEatAt();
-            if (eatAt < 0) {
-                this.aiTraverse(traverseTo[0], traverseTo[1], () -> {});
-            } else {
-                this.aiStealCrops(new int[]{eatAt, traverseTo[0], traverseTo[1]}, null);
-            }
+        if (!this.animalState.getSpeedMultiplier().equals(newState.getSpeedMultiplier())) {
+            Double newSpeedMultiplier = newState.getSpeedMultiplier();
+            this.movementComponent.setSpeedMultiplier(newSpeedMultiplier);
+            this.animalState.setSpeedMultiplier(newSpeedMultiplier);
+            return;
         }
+        this.isPuppet = true;
+
+        this.removeComponent(SteeringComponent.class);
+        this.transformComponent.setPosition(newState.getPosition());
+        this.movementComponent.setSpeedMultiplier(newState.getSpeedMultiplier());
+
+        List<Point2D> path = newState.getPath();
+        if (!path.isEmpty()) {
+            this.addComponent(new SteeringComponent(path, null, 250));
+        }
+
         this.animalState.updateStateFrom(newState);
     }
 
@@ -124,14 +133,11 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 16);
 
-        SteeringComponent newSteering = new SteeringComponent(path, callback, 250);
+        this.animalState.setPosition(this.transformComponent.getWorldPosition());
+        this.animalState.setPath(path);
+        this.sendStateUpdate();
 
-        SteeringComponent currentSteering = this.getComponent(SteeringComponent.class);
-        if (currentSteering == null) {
-            this.addComponent(newSteering);
-        } else {
-            currentSteering.subsequentSteering = newSteering;
-        }
+        this.addComponent(new SteeringComponent(path, callback, 250));
     }
 
     /**
@@ -141,8 +147,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
 
         this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(null);
-        this.animalState.setEatAt(-1);
+        this.animalState.setPath(null);
         this.sendStateUpdate();
 
         executor.schedule(() -> Platform.runLater(aiDecisionAlgorithm), idleTime, TimeUnit.SECONDS);
@@ -150,21 +155,10 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
     /**
      * Steals crops from a given farm.
-     * @param eatAt Location used for networking.
+     *
      * @param randFarm The farm to steal crops from.
      */
-    private void aiStealCrops(int[] eatAt, FarmEntity randFarm) {
-        if (eatAt != null) {
-            FarmEntity theFarm = (FarmEntity) farms.stream().filter((farm) -> farm.farmID.equals(eatAt[0])).toArray()[0];
-            int theX = eatAt[1];
-            int theY = eatAt[2];
-            Runnable onComplete = () ->  {
-                theFarm.pickItemAt(theX, theY, false);
-            };
-
-            aiTraverse(theX, theY, onComplete);
-            return;
-        }
+    private void aiStealCrops(FarmEntity randFarm) {
         List<Point2D> fullyGrownItems = new ArrayList<>();
 
         fullyGrownItems = randFarm.getGrownItemPositions();
@@ -186,11 +180,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
             Platform.runLater(aiDecisionAlgorithm);
         };
 
-        this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(new int[]{x, y});
-        this.animalState.setEatAt(randFarm.farmID);
-        this.sendStateUpdate();
-
         aiTraverse(x, y, onComplete);
     }
 
@@ -206,11 +195,6 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         int randX = randomInteger((int) randomSquare.topLeft.getX(), (int) randomSquare.bottomRight.getX());
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
-
-        this.animalState.setPosition(this.transformComponent.getWorldPosition());
-        this.animalState.setTraveseTo(new int[]{randX, randY});
-        this.animalState.setEatAt(-1);
-        this.sendStateUpdate();
 
         aiTraverse(randX, randY, aiDecisionAlgorithm);
     }
@@ -261,7 +245,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         } else if (probability <= stealProbability) {
             //Steal plants
-            aiStealCrops(null, selectedFarm);
+            aiStealCrops(selectedFarm);
 
         } else {
             //Pick random point

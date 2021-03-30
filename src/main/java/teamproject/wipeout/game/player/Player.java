@@ -18,6 +18,7 @@ import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
@@ -26,6 +27,7 @@ import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
@@ -56,6 +58,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private DoubleProperty money;
 
+    private Consumer<PotionEntity> thrownPotion;
     private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
     private final Transform position;
@@ -82,6 +85,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             this.playerState.setPosition(newPosition);
             this.sendPlayerStateUpdate();
         };
+        this.physics.speedMultiplierChanged = (newMultiplier) -> {
+            this.playerState.setSpeedMultiplier(newMultiplier);
+            this.sendPlayerStateUpdate();
+        };
+
         this.addComponent(this.position);
         this.addComponent(this.physics);
         this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
@@ -89,13 +97,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(new HitboxComponent(new Rectangle(20, 12, 24, 16)));
         this.addComponent(new CollisionResolutionComponent());
 
-        audio = new AudioComponent();
-        this.addComponent(audio);
+        this.audio = new AudioComponent();
+        this.addComponent(this.audio);
 
         this.invUI = invUI;
         if (invUI != null) {
             for (int i = 0; i < MAX_SIZE; i++) {
-                inventory.add(null);
+                this.inventory.add(null);
             }
             selectSlot(0);
 
@@ -115,6 +123,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public void setMoney(double value) {
         this.money.set(value);
         this.playerState.setMoney(value);
+        this.sendPlayerStateUpdate();
     }
 
     public DoubleProperty moneyProperty() {
@@ -125,8 +134,25 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.clientSupplier = supplier;
     }
 
+    public Consumer<PotionEntity> getThrownPotion() {
+        return this.thrownPotion;
+    }
+
+    public void setThrownPotion(Consumer<PotionEntity> thrownPotion) {
+        this.thrownPotion = thrownPotion;
+    }
+
     /**
-     * Adds acceleration to the physics component of the Player
+     * Sets world position of the Player.
+     *
+     * @param position {@link Point2D} position of the Player
+     */
+    public void setWorldPosition(Point2D position) {
+        this.position.setPosition(position);
+    }
+
+    /**
+     * Adds acceleration to the physics component of the Player.
      *
      * @param x X axis acceleration
      * @param y Y axis acceleration
@@ -143,6 +169,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public void updateFromState(PlayerState newState) {
+        this.physics.setSpeedMultiplier(newState.getSpeedMultiplier());
         this.physics.acceleration = newState.getAcceleration();
         if (newState.getAcceleration().equals(Point2D.ZERO)) {
             this.position.setPosition(newState.getPosition());

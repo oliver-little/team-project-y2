@@ -18,10 +18,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
-import teamproject.wipeout.game.item.components.TradableComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.util.resources.ResourceLoader;
@@ -36,7 +36,7 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager) {
+    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, WorldEntity world) {
         super();
 
         try {
@@ -55,6 +55,7 @@ public class MarketUI extends AnchorPane {
         List<Node> seedsList = new ArrayList<>();
         List<Node> plantsList = new ArrayList<>();
         List<Node> potionsList = new ArrayList<>();
+        List<Node> farmsList = new ArrayList<>();
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
@@ -68,11 +69,14 @@ public class MarketUI extends AnchorPane {
             }
         }
 
+        farmsList.add(new FarmExpansionUI(market, player, spriteManager, world));
+
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));
         Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList));
+        Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList));
         //Tab tasks = new Tab("Tasks", new Label("Purchasable Tasks")); -- Implement later.
-        tabPane.getTabs().addAll(seeds, plants, potions);
+        tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions);
 
         Button close = new Button("X");
 

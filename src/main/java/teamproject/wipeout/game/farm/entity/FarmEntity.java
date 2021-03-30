@@ -38,6 +38,8 @@ import java.util.function.Supplier;
  */
 public class FarmEntity extends GameEntity {
 
+    public static final int MAX_EXPANSION_SIZE = 5;
+
     public static int SQUARE_SIZE = 32;
     public static double SKEW_FACTOR = 0.89;
 
@@ -50,9 +52,6 @@ public class FarmEntity extends GameEntity {
 
     private final SpriteManager spriteManager;
     private final ItemStore itemStore;
-
-    private double growthMultiplier;
-    private double AIMultiplier;
 
     private final List<ItemsRowEntity> rowEntities;
 
@@ -71,7 +70,9 @@ public class FarmEntity extends GameEntity {
 
     private final Pickables pickables;
 
-    private final Supplier<Double> growthMultiplierSupplier = () -> this.growthMultiplier;
+    private final FarmRenderer farmRenderer;
+
+    private final Supplier<Double> growthMultiplierSupplier = () -> this.data.getGrowthMultiplier();
 
     /**
      * Creates a new instance of {@code FarmEntity}
@@ -83,15 +84,16 @@ public class FarmEntity extends GameEntity {
      */
     public FarmEntity(GameScene scene, Integer farmID, Point2D location, Pickables pickables, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
+        this.spriteManager = spriteManager;
+        this.itemStore = itemStore;
+
         this.farmID = farmID;
+        this.data = new FarmData(-13, null, this.expandFarmBy(), this.itemStore);
 
         this.transform = new Transform(location, 0.0, -1);
 
-        Point2D squareGrid = new Point2D(FarmData.FARM_COLUMNS, FarmData.FARM_ROWS);
+        Point2D squareGrid = new Point2D(this.data.farmColumns, this.data.farmRows);
         this.size = squareGrid.multiply(SQUARE_SIZE).add(SQUARE_SIZE * 2, SQUARE_SIZE * 2);
-
-        this.spriteManager = spriteManager;
-        this.itemStore = itemStore;
 
         this.rowEntities = new ArrayList<ItemsRowEntity>();
 
@@ -100,16 +102,13 @@ public class FarmEntity extends GameEntity {
         this.destroyerEntity = null;
         this.destroyerDelegate = null;
 
-        this.growthMultiplier = 1.0;
-        this.AIMultiplier = 1.0;
-
         this.addComponent(this.transform);
-        this.addComponent(new RenderComponent(false, new FarmRenderer(this.size, this.spriteManager)));
+
+        this.farmRenderer = new FarmRenderer(this.size, this.spriteManager);
+        this.addComponent(new RenderComponent(false, this.farmRenderer));
 
         audio = new AudioComponent();
         this.addComponent(audio);
-
-        this.data = new FarmData(-13, null, this.itemStore);
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
@@ -125,10 +124,18 @@ public class FarmEntity extends GameEntity {
         this.pickables = pickables;
     }
 
+    public Point2D getWorldPosition() {
+        return this.transform.getWorldPosition();
+    }
+
+    public Point2D getSize() {
+        return this.size;
+    }
+
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
         this.removePlayer();
 
-        this.data = new FarmData(this.farmID, playerID, this.itemStore);
+        this.data = new FarmData(this.farmID, playerID, this.expandFarmBy(), this.itemStore);
 
         int row = 0;
         for (ItemsRowEntity rowEntity : this.rowEntities) {
@@ -136,15 +143,17 @@ public class FarmEntity extends GameEntity {
             row += 1;
         }
 
+        this.clientSupplier = clientFunction;
+
         if (activePlayer) {
             //this.farmUI = new FarmUI(this.data, spriteManager);
             //this.farmUI.setParent(uiContainer);
-            this.addComponent(this.makeClickable(clientFunction));
+            this.addComponent(this.makeClickable());
         }
     }
 
     private void removePlayer() {
-        this.data = new FarmData(-13, null, this.itemStore);
+        this.data = new FarmData(-13, null, this.expandFarmBy(), this.itemStore);
 
         int row = 0;
         for (ItemsRowEntity rowEntity : this.rowEntities) {
@@ -363,8 +372,7 @@ public class FarmEntity extends GameEntity {
     public boolean isDestroyingItem() {
         if (this.destroyerEntity == null) {
             return false;
-        }
-        else {
+        } else {
             return this.destroyerEntity.getDestroyMode();
         }
     }
@@ -410,8 +418,13 @@ public class FarmEntity extends GameEntity {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+
         this.audio.play("shovel.wav");
-        return this.data.placeItem(item, 0.0, row, column);
+
+        boolean placed = this.data.placeItem(item, 0.0, row, column);
+
+        this.sendStateUpdate();
+        return placed;
     }
 
     /**
@@ -459,11 +472,10 @@ public class FarmEntity extends GameEntity {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
             this.audio.play("slice.wav");
-        }
-        else {
+        } else {
             pickedItem = this.data.pickItemAt(row, column);
         }
-
+        this.sendStateUpdate();
         
         if (pickedItem == null) {
             return;
@@ -490,9 +502,87 @@ public class FarmEntity extends GameEntity {
         } else {
             // Animal eating the farm item
             this.audio.play("chomp.wav");
-            this.sendStateUpdate();
         }
-        
+    }
+
+    /**
+     * Function to expand the size of a farm.
+     *
+     * @param expandBy Amount to expand the farm by.
+     */
+    public void expandFarmBy(int expandBy) {
+        this.data.expandFarm(expandBy);
+    }
+
+    /**
+     * Function to expand the size of a farm.
+     * @return {@code Consumer<Integer>} which expands the entity.
+     */
+    public Consumer<Integer> expandFarmBy() {
+        return (expandBy) -> {
+            double expandByPoints = SQUARE_SIZE * expandBy;
+
+            this.size = this.size.add(expandByPoints, expandByPoints);
+            this.farmRenderer.setFarmSize(this.size);
+
+            Point2D addedDimensions;
+            int row;
+            switch (this.farmID) {
+                case 1:
+                    addedDimensions = new Point2D(expandByPoints, expandByPoints);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                    row = 1;
+                    break;
+                case 2:
+                    addedDimensions = new Point2D(0, expandByPoints);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                    row = 1;
+                    break;
+                case 3:
+                    addedDimensions = new Point2D(expandByPoints, 0);
+                    this.transform.setPosition(this.transform.getWorldPosition().subtract(addedDimensions));
+                default:
+                    row = 0;
+                    break;
+            }
+
+            for (ItemsRowEntity rowEntity : this.rowEntities) {
+                Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+                rowEntity.getComponent(Transform.class).setPosition(rowPoint);
+                rowEntity.setFarmRow(this.data.getItemsInRow(row));
+                row += 1;
+            }
+
+            Point2D newRowPoint;
+            int newRowIndex;
+            switch (this.farmID) {
+                case 1:
+                case 2:
+                    newRowPoint = new Point2D(0, SQUARE_SIZE / 1.5);
+                    newRowIndex = 0;
+                    break;
+                default:
+                    newRowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * row));
+                    newRowIndex = this.data.farmRows - 1;
+                    break;
+            }
+            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
+            newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
+
+            newRowEntity.setParent(this);
+            this.addChild(newRowEntity);
+            this.rowEntities.add(0, newRowEntity);
+
+            this.sendStateUpdate();
+        };
+    }
+
+    /**
+     * Function to check has the farm reached its maximum size.
+     * @return True if hit maximum, False if under maximum.
+     */
+    public boolean isMaxSize() {
+        return this.data.getExpansionLevel() >= MAX_EXPANSION_SIZE;
     }
 
     /**
@@ -621,29 +711,18 @@ public class FarmEntity extends GameEntity {
      *
      * @return {@link Clickable} component
      */
-    private Clickable makeClickable(Supplier<GameClient> clientFunction) {
-        this.clientSupplier = clientFunction;
-
+    private Clickable makeClickable() {
         Clickable clickable = new Clickable((x, y, button) -> {
-            boolean stateChanged = false;
-
             if (this.isPickingItem()) { 
                 this.pickItemAt(x, y); //Picking a plant
                 this.stopPickingItem();
-                stateChanged = true;
-            
+
             } else if (this.isDestroyingItem()) {
                 this.pickItemAt(x, y, true); //Destroying a plant
                 this.stopPickingItem();
-                stateChanged = true;
 
             } else if (this.placingItem != null && this.placeItem(placingItem, x, y)) {
                 this.stopPlacingItem(true);
-                stateChanged = true;
-            }
-
-            if (stateChanged) {
-                this.sendStateUpdate();
             }
         });
         clickable.setEntity(this);
@@ -689,7 +768,7 @@ public class FarmEntity extends GameEntity {
      * @return The growth multiplier for a farm.
      */
     public double getGrowthMultiplier() {
-        return this.growthMultiplier;
+        return this.data.getGrowthMultiplier();
     }
 
     /**
@@ -697,7 +776,8 @@ public class FarmEntity extends GameEntity {
      * @param growthMultiplier The new growth multiplier for a farm.
      */
     public void setGrowthMultiplier(double growthMultiplier) {
-        this.growthMultiplier = growthMultiplier;
+        this.data.setGrowthMultiplier(growthMultiplier);
+        this.sendStateUpdate();
     }
 
     /**
@@ -705,7 +785,7 @@ public class FarmEntity extends GameEntity {
      * @return The AI multiplier
      */
     public double getAIMultiplier() {
-        return this.AIMultiplier;
+        return this.data.getAIMultiplier();
     }
 
     /**
@@ -713,6 +793,7 @@ public class FarmEntity extends GameEntity {
      * @param AIMultiplier The new AI multiplier for a farm.
      */
     public void setAIMultiplier(double AIMultiplier) {
-        this.AIMultiplier = AIMultiplier;
+        this.data.setAIMultiplier(AIMultiplier);
+        this.sendStateUpdate();
     }
 }

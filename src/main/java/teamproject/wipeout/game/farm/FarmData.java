@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.farm;
 
+import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -19,14 +20,18 @@ import java.util.function.Consumer;
  */
 public class FarmData implements StateUpdatable<FarmState> {
 
-    /** Number of rows on any farm */
-    public static int FARM_ROWS = 3;
-    /** Number of columns on any farm */
-    public static int FARM_COLUMNS = 6;
-
     public final Integer farmID;
     public final Integer playerID;
-    public final double TREE_GROWTH_HARVEST_PERCENTAGE = 0.75; //Sets the growth percentage to return a tree to when harvested.
+
+    public int farmRows;
+    public int farmColumns;
+    private int expansionLevel;
+
+    //Sets the growth percentage to return a tree to when harvested.
+    public final double TREE_GROWTH_HARVEST_PERCENTAGE = 0.75;
+
+    private double growthMultiplier;
+    private double AIMultiplier;
 
     protected final ArrayList<ArrayList<FarmItem>> items;
 
@@ -35,19 +40,28 @@ public class FarmData implements StateUpdatable<FarmState> {
     private final HashSet<Consumer<FarmItem>> customGrowthDelegates;
     private final Consumer<FarmItem> growthDelegate;
 
+    private final Consumer<Integer> entityExpander;
+
     /**
      * Creates a data container for an empty farm.
      * Data are tied to a player via playerID.
      *
      * @param playerID Player's ID
      */
-    public FarmData(Integer farmID, Integer playerID, ItemStore itemStore) {
+    public FarmData(Integer farmID, Integer playerID, Consumer<Integer> entityExpander, ItemStore itemStore) {
         this.farmID = farmID;
         this.playerID = playerID;
 
-        this.items = new ArrayList<ArrayList<FarmItem>>(FARM_ROWS);
-        for (int i = 0; i < FARM_ROWS; i++) {
-            ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(FARM_COLUMNS, null));
+        this.farmRows = 3;
+        this.farmColumns = 6;
+        this.expansionLevel = 0;
+
+        this.growthMultiplier = 1.0;
+        this.AIMultiplier = 1.0;
+
+        this.items = new ArrayList<ArrayList<FarmItem>>(this.farmRows);
+        for (int i = 0; i < this.farmRows; i++) {
+            ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(this.farmColumns, null));
             this.items.add(newRow);
         }
 
@@ -59,15 +73,36 @@ public class FarmData implements StateUpdatable<FarmState> {
                 customDelegate.accept(farmItem);
             }
         };
+
+        this.entityExpander = entityExpander;
+    }
+
+    public int getExpansionLevel() {
+        return this.expansionLevel;
+    }
+
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
+    public void setGrowthMultiplier(double growthMultiplier) {
+        this.growthMultiplier = growthMultiplier;
+    }
+
+    public void setAIMultiplier(double AIMultiplier) {
+        this.AIMultiplier = AIMultiplier;
     }
 
     /**
      * Gets the current state of the farm.
-     *
      * @return Current {@link FarmState}
      */
     public FarmState getCurrentState() {
-        return new FarmState(this.farmID, this.items);
+        return new FarmState(this.farmID, this.expansionLevel, this.items, this.growthMultiplier, this.AIMultiplier);
     }
 
     /**
@@ -76,7 +111,15 @@ public class FarmData implements StateUpdatable<FarmState> {
      * @param farmState New state of the farm
      */
     public void updateFromState(FarmState farmState) {
-        List<List<Pair<Integer, Double>>> newItems = farmState.items;
+        this.growthMultiplier = farmState.getGrowthMultiplier();
+        this.AIMultiplier = farmState.getAIMultiplier();
+
+        int expandBy = farmState.getExpansions() - this.expansionLevel;
+        if (expandBy > 0) {
+            this.expandFarm(expandBy);
+        }
+
+        List<List<Pair<Integer, Double>>> newItems = farmState.getItems();
         for (int r = 0; r < this.items.size(); r++) {
             for (int c = 0; c < this.items.get(r).size(); c++) {
 
@@ -110,7 +153,6 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     /**
      * Retrieves 2D {@code ArrayList} of all {@code FarmItem}s at the farm.
-     *
      * @return 2D {@code ArrayList} of all {@code FarmItem}s
      */
     public ArrayList<ArrayList<FarmItem>> getItems() {
@@ -185,7 +227,7 @@ public class FarmData implements StateUpdatable<FarmState> {
         }
         int rowMax = row + h;
         int columnMax = column + w;
-        if (rowMax > FARM_ROWS || columnMax > FARM_COLUMNS) {
+        if (rowMax > this.farmRows || columnMax > this.farmColumns) {
             return false;
         }
 
@@ -342,6 +384,39 @@ public class FarmData implements StateUpdatable<FarmState> {
         return null;
     }
 
+    public void expandFarm(int expandBy) {
+        this.farmRows += expandBy;
+        this.farmColumns += expandBy;
+        this.expansionLevel += expandBy;
+
+        switch (this.farmID) {
+            case 1:
+            case 3:
+                for (ArrayList<FarmItem> row : this.items) {
+                    row.add(0, null);
+                }
+                break;
+            default:
+                for (ArrayList<FarmItem> row : this.items) {
+                    row.add(null);
+                }
+                break;
+        }
+
+        ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(this.farmColumns, null));
+        switch (this.farmID) {
+            case 1:
+            case 2:
+                this.items.add(0, newRow);
+                break;
+            default:
+                this.items.add(newRow);
+                break;
+        }
+
+        this.entityExpander.accept(expandBy);
+    }
+
     /**
      * Gets the growth delegate.
      *
@@ -379,7 +454,7 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     protected boolean areCoordinatesInvalid(int row, int column) {
         boolean lessThanZero = row < 0 || column < 0;
-        boolean lessThanBoundary = row < FARM_ROWS && column < FARM_COLUMNS;
+        boolean lessThanBoundary = row < this.farmRows && column < this.farmColumns;
         return lessThanZero || !lessThanBoundary;
     }
 

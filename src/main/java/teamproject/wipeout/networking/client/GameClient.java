@@ -137,7 +137,7 @@ public class GameClient {
         this.out.writeObject(new GameUpdate(updatedState));
         this.out.reset();
 
-        this.handlePlayerStateUpdate(updatedState.carbonCopy());
+        this.handlePlayerStateUpdate(updatedState);
     }
 
     /**
@@ -227,8 +227,9 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | StreamCorruptedException ignore) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
+                    ignore.printStackTrace();
                 } catch (EOFException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;

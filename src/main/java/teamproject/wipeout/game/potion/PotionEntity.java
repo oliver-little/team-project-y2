@@ -3,9 +3,7 @@ package teamproject.wipeout.game.potion;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -37,6 +35,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.util.SupplierGenerator;
 
 public class PotionEntity extends GameEntity {
+
     public static final double POTION_EFFECT_RADIUS = 100.0;
     public static final double THROW_SPEED = 600.0;
     public static final double EXPLOSION_CONE_ANGLE = 20.0;
@@ -45,13 +44,15 @@ public class PotionEntity extends GameEntity {
     private Item potion;
     private Collection<GameEntity> possibleEffectEntities;
 
-    private double throwDistance;
     private Point2D startPosition;
+    private Point2D endPosition;
+    private double throwDistance;
 
     private ParticleComponent trail;
     private ParticleComponent explosion;
 
     private AudioComponent audio;
+    private Runnable potionRemover;
 
     public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, Point2D startPosition, Point2D endPosition) {
         super(scene);
@@ -59,6 +60,7 @@ public class PotionEntity extends GameEntity {
         this.potion = potion;
         this.possibleEffectEntities = possibleEffectEntities;
         this.startPosition = startPosition;
+        this.endPosition = endPosition;
         this.throwDistance = endPosition.subtract(startPosition).magnitude();
 
         this.addComponent(new Transform(startPosition, 0, 1));
@@ -109,6 +111,22 @@ public class PotionEntity extends GameEntity {
         }
 
         this.addComponent(new MovementComponent(movementVector.multiply(0.5), movementVector, 0.98));
+    }
+
+    public Integer getPotionID() {
+        return this.potion.id;
+    }
+
+    public Point2D getStartPosition() {
+        return this.startPosition;
+    }
+
+    public Point2D getEndPosition() {
+        return this.endPosition;
+    }
+
+    public void setPotionRemover(Runnable potionRemover) {
+        this.potionRemover = potionRemover;
     }
 
     public static ParticleParameters potionTrailFactory(Color particleColor) {
@@ -167,7 +185,7 @@ public class PotionEntity extends GameEntity {
                 trail.parameters.setEmissionRate(0);
 
                 explosion.onStop = () -> {
-                    Platform.runLater(() -> this.destroy());
+                    Platform.runLater(() -> this.destroyMyself());
                 };
 
                 explosion.parameters.addUpdateFunction((particle, percentage) -> {
@@ -178,10 +196,18 @@ public class PotionEntity extends GameEntity {
 
                 audio.play("glassSmashing2.wav");
                 explosion.play();
-            }
-            else {
-                this.destroy();
+
+            } else {
+                this.destroyMyself();
             }
         }
     };
+
+    private void destroyMyself() {
+        this.destroy();
+        if (this.potionRemover != null) {
+            this.potionRemover.run();
+        }
+    }
+
 }
