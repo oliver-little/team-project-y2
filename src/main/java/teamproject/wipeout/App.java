@@ -170,7 +170,7 @@ public class App implements Controller {
 
 
         try {
-            player.addComponent(new RenderComponent());
+            player.addComponent(new RenderComponent(new Point2D(0, -3)));
             player.addComponent(new PlayerAnimatorComponent(
                 spriteManager.getSpriteSet("player-red", "walk-up"), 
                 spriteManager.getSpriteSet("player-red", "walk-right"), 
