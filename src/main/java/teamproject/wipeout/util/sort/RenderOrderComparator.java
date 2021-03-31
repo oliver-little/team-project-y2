@@ -3,9 +3,10 @@ package teamproject.wipeout.util.sort;
 import java.util.Comparator;
 
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 
-public class TransformComparator implements Comparator<GameEntity> {
+public class RenderOrderComparator implements Comparator<GameEntity> {
     @Override
     public int compare(GameEntity a, GameEntity b) {
         Transform transformA = a.getComponent(Transform.class);
@@ -18,7 +19,15 @@ public class TransformComparator implements Comparator<GameEntity> {
                 return zComp;
             }
             
-            return Double.compare(transformA.getWorldPosition().getY(), transformB.getWorldPosition().getY());
+            RenderComponent rcA = a.getComponent(RenderComponent.class);
+            RenderComponent rcB = b.getComponent(RenderComponent.class);
+
+            if (rcA != null && rcB != null) {
+                return Double.compare(transformA.getWorldPosition().getY() + rcA.getHeight(), transformB.getWorldPosition().getY() + rcB.getHeight());
+            }
+            else {
+                return Double.compare(transformA.getWorldPosition().getY(), transformB.getWorldPosition().getY());
+            }
         }
 
         return 0;

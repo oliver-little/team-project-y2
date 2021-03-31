@@ -101,7 +101,7 @@ public class Networker {
                 return null;
             }
 
-            Player newPlayer = gameScene.createPlayer(newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), null);
+            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), null);
 
             newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
             newPlayer.addComponent(new CollisionResolutionComponent());

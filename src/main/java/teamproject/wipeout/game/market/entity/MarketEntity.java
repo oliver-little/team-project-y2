@@ -31,7 +31,7 @@ import teamproject.wipeout.game.player.Player;
 public class MarketEntity extends GameEntity {
 
     public static final double PLAYER_INTERACTION_DISTANCE = 250;
-    public static final double Y_OFFSET = -44;
+    public static final double Y_OFFSET = 0;
 
     protected MarketUI marketUI;
     protected Market market;

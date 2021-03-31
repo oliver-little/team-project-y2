@@ -4,7 +4,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.render.ItemsRowRenderer;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
@@ -55,7 +54,7 @@ public class SeedEntity extends GameEntity {
         seedRenderEntity.addComponent(new Transform(0, 0, 2));
 
         SpriteRenderable seedRenderable = new SpriteRenderable(seedImage);
-        double scaleFactor = ItemsRowRenderer.scaleFactorToFitWidth(plant.width, seedImage.getWidth(), seedImage.getHeight());
+        double scaleFactor = FarmEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth(), seedImage.getHeight());
         seedRenderable.spriteScale = new Point2D(scaleFactor, scaleFactor);
         RenderComponent seedRenderComponent = new RenderComponent(seedRenderable);
         seedRenderEntity.addComponent(seedRenderComponent);
