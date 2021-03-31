@@ -72,7 +72,7 @@ public class ItemsRowEntity extends GameEntity {
         child.addComponent(new Transform(FarmEntity.SQUARE_SIZE + FarmEntity.SQUARE_SIZE * index, 0, 1));
 
         SpriteRenderable sprite = new SpriteRenderable(null);
-        child.addComponent(new RenderComponent(sprite, new RectRenderable(Color.PINK, 1, 1)));
+        child.addComponent(new RenderComponent(sprite));
         FarmSpriteComponent spriteController = new FarmSpriteComponent(sprite, row, index);
         child.addComponent(spriteController);
 
