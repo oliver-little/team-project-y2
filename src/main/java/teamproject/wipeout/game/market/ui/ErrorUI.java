@@ -20,7 +20,8 @@ public class ErrorUI {
         TASKS_FULL,
         TASK_EXISTS,
         INVENTORY_FULL,
-        INVENTORY_EMPTY
+        INVENTORY_EMPTY,
+        TASK_COMPLETED
     }
 
     private Label errorMessageLabel;
@@ -36,11 +37,17 @@ public class ErrorUI {
             this.errorMessageLabel = new Label("Cannot purchase: Inventory Full!"); 
         } else if (errorType == ERROR_TYPE.INVENTORY_EMPTY) {
             this.errorMessageLabel = new Label("Cannot sell: Item Not Owned!"); 
+        } else if (errorType == ERROR_TYPE.TASK_COMPLETED) {
+            this.errorMessageLabel = new Label("Task Completed!"); 
         } else {
             throw new IllegalArgumentException("Invalid error type passed to ErrorUI.");
         }
 
-        errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
+        if (errorType == ERROR_TYPE.TASK_COMPLETED) {
+            errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(50, 168, 82, 1); -fx-font-weight: bold;");
+        } else {
+            errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
+        }
 
         HBox errorBackground = new HBox();
 

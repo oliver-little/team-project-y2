@@ -637,6 +637,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 currentAvailableTasks.remove(task.id);
                 this.money.set(this.money.getValue() + task.reward);
                 this.playSound("coinPrize.wav");
+                invUI.taskSuccess();
                 System.out.println("Task is completed");
             }
         }

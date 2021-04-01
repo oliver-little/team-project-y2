@@ -12,7 +12,6 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.FunctionalSignatureCollector;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.components.SabotageComponent;
-import teamproject.wipeout.game.player.Player;
 
 public class SabotageSystem implements EventSystem {
 
