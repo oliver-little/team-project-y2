@@ -1,0 +1,17 @@
+{
+    "fileType": "SpritesheetDescriptor",
+    "version": "1.0.0",
+    "name": "arrow",
+    "sprites": [
+      {
+        "name": "arrow",
+        "type": "sprite",
+        "parameters" : {
+          "x": 0,
+          "y": 0,
+          "width": 50,
+          "height": 50
+        }
+      }
+    ]
+  }

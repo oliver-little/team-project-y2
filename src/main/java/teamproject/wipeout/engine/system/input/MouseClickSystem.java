@@ -48,7 +48,7 @@ public class MouseClickSystem implements EventSystem {
         if (clicked != null) {
             Clickable entityClickable = clicked.getKey().getComponent(Clickable.class);
             if (entityClickable != null) {
-                entityClickable.onClick.performMouseClickAction(clicked.getValue().getX(), clicked.getValue().getY(), button, clicked.getKey());
+                entityClickable.onClick.performMouseClickAction(clicked.getValue().getX(), clicked.getValue().getY(), button);
             }
         }
     };

@@ -13,6 +13,7 @@ public class AudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
 	private double spotEffectsVolume;
+	private double previousVolume = 0.05f;
 	public boolean muted;
 	
 	/**
@@ -43,9 +44,11 @@ public class AudioSystem implements GameSystem {
 		List<GameEntity> entities = this.entityCollector.getEntities();
 		for (GameEntity entity : entities) { //iterates through all entities with AudioComponents
 			AudioComponent s = entity.getComponent(AudioComponent.class);
-			if (s.toPlay()) {
-				s.setVolume(spotEffectsVolume); //applies the spot effects volume to component before playing
-				s.playSound();
+			for(String key : s.sounds.keySet()){
+				if(s.sounds.get(key)){
+					s.setVolume(spotEffectsVolume);
+					s.playSound(key);
+				}
 			}
 		}
 	}
@@ -68,11 +71,32 @@ public class AudioSystem implements GameSystem {
 	
 	public void muteUnmute() {
 		if(muted) {
-			muted = false;
-			this.setSpotEffectsVolume(0.05f);
+			unmute();
 		}else {
-			muted = true;
-			this.setSpotEffectsVolume(0.0f);
+			mute();
 		}
 	}
+
+	public void mute(){
+		muted = true;
+		this.previousVolume = this.spotEffectsVolume;
+		this.setSpotEffectsVolume(0.0f);
+
+		List<GameEntity> entities = this.entityCollector.getEntities();
+		for (GameEntity entity: entities) {
+			entity.getComponent(AudioComponent.class).setVolume(0.0f);
+			//this stops sounds being 'queued' while the system is muted
+		}
+	}
+
+	public void unmute(){
+		muted = false;
+		this.setSpotEffectsVolume(this.previousVolume);
+		List<GameEntity> entities = this.entityCollector.getEntities();
+		for (GameEntity entity: entities) {
+			entity.getComponent(AudioComponent.class).setVolume(this.previousVolume);
+			//alerts components that sounds can be added again
+		}
+	}
+	
 }

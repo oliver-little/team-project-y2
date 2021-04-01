@@ -23,6 +23,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
@@ -49,7 +50,7 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer, ArrayList<Task> purchasableTasks) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer, WorldEntity world,  ArrayList<Task> purchasableTasks) {
         super(scene);
 
         this.uiContainer = uiContainer;
@@ -70,19 +71,20 @@ public class MarketEntity extends GameEntity {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
             Image marketSprite = spriteManager.getSpriteSet("market", "market")[0];
 
-            this.addComponent(new RenderComponent(new Point2D(0, Y_OFFSET), new SpriteRenderable(marketSprite), new RectRenderable(Color.BLACK, 1, 1)));
+            this.addComponent(new RenderComponent(new Point2D(0, Y_OFFSET), new SpriteRenderable(marketSprite)));
 
             RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
             this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
             this.hoverRect.alpha = 0;
             this.hoverRect.radius = 50;
 
-            child.addComponent(new RenderComponent(hoverRect));
-
             // Set up interaction areas
             clickableTopLeft = childTransform.getWorldPosition();
             clickableBottomRight = clickableTopLeft.add(marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
             clickableCentre = clickableTopLeft.add(clickableBottomRight).multiply(0.5);
+
+            child.addComponent(new RenderComponent(hoverRect));
+            
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -113,7 +115,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, purchasableTasks);
+        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 
@@ -129,7 +131,7 @@ public class MarketEntity extends GameEntity {
         this.marketUI.onUIClose = onClose;
     }
 
-    private EntityClickAction onClick = (x, y, button, entity) -> {
+    private EntityClickAction onClick = (x, y, button) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
             if (this.onUIOpen != null) {
                 this.onUIOpen.run();

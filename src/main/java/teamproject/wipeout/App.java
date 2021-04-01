@@ -11,7 +11,10 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
@@ -19,7 +22,12 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.property.*;
+import teamproject.wipeout.engine.component.render.particle.type.Particle;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -31,6 +39,7 @@ import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
 import teamproject.wipeout.engine.system.physics.CollisionSystem;
 import teamproject.wipeout.engine.system.physics.MovementSystem;
 import teamproject.wipeout.engine.system.render.CameraFollowSystem;
+import teamproject.wipeout.engine.system.render.ParticleSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.ai.SteeringSystem;
@@ -40,26 +49,31 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
+import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
-
+import teamproject.wipeout.util.SupplierGenerator;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import java.util.*;
 
+import javafx.application.Platform;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
@@ -125,28 +139,31 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
         GameScene gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
+        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(mhs);
+        systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
-        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
-        systemUpdater.addSystem(new ScriptSystem(gameScene));
         systemUpdater.addSystem(mas);
         systemUpdater.addSystem(new SteeringSystem(gameScene));
+        systemUpdater.addSystem(new ScriptSystem(gameScene));
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
-
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
-        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
-        eventSystems = List.of(mcs, mhs, pas);
+        SabotageSystem sas = new SabotageSystem(gameScene);
+        eventSystems = List.of(mcs, pas, sas);
 
         input.mouseHoverSystem = mhs;
 
@@ -157,7 +174,6 @@ public class App implements Controller {
         
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-        
 
     	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
@@ -201,8 +217,10 @@ public class App implements Controller {
         ArrayList<Task> purchasableTasks = allTasks;
 
         //World Entity
-        WorldEntity world = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        WorldEntity world = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+
         world.setClientSupplier(this.networker.clientSupplier);
+        player.setThrownPotion((potion) ->  world.addPotion(potion));
         this.networker.worldEntity = world;
         
         addInvUIInput(input, invUI, world);
@@ -221,17 +239,26 @@ public class App implements Controller {
         this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
+        VBox topRight = new VBox();
+        topRight.setAlignment(Pos.TOP_RIGHT);
+        topRight.setPickOnBounds(false);
+        topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
         ClockUI clockUI = clockSystem.clockUI;
-        StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
+        //StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
 
-        AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
-        player.addComponent(playerSound);
-
-        input.onKeyRelease(KeyCode.D, playerSound::play); //example - pressing the D key will trigger the sound
-        
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
-        input.onKeyRelease(KeyCode.P, ga::stopStart); //example - pressing the P key will switch between stop and start
+        ga.play();
+
+        SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
+        //StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+
+        StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+        topRight.getChildren().addAll(clockUI, settingsUI);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
+
+        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the G key will trigger the sound
 
         input.addKeyAction(KeyCode.LEFT,
                 () -> player.addAcceleration(-500f, 0f),
@@ -252,17 +279,17 @@ public class App implements Controller {
 
         input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
         input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
+        /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
-
+        */
         invUI.onMouseClick(world);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
-        
-        input.addKeyAction(KeyCode.X,
-                () -> {player.pickup();
-                	   },
-                () -> {});
+        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, world.pickables));
+
+        input.onKeyRelease(KeyCode.X, () -> {
+            world.pickables.picked(player.pickup());
+        });
 
         gl.start();
     }
@@ -385,6 +412,7 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
         spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
+        spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
     }
     
 

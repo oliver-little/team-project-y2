@@ -81,6 +81,10 @@ public class Networker {
 
     public InputKeyAction initiateClient(GameScene gameScene, SpriteManager spriteManager) {
         return () -> {
+            if (this.client != null) {
+                return;
+            }
+
             try {
                 this.serverDiscovery = new ServerDiscovery(this.onServerDiscovery(gameScene, spriteManager));
                 this.serverDiscovery.startLookingForServers();
@@ -93,7 +97,7 @@ public class Networker {
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
         return (newPlayerState) -> {
-            if (newPlayerState.getPlayerID().equals(this.worldEntity.getMyPlayer().playerID)) {
+            if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
                 return null;
             }
 
@@ -126,15 +130,14 @@ public class Networker {
         return (name, address) -> {
             this.serverDiscovery.stopLookingForServers();
 
-            Player myPlayer = this.worldEntity.getMyPlayer();
+            Player myPlayer = this.worldEntity.myPlayer;
             Market myMarket = this.worldEntity.market.getMarket();
 
             Consumer<Pair<GameClient, Integer>> farmHandler = (farmPair) -> {
                 GameClient currentClient = farmPair.getKey();
                 Integer newFarmID = farmPair.getValue();
 
-                currentClient.myAnimal = this.worldEntity.getMyAnimal();
-                currentClient.market = this.worldEntity.market.getMarket();
+                currentClient.worldEntity = this.worldEntity;
 
                 myMarket.setIsLocal(true);
                 this.worldEntity.marketUpdater.stop();

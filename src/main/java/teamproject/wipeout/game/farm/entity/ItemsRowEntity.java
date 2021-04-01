@@ -10,6 +10,7 @@ import teamproject.wipeout.game.farm.FarmItem;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Represents a row of items.
@@ -27,10 +28,10 @@ public class ItemsRowEntity extends GameEntity {
      * @param growthUpdater Calls .accept() when growth is updated
      * @param spriteManager {@link SpriteManager} for the {@link ItemsRowRenderer}
      */
-    public ItemsRowEntity(GameScene scene, List<FarmItem> row, Consumer<FarmItem> growthUpdater, SpriteManager spriteManager) {
+    public ItemsRowEntity(GameScene scene, List<FarmItem> row, Supplier<Double> growthMultiplier, Consumer<FarmItem> growthUpdater, SpriteManager spriteManager) {
         super(scene);
 
-        this.growthComponent = new RowGrowthComponent(row, growthUpdater);
+        this.growthComponent = new RowGrowthComponent(row, growthMultiplier, growthUpdater);
         this.rowRenderer = new ItemsRowRenderer(row, spriteManager);
 
         this.addComponent(this.growthComponent);

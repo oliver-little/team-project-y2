@@ -1,9 +1,8 @@
 package teamproject.wipeout.networking.client;
 
 import javafx.util.Pair;
-import teamproject.wipeout.game.entity.AnimalEntity;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -40,8 +39,7 @@ public class GameClient {
     public NewPlayerAction newPlayerAction;
 
     public final HashMap<Integer, Player> players;
-    public AnimalEntity myAnimal;
-    public Market market;
+    public WorldEntity worldEntity;
 
     public Consumer<Long> clockCalibration;
     public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
@@ -139,7 +137,7 @@ public class GameClient {
         this.out.writeObject(new GameUpdate(updatedState));
         this.out.reset();
 
-        this.handlePlayerStateUpdate(updatedState.carbonCopy());
+        this.handlePlayerStateUpdate(updatedState);
     }
 
     /**
@@ -174,7 +172,7 @@ public class GameClient {
         new ServerThread(() -> {
             while (this.isActive.get()) {
                 try {
-                    GameUpdate receivedUpdate = null;
+                    GameUpdate receivedUpdate;
                     Object object = this.in.readObject();
                     if (object instanceof GameUpdate) {
                         receivedUpdate = (GameUpdate) object;
@@ -188,7 +186,7 @@ public class GameClient {
                             break;
                         case ANIMAL_STATE:
                             if (!receivedUpdate.originClientID.equals(this.id)) {
-                                this.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
+                                this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
                         case FARM_STATE:
@@ -201,7 +199,11 @@ public class GameClient {
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
-                            this.market.updateFromState(mState);
+                            this.worldEntity.market.getMarket().updateFromState(mState);
+                            break;
+                        case WORLD_STATE:
+                            WorldState wState = (WorldState) receivedUpdate.content;
+                            this.worldEntity.updateFromState(wState);
                             break;
                         case CLOCK_CALIB:
                             if (!receivedUpdate.originClientID.equals(this.id)) {
@@ -210,7 +212,7 @@ public class GameClient {
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.market.responseArrived(response);
+                            this.worldEntity.market.getMarket().responseArrived(response);
                             break;
                         case DISCONNECT:
                             Integer disconnectedClientID = receivedUpdate.originClientID;
@@ -225,8 +227,9 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | StreamCorruptedException ignore) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
+                    ignore.printStackTrace();
                 } catch (EOFException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;
