@@ -30,7 +30,8 @@ public class InputHandler {
     // Used to prevent repeated performKeyAction calls.
     private final HashSet<KeyCode> performingKeyActions;
 
-    // Set of key release bindings, used to simulate keys releasing when input is disabled.
+    // Set of key press and release bindings, used to simulate keys when input is enabled/disabled.
+    private HashMap<KeyCode, Set<InputKeyAction>> keyPressBindings;
     private HashMap<KeyCode, Set<InputKeyAction>> keyReleaseBindings;
 
     // Control variable used to track mouse dragging.
@@ -50,6 +51,7 @@ public class InputHandler {
         this.disableInput = false;
 
         this.performingKeyActions = new HashSet<KeyCode>();
+        this.keyPressBindings = new HashMap<>();
         this.keyReleaseBindings = new HashMap<>();
         this.isDragging = null;
 
@@ -83,6 +85,14 @@ public class InputHandler {
             this.performingKeyActions.clear();
             this.isDragging = null;
         }
+        else {
+            // Simulate all keys being pressed
+            for (KeyCode key : this.performingKeyActions) {
+                for (InputKeyAction action : this.keyPressBindings.get(key)) {
+                    action.performKeyAction();
+                }
+            }
+        }
     }
 
     /**
@@ -94,13 +104,14 @@ public class InputHandler {
      */
     public void onKeyPress(KeyCode key,
                            InputKeyAction onPress) {
+
+        if (!this.keyPressBindings.containsKey(key)) {
+            this.keyPressBindings.put(key, new HashSet<>());
+        }
+        this.keyPressBindings.get(key).add(onPress);
+
         // Register inputScene's listener
         this.inputScene.addEventFilter(KeyEvent.KEY_PRESSED, (pressedKey) -> {
-            // Do nothing when input is disabled.
-            if (this.disableInput) {
-                return;
-            }
-
             KeyCode pressedKeyCode = pressedKey.getCode();
 
             // Do nothing if the key action was already performed.
@@ -111,6 +122,12 @@ public class InputHandler {
             // Do something when the pressed key is equal to the key which is being listened to.
             if (pressedKeyCode == key) {
                 this.performingKeyActions.add(key);
+
+                // Do nothing when input is disabled.
+                if (this.disableInput) {
+                    return;
+                }
+
                 onPress.performKeyAction();
             }
         });
@@ -132,15 +149,15 @@ public class InputHandler {
 
         // Register inputScene's listener
         this.inputScene.addEventFilter(KeyEvent.KEY_RELEASED, (releasedKey) -> {
-            // Do nothing when input is disabled.
-            if (this.disableInput) {
-                return;
-            }
-
             // Do something when the released key is equal to the key which is being listened to.
             if (releasedKey.getCode() == key) {
-                onRelease.performKeyAction();
                 this.performingKeyActions.remove(key);
+                // Do nothing when input is disabled.
+                if (this.disableInput) {
+                    return;
+                }
+
+                onRelease.performKeyAction();
             }
         });
     }
