@@ -9,12 +9,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.player.Player;
 
 /**
@@ -28,7 +26,7 @@ public class FarmExpansionUI extends VBox {
 
     public double expansionPrice = 100.00; //Initial expansion price.
 
-    public FarmExpansionUI(Market market, Player player, SpriteManager spriteManager, WorldEntity world, StackPane errorPane) {
+    public FarmExpansionUI(Market market, Player player, SpriteManager spriteManager, WorldEntity world) {
         super();
 
         this.getStyleClass().add("vbox");
@@ -69,9 +67,7 @@ public class FarmExpansionUI extends VBox {
 
         // Set buy click event
         expandButton.setOnAction((e) -> {
-            if (player.getMoney() - expansionPrice < 0) {
-                new ErrorUI(errorPane, ERROR_TYPE.MONEY);
-            } else if (world.getMyFarm() != null) {
+            if ((player.hasEnoughMoney(expansionPrice)) && world.getMyFarm() != null) {
                 player.setMoney(player.getMoney() - expansionPrice);
                 world.getMyFarm().expandFarmBy(1);
 

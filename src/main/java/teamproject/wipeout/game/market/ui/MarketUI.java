@@ -38,7 +38,7 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks, StackPane uiContainer) {
+    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks) {
         super();
 
         try {
@@ -62,13 +62,13 @@ public class MarketUI extends AnchorPane {
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
-                seedsList.add(new MarketItemUI(item, market, player, spriteManager, uiContainer));
+                seedsList.add(new MarketItemUI(item, market, player, spriteManager));
             }
             else if (item.hasComponent(SabotageComponent.class)) {
-                potionsList.add(new MarketItemUI(item, market, player, spriteManager, uiContainer));
+                potionsList.add(new MarketItemUI(item, market, player, spriteManager));
             }
             else {
-                plantsList.add(new MarketItemUI(item, market, player, spriteManager, uiContainer));
+                plantsList.add(new MarketItemUI(item, market, player, spriteManager));
             }
         }
 
@@ -77,10 +77,10 @@ public class MarketUI extends AnchorPane {
                 continue;
             }
             Item relatedItem = purchasableTask.relatedItem;
-            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, player, spriteManager, uiContainer));
+            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, player, spriteManager));
         }
 
-        farmsList.add(new FarmExpansionUI(market, player, spriteManager, world, uiContainer));
+        farmsList.add(new FarmExpansionUI(market, player, spriteManager, world));
 
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));

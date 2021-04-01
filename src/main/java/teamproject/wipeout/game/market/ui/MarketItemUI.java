@@ -10,7 +10,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
@@ -27,7 +26,7 @@ public class MarketItemUI extends VBox {
 
     public static final int IMAGE_SIZE = 48;
 
-    public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager, StackPane errorPane) {
+    public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
         final double doubleCompare = 0.0000001;

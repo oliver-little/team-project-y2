@@ -9,13 +9,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.ImageUtil;
@@ -26,7 +24,7 @@ import teamproject.wipeout.util.ImageUtil;
 public class MarketTaskUI extends VBox {
     public static final int IMAGE_SIZE = 48;
 
-    public MarketTaskUI(Task task, Item item, Market market, Player player, SpriteManager spriteManager, StackPane errorPane) {
+    public MarketTaskUI(Task task, Item item, Market market, Player player, SpriteManager spriteManager) {
         super();
 
         this.getStyleClass().add("vbox");
@@ -74,15 +72,7 @@ public class MarketTaskUI extends VBox {
         buy.textProperty().bind(Bindings.concat("Buy: " + String.format("%.2f", (task.priceToBuy))));
 
         buy.setOnAction((e) -> {
-            if (player.isTaskListFull()) {
-                new ErrorUI(errorPane, ERROR_TYPE.TASKS_FULL);
-            } else if (player.getMoney() - task.priceToBuy < 0) {
-                new ErrorUI(errorPane, ERROR_TYPE.MONEY);
-            } else if (player.doesTaskExist(task)) {
-                new ErrorUI(errorPane, ERROR_TYPE.TASK_EXISTS);
-            } else {
-                player.addNewTask(task);
-                player.setMoney(player.getMoney() - task.priceToBuy);
+            if (player.buyTask(task)) {
                 buy.textProperty().bind(Bindings.concat("TASK ALREADY PURCHASHED"));
                 buy.setDisable(true);
             }

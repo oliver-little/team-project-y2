@@ -28,15 +28,15 @@ public class ErrorUI {
 
     public ErrorUI(StackPane errorPane, ERROR_TYPE errorType) {
         if (errorType == ERROR_TYPE.MONEY) {
-            this.errorMessageLabel = new Label("Cannot purchase: Insufficient Funds!");
+            this.errorMessageLabel = new Label("Cannot Purchase: Insufficient Funds!");
         } else if (errorType == ERROR_TYPE.TASKS_FULL) {
-            this.errorMessageLabel = new Label("Cannot purchase: Task List Full!"); 
+            this.errorMessageLabel = new Label("Cannot Purchase: Task List Full!"); 
         } else if (errorType == ERROR_TYPE.TASK_EXISTS) {
-            this.errorMessageLabel = new Label("Cannot purchase: Task Already Owned!"); 
+            this.errorMessageLabel = new Label("Cannot Purchase: Task Already Owned!"); 
         } else if (errorType == ERROR_TYPE.INVENTORY_FULL) {
-            this.errorMessageLabel = new Label("Cannot purchase: Inventory Full!"); 
+            this.errorMessageLabel = new Label("Cannot Obtain Item(s): Inventory Full!"); 
         } else if (errorType == ERROR_TYPE.INVENTORY_EMPTY) {
-            this.errorMessageLabel = new Label("Cannot sell: Item Not Owned!"); 
+            this.errorMessageLabel = new Label("Cannot Sell: Item(s) Not Owned!"); 
         } else if (errorType == ERROR_TYPE.TASK_COMPLETED) {
             this.errorMessageLabel = new Label("Task Completed!"); 
         } else {
