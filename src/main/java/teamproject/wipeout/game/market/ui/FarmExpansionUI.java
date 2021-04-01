@@ -67,7 +67,7 @@ public class FarmExpansionUI extends VBox {
 
         // Set buy click event
         expandButton.setOnAction((e) -> {
-            if ((!(player.getMoney() - expansionPrice < 0)) && world.getMyFarm() != null) {
+            if ((player.hasEnoughMoney(expansionPrice)) && world.getMyFarm() != null) {
                 player.setMoney(player.getMoney() - expansionPrice);
                 world.getMyFarm().expandFarmBy(1);
 

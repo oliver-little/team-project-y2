@@ -18,6 +18,9 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.ImageUtil;
 
+/**
+ * Creates the UI for purchasable tasks in the market.
+ */
 public class MarketTaskUI extends VBox {
     public static final int IMAGE_SIZE = 48;
 
@@ -69,8 +72,9 @@ public class MarketTaskUI extends VBox {
         buy.textProperty().bind(Bindings.concat("Buy: " + String.format("%.2f", (task.priceToBuy))));
 
         buy.setOnAction((e) -> {
-            if (!(player.getMoney() - task.priceToBuy < 0)) {
-                player.addNewTask(task);
+            if (player.buyTask(task)) {
+                buy.textProperty().bind(Bindings.concat("TASK ALREADY PURCHASHED"));
+                buy.setDisable(true);
             }
         });
 

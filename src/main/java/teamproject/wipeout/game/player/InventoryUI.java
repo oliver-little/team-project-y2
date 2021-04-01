@@ -37,6 +37,8 @@ import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent.SabotageType;
+import teamproject.wipeout.game.market.ui.ErrorUI;
+import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionThrowEntity;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -226,6 +228,14 @@ public class InventoryUI extends StackPane {
 				player.playSound("thud.wav");
 			}
 		};
+	}
+
+	/**
+	 * Displays an onscreen message.
+	 * @param errorType The type of error/message to display.
+	 */
+	public void displayMessage(ERROR_TYPE errorType) {
+		new ErrorUI(this, errorType);
 	}
 	
 	/**

@@ -3,6 +3,7 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -18,6 +19,8 @@ import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.market.ui.ErrorUI;
+import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
@@ -34,6 +37,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final int MAX_SIZE = 10; //no. of inventory slots
     public final int INITIAL_MONEY = 2500; //initial amount of money
+    public final int MAX_TASK_SIZE = 10; //no. of task slots
 
     public final Integer playerID;
     public String playerName;
@@ -187,7 +191,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @return true if successful, false if unsuccessful
      */
     public boolean buyItem(Market market, int id, int quantity) {
-        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
+        if (!this.hasEnoughMoney(market.calculateTotalCost(id, quantity, true))) {
             return false;
         }
         if (!this.acquireItem(id, quantity)) {
@@ -198,12 +202,23 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return true;
     }
 
-    // if you want to purchase some task from the market
+    /**
+     * If you want to buy a task from the market.
+     * @param task The task you want to buy.
+     * @return TRUE if successful, otherwise FALSE.
+     */
     public boolean buyTask(Task task) {
-        if(task.priceToBuy > this.money.getValue()) {
+        if(currentAvailableTasks.containsKey(task.id)) {
+            invUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
+            return false;
+        } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
+            invUI.displayMessage(ERROR_TYPE.TASKS_FULL);
+            return false;
+        } else if (!hasEnoughMoney(task.priceToBuy)) {
+            invUI.displayMessage(ERROR_TYPE.MONEY);
             return false;
         }
-        tasks.add(task);
+        this.addNewTask(task);
         this.playSound("coins.wav");
         this.setMoney(this.money.getValue() - task.priceToBuy);
         return true;
@@ -245,6 +260,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (!addToInventory(itemID, quantity)) {
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
             System.out.println("No space in inventory for item(s)");
             return false;
         }
@@ -405,8 +421,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	int noOfThisItem = countItems(itemID);
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	if(quantity > noOfThisItem) {
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
     		System.out.println("There isn't " + quantity + " of itemID " + itemID + " in the inventory");
-    		
     		return -1;
     	}
     	int endQuantity = noOfThisItem - quantity;
@@ -590,6 +606,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 currentAvailableTasks.remove(task.id);
                 this.money.set(this.money.getValue() + task.reward);
                 this.playSound("coinPrize.wav");
+                invUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
                 System.out.println("Task is completed");
             }
         }
@@ -614,14 +631,34 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
     }
 
+    /**
+     * Adds a task to the player's list of tasks.
+     * @param task The task to add.
+     */
     public void addNewTask(Task task) {
         if(currentAvailableTasks.containsKey(task.id)) {
+            return;
+        } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
             return;
         }
         this.currentAvailableTasks.putIfAbsent(task.id, 1);
         this.tasks.add(task);
         this.checkTasks();
     }
+
+    /**
+     * Checks if a player has enough money to purchase something and displays an error if not.
+     * @param price The item/task they wish to buy.
+     * @return FALSE (and displays error message) if they do not have enough money, otherwise TRUE.
+     */
+    public boolean hasEnoughMoney(double price) {
+        if (getMoney() < price) {
+            invUI.displayMessage(ERROR_TYPE.MONEY);
+            return false;
+        }
+        return true;
+    }
+
     public void playSound(String fileName){
         audio.play(fileName);
     }

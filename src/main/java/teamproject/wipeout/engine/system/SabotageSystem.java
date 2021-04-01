@@ -12,7 +12,6 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.FunctionalSignatureCollector;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.components.SabotageComponent;
-import teamproject.wipeout.game.player.Player;
 
 public class SabotageSystem implements EventSystem {
 
@@ -57,7 +56,7 @@ public class SabotageSystem implements EventSystem {
                 }
             };
 
-            farm.setGrowthMultiplier(sabotageComponent.multiplier);
+            farm.setGrowthMultiplier(farm.getGrowthMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(growthTask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
@@ -76,7 +75,7 @@ public class SabotageSystem implements EventSystem {
                 }
             };
 
-            farm.setAIMultiplier(sabotageComponent.multiplier);
+            farm.setAIMultiplier(farm.getAIMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(AITask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
