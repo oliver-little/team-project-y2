@@ -230,8 +230,12 @@ public class InventoryUI extends StackPane {
 		};
 	}
 
-	public void taskSuccess() {
-		new ErrorUI(this, ERROR_TYPE.TASK_COMPLETED);
+	/**
+	 * Displays an onscreen message.
+	 * @param errorType The type of error/message to display.
+	 */
+	public void displayMessage(ERROR_TYPE errorType) {
+		new ErrorUI(this, errorType);
 	}
 	
 	/**

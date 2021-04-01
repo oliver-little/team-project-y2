@@ -96,7 +96,7 @@ public class MarketItemUI extends VBox {
 
         // Set buy click event
         buy.setOnAction((e) -> {
-            player.buyItem(market, item.id, quantity.getValue(), errorPane);
+            player.buyItem(market, item.id, quantity.getValue());
         });
 
 
@@ -116,7 +116,7 @@ public class MarketItemUI extends VBox {
 
             // Set sell click event
             sell.setOnAction((e) -> {
-                player.sellItem(market, item.id, quantity.getValue(), errorPane);
+                player.sellItem(market, item.id, quantity.getValue());
             });
         }
 

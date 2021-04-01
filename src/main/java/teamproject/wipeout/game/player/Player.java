@@ -192,31 +192,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean buyItem(Market market, int id, int quantity) {
         if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
+            invUI.displayMessage(ERROR_TYPE.MONEY);
             return false;
         }
         if (!this.acquireItem(id, quantity)) {
-        	return false;
-        };
-        this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
-        this.playSound("coins.wav");
-        return true;
-    }
-
-    /**
-     * When called with a market item, purchases an item for a player and returns true, otherwise if player has not enough money, returns false. Takes additional error pane parameter to display error message on screen.
-     * @param market - from which item is bought
-     * @param id - of item to buy
-     * @param quantity - of items to buy
-     * @param errorPane - Stackpane to present error to in the result of failure.
-     * @return true if successful, false if unsuccessful
-     */
-    public boolean buyItem(Market market, int id, int quantity, StackPane errorPane) {
-        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
-            new ErrorUI(errorPane, ERROR_TYPE.MONEY);
-            return false;
-        }
-        if (!this.acquireItem(id, quantity)) {
-            new ErrorUI(errorPane, ERROR_TYPE.INVENTORY_FULL);
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
         	return false;
         };
         this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
@@ -244,27 +224,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean sellItem(Market market, int id, int quantity) {
         if (removeItem(id, quantity) < 0) {
-            return false;
-        }
-        this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
-        this.playSound("coins.wav");
-        this.soldItems.putIfAbsent(id, 0);
-        this.soldItems.put(id, this.soldItems.get(id) + quantity);
-        checkTasks();
-        return true;
-    }
-
-    /**
-     * if the player has the item(s), removes them from the inventory, adds money and returns true, otherwise returns false. Takes additional error pane parameter to display error message on screen.
-     * @param market - to which item is sold
-     * @param id - of item to sell
-     * @param quantity - of item to sell
-     * @param errorPane - Stackpane to present error to in the result of failure.
-     * @return true if successful, false if unsuccessful
-     */
-    public boolean sellItem(Market market, int id, int quantity, StackPane errorPane) {
-        if (removeItem(id, quantity) < 0) {
-            new ErrorUI(errorPane, ERROR_TYPE.INVENTORY_EMPTY);
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
             return false;
         }
         this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
@@ -637,7 +597,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 currentAvailableTasks.remove(task.id);
                 this.money.set(this.money.getValue() + task.reward);
                 this.playSound("coinPrize.wav");
-                invUI.taskSuccess();
+                invUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
                 System.out.println("Task is completed");
             }
         }
@@ -694,7 +654,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @return TRUE if full, otherwise FALSE.
      */
     public boolean isTaskListFull() {
-        if (this.tasks.size() >= MAX_TASK_SIZE) {
+        if (this.currentAvailableTasks.size() >= MAX_TASK_SIZE) {
             return true;
         }
 
