@@ -3,7 +3,6 @@ package teamproject.wipeout.game.farm.entity;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.farm.FarmSpriteComponent;
 import teamproject.wipeout.engine.component.farm.RowGrowthComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 /**
@@ -57,7 +55,12 @@ public class ItemsRowEntity extends GameEntity {
             rowRenderers.remove(this.rowRenderers.size() - 1).getKey().destroy();
         }
 
-        this.rowRenderers.forEach((pair) -> pair.getValue().setFarmRow(row));
+        // Update farm row for each renderer, also update last growth stage to force update the sprite being shown
+        this.rowRenderers.forEach((pair) -> {
+            FarmSpriteComponent fs = pair.getValue();
+            fs.setFarmRow(row); 
+            fs.setLastGrowthStage(-1);
+            fs.spriteRenderer.sprite = null;});
 
         // Add elements if size has increased
         while(this.rowRenderers.size() < row.size()) {
