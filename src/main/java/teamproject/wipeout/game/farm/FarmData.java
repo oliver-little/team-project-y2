@@ -1,6 +1,5 @@
 package teamproject.wipeout.game.farm;
 
-import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -500,8 +499,8 @@ public class FarmData implements StateUpdatable<FarmState> {
     private int[] getFarmPosition(FarmItem item) {
         if (item != null && item.get() == null) {
             String[] coordinates = Double.toString(item.growth).split("[.]");
-            int actualRow = Integer.parseInt(coordinates[0]);
-            int actualColumn = Integer.parseInt(coordinates[1]);
+            int actualRow = Integer.parseInt(coordinates[0]) + this.expansionLevel;
+            int actualColumn = Integer.parseInt(coordinates[1]) + this.expansionLevel;
             return new int[]{actualRow, actualColumn};
         }
         return null;
