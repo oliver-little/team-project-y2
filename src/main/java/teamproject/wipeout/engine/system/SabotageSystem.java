@@ -57,7 +57,7 @@ public class SabotageSystem implements EventSystem {
                 }
             };
 
-            farm.setGrowthMultiplier(sabotageComponent.multiplier);
+            farm.setGrowthMultiplier(farm.getGrowthMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(growthTask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);
@@ -76,7 +76,7 @@ public class SabotageSystem implements EventSystem {
                 }
             };
 
-            farm.setAIMultiplier(sabotageComponent.multiplier);
+            farm.setAIMultiplier(farm.getAIMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(AITask, (long) sabotageComponent.duration * 1000);
             entity.removeComponent(SabotageComponent.class);

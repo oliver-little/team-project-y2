@@ -127,7 +127,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world, purchasableTasks);
+        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world, purchasableTasks, uiContainer);
         this.marketUI.setParent(uiContainer);
     }
 

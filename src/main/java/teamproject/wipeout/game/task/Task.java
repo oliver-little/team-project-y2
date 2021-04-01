@@ -30,7 +30,7 @@ public class Task {
         this.reward = reward;
         this.condition = condition;
         this.completed = false;
-        this.priceToBuy = (double) reward * 1.5;
+        this.priceToBuy = (double) reward / 2;
         this.relatedItem = relatedItem;
     }
 }

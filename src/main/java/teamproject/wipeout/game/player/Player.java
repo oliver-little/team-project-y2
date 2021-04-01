@@ -3,6 +3,7 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.StackPane;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -18,6 +19,8 @@ import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.market.ui.ErrorUI;
+import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
@@ -34,6 +37,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final int MAX_SIZE = 10; //no. of inventory slots
     public final int INITIAL_MONEY = 2500; //initial amount of money
+    public final int MAX_TASK_SIZE = 10; //no. of task slots
 
     public final Integer playerID;
     public String playerName;
@@ -198,6 +202,28 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return true;
     }
 
+    /**
+     * When called with a market item, purchases an item for a player and returns true, otherwise if player has not enough money, returns false. Takes additional error pane parameter to display error message on screen.
+     * @param market - from which item is bought
+     * @param id - of item to buy
+     * @param quantity - of items to buy
+     * @param errorPane - Stackpane to present error to in the result of failure.
+     * @return true if successful, false if unsuccessful
+     */
+    public boolean buyItem(Market market, int id, int quantity, StackPane errorPane) {
+        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
+            new ErrorUI(errorPane, ERROR_TYPE.MONEY);
+            return false;
+        }
+        if (!this.acquireItem(id, quantity)) {
+            new ErrorUI(errorPane, ERROR_TYPE.INVENTORY_FULL);
+        	return false;
+        };
+        this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
+        this.playSound("coins.wav");
+        return true;
+    }
+
     // if you want to purchase some task from the market
     public boolean buyTask(Task task) {
         if(task.priceToBuy > this.money.getValue()) {
@@ -218,6 +244,27 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean sellItem(Market market, int id, int quantity) {
         if (removeItem(id, quantity) < 0) {
+            return false;
+        }
+        this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
+        this.playSound("coins.wav");
+        this.soldItems.putIfAbsent(id, 0);
+        this.soldItems.put(id, this.soldItems.get(id) + quantity);
+        checkTasks();
+        return true;
+    }
+
+    /**
+     * if the player has the item(s), removes them from the inventory, adds money and returns true, otherwise returns false. Takes additional error pane parameter to display error message on screen.
+     * @param market - to which item is sold
+     * @param id - of item to sell
+     * @param quantity - of item to sell
+     * @param errorPane - Stackpane to present error to in the result of failure.
+     * @return true if successful, false if unsuccessful
+     */
+    public boolean sellItem(Market market, int id, int quantity, StackPane errorPane) {
+        if (removeItem(id, quantity) < 0) {
+            new ErrorUI(errorPane, ERROR_TYPE.INVENTORY_EMPTY);
             return false;
         }
         this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
@@ -614,14 +661,45 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
     }
 
-    public void addNewTask(Task task) {
+    /**
+     * Adds a task to the player's list of tasks.
+     * @param task The task to add.
+     * @return TRUE if successfully added, otherwise FALSE.
+     */
+    public boolean addNewTask(Task task) {
         if(currentAvailableTasks.containsKey(task.id)) {
-            return;
+            return false;
         }
         this.currentAvailableTasks.putIfAbsent(task.id, 1);
         this.tasks.add(task);
         this.checkTasks();
+        return true;
     }
+
+    /**
+     * Checks if a task already exists in a player's task list.
+     * @param task The task.
+     * @return TRUE if already exists, otherwise FALSE.
+     */
+    public boolean doesTaskExist(Task task) {
+        if(currentAvailableTasks.containsKey(task.id)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks to see if the player's task list is full
+     * @return TRUE if full, otherwise FALSE.
+     */
+    public boolean isTaskListFull() {
+        if (this.tasks.size() >= MAX_TASK_SIZE) {
+            return true;
+        }
+
+        return false;
+    }
+
     public void playSound(String fileName){
         audio.play(fileName);
     }
