@@ -75,8 +75,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
-        this.addComponent(new RenderComponent(new Point2D(-16, -16)));
-        this.addComponent(new HitboxComponent(new Rectangle(-16, -16, 32, 32)));
+        this.addComponent(new RenderComponent());
+        this.addComponent(new HitboxComponent(new Rectangle(0, 0, 32, 32)));
 
         this.animalState = new AnimalState(position, null);
 

@@ -31,7 +31,7 @@ public class RenderSystem implements GameSystem {
     protected RendererEntityCollector renderableEntityCollector;
     protected CameraEntityCollector cameraCollector;
 
-    private TransformComparator yPosComparator;
+    private RenderOrderComparator yPosComparator;
     private Point2D lastCameraPos;
     private double lastZoom;
 
@@ -46,7 +46,7 @@ public class RenderSystem implements GameSystem {
     public RenderSystem(GameScene scene, Canvas staticCanvas, Canvas dynamicCanvas) {
         this.renderableEntityCollector = new RendererEntityCollector(scene);
         this.cameraCollector = new CameraEntityCollector(scene);
-        this.yPosComparator = new TransformComparator();
+        this.yPosComparator = new RenderOrderComparator();
 
         this.staticCanvas = staticCanvas;
         this.staticGC = staticCanvas.getGraphicsContext2D();

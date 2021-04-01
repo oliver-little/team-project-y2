@@ -38,8 +38,7 @@ public class PlayerTest {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
 		
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-		//player = scene.createPlayer(new Random().nextInt(1024), "testPlayer", new Point2D(0,0), invUI);
-		player = scene.createPlayer(new Random().nextInt(1024), "testPlayer", new Point2D(0, 0), invUI);
+		player = new Player(scene, new Random().nextInt(1024), "testPlayer", new Point2D(0, 0), invUI);
 		MAX_SIZE = player.MAX_SIZE;
 	}
 	

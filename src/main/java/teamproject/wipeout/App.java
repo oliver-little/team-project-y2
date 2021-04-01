@@ -14,20 +14,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.particle.ParticleComponent;
-import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
-import teamproject.wipeout.engine.component.render.particle.property.*;
-import teamproject.wipeout.engine.component.render.particle.type.Particle;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -43,18 +36,17 @@ import teamproject.wipeout.engine.system.render.ParticleSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.ai.SteeringSystem;
+import teamproject.wipeout.engine.system.farm.FarmSpriteSystem;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
-import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
-import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
@@ -64,16 +56,11 @@ import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
-import teamproject.wipeout.util.SupplierGenerator;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import java.util.*;
-
-import javafx.application.Platform;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
@@ -151,6 +138,7 @@ public class App implements Controller {
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
         systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(new FarmSpriteSystem(gameScene, spriteManager));
         systemUpdater.addSystem(mhs);
         systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
@@ -175,7 +163,7 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
-    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
+    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -184,7 +172,7 @@ public class App implements Controller {
 
 
         try {
-            player.addComponent(new RenderComponent(new Point2D(0, -32)));
+            player.addComponent(new RenderComponent(new Point2D(0, -3)));
             player.addComponent(new PlayerAnimatorComponent(
                 spriteManager.getSpriteSet("player-red", "walk-up"), 
                 spriteManager.getSpriteSet("player-red", "walk-right"), 

@@ -30,12 +30,6 @@ public class GameScene {
         return newEntity;
     }
 
-    public Player createPlayer(Integer id, String name, Point2D position, InventoryUI invUI) {
-        Player playerEntity = new Player(this, id, name, position, invUI);
-        this.entities.add(playerEntity);
-        return playerEntity;
-    }
-
     public void addEntity(GameEntity newEntity) {
         if (!this.entities.contains(newEntity)) {
             this.entities.add(newEntity);

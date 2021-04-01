@@ -112,7 +112,7 @@ public class FarmEntity extends GameEntity {
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier, this.data.getGrowthDelegate());
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
@@ -122,6 +122,10 @@ public class FarmEntity extends GameEntity {
         }
 
         this.pickables = pickables;
+    }
+
+    public static double scaleFactorToFitWidth(int squareScale, double w, double h) {
+        return squareScale * FarmEntity.SQUARE_SIZE / w;
     }
 
     public Point2D getWorldPosition() {
@@ -566,7 +570,7 @@ public class FarmEntity extends GameEntity {
                     newRowIndex = this.data.farmRows - 1;
                     break;
             }
-            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate(), this.spriteManager);
+            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate());
             newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
 
             newRowEntity.setParent(this);
