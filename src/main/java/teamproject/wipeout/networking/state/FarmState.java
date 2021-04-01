@@ -42,7 +42,7 @@ public class FarmState implements Serializable {
             return row.stream().map((item) -> {
                 if (item != null) {
                     Item currentItem = item.get();
-                    return currentItem == null ? null : new Pair<Integer, Double>(currentItem.id, item.growth);
+                    return currentItem == null ? null : new Pair<Integer, Double>(currentItem.id, item.growth.getValue());
                 }
                 return null;
             }).collect(Collectors.toList());

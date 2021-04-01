@@ -36,9 +36,6 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     private final ItemStore itemStore;
 
-    private final HashSet<Consumer<FarmItem>> customGrowthDelegates;
-    private final Consumer<FarmItem> growthDelegate;
-
     private final Consumer<Integer> entityExpander;
 
     /**
@@ -65,13 +62,6 @@ public class FarmData implements StateUpdatable<FarmState> {
         }
 
         this.itemStore = itemStore;
-
-        this.customGrowthDelegates = new HashSet<Consumer<FarmItem>>();
-        this.growthDelegate = (farmItem) -> {
-            for (Consumer<FarmItem> customDelegate : this.customGrowthDelegates) {
-                customDelegate.accept(farmItem);
-            }
-        };
 
         this.entityExpander = entityExpander;
     }
@@ -129,7 +119,7 @@ public class FarmData implements StateUpdatable<FarmState> {
                     Item currentItem = currentFarmItem.get();
 
                     if (currentItem != null && newItemPair != null && currentItem.id == newItemPair.getKey()) {
-                        currentFarmItem.growth = newItemPair.getValue();
+                        currentFarmItem.growth.setValue(newItemPair.getValue());
                         continue;
                     } else if (currentItem != null) {
                         this.destroyItemAt(r, c);
@@ -257,7 +247,7 @@ public class FarmData implements StateUpdatable<FarmState> {
             return false;
         }
         FarmItem placingItem = new FarmItem(item);
-        placingItem.growth = growth;
+        placingItem.growth.set(growth);
 
         // Handles oversized items
         if (plantWidth > 1 || plantHeight > 1) {
@@ -417,34 +407,6 @@ public class FarmData implements StateUpdatable<FarmState> {
     }
 
     /**
-     * Gets the growth delegate.
-     *
-     * @return {@link Consumer<FarmItem>}
-     */
-    public Consumer<FarmItem> getGrowthDelegate() {
-        return this.growthDelegate;
-    }
-
-    /**
-     * Adds a given action to the growth delegates.
-     * The action will be called when any item changes its growth value.
-     *
-     * @param customGrowthDelegate Action to be called when any item changes its growth value.
-     */
-    public void addGrowthDelegate(Consumer<FarmItem> customGrowthDelegate) {
-        this.customGrowthDelegates.add(customGrowthDelegate);
-    }
-
-    /**
-     * Removes a given action from the growth delegates.
-     *
-     * @param customGrowthDelegate Action to be removed
-     */
-    public void removeGrowthDelegate(Consumer<FarmItem> customGrowthDelegate) {
-        this.customGrowthDelegates.remove(customGrowthDelegate);
-    }
-
-    /**
      * Validates whether a given coordinates are within the farm's range.
      *
      * @param row Row to be validated
@@ -498,7 +460,7 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     private int[] getFarmPosition(FarmItem item) {
         if (item != null && item.get() == null) {
-            String[] coordinates = Double.toString(item.growth).split("[.]");
+            String[] coordinates = item.growth.getValue().toString().split("[.]");
             int actualRow = Integer.parseInt(coordinates[0]) + this.expansionLevel;
             int actualColumn = Integer.parseInt(coordinates[1]) + this.expansionLevel;
             return new int[]{actualRow, actualColumn};

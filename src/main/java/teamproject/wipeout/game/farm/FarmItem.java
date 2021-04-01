@@ -1,5 +1,7 @@
 package teamproject.wipeout.game.farm;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
@@ -8,7 +10,7 @@ import teamproject.wipeout.game.item.components.PlantComponent;
  */
 public class FarmItem {
 
-    public double growth;
+    public final DoubleProperty growth;
 
     private final Item item;
 
@@ -20,7 +22,7 @@ public class FarmItem {
      */
     public FarmItem(Item item) {
         this.item = item;
-        this.growth = 0.0;
+        this.growth = new SimpleDoubleProperty(0.0);
     }
 
     /**
@@ -32,7 +34,7 @@ public class FarmItem {
      */
     public FarmItem(Item item, Double growth) {
         this.item = item;
-        this.growth = growth;
+        this.growth = new SimpleDoubleProperty(growth);
     }
 
     /**
@@ -69,7 +71,7 @@ public class FarmItem {
      */
     public int getCurrentGrowthStage() {
         double growthRate = this.getGrowthRate();
-        return (int) (this.growth / growthRate);
+        return (int) (this.growth.get() / growthRate);
     }
 
     /**
@@ -81,7 +83,7 @@ public class FarmItem {
     public int getCurrentGrowthPercentage() {
         PlantComponent plant = this.item.getComponent(PlantComponent.class);
         double maxGrowth = plant.maxGrowthStage * plant.growthRate;
-        double growthPercentage = ((this.growth / maxGrowth) * 100);
+        double growthPercentage = ((this.growth.get() / maxGrowth) * 100);
         if (growthPercentage >= 100.0) {
             return 100;
         } else {
@@ -99,7 +101,7 @@ public class FarmItem {
             return false;
         }
         PlantComponent plant = this.item.getComponent(PlantComponent.class);
-        return this.growth >= plant.maxGrowthStage * plant.growthRate;
+        return this.growth.get() >= plant.maxGrowthStage * plant.growthRate;
     }
 
 }

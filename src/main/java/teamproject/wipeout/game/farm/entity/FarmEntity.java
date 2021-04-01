@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.farm.entity;
 
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
@@ -62,7 +63,7 @@ public class FarmEntity extends GameEntity {
     private Consumer<Item> abortPlacing;
 
     private DestroyerEntity destroyerEntity;
-    private Consumer<FarmItem> destroyerDelegate;
+    private Pair<FarmItem, ChangeListener<? super Number>> destroyerListener;
 
     private Supplier<GameClient> clientSupplier;
 
@@ -100,7 +101,7 @@ public class FarmEntity extends GameEntity {
         this.placingItem = null;
         this.seedEntity = null;
         this.destroyerEntity = null;
-        this.destroyerDelegate = null;
+        this.destroyerListener = null;
 
         this.addComponent(this.transform);
 
@@ -112,7 +113,7 @@ public class FarmEntity extends GameEntity {
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
-            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier, this.data.getGrowthDelegate());
+            ItemsRowEntity rowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(r), this.growthMultiplierSupplier);
             Point2D rowPoint = new Point2D(0, (SQUARE_SIZE / 1.5) + (SQUARE_SIZE * r));
             rowEntity.addComponent(new Transform(rowPoint, 0.0, 1));
 
@@ -266,6 +267,11 @@ public class FarmEntity extends GameEntity {
                 // Is NOT within the farm
                 dTransform.setPosition(new Point2D(x, y));
                 this.destroyerEntity.adaptToFarmItem(null);
+                // Removes existing growth delegates
+                if (this.destroyerListener != null) {
+                    this.destroyerListener.getKey().growth.removeListener(this.destroyerListener.getValue());
+                }
+
             } else {
                 // Is within the farm. But is there any item at that coordinates?...
                 Pair<FarmItem, Boolean> pickingItem = this.canBePicked(x, y);
@@ -273,23 +279,31 @@ public class FarmEntity extends GameEntity {
                     //...NO :( there is no item
                     dTransform.setPosition(point);
                     this.destroyerEntity.adaptToFarmItem(null);
+                    // Removes existing growth delegates
+                    if (this.destroyerListener != null) {
+                        this.destroyerListener.getKey().growth.removeListener(this.destroyerListener.getValue());
+                    }
+
                 } else {
                     //...YES :) there is an item
-                    
-                    int[] itemFarmPosition = this.data.positionForItem(pickingItem.getKey());
+                    FarmItem onFarmItem = pickingItem.getKey();
+
+                    int[] itemFarmPosition = this.data.positionForItem(onFarmItem);
                     dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
                     this.destroyerEntity.adaptToFarmItem(pickingItem);
 
                     // Set up a delegate so that the destroyer tool gets updates about the item's growth progress
-                    this.destroyerDelegate = (updatedFarmItem) -> {
-                        if (this.destroyerEntity == null) {
-                            return;
-                        }
-                        if (pickingItem.getKey() == updatedFarmItem) {
-                            this.destroyerEntity.setColorForPickable(updatedFarmItem.isFullyGrown());
-                        }
-                    };
-                    this.data.addGrowthDelegate(this.destroyerDelegate);
+                    if (this.destroyerListener == null || !this.destroyerListener.getKey().equals(onFarmItem)) {
+                        this.destroyerListener = new Pair<FarmItem, ChangeListener<? super Number>>(onFarmItem, (observable, oldVal, newVal) -> {
+                            if (this.destroyerEntity == null) {
+                                return;
+                            }
+                            if (onFarmItem.isFullyGrown()) {
+                                this.destroyerEntity.setColorForPickable(true);
+                            }
+                        });
+                        onFarmItem.growth.addListener(this.destroyerListener.getValue());
+                    }
                 }
             }
         };
@@ -314,6 +328,11 @@ public class FarmEntity extends GameEntity {
             Point2D point = this.isWithinFarm(x, y);
             Transform dTransform = this.destroyerEntity.getComponent(Transform.class);
 
+            // Removes existing growth delegate
+            if (this.destroyerListener != null) {
+                this.destroyerListener.getKey().growth.removeListener(this.destroyerListener.getValue());
+            }
+
             if (point == null) {
                 // Is NOT within the farm
                 dTransform.setPosition(new Point2D(x, y));
@@ -325,23 +344,15 @@ public class FarmEntity extends GameEntity {
                     //...NO :( there is no item
                     dTransform.setPosition(point);
                     this.destroyerEntity.adaptToDestroyFarmItem(null);
+                    this.destroyerEntity.setColorForPickable(false);
                 } else {
                     //...YES :) there is an item
+                    FarmItem onFarmItem = pickingItem.getKey();
                     
-                    int[] itemFarmPosition = this.data.positionForItem(pickingItem.getKey());
+                    int[] itemFarmPosition = this.data.positionForItem(onFarmItem);
                     dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
                     this.destroyerEntity.adaptToDestroyFarmItem(pickingItem);
-
-                    // Set up a delegate so that the destroyer tool gets updates about the item's growth progress
-                    this.destroyerDelegate = (updatedFarmItem) -> {
-                        if (this.destroyerEntity == null) {
-                            return;
-                        }
-                        if (pickingItem.getKey() == updatedFarmItem) {
-                            this.destroyerEntity.setColorForPickable(true);
-                        }
-                    };
-                    this.data.addGrowthDelegate(this.destroyerDelegate);
+                    this.destroyerEntity.setColorForPickable(true);
                 }
             }
         };
@@ -354,13 +365,13 @@ public class FarmEntity extends GameEntity {
      */
     public void stopPickingItem() {
         this.removeComponent(Hoverable.class);
-        this.data.removeGrowthDelegate(this.destroyerDelegate);
-        this.destroyerDelegate = null;
-        if (this.destroyerEntity == null) {
-            return;
+        if (this.destroyerListener != null) {
+            this.destroyerListener.getKey().growth.removeListener(this.destroyerListener.getValue());
         }
-        this.destroyerEntity.destroy();
-        this.destroyerEntity = null;
+        if (this.destroyerEntity != null) {
+            this.destroyerEntity.destroy();
+            this.destroyerEntity = null;
+        }
     }
 
     /**
@@ -570,7 +581,7 @@ public class FarmEntity extends GameEntity {
                     newRowIndex = this.data.farmRows - 1;
                     break;
             }
-            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier, this.data.getGrowthDelegate());
+            ItemsRowEntity newRowEntity = new ItemsRowEntity(this.scene, this.data.getItemsInRow(newRowIndex), this.growthMultiplierSupplier);
             newRowEntity.addComponent(new Transform(newRowPoint, 0.0, 1));
 
             newRowEntity.setParent(this);

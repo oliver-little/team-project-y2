@@ -10,15 +10,13 @@ import java.util.function.Supplier;
 
 public class RowGrowthComponent implements GameComponent {
 
-    private final Supplier<Double> growthMultiplier;
-    private final Consumer<FarmItem> growthUpdater;
-
     private List<FarmItem> farmRow;
 
-    public RowGrowthComponent(List<FarmItem> farmRow, Supplier<Double> growthMultiplier, Consumer<FarmItem> updater) {
+    private final Supplier<Double> growthMultiplier;
+
+    public RowGrowthComponent(List<FarmItem> farmRow, Supplier<Double> growthMultiplier) {
         this.farmRow = farmRow;
         this.growthMultiplier = growthMultiplier;
-        this.growthUpdater = updater;
     }
 
     public void setFarmRow(List<FarmItem> farmRow) {
@@ -39,8 +37,8 @@ public class RowGrowthComponent implements GameComponent {
             return;
         }
 
-        farmItem.growth += increment * this.growthMultiplier.get();
-        this.growthUpdater.accept(farmItem);
+        double newGrowth = farmItem.growth.get() + (increment * this.growthMultiplier.get());
+        farmItem.growth.set(newGrowth);
     }
 
     public void updateGrowth(double timestep) {

@@ -31,13 +31,11 @@ public class ItemsRowEntity extends GameEntity {
      *
      * @param scene The GameScene this entity is part of
      * @param row ArrayList of items in a certain row
-     * @param growthUpdater Calls .accept() when growth is updated
-     * @param spriteManager {@link SpriteManager} for the {@link ItemsRowRenderer}
      */
-    public ItemsRowEntity(GameScene scene, List<FarmItem> row, Supplier<Double> growthMultiplier, Consumer<FarmItem> growthUpdater) {
+    public ItemsRowEntity(GameScene scene, List<FarmItem> row, Supplier<Double> growthMultiplier) {
         super(scene);
 
-        this.growthComponent = new RowGrowthComponent(row, growthMultiplier, growthUpdater);
+        this.growthComponent = new RowGrowthComponent(row, growthMultiplier);
         this.rowRenderers = new ArrayList<>();
         
         this.addComponent(this.growthComponent);
