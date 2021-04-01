@@ -103,19 +103,21 @@ public class MarketEntity extends GameEntity {
                 // Main body right
         		new Rectangle(96, 44, 159, 95),
                 // Main body left
-                new Rectangle(49, 46, 47, 106),
+                new Rectangle(49, 44, 47, 108),
                 // Sign and wood pile left
                 new Rectangle(22, 152, 65, 32),
                 // Planters and half of spears
                 new Rectangle(16, 78, 37, 74),
                 // Rest of spears
                 new Rectangle(5, 127, 18, 29),
+                // Red plant
+                new Rectangle(88, 130, 19, 20),
                 // Bows arrows and green plant
                 new Rectangle(172, 138, 75, 29),
                 // Wood pile bottom
                 new Rectangle(225, 166, 22, 17),
                 // Target and scarecrow
-                new Rectangle(246, 118, 46, 34)
+                new Rectangle(246, 118, 37, 34)
         };
         this.addComponent(new HitboxComponent(hitboxes));
         this.addComponent(new CollisionResolutionComponent(false));
