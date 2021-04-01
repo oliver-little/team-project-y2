@@ -72,7 +72,7 @@ public class MarketUI extends AnchorPane {
         }
 
         for (Task purchasableTask: purchasableTasks) {
-            if(player.currentAvailableTasks.containsKey(purchasableTask.id)) {
+            if(player.currentAvailableTasks.containsKey(purchasableTask.id) || purchasableTask.completed) {
                 continue;
             }
             Item relatedItem = purchasableTask.relatedItem;

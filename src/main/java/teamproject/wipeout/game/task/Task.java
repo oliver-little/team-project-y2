@@ -13,7 +13,7 @@ public class Task {
     public String description;
     public String descriptionWithoutMoney;
     public Boolean completed;
-    public Integer priceToBuy;
+    public double priceToBuy;
     public Item relatedItem;
     public Function<Player, Boolean> condition;
 
@@ -30,7 +30,7 @@ public class Task {
         this.reward = reward;
         this.condition = condition;
         this.completed = false;
-        this.priceToBuy = reward/5;
+        this.priceToBuy = (double) reward * 1.5;
         this.relatedItem = relatedItem;
     }
 }

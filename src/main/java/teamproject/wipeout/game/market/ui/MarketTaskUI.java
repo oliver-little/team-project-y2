@@ -87,34 +87,12 @@ public class MarketTaskUI extends VBox {
 
         // Set button text to update with quantity and buy price changes
         buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createStringBinding(() -> {
-            return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), true)));
+            return String.format("%.2f", (task.priceToBuy));
         }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
-
         // Set buy click event
         buy.setOnAction((e) -> {
             player.addNewTask(task);
         });
-
-
-//        Button sell = new Button();
-//        sell.setPrefWidth(85);
-//
-//        //Check if the item is sellable.
-//        if (Math.abs(marketItem.getDefaultSellPrice() - (-1)) < doubleCompare) {
-//            sell.setDisable(true);
-//            sell.textProperty().bind(Bindings.concat("Sell: 0.00"));
-//        }
-//        else {
-//            // Set sell price to update with quantity and sell price changes
-//            sell.textProperty().bind(Bindings.concat("Sell: ").concat(Bindings.createStringBinding(() -> {
-//                return String.format("%.2f", (market.calculateTotalCost(item.id, quantity.valueProperty().get(), false)));
-//            }, quantity.getValueFactory().valueProperty(), marketItem.quantityDeviationProperty())));
-//
-//            // Set sell click event
-//            sell.setOnAction((e) -> {
-//                player.sellItem(market, item.id, quantity.getValue());
-//            });
-//        }
 
         buySellLayout.getChildren().addAll(buy);
 
