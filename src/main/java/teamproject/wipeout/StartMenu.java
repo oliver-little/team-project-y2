@@ -26,8 +26,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +48,15 @@ public class StartMenu implements Controller {
 
     Networker networker;
 
-    LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
+    private LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
+    private ArrayList<String> dropDownItems = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT"));
+    private ArrayList<ComboBox<String>> dropDowns = new ArrayList<>();
 
     public StartMenu() {
         this.root = new StackPane();
         this.menuBox = new VBox(30);
         this.networker = new Networker();
-        createDefaultBindings();
+        createDefaultBindings();       
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             GameClient client = this.networker.getClient();
@@ -275,15 +280,47 @@ public class StartMenu implements Controller {
         return true;
     }
 
+    /**
+     * Gets key bindings which are taken
+     * @return ArrayList of strings representing key bindings which are taken
+     */
+    private ArrayList<String> getTakenBindings(){
+        ArrayList<String> result = new ArrayList<>();
+        for(Map.Entry<String, KeyCode> entry2 : keyBindings.entrySet()){
+            result.add(entry2.getValue().getName().toUpperCase());
+        } 
+
+        return result;
+    }
+
+    /**
+     * Method to grey out items in all of the comboboxes which are already taken
+     */
+    private void updateDisabledItems(){
+        ArrayList<String> takenBindings = getTakenBindings();
+        for(ComboBox<String> d : dropDowns){
+            d.setCellFactory(lv -> new ListCell<String>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                        setDisable(takenBindings.contains(item.toString()));
+                    }
+                    
+                }
+            });
+        }
+    }
+
+    /**
+     * Creates settings menu for changing key bindings
+     */
     private void createSettingsMenu(){
         root.getChildren().remove(menuBox);
-        String[] alphabet = "abcdefghijklmnopqrstuvwxyz".toUpperCase().split("");
-        String[] others = {"UP", "DOWN", "LEFT", "RIGHT"};
-        
-        String[] dropDownItems = new String[alphabet.length + others.length];
-        System.arraycopy(alphabet, 0, dropDownItems, 0, alphabet.length);
-        System.arraycopy(others, 0, dropDownItems, alphabet.length, others.length);
-        
+
         menuBox.getChildren().clear();
 
         menuBox.getChildren().add(UIUtil.createTitle("Settings"));
@@ -293,7 +330,7 @@ public class StartMenu implements Controller {
         tilePane.setVgap(20);
         tilePane.setHgap(20);
 
-        //create 'tiles' 
+        //create a HBox for each drop down menu (key-binding)
         for(Map.Entry<String, KeyCode> entry : keyBindings.entrySet()) {
             String action = entry.getKey();
             KeyCode code = entry.getValue();
@@ -301,34 +338,30 @@ public class StartMenu implements Controller {
             HBox box = new HBox();
             box.setAlignment(Pos.CENTER_RIGHT);
             box.setPrefWidth(200);
+
             Label label = new Label(action + ":  ");
             
-            ComboBox dropDown = new ComboBox<String>();
-            dropDown.getItems().addAll(dropDownItems);
+            ComboBox<String> dropDown = new ComboBox<String>();
 
-            for(Map.Entry<String, KeyCode> entry2 : keyBindings.entrySet()){
-                if(!(entry2.equals(entry))){
-                    dropDown.getItems().remove(entry2.getValue().getName()); //removes taken key bindings
-                }
-            }
-
+            dropDown.getItems().addAll(dropDownItems); //adds all possible key bindings
             dropDown.setValue(code.getName().toUpperCase()); //sets default value
 
+            dropDowns.add(dropDown); 
+            
             dropDown.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
             {
                 public void changed(ObservableValue<? extends String> ov, final String oldvalue, final String newvalue){
-                    System.out.println("value changed from: " + oldvalue + " to " + newvalue);
+                    keyBindings.put(action, KeyCode.valueOf(newvalue));
+                    printBindings();
+                    updateDisabledItems(); //greys out taken bindings
                 }
             });
-            
             box.getChildren().addAll(label, dropDown);
             tilePane.getChildren().add(box);
         }
-
-
+        updateDisabledItems();
 
         menuBox.getChildren().add(tilePane);
-
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
@@ -338,7 +371,17 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
-        
+    }
+
+    //for testing
+    private void printBindings(){
+        System.out.println();
+        for(Map.Entry<String, KeyCode> entry : keyBindings.entrySet()) {
+            String action = entry.getKey();
+            KeyCode code = entry.getValue();
+            System.out.print(action + ":" + code + " , ");
+        }
+        System.out.println();
     }
 
     private void createMainMenu(){
