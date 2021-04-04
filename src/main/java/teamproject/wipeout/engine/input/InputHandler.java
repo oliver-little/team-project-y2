@@ -115,8 +115,10 @@ public class InputHandler {
         if (disabled) {
             // Simulate all keys releasing
             for (KeyCode key : this.performingKeyActions) {
-                for (InputKeyAction action : this.keyReleaseBindings.get(key)) {
-                    action.performKeyAction();
+                if (this.keyReleaseBindings.get(key) != null) {
+                    for (InputKeyAction action : this.keyReleaseBindings.get(key)) {
+                        action.performKeyAction();
+                    }
                 }
             }
 
@@ -127,8 +129,10 @@ public class InputHandler {
         else {
             // Simulate all keys being pressed
             for (KeyCode key : this.performingKeyActions) {
-                for (InputKeyAction action : this.keyPressBindings.get(key)) {
-                    action.performKeyAction();
+                if (this.keyPressBindings.get(key) != null) {
+                    for (InputKeyAction action : this.keyPressBindings.get(key)) {
+                        action.performKeyAction();
+                    }
                 }
             }
         }
