@@ -40,6 +40,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent.SabotageType;
 import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionThrowEntity;
+import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -47,6 +48,8 @@ import teamproject.wipeout.util.resources.ResourceType;
  * Creates the player's inventory bar as a StackPane
  */
 public class InventoryUI extends StackPane {
+
+	public static final int IMAGE_SIZE = 48;
 
 	public enum InventoryState {
 		NONE,
@@ -94,20 +97,13 @@ public class InventoryUI extends StackPane {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);
 			quantityTexts[index].setText("" + items.get(index).quantity);
-			try {
-				Image sprite = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
-				spriteViews[index].setImage(sprite);
-				spriteViews[index].setX(67*index + (32 - sprite.getWidth()/2));
-				if (sprite.getHeight() > 64) {
-					spriteViews[index].setY(32 - sprite.getHeight() / 1.4);
-				} else {
-					spriteViews[index].setY(32 - sprite.getHeight() / 2);
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
+			Image sprite = getScaledImage(inv.spriteSheetName, inv.spriteSetName);
+			spriteViews[index].setImage(sprite);
+
+			spriteViews[index].setX(67*index + (32 - Math.min(IMAGE_SIZE, sprite.getWidth())/2));
+			spriteViews[index].setY(32 - Math.min(IMAGE_SIZE, sprite.getHeight()) / 2);
+		} 
+		else {
 			quantityTexts[index].setText("");
 			spriteViews[index].setImage(null);
 		}
@@ -254,7 +250,11 @@ public class InventoryUI extends StackPane {
 			rectangles[i] = r;
 			
 			ImageView spriteView = new ImageView();
+			spriteView.setFitWidth(IMAGE_SIZE);
+			spriteView.setFitHeight(IMAGE_SIZE);
+			spriteView.setPreserveRatio(true);
 			spriteView.setMouseTransparent(true);
+			spriteView.setStyle("-fx-stroke: cyan; -fx-stroke-width: 1;");
 			root.getChildren().add(spriteView);
 			spriteViews[i] = spriteView;
 		}
@@ -265,8 +265,7 @@ public class InventoryUI extends StackPane {
 	 */
 	private void createTexts() {
 		InputStream path;
-		try
-		{
+		try {
 			path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
 			Font font = Font.loadFont(path, 13);
 			for(int i = 0; i < MAX_SIZE; i++) {
@@ -284,5 +283,31 @@ public class InventoryUI extends StackPane {
 		{
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Gets an image from the spriteManager, scaled to fit the inventory image sizes
+	 * 
+	 * @param spriteSheetName The spriteSheet to retrieve an image from
+	 * @param spriteSetName The spriteSet to retrieve an image from
+	 * @return The requested image, scaled to IMAGE_SIZE
+	 */
+	private Image getScaledImage(String spriteSheetName, String spriteSetName) {
+		Image sprite = null;
+		try {
+			sprite = spriteManager.getSpriteSet(spriteSheetName, spriteSetName)[0];
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		if (sprite.getWidth() > sprite.getHeight() && sprite.getWidth() < IMAGE_SIZE) {
+			sprite = ImageUtil.scaleImage(sprite, ((double) IMAGE_SIZE)/sprite.getWidth());
+		}
+		else if (sprite.getHeight() < IMAGE_SIZE) {
+			sprite = ImageUtil.scaleImage(sprite, ((double) IMAGE_SIZE)/sprite.getHeight());
+		}
+
+		return sprite;
 	}
 }
