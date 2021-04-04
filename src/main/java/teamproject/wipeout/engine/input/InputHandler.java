@@ -83,14 +83,15 @@ public class InputHandler {
         this.inputScene.addEventFilter(KeyEvent.KEY_RELEASED, (pressedKey) -> {
             KeyCode pressedKeyCode = pressedKey.getCode();
 
-            this.performingKeyActions.remove(pressedKeyCode);
-
-            // If input is enabled
-            if (!this.disableInput) {
-                // Complete all actions bound for this key
-                if (keyReleaseBindings.get(pressedKeyCode) != null) {
-                    for (InputKeyAction action : this.keyReleaseBindings.get(pressedKeyCode)) {
-                        action.performKeyAction();
+            // Do nothing if the game is not aware this key was pressed
+            if (this.performingKeyActions.remove(pressedKeyCode)) {
+                // If input is enabled
+                if (!this.disableInput) {
+                    // Complete all actions bound for this key
+                    if (keyReleaseBindings.get(pressedKeyCode) != null) {
+                        for (InputKeyAction action : this.keyReleaseBindings.get(pressedKeyCode)) {
+                            action.performKeyAction();
+                        }
                     }
                 }
             }
