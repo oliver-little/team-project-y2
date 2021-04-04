@@ -28,6 +28,7 @@ public class Particle {
     private double lifetime;
 
     private ParticleSimulationSpace simulationSpace;
+    private Point2D startPosition;
     private Point2D startVelocity;
     private double startWidth;
     private double startHeight;
@@ -46,6 +47,7 @@ public class Particle {
      */
     public void initialise(Point2D position, ParticleSimulationSpace simulationSpace, Point2D velocity, double lifetime, double width, double height, double opacity, ParticleRender render) {
         this.position = position;
+        this.startPosition = position;
         this.simulationSpace = simulationSpace;
 
         this.startVelocity = velocity;
@@ -78,6 +80,14 @@ public class Particle {
      */
     public double getLifetime() {
         return this.lifetime;
+    }
+
+    /**
+     * Gets the initial value of the position for this particle
+     * @return A Point2D object representing the initial position
+     */
+    public Point2D getStartPosition() {
+        return this.startPosition;
     }
 
     /**

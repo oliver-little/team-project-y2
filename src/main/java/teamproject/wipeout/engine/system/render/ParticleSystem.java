@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.system.render;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -52,6 +53,7 @@ public class ParticleSystem implements GameSystem {
     }
 
     public void accept(Double timeStep) {
+        ArrayList<ParticleComponent> toStop = new ArrayList<>();
         for (Map.Entry<GameEntity, ParticleRenderable> entry : trackedEntities.entrySet()) {
             ParticleComponent pc = entry.getKey().getComponent(ParticleComponent.class);
             ParticleRenderable renderable = entry.getValue();
@@ -80,7 +82,7 @@ public class ParticleSystem implements GameSystem {
                     }
                     renderable.particles.clear();
                     
-                    pc.stop();
+                    toStop.add(pc);
                     continue;
                 }
             }
@@ -101,7 +103,7 @@ public class ParticleSystem implements GameSystem {
                 }
                 else {
                     for (ParticleUpdateFunction function : parameters.getUpdateFunctions()) {
-                        function.update(particle, percentage);
+                        function.update(particle, percentage, timeStep);
                     }
                     particle.position = particle.position.add(particle.velocity.multiply(timeStep));
                     if (particle.position.getX() > maxX) {
@@ -160,6 +162,11 @@ public class ParticleSystem implements GameSystem {
                     pc.nextBurst++;
                 }
             }
+        }
+
+        // Call stop function after main loop to prevent concurrent modification errors
+        while (toStop.size() > 0) {
+            toStop.remove(0).stop();
         }
     }
 

@@ -132,7 +132,7 @@ public class PotionEntity extends GameEntity {
     public static ParticleParameters potionTrailFactory(Color particleColor) {
         ParticleParameters parameters = new ParticleParameters(100, true, new OvalParticle(particleColor), ParticleSimulationSpace.WORLD, SupplierGenerator.rangeSupplier(0.5, 1.5), SupplierGenerator.rangeSupplier(1.0, 2.0), null, SupplierGenerator.staticSupplier(1.0), SupplierGenerator.circlePointSupplier(5, 10));
         parameters.setEmissionRate(50);
-        parameters.addUpdateFunction((particle, percentage) -> {
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
             double val = particle.getStartWidth() * EASE_CURVE.apply(percentage);
             particle.width = val;
             particle.height = val;
@@ -147,7 +147,7 @@ public class PotionEntity extends GameEntity {
 
         ParticleParameters parameters = new ParticleParameters(3.0, false, new OvalParticle(particleColor), ParticleSimulationSpace.WORLD, SupplierGenerator.rangeSupplier(3.5, 4.0), SupplierGenerator.rangeSupplier(1.0, 4.0), null, SupplierGenerator.staticSupplier(1.0), velocitySupplier);
         parameters.setBursts(List.of(new ParticleBurst(0.0, SupplierGenerator.staticSupplier(600))));
-        parameters.addUpdateFunction((particle, percentage) -> {
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
             double val = particle.getStartWidth() * EASE_CURVE.apply(percentage);
             particle.width = val;
             particle.height = val;
@@ -188,7 +188,7 @@ public class PotionEntity extends GameEntity {
                     Platform.runLater(() -> this.destroyMyself());
                 };
 
-                explosion.parameters.addUpdateFunction((particle, percentage) -> {
+                explosion.parameters.addUpdateFunction((particle, percentage, updateTimeStep) -> {
                     if (particle.position.distance(hitPosition) > POTION_EFFECT_RADIUS) {
                         particle.position = hitPosition.add(particle.position.subtract(hitPosition).normalize().multiply(POTION_EFFECT_RADIUS));
                     }

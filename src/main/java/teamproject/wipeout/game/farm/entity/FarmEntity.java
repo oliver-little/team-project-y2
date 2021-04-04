@@ -434,9 +434,14 @@ public class FarmEntity extends GameEntity {
         int row = (int) coors.getY();
         int column = (int) coors.getX();
 
-        this.audio.play("shovel.wav");
-
         boolean placed = this.data.placeItem(item, 0.0, row, column);
+
+        if (placed) {
+            this.audio.play("shovel.wav");
+            PlantComponent pc = item.getComponent(PlantComponent.class);
+            Point2D startPos = this.rescaleCoordinatesToScene(column, row).add((pc.width * FarmEntity.SQUARE_SIZE / 2), (pc.height * FarmEntity.SQUARE_SIZE / 1.8));
+            new PlantParticleEntity(this.getScene(), startPos.getX(), startPos.getY());
+        }
 
         this.sendStateUpdate();
         return placed;

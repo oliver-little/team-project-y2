@@ -5,5 +5,5 @@ package teamproject.wipeout.engine.component.render.particle.type;
  */
 @FunctionalInterface
 public interface ParticleUpdateFunction {
-    public void update(Particle p, double percentage);
+    public void update(Particle p, double percentage, double timeStep);
 }

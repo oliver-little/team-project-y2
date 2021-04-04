@@ -34,7 +34,7 @@ public class SupplierGenerator {
      */
     public static Supplier<Integer> rangeSupplier(int min, int max) {
         return () -> {
-            return new Random().nextInt() * (max - min) + min;
+            return ((int) new Random().nextDouble() * (max - min) + min);
         };
     }
 
