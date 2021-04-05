@@ -3,7 +3,6 @@ package teamproject.wipeout.engine.system.render;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -31,8 +30,6 @@ public class ParticleSystem implements GameSystem {
 
     private ObjectPool<Particle> particlePool;
 
-    private Random randomGenerator;
-
     /**
      * Creates a new instance of ParticleSystem
      * @param scene The scene this particle system is part of
@@ -42,8 +39,6 @@ public class ParticleSystem implements GameSystem {
         trackedEntities = new HashMap<>();
 
         particlePool = new ObjectPool<Particle>(() -> {return new Particle();});
-
-        randomGenerator = new Random();
     }
 
     /**
@@ -59,35 +54,13 @@ public class ParticleSystem implements GameSystem {
             ParticleComponent pc = entry.getKey().getComponent(ParticleComponent.class);
             ParticleRenderable renderable = entry.getValue();
 
-            if (!pc.isPlaying()) {
-                if (renderable.particles.size() > 0) {
-                    renderable.particles.clear();
-                }
+            // Check if we should skip this ParticleComponent - only skip if stopped and no particles left simulating
+            if (!pc.isPlaying() && renderable.particles.size() == 0) {
                 continue;
             }
 
             ParticleParameters parameters = pc.parameters;
-            pc.time += timeStep;
-            if (pc.time > parameters.getRuntime()) {
-                if (parameters.doesLoop()) {
-                    pc.time = 0;
-                    pc.lastEmissionTime = 0;
-                    
-                    if (parameters.getBurstsEnabled()) {
-                        pc.nextBurst = 0;
-                    }
-                }
-                else {
-                    for (Particle p : renderable.particles) {
-                        particlePool.returnInstance(p);
-                    }
-                    renderable.particles.clear();
-                    
-                    toStop.add(pc);
-                    continue;
-                }
-            }
-
+            
             double maxX = Double.NEGATIVE_INFINITY;
             double maxY = Double.NEGATIVE_INFINITY;
 
@@ -119,8 +92,35 @@ public class ParticleSystem implements GameSystem {
 
             renderable.setWidth(maxX);
             renderable.setHeight(maxY);
+
+            // Check if stopped, if so we should only be simulating existing particles, so move on
+            if (!pc.isPlaying()) {
+                continue;
+            }
             
-            // Generate new particles
+            // Check if this ParticleComponent's runtime has elapsed
+            pc.time += timeStep;
+            if (pc.time > parameters.getRuntime()) {
+                if (parameters.doesLoop()) {
+                    pc.time = 0;
+                    pc.lastEmissionTime = 0;
+                    
+                    if (parameters.getBurstsEnabled()) {
+                        pc.nextBurst = 0;
+                    }
+                }
+                else {
+                    for (Particle p : renderable.particles) {
+                        particlePool.returnInstance(p);
+                    }
+                    renderable.particles.clear();
+                    
+                    toStop.add(pc);
+                    continue;
+                }
+            }
+            
+            // Finally, generate new particles as the emission describes
             if (parameters.getEmissionEnabled()) {
                 double timeDiff = pc.time - pc.lastEmissionTime;
                 if (timeDiff > parameters.getSecsPerEmission()) {
