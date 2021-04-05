@@ -12,6 +12,7 @@ public class EaseCurve implements Function<Double, Double> {
     public static final EaseCurve EASE_OUT = new EaseCurve(EaseType.EASE_OUT);
     public static final EaseCurve EASE_IN_OUT = new EaseCurve(EaseType.EASE_IN_OUT);
     public static final EaseCurve INVERSE_EASE_IN_OUT = new EaseCurve(EaseType.INVERSE_EASE_IN_OUT);
+    public static final EaseCurve FADE_IN_OUT = new EaseCurve(EaseType.FADE_IN_OUT);
 
     /**
      * Represents the various easing types, as well as implementing the functions required to calculate those easing types.
@@ -37,6 +38,10 @@ public class EaseCurve implements Function<Double, Double> {
                 double partial = 2 * x - 2;
                 return 1 - ((x - 1) * partial * partial + 1);
             }
+        }),
+        FADE_IN_OUT((x) -> {
+            double oneMinus = 1 - x;
+            return 3 * x * Math.pow(oneMinus, 2) * 2 + 3 * x * x * oneMinus * 0.5;
         });
 
 

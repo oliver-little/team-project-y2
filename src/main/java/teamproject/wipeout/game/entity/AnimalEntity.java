@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
@@ -21,6 +22,10 @@ import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
+import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
+import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
@@ -31,8 +36,12 @@ import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.state.AnimalState;
 import teamproject.wipeout.networking.state.StateUpdatable;
+import teamproject.wipeout.util.SupplierGenerator;
 
 public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalState> {
+
+    public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
+    public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
     public static final int IDLE_TIME_SCALING_FACTOR = 5;
 
@@ -53,6 +62,8 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private AnimalState animalState;
     private List<FarmEntity> farms;
 
+    private ParticleEntity sabotageEffect;
+
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
@@ -71,12 +82,46 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         this.movementComponent.speedMultiplierChanged = (newMultiplier) -> {
             this.animalState.setSpeedMultiplier(newMultiplier);
             this.sendStateUpdate();
+
+            if (newMultiplier != 1) {
+                if (newMultiplier < 1) {
+                    sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+                }
+                else {
+                    sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+                }
+    
+                if (!sabotageEffect.isPlaying()) {
+                    sabotageEffect.play();
+                }
+            }
+            else if (sabotageEffect.isPlaying()) {
+                sabotageEffect.stop();
+            }
         };
 
         this.addComponent(this.transformComponent);
         this.addComponent(this.movementComponent);
         this.addComponent(new RenderComponent());
         this.addComponent(new HitboxComponent(new Rectangle(0, 0, 32, 32)));
+
+        ParticleParameters parameters = new ParticleParameters(100, true, 
+            FAST_PARTICLE, 
+            ParticleSimulationSpace.WORLD, 
+            SupplierGenerator.rangeSupplier(1.0, 1.75), 
+            SupplierGenerator.rangeSupplier(1.0, 2.0), 
+            null, 
+            SupplierGenerator.staticSupplier(0.0), 
+            SupplierGenerator.rangeSupplier(new Point2D(-20, -5), new Point2D(20, 0)));
+
+        parameters.setEmissionRate(20);
+        parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(11, 22), new Point2D(20, 32)));
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
+            particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage);
+        });
+
+        this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
+        this.sabotageEffect.setParent(this);
 
         this.animalState = new AnimalState(position, null);
 
@@ -122,6 +167,22 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         }
 
         this.animalState.updateStateFrom(newState);
+
+        if (newState.getSpeedMultiplier() != 1) {
+            if (newState.getSpeedMultiplier() < 1) {
+                sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+            }
+
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 
     /**

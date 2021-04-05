@@ -2,6 +2,7 @@ package teamproject.wipeout.game.farm.entity;
 
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -9,12 +10,18 @@ import teamproject.wipeout.engine.component.input.Clickable;
 import teamproject.wipeout.engine.component.input.Hoverable;
 import teamproject.wipeout.engine.component.render.FarmRenderer;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
+import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
+import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
 import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.farm.Pickables;
@@ -25,6 +32,7 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.state.FarmState;
+import teamproject.wipeout.util.SupplierGenerator;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -40,6 +48,11 @@ import java.util.function.Supplier;
 public class FarmEntity extends GameEntity {
 
     public static final int MAX_EXPANSION_SIZE = 5;
+
+    public static final OvalParticle FAST_CROP_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.003, 1));
+    public static final OvalParticle SLOW_CROP_PARTICLE = new OvalParticle(new Color(1, 0.003, 0.003, 1));
+    public static final OvalParticle AI_ATTRACT_PARTICLE = new OvalParticle(Color.YELLOW);
+    public static final OvalParticle AI_REPEL_PARTICLE = new OvalParticle(new Color(0.25, 0.25, 0.25, 1));
 
     public static int SQUARE_SIZE = 32;
     public static double SKEW_FACTOR = 0.89;
@@ -61,6 +74,8 @@ public class FarmEntity extends GameEntity {
     private Item placingItem;
     private SeedEntity seedEntity;
     private Consumer<Item> abortPlacing;
+
+    private ParticleEntity sabotageEffect;
 
     private DestroyerEntity destroyerEntity;
     private Pair<FarmItem, ChangeListener<? super Number>> destroyerListener;
@@ -123,6 +138,24 @@ public class FarmEntity extends GameEntity {
         }
 
         this.pickables = pickables;
+
+        ParticleParameters parameters = new ParticleParameters(100, true, 
+            FAST_CROP_PARTICLE, 
+            ParticleSimulationSpace.WORLD, 
+            SupplierGenerator.rangeSupplier(1.0, 7.0), 
+            SupplierGenerator.rangeSupplier(1.0, 5.0), 
+            null, 
+            SupplierGenerator.staticSupplier(0.0), 
+            SupplierGenerator.rangeSupplier(new Point2D(-5, -5), new Point2D(5, 0)));
+
+        parameters.setEmissionRate(10);
+        parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(Point2D.ZERO, this.getSize()));
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
+            particle.opacity = 1.0 * EaseCurve.FADE_IN_OUT.apply(percentage);
+        });
+
+        this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
+        this.sabotageEffect.setParent(this);
     }
 
     public static double scaleFactorToFitWidth(int squareScale, double w, double h) {
@@ -180,6 +213,28 @@ public class FarmEntity extends GameEntity {
 
     public void updateFromState(FarmState farmState) {
         this.data.updateFromState(farmState);
+
+        if (farmState.getAIMultiplier() != 1 || farmState.getGrowthMultiplier() != 1) {
+            if (farmState.getGrowthMultiplier() > 1) {
+                sabotageEffect.getParameters().setEmissionType(FAST_CROP_PARTICLE);
+            }
+            else if (farmState.getGrowthMultiplier() < 1) {
+                sabotageEffect.getParameters().setEmissionType(SLOW_CROP_PARTICLE);
+            }
+            else if (farmState.getAIMultiplier() > 1) {
+                sabotageEffect.getParameters().setEmissionType(AI_ATTRACT_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(AI_REPEL_PARTICLE);
+            }
+            
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 
     /**
@@ -594,6 +649,8 @@ public class FarmEntity extends GameEntity {
             this.rowEntities.add(0, newRowEntity);
 
             this.sendStateUpdate();
+
+            sabotageEffect.getComponent(ParticleComponent.class).parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(Point2D.ZERO, this.getSize()));
         };
     }
 
@@ -798,6 +855,22 @@ public class FarmEntity extends GameEntity {
     public void setGrowthMultiplier(double growthMultiplier) {
         this.data.setGrowthMultiplier(growthMultiplier);
         this.sendStateUpdate();
+
+        if (growthMultiplier != 1) {
+            if (growthMultiplier > 1) {
+                sabotageEffect.getParameters().setEmissionType(FAST_CROP_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(SLOW_CROP_PARTICLE);
+            }
+
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 
     /**
@@ -815,5 +888,21 @@ public class FarmEntity extends GameEntity {
     public void setAIMultiplier(double AIMultiplier) {
         this.data.setAIMultiplier(AIMultiplier);
         this.sendStateUpdate();
+
+        if (AIMultiplier != 1) {
+            if (AIMultiplier > 1) {
+                sabotageEffect.getParameters().setEmissionType(AI_ATTRACT_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(AI_REPEL_PARTICLE);
+            }
+
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 }

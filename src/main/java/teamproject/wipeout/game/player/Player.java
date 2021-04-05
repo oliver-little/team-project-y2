@@ -3,7 +3,7 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
-import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
@@ -11,15 +11,19 @@ import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
+import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
+import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
@@ -27,6 +31,7 @@ import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
+import teamproject.wipeout.util.SupplierGenerator;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,6 +39,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
+
+    public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
+    public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
     public final int MAX_SIZE = 10; //no. of inventory slots
     public final int INITIAL_MONEY = 2500; //initial amount of money
@@ -70,6 +78,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private final MovementComponent physics;
     private final AudioComponent audio;
 
+    private ParticleEntity sabotageEffect;
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -84,6 +94,24 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
 
+        ParticleParameters parameters = new ParticleParameters(100, true, 
+            FAST_PARTICLE, 
+            ParticleSimulationSpace.WORLD, 
+            SupplierGenerator.rangeSupplier(0.5, 1.5), 
+            SupplierGenerator.rangeSupplier(1.0, 4.0), 
+            null, 
+            SupplierGenerator.staticSupplier(0.0), 
+            SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
+
+        parameters.setEmissionRate(20);
+        parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(12, 0), new Point2D(52, 40)));
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
+            particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage);
+        });
+
+        this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
+        this.sabotageEffect.setParent(this);
+
         this.position = new Transform(position, 0.0, 1);
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);
         this.physics.stopCallback = (newPosition) -> {
@@ -91,6 +119,23 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             this.sendPlayerStateUpdate();
         };
         this.physics.speedMultiplierChanged = (newMultiplier) -> {
+            // Updates local player when sabotage applied
+            if (newMultiplier != 1) {
+                if (newMultiplier < 1) {
+                    sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+                }
+                else {
+                    sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+                }
+
+                if (!sabotageEffect.isPlaying()) {
+                    sabotageEffect.play();
+                }
+            }
+            else if (sabotageEffect.isPlaying()) {
+                sabotageEffect.stop();
+            }
+
             this.playerState.setSpeedMultiplier(newMultiplier);
             this.sendPlayerStateUpdate();
         };
@@ -181,6 +226,23 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
         this.money.set(newState.getMoney());
         this.playerState.updateStateFrom(newState);
+
+        // Update remote players
+        if (newState.getSpeedMultiplier() != 1) {
+            if (newState.getSpeedMultiplier() < 1) {
+                sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+            }
+
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 
     /**

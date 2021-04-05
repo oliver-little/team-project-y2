@@ -174,7 +174,6 @@ public class PotionEntity extends GameEntity {
 
                         Rectangle r = new Rectangle(transform.getWorldPosition().getX(), transform.getWorldPosition().getY(), rc.getWidth(), rc.getHeight());
                         if (GeometryUtil.intersects(potionArea, r)) {
-                            System.out.println("hit");
                             entity.addComponent(potion.getComponent(SabotageComponent.class));
                         }
                     }

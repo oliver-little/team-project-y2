@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.render.particle.*;
@@ -212,19 +213,6 @@ public class ParticleSystem implements GameSystem {
     };
 
     /**
-     * Gets a random position within a given bounding box
-     * @param topLeft The top left position to get a random point from
-     * @param widthHeight The width and height of the box
-     * @return The random position within the box
-     */
-    private Point2D getRandomPositionInArea(Point2D topLeft, Point2D widthHeight) {
-        double x = topLeft.getX() + randomGenerator.nextInt((int) widthHeight.getX());
-        double y = topLeft.getY() + randomGenerator.nextInt((int) widthHeight.getY());
-
-        return new Point2D(x, y);
-    }
-
-    /**
      * Initialises a new particle from the pool
      * @param parameters The particle parameter object to reference for initialisation
      * @return The newly initialised particle
@@ -235,9 +223,9 @@ public class ParticleSystem implements GameSystem {
             startPos = particleEntityPos;
         }
 
-        Point2D emissionArea = parameters.getEmissionArea();
-        if (emissionArea != null && emissionArea.getX() > 0 && emissionArea.getY() > 0) {
-            startPos = this.getRandomPositionInArea(startPos, parameters.getEmissionArea());
+        Supplier<Point2D> emissionArea = parameters.getEmissionPositionGenerator();
+        if (emissionArea != null) {
+            startPos = startPos.add(emissionArea.get());
         }
 
         double width = parameters.getWidth().get();

@@ -30,7 +30,7 @@ public class ParticleParameters {
     private int emissionRate = 0;
     private double invEmissionRate;
 
-    private Point2D emissionArea;
+    private Supplier<Point2D> emissionPositionGenerator;
 
     private boolean burstsEnabled = false;
 
@@ -213,18 +213,18 @@ public class ParticleParameters {
 
     /**
      * Gets the area over which particles should be emitted (local to the transform of this object)
-     * @return A Point2D object representing the width and height of the box to generate particles in
+     * @return A Supplier<Point2D> object generating positions for particles to be generated at
      */
-    public Point2D getEmissionArea() {
-        return this.emissionArea;
+    public Supplier<Point2D> getEmissionPositionGenerator() {
+        return this.emissionPositionGenerator;
     }
 
     /**
      * Sets the area over which particles should be emitted
-     * @param emissionArea A Point2D object representing the width and height of the box to generate particles in
+     * @param emissionArea A Supplier<Point2D> object generating positions for particles to be generated at
      */
-    public void setEmissionArea(Point2D emissionArea) {
-        this.emissionArea = emissionArea;
+    public void setEmissionPositionGenerator(Supplier<Point2D> emissionArea) {
+        this.emissionPositionGenerator = emissionArea;
     }
 
     /**
