@@ -19,6 +19,8 @@ import java.util.Set;
 
 public class MouseHoverSystem implements GameSystem {
 
+    public static final Point2D CLICK_ERROR_OFFSET = MouseClickSystem.CLICK_ERROR_OFFSET;
+
     private final SignatureEntityCollector collector;
     private final CameraEntityCollector cameraCollector;
 
@@ -28,8 +30,8 @@ public class MouseHoverSystem implements GameSystem {
     private double lastFrameWorldY;
 
     protected final InputHoverableAction onHover = (x, y) -> {
-        this.currentMouseX = x;
-        this.currentMouseY = y;
+        this.currentMouseX = x + CLICK_ERROR_OFFSET.getX();
+        this.currentMouseY = y + CLICK_ERROR_OFFSET.getY();
     };
 
     public MouseHoverSystem(GameScene scene, InputHandler input) {

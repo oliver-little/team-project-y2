@@ -21,6 +21,8 @@ import java.util.Set;
 
 public class MouseClickSystem implements EventSystem {
 
+    public static final Point2D CLICK_ERROR_OFFSET = new Point2D(8, 20);
+
     public static final Set<Class<? extends GameComponent>> signature = Set.of(Transform.class, RenderComponent.class, Clickable.class);
 
     private static final RenderOrderComparator comparator = new RenderOrderComparator();
@@ -62,8 +64,8 @@ public class MouseClickSystem implements EventSystem {
             position = cameraCollector.getCameraTransform().getWorldPosition();
         }
 
-        x = (x / zoom) + position.getX();
-        y = (y / zoom) + position.getY();
+        x = ((x + CLICK_ERROR_OFFSET.getX())/ zoom) + position.getX();
+        y = ((y + CLICK_ERROR_OFFSET.getY()) / zoom) + position.getY();
 
         List<GameEntity> entities = this.collector.getEntities();
         entities = InsertionSort.sort(entities, comparator);
@@ -76,7 +78,7 @@ public class MouseClickSystem implements EventSystem {
             entity = entities.get(i);
             worldPosition = entity.getComponent(Transform.class).getWorldPosition();
             renderComponent = entity.getComponent(RenderComponent.class);
-            if (x > worldPosition.getX() && y > worldPosition.getY() && x < worldPosition.getX() + renderComponent.getWidth() && y < worldPosition.getY() + renderComponent.getHeight()) {
+            if (x >= worldPosition.getX() && y >= worldPosition.getY() && x < worldPosition.getX() + renderComponent.getWidth() && y < worldPosition.getY() + renderComponent.getHeight()) {
                 return new Pair<GameEntity, Point2D>(entity, new Point2D(x, y));
             } 
             i--;
