@@ -58,6 +58,7 @@ import teamproject.wipeout.util.Networker;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -94,8 +95,11 @@ public class App implements Controller {
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public App(Networker networker, Long givenGameStartTime) {
+    private LinkedHashMap<String, KeyCode> keyBindings;
+
+    public App(Networker networker, Long givenGameStartTime, LinkedHashMap<String, KeyCode> bindings) {
         this.networker = networker;
+        this.keyBindings = bindings;
 
         if (givenGameStartTime == null) {
             this.gameStartTime = System.currentTimeMillis();
@@ -178,7 +182,8 @@ public class App implements Controller {
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
         this.worldEntity = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
-
+        this.worldEntity.setupFarmPickingKey(keyBindings.get("Harvest"));
+        
         if (this.networker != null) {
             this.worldEntity.setClientSupplier(this.networker.clientSupplier);
             this.networker.worldEntity = this.worldEntity;
@@ -211,21 +216,21 @@ public class App implements Controller {
         
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
 
-        input.addKeyAction(KeyCode.LEFT,
+        input.addKeyAction(keyBindings.get("Move left"),
                 () -> player.addAcceleration(-500f, 0f),
-                () -> player.addAcceleration(500f, 0f));
+                () -> player.addAcceleration(500f, 0f)); //moving left
 
-        input.addKeyAction(KeyCode.RIGHT,
+        input.addKeyAction(keyBindings.get("Move right"),
                 () -> player.addAcceleration(500f, 0f),
-                () -> player.addAcceleration(-500f, 0f));
+                () -> player.addAcceleration(-500f, 0f)); //moving right
 
-        input.addKeyAction(KeyCode.UP,
+        input.addKeyAction(keyBindings.get("Move up"),
                 () -> player.addAcceleration(0f, -500f),
-                () -> player.addAcceleration(0f, 500f));
+                () -> player.addAcceleration(0f, 500f)); //moving up
 
-        input.addKeyAction(KeyCode.DOWN,
+        input.addKeyAction(keyBindings.get("Move down"),
                 () -> player.addAcceleration(0f, 500f),
-                () -> player.addAcceleration(0f, -500f));
+                () -> player.addAcceleration(0f, -500f)); //moving down
                 
         /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
@@ -236,7 +241,7 @@ public class App implements Controller {
         invUI.onMouseClick(this.worldEntity);
         input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
         
-        input.addKeyAction(KeyCode.X,
+        input.addKeyAction(keyBindings.get("Pick-up"),
                 () -> {player.pickup();
                 	   },
                 () -> {});

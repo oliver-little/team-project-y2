@@ -444,7 +444,7 @@ public class StartMenu implements Controller {
     }
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        App game = new App(givenNetworker, gameStartTime);
+        App game = new App(givenNetworker, gameStartTime, keyBindings);
         Window window = root.getScene().getWindow();
         Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
         root.getScene().setRoot(content);

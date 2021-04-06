@@ -132,7 +132,7 @@ public class WorldEntity extends GameEntity {
 		nameTag.setParent(this.myAnimal);
 
 		this.setMyFarm(this.farms.get(1));
-		this.setupFarmPickingKey();
+		//this.setupFarmPickingKey();
 	}
 
 	public Player getMyPlayer() {
@@ -168,8 +168,8 @@ public class WorldEntity extends GameEntity {
 		}
 	}
 
-	protected void setupFarmPickingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
+	public void setupFarmPickingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
