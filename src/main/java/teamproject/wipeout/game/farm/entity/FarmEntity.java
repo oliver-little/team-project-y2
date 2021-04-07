@@ -170,6 +170,22 @@ public class FarmEntity extends GameEntity {
         return this.size;
     }
 
+    public Point2D getPointSize() {
+        return new Point2D(this.data.farmColumns, this.data.farmRows);
+    }
+
+    public int getEmptySpaces() {
+        int counter = 0;
+        for (ArrayList<FarmItem> row : this.data.getItems()) {
+            for (FarmItem item : row) {
+                if (item == null) {
+                    counter += 1;
+                }
+            }
+        }
+        return counter;
+    }
+
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
         this.removePlayer();
 
@@ -454,10 +470,21 @@ public class FarmEntity extends GameEntity {
      * @param y Y coordinate of the "square"
      * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
      */
-    protected boolean canBePlaced(double x, double y, int w, int h) {
+    public boolean canBePlaced(double x, double y, int w, int h) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
+        return this.data.canBePlaced(row, column, w ,h);
+    }
+
+    /**
+     * Checks if a given position at the farm is empty.
+     *
+     * @param x X coordinate of the "square"
+     * @param y Y coordinate of the "square"
+     * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
+     */
+    public boolean canBePlacedAtSquare(int row, int column, int w, int h) {
         return this.data.canBePlaced(row, column, w ,h);
     }
 
@@ -483,8 +510,9 @@ public class FarmEntity extends GameEntity {
      * @param item {@link Item} to be stored
      * @param x X scene coordinate
      * @param y Y scene coordinate
+     * @return True if the item was placed, otherwise false
      */
-    protected boolean placeItem(Item item, double x, double y) {
+    public boolean placeItem(Item item, double x, double y) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
@@ -493,6 +521,27 @@ public class FarmEntity extends GameEntity {
 
         if (placed) {
             this.audio.play("shovel.wav");
+            PlantComponent pc = item.getComponent(PlantComponent.class);
+            Point2D startPos = this.rescaleCoordinatesToScene(column, row).add((pc.width * FarmEntity.SQUARE_SIZE / 2), (pc.height * FarmEntity.SQUARE_SIZE / 1.8));
+            new PlantParticleEntity(this.getScene(), startPos.getX(), startPos.getY());
+        }
+
+        this.sendStateUpdate();
+        return placed;
+    }
+
+    /**
+     * Puts a given Item on a given position defined by the X and Y coordinates.
+     *
+     * @param item {@link Item} to be stored
+     * @param x X scene coordinate
+     * @param y Y scene coordinate
+     * @return True if the item was placed, otherwise false
+     */
+    public boolean placeItemAtSquare(Item item, int row, int column) {
+        boolean placed = this.data.placeItem(item, 0.0, row, column);
+
+        if (placed) {
             PlantComponent pc = item.getComponent(PlantComponent.class);
             Point2D startPos = this.rescaleCoordinatesToScene(column, row).add((pc.width * FarmEntity.SQUARE_SIZE / 2), (pc.height * FarmEntity.SQUARE_SIZE / 1.8));
             new PlantParticleEntity(this.getScene(), startPos.getX(), startPos.getY());
@@ -518,7 +567,7 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      * @param makePickable True if you want the item to be pickable, otherwise false.
      */
-    public void pickItemAt(double x, double y, boolean makePickable) {
+    public Integer pickItemAt(double x, double y, boolean makePickable) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
@@ -529,7 +578,7 @@ public class FarmEntity extends GameEntity {
         // Get the farmItem
         FarmItem itemToPick = this.data.itemAt(row, column);
         if (itemToPick == null) {
-            return;
+            return null;
         }
 
         Item pickedItem = itemToPick.get();
@@ -553,11 +602,9 @@ public class FarmEntity extends GameEntity {
         this.sendStateUpdate();
         
         if (pickedItem == null) {
-            return;
+            return null;
         }
 
-        
-        
         if (makePickable) {
             // Player picking the farm item
 
@@ -578,6 +625,8 @@ public class FarmEntity extends GameEntity {
             // Animal eating the farm item
             this.audio.play("chomp.wav");
         }
+
+        return pickedItem.id;
     }
 
     /**

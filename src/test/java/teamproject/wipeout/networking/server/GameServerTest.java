@@ -53,7 +53,7 @@ class GameServerTest {
                 return player;
             }
         }
-        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null);
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null, null);
     };
 
     @BeforeAll
@@ -75,7 +75,7 @@ class GameServerTest {
 
             this.clientPlayers = new Player[CLIENT_IDs.length];
             for (int i = 0; i < CLIENT_IDs.length; i++) {
-                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), null);
+                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), null, null);
             }
 
         } catch (IOException | InterruptedException | ReflectiveOperationException exception) {

@@ -50,12 +50,12 @@ class GameClientTest {
     private HashSet<PlayerState> newPlayers;
     private final NewPlayerAction newPlayerAction = (newPlayer) -> {
         newPlayers.add(newPlayer);
-        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null);
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null, null);
     };
 
     @BeforeAll
     void initializeGameClient() throws IOException, InterruptedException, ReflectiveOperationException {
-        this.clientPlayer = new Player(new GameScene(), CLIENT_ID, "Test", Point2D.ZERO, null);
+        this.clientPlayer = new Player(new GameScene(), CLIENT_ID, "Test", Point2D.ZERO, null, null);
         this.newPlayers = new HashSet<>();
 
         this.gameServer = new GameServer(SERVER_NAME);
@@ -314,7 +314,7 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            Player secondPlayer = new Player(new GameScene(), DUMMY_CLIENT_ID, "Test", Point2D.ZERO, null);
+            Player secondPlayer = new Player(new GameScene(), DUMMY_CLIENT_ID, "Test", Point2D.ZERO, null, null);
             this.playerWaitingForFarmID = secondPlayer;
             GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             this.clientWaitingForFarmID = secondClient;

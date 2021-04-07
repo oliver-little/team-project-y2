@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
@@ -86,7 +87,7 @@ public class Networker {
             }
 
             try {
-                this.serverDiscovery = new ServerDiscovery(this.onServerDiscovery(gameScene, spriteManager));
+                this.serverDiscovery = new ServerDiscovery(this.onServerDiscovery(gameScene));
                 this.serverDiscovery.startLookingForServers();
 
             } catch (IOException exception) {
@@ -95,13 +96,13 @@ public class Networker {
         };
     }
 
-    public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
+    public NewPlayerAction onPlayerConnection(GameScene gameScene, ItemStore itemStore, SpriteManager spriteManager) {
         return (newPlayerState) -> {
             if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
                 return null;
             }
 
-            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), null);
+            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), itemStore, null);
 
             newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
             newPlayer.addComponent(new CollisionResolutionComponent());
@@ -126,7 +127,7 @@ public class Networker {
         };
     }
 
-    protected NewServerDiscovery onServerDiscovery(GameScene gameScene, SpriteManager spriteManager) {
+    protected NewServerDiscovery onServerDiscovery(GameScene gameScene) {
         return (name, address) -> {
             this.serverDiscovery.stopLookingForServers();
 
@@ -143,7 +144,7 @@ public class Networker {
                 this.worldEntity.marketUpdater.stop();
 
                 FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
-                this.worldEntity.setMyFarm(myFarm);
+                this.worldEntity.setFarmFor(this.worldEntity.myPlayer, true, myFarm);
 
                 System.out.println("Connected client with ID: " + currentClient.id);
 
@@ -157,7 +158,7 @@ public class Networker {
             };
 
             try {
-                this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmHandler, this.onPlayerConnection(gameScene, spriteManager));
+                this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmHandler, this.onPlayerConnection(gameScene, this.worldEntity.itemStore, this.worldEntity.spriteManager));
                 this.client.clockCalibration = (originalGameStart) -> {
                     double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
                     this.clockSystem.setTimeDifference(timeDifference);

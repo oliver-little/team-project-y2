@@ -4,10 +4,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
+import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.render.Renderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.component.render.RectRenderable;
@@ -20,6 +23,7 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
+import teamproject.wipeout.game.player.AIPlayerComponent;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -54,8 +58,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	private InputHandler inputHandler;
 	private Supplier<GameClient> clientSupplier;
 
-	private SpriteManager spriteManager;
-	private ItemStore itemStore;
+	public SpriteManager spriteManager;
+	public ItemStore itemStore;
 
 	public WorldEntity(GameScene gameScene, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input, ArrayList<Task> purchasableTasks) {
 		super(gameScene);
@@ -143,11 +147,22 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
-		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), navMesh, spriteManager, new ArrayList<>(farms.values()));
+		/*boolean xxx = true;
+		for (NavigationSquare square : this.navMesh.squares) {
+			GameEntity eSquare = this.scene.createEntity();
+			eSquare.addComponent(new Transform(square.topLeft, 0.0));
+			RectRenderable renderable = new RectRenderable(xxx ? Color.RED : Color.BLUE, square.bottomRight.getX() - square.topLeft.getX(), square.bottomRight.getY() - square.topLeft.getY());
+			xxx = !xxx;
+			eSquare.addComponent(new RenderComponent(renderable));
+		}*/
 
-		this.setMyFarm(this.farms.get(1));
+		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
+
+		this.setFarmFor(this.myPlayer, true, this.farms.get(1));
 		this.setupFarmPickingKey();
 		this.setupFarmDestroyingKey();
+
+		this.createAIPlayer();
 	}
 
 	public void addPotion(PotionEntity potionEntity) {
@@ -172,14 +187,16 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.myAnimal.setClientSupplier(supplier);
 	}
 
-	public void setMyFarm(FarmEntity farm) {
-		this.myFarm = farm;
+	public void setFarmFor(Player player, boolean activePlayer, FarmEntity farm) {
+		if (activePlayer) {
+			this.myFarm = farm;
+		}
 		if (farm != null) {
-			this.myPlayer.getCurrentState().assignFarm(farm.farmID);
-			this.setMyPlayerPosition(farm);
-			farm.assignPlayer(this.myPlayer.playerID, true, this.clientSupplier);
+			player.getCurrentState().assignFarm(farm.farmID);
+			this.setPositionForPlayer(player, farm);
+			farm.assignPlayer(player.playerID, activePlayer, this.clientSupplier);
 		} else {
-			this.myPlayer.getCurrentState().assignFarm(null);
+			player.getCurrentState().assignFarm(null);
 		}
 	}
 
@@ -209,7 +226,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	protected void setMyPlayerPosition(FarmEntity farm) {
+	protected void setPositionForPlayer(Player player, FarmEntity farm) {
 		Point2D playerPosition;
 		switch (farm.farmID) {
 			case 1:
@@ -228,7 +245,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				playerPosition = Point2D.ZERO;
 				break;
 		}
-		this.myPlayer.setWorldPosition(playerPosition);
+		player.setWorldPosition(playerPosition);
 	}
 
 	protected void setupFarmPickingKey() {
@@ -241,6 +258,23 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
 			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
+	}
+
+	private void createAIPlayer() {
+		Player player = new Player(this.scene, new Random().nextInt(1024), "Farmer", new Point2D(10, 10), this.itemStore, null);
+		try {
+			player.addComponent(new RenderComponent(new Point2D(0, -3)));
+			player.addComponent(new PlayerAnimatorComponent(
+					spriteManager.getSpriteSet("player-red", "walk-up"),
+					spriteManager.getSpriteSet("player-red", "walk-right"),
+					spriteManager.getSpriteSet("player-red", "walk-down"),
+					spriteManager.getSpriteSet("player-red", "walk-left"),
+					spriteManager.getSpriteSet("player-red", "idle")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.setFarmFor(player, false, this.farms.get(2));
+		player.addComponent(new AIPlayerComponent(player, this.market.getMarket(), this.navMesh, this.farms.get(2)));
 	}
 
 	/**

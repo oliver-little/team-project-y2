@@ -212,6 +212,9 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     public boolean canBePlaced(int row, int column, int w, int h) {
         if (this.areCoordinatesInvalid(row, column)) {
+            System.out.println("Invalid " + w);
+            System.out.println(row);
+            System.out.println(column);
             return false;
         }
         int rowMax = row + h;
@@ -242,7 +245,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     public boolean placeItem(Item item, double growth, int row, int column) {
         PlantComponent plant = item.getComponent(PlantComponent.class);
         int plantWidth = plant.width;
-        int plantHeight= plant.height;
+        int plantHeight = plant.height;
         if (!this.canBePlaced(row, column, plantWidth, plantHeight)) {
             return false;
         }

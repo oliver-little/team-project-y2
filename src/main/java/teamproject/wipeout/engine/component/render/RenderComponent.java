@@ -37,6 +37,14 @@ public class RenderComponent implements GameComponent {
         this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));
     }
 
+    /**
+     * Takes any number of renderable objects to render for this object to render.
+     * @param newRenderables An arbitrary number of renderable objects.
+     */
+    public RenderComponent(ArrayList<Renderable> newRenderables) {
+        this.renderables = newRenderables;
+    }
+
     public RenderComponent(boolean isStatic, Renderable... newRenderables) {
         this.isStatic = isStatic;
         this.renderables = new ArrayList<Renderable>(Arrays.asList(newRenderables));

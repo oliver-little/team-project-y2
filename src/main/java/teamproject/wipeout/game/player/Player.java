@@ -85,12 +85,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, InventoryUI invUI) {
+    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, ItemStore itemStore, InventoryUI invUI) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
+
+        this.itemStore = itemStore;
 
         this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
 
@@ -150,13 +152,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.audio = new AudioComponent();
         this.addComponent(this.audio);
 
+        for (int i = 0; i < MAX_SIZE; i++) {
+            this.inventory.add(null);
+        }
+
         this.invUI = invUI;
         if (invUI != null) {
-            for (int i = 0; i < MAX_SIZE; i++) {
-                this.inventory.add(null);
-            }
             selectSlot(0);
-
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
     }
@@ -322,11 +324,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (!addToInventory(itemID, quantity)) {
-            invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
-            System.out.println("No space in inventory for item(s)");
+            if (this.invUI != null) {
+                invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
+            }
             return false;
         }
-        System.out.println("Acquired " + quantity + " of itemID " + itemID);
         return true;
     }
     
@@ -352,7 +354,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     private int countFreeItemSpaces(Integer itemID) {
     	int counter = 0;
-    	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	System.out.println(stackLimit);
     	for(InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			counter += stackLimit - pair.quantity;
@@ -360,6 +363,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     			counter += stackLimit;
     		}
     	}
+        System.out.println(counter);
     	return counter;
     }
 
@@ -375,18 +379,22 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	}
     	
     	int i = 0;
-        int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+        int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
         for (InventoryItem pair : inventory) { //adding to item's existing slots
             if((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
                 pair.quantity += quantity;
                 inventory.set(i, pair);
-                this.invUI.updateUI(inventory, i);
+                if (this.invUI != null) {
+                    this.invUI.updateUI(inventory, i);
+                }
                 return true; //returns index of change
             }else if((pair != null) && (itemID == pair.itemID)) {
             	quantity -= stackLimit - pair.quantity;
             	pair.quantity = stackLimit;
             	inventory.set(i, pair);
-            	this.invUI.updateUI(inventory, i);
+                if (this.invUI != null) {
+                    this.invUI.updateUI(inventory, i);
+                }
             }
             i++;
         }
@@ -397,14 +405,18 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 	                pair = new InventoryItem(itemID, quantity);
 	                inventory.set(i, pair);
 	                occupiedSlots++;
-	                this.invUI.updateUI(inventory, i);
+                    if (this.invUI != null) {
+                        this.invUI.updateUI(inventory, i);
+                    }
 	                return true; //returns index of change
 	            }else if(pair == null) {
 	            	pair = new InventoryItem(itemID, stackLimit);
 	            	quantity -= stackLimit;
 	                inventory.set(i, pair);
 	                occupiedSlots++;
-	                this.invUI.updateUI(inventory, i);
+                    if (this.invUI != null) {
+                        this.invUI.updateUI(inventory, i);
+                    }
 	            }
 	            i++;
 	        }
@@ -481,10 +493,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public int removeItem(int itemID, int quantity) {
     	int noOfThisItem = countItems(itemID);
-    	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+    	int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	if(quantity > noOfThisItem) {
-            invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
-    		System.out.println("There isn't " + quantity + " of itemID " + itemID + " in the inventory");
+    	    if (this.invUI != null) {
+                invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
+            }
     		return -1;
     	}
     	int endQuantity = noOfThisItem - quantity;
@@ -496,7 +509,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             	if(quantity >= pair.quantity) {
             		quantity -= pair.quantity;
             		inventory.set(i, null); //free inventory slot
-                    invUI.updateUI(inventory, i);
+                    if (this.invUI != null) {
+                        invUI.updateUI(inventory, i);
+                    }
                     occupiedSlots--; //inventory slot is freed
                     if(quantity == 0) {
                     	break;
@@ -504,7 +519,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             	}else {
             		pair.quantity -= quantity;
                     inventory.set(i, pair);
-                    invUI.updateUI(inventory, i);
+                    if (this.invUI != null) {
+                        invUI.updateUI(inventory, i);
+                    }
                     slotWithSpace = i;
                     break;
             	}
@@ -715,7 +732,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean hasEnoughMoney(double price) {
         if (getMoney() < price) {
-            invUI.displayMessage(ERROR_TYPE.MONEY);
+            if (this.invUI != null) {
+                this.invUI.displayMessage(ERROR_TYPE.MONEY);
+            }
             return false;
         }
         return true;
