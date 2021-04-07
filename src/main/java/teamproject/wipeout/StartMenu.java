@@ -132,12 +132,15 @@ public class StartMenu implements Controller {
 
         //addTitle("Lobby");
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
-        VBox players = new VBox();
-        players.getStyleClass().add("vbox");
-        players.setAlignment(Pos.CENTER);
-        players.setMaxWidth(400);
+        
+        ListView<String> playerList = new ListView<>();
+        playerList.setMaxWidth(180);
+        playerList.setMaxHeight(120);
+        //list.setMouseTransparent( true );
+        playerList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
+        //serverList.getItems().add(new Server("test", null));
 
-        menuBox.getChildren().addAll(players);
+        menuBox.getChildren().addAll(playerList);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Start Game", () -> startServerGame()),
@@ -166,10 +169,9 @@ public class StartMenu implements Controller {
             }
 
             Platform.runLater(() -> {
-                players.getChildren().clear();
+                playerList.getItems().clear();
                 for (String player : observablePlayers.values()) {
-                    Label playerLabel = new Label(player);
-                    players.getChildren().add(playerLabel);
+                    playerList.getItems().add(player);
                 }
             });
         });
@@ -199,13 +201,13 @@ public class StartMenu implements Controller {
         serverBox.setAlignment(Pos.CENTER);
 
         
-        ListView<Server> list = new ListView<>();
-        list.setMaxWidth(180);
-        list.setMaxHeight(120);
+        ListView<Server> serverList = new ListView<>();
+        serverList.setMaxWidth(180);
+        serverList.setMaxHeight(120);
         //list.setMouseTransparent( true );
-        list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
-        list.getItems().add(new Server("test", null));
-        serverBox.getChildren().add(list);
+        serverList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
+        //serverList.getItems().add(new Server("test", null));
+        serverBox.getChildren().add(serverList);
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
@@ -216,15 +218,15 @@ public class StartMenu implements Controller {
                 serverBox.getChildren().clear();
 
                 for (Map.Entry<String, InetSocketAddress> entry : servers.entrySet()) {
-                	list.getItems().add(new Server(entry.getKey(), entry.getValue()));
+                	serverList.getItems().add(new Server(entry.getKey(), entry.getValue()));
                 }
-                serverBox.getChildren().add(list);
+                serverBox.getChildren().add(serverList);
             });
         });
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
-                	Server selectedItem = list.getSelectionModel().getSelectedItem();
+                	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
                 	System.out.println("selectedItem: "+ selectedItem.getServerName());
                     if(selectedItem != null){
                         joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
