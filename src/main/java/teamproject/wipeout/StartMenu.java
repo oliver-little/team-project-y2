@@ -197,8 +197,15 @@ public class StartMenu implements Controller {
         VBox serverBox = new VBox();
         serverBox.getStyleClass().add("pane");
         serverBox.setAlignment(Pos.CENTER);
-        //toggle groups are so only one can be selected at a time
-        ToggleGroup serverGroup = new ToggleGroup();
+
+        
+        ListView<Server> list = new ListView<>();
+        list.setMaxWidth(180);
+        list.setMaxHeight(120);
+        //list.setMouseTransparent( true );
+        list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
+        list.getItems().add(new Server("test", null));
+        serverBox.getChildren().add(list);
 
         menuBox.getChildren().addAll(playerInfoBox, serverBox);
 
@@ -209,19 +216,18 @@ public class StartMenu implements Controller {
                 serverBox.getChildren().clear();
 
                 for (Map.Entry<String, InetSocketAddress> entry : servers.entrySet()) {
-                    ToggleButton serverButton = new ToggleButton(entry.getKey());
-                    serverButton.setUserData(entry.getValue());
-                    serverButton.setToggleGroup(serverGroup);
-                    serverBox.getChildren().add(serverButton);
+                	list.getItems().add(new Server(entry.getKey(), entry.getValue()));
                 }
+                serverBox.getChildren().add(list);
             });
         });
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
-                    ToggleButton s = (ToggleButton) serverGroup.getSelectedToggle();
-                    if(s != null){
-                        joinServer(s.getText(), nameTF.getText(), (InetSocketAddress) s.getUserData());
+                	Server selectedItem = list.getSelectionModel().getSelectedItem();
+                	System.out.println("selectedItem: "+ selectedItem.getServerName());
+                    if(selectedItem != null){
+                        joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
