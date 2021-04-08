@@ -2,18 +2,21 @@ package teamproject.wipeout.game.player;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketItem;
+import teamproject.wipeout.game.market.ui.FarmExpansionUI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +25,11 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class AIPlayerComponent implements GameComponent  {
 
-    public static final int IDLE_TIME_SCALING_FACTOR = 5;
+    public static final int IDLE_TIME_SCALING_FACTOR = 3;
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
@@ -38,6 +42,8 @@ public class AIPlayerComponent implements GameComponent  {
     private Market market;
 
     private ScheduledExecutorService executor;
+
+    public Supplier<ClockSystem> clock;
 
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
@@ -84,7 +90,7 @@ public class AIPlayerComponent implements GameComponent  {
 
         //If there are no fully grown crops in the selected farm, just find a random location instead.
         if (fullyGrownItems.size() == 0) {
-            aiDecisionAlgorithm().run();
+            this.aiDecisionAlgorithm().run();
             return;
         }
 
@@ -95,11 +101,18 @@ public class AIPlayerComponent implements GameComponent  {
         int y = (int) fullyGrownItems.get(rand).getY();
 
         Runnable onComplete = () ->  {
-            Integer pickedID = this.myFarm.pickItemAt(x, y, false);
-            if (pickedID != null) {
-                this.myPlayer.sellItem(this.market, pickedID, 1);
+            Integer[] picked = this.myFarm.pickItemAt(x, y, false);
+            if (picked != null) {
+                Integer pickedID = picked[0];
+                int pickedQuantity = picked[1];
+                this.myPlayer.acquireItem(pickedID, pickedQuantity);
+                this.myPlayer.sellItem(this.market, pickedID, pickedQuantity);
             }
-            Platform.runLater(this.aiDecisionAlgorithm());
+            if (fullyGrownItems.size() - 1 > 0) {
+                this.aiHarvestCrops();
+            } else {
+                Platform.runLater(this.aiDecisionAlgorithm());
+            }
         };
 
         aiTraverse(x, y, onComplete);
@@ -118,7 +131,7 @@ public class AIPlayerComponent implements GameComponent  {
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
 
-        aiTraverse(randX, randY, aiDecisionAlgorithm());
+        aiTraverse(randX, randY, this.aiDecisionAlgorithm());
     }
 
     /**
@@ -126,29 +139,66 @@ public class AIPlayerComponent implements GameComponent  {
      */
     private Runnable aiDecisionAlgorithm() {
         return () -> {
+            if (this.clock != null && this.clock.get().clockUI.getTime() <= 0.0) {
+                System.out.println("STOP");
+                System.out.println("AI: " + this.myPlayer.getMoney());
+                System.out.println("AI: " + this.myPlayer.getInventory().toString());
+                return;
+            }
             double stealProbability = 0.3; //Probability of stealing crops.
             double buyProbability = 0.8; //Probability of stealing crops.
 
             //Make decision on what to do next.
             double probability = Math.random();
 
-            if (probability <= 0.3) {
+            if (probability <= 0.8) {
+                if (this.clock != null && this.clock.get().clockUI.getTime() < 30.0) {
+                    System.out.println("Harvest STOP");
+                    aiHarvestCrops();
+                    return;
+                }
 
-                if (Math.random() < 0.5) {
-                    //Idle
-                    aiIdle();
+                if (Math.random() <= 0.6) {
+                    //Steal plants
+                    System.out.println("Harvest");
+                    aiHarvestCrops();
+
                 } else {
-                    //Pick random point
-                    aiPathFind();
+                    if (Math.random() > 0.8) {
+                        double expansionAddition = (this.myFarm.getExpansionLevel() * FarmExpansionUI.PRICE_MULTIPLIER);
+                        double expansionPrice = 100 * (expansionAddition == 0.0 ? 1.0 : expansionAddition);
+                        if (this.myPlayer.hasEnoughMoney(expansionPrice)) {
+                            System.out.println("Expand");
+                            this.myPlayer.setMoney(this.myPlayer.getMoney() - expansionPrice);
+                            this.myFarm.expandFarmBy(1);
+                            this.aiDecisionAlgorithm().run();
+                        } else {
+                            System.out.println("Buy 2");
+                            aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
+                                System.out.println("Before");
+                                this.buyPlants();
+                                this.aiDecisionAlgorithm().run();
+                                System.out.println("After");
+                            });
+                        }
+                    } else {
+                        System.out.println("Buy 1");
+                        aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
+                            this.buyPlants();
+                            this.aiDecisionAlgorithm().run();
+                        });
+                    }
                 }
 
             } else {
-                if (Math.random() <= 0.6) {
-                    //Steal plants
-                    aiHarvestCrops();
-
-                } else  {
-                    aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> this.buyPlants());
+                if (Math.random() < 0.6) {
+                    //Idle
+                    System.out.println("Idle");
+                    aiIdle();
+                } else {
+                    //Pick random point
+                    System.out.println("Wander");
+                    aiPathFind();
                 }
             }
         };
@@ -156,33 +206,46 @@ public class AIPlayerComponent implements GameComponent  {
 
     private void buyPlants() {
         double emptySpaces = this.myFarm.getEmptySpaces();
-        if (emptySpaces > 0 && this.myPlayer.getMoney() > 0.0) {
-            Integer buyID = this.chooseItemToBuy(this.myPlayer.getMoney(), emptySpaces >= 4);
-            if (buyID == null) {
-                this.aiDecisionAlgorithm().run();
-                return;
-            }
-            this.myPlayer.buyItem(this.market, buyID, 1);
-            this.myPlayer.removeItem(buyID, 1);
-            this.boughtItems.merge(buyID, 1, (a, b) -> Integer.sum(a, b));
-            Item item = this.myPlayer.itemStore.getItem(buyID);
-            PlantComponent plant = item.getComponent(PlantComponent.class);
+        double currentBalance = this.myPlayer.getMoney();
 
-            int row = 0;
-            int column = 0;
-            while (!this.myFarm.canBePlacedAtSquare(row, column, plant.isTree ? 2 : 1, plant.isTree ? 2 : 1)) {
-                if (column < this.myFarm.getPointSize().getX() - 1) {
-                    column += 1;
-                } else if (row < this.myFarm.getPointSize().getY() - 2) {
-                    column = 0;
-                    row += 1;
-                } else {
+        if (emptySpaces > 0 && currentBalance > 0.0) {
+            ArrayList<Integer> boughtPlants = new ArrayList<>();
+            boolean allowTrees = true;
+            while (emptySpaces > 0) {
+                boolean canBeTree = Math.random() > 0.6 && allowTrees && this.myFarm.canPlaceTree();
+                Pair<Integer[], Double> buyPair = this.chooseItemToBuy(currentBalance, canBeTree);
+                if (buyPair == null) {
                     break;
                 }
+
+                int buyID = buyPair.getKey()[0];
+                this.boughtItems.merge(buyID, 1, (a, b) -> Integer.sum(a, b));
+                emptySpaces -= buyPair.getKey()[1];
+                currentBalance -= buyPair.getValue();
+                boughtPlants.add(buyID);
+                allowTrees = buyPair.getKey()[1] <= 1;
+            }
+            if (boughtPlants.isEmpty()) {
+                return;
             }
 
-            this.myFarm.placeItemAtSquare(item, row, column);
-            this.aiDecisionAlgorithm().run();
+            for (Integer boughtID : boughtPlants) {
+                this.myPlayer.buyItem(this.market, boughtID, 1);
+                this.myPlayer.removeItem(boughtID, 1);
+
+                Item item = this.myPlayer.itemStore.getItem(boughtID);
+                PlantComponent plant = item.getComponent(PlantComponent.class);
+
+                int[] freeSquare = this.myFarm.firstFreeSquareFor(plant.isTree ? 2 : 1, plant.isTree ? 2 : 1);
+
+                if (freeSquare == null) {
+                    System.out.println(item.name);
+                    continue;
+                }
+                int row = freeSquare[0];
+                int column = freeSquare[1];
+                this.myFarm.placeItemAtSquare(item, row, column);
+            }
         }
     }
 
@@ -197,13 +260,15 @@ public class AIPlayerComponent implements GameComponent  {
     }
 
     private HashMap<Integer, Integer> boughtItems = new HashMap<>();
-    private Integer chooseItemToBuy(double withinPrice, boolean canBeTree) {
+    private Pair<Integer[], Double> chooseItemToBuy(double withinPrice, boolean canBeTree) {
         MarketItem bestToBuy = null;
+        boolean isTree = false;
         double currentPriceDiff = 0.0;
         MarketItem[] seedStockDatabase = this.market.stockDatabase.values().stream().filter((mItm) -> mItm.getID() > 28 && mItm.getID() < 50).toArray((arrSize) -> new MarketItem[arrSize]);;
         for (MarketItem marketItem : seedStockDatabase) {
+            int randBoundary = new Random().nextInt(5);
             double currentBuyPrice = marketItem.getCurrentBuyPrice();
-            if (currentBuyPrice > withinPrice || this.boughtItems.getOrDefault(marketItem.getID(), 0) > 1) {
+            if (currentBuyPrice > withinPrice || this.boughtItems.getOrDefault(marketItem.getID(), 0) > randBoundary) {
                 continue;
             }
 
@@ -212,22 +277,28 @@ public class AIPlayerComponent implements GameComponent  {
             if (!canBeTree && plant.isTree) {
                 continue;
             }
-            int avgDrop = (plant.minDrop + plant.maxDrop) / 2;
-            double newPriceDiff = (marketItem.getCurrentSellPrice() * avgDrop) - currentBuyPrice;
-            if (bestToBuy == null) {
-                bestToBuy = marketItem;
-                currentPriceDiff = newPriceDiff;
-                continue;
-            }
 
-            if (newPriceDiff > currentPriceDiff) {
-                bestToBuy = marketItem;
-                continue;
+            int avgDrop = (plant.minDrop + plant.maxDrop) / 2;
+            if (Math.random() > 0.4) {
+                double newPriceDiff = (marketItem.getCurrentSellPrice() * avgDrop) - currentBuyPrice;
+                if (bestToBuy == null || newPriceDiff > currentPriceDiff) {
+                    bestToBuy = marketItem;
+                    isTree = plant.isTree;
+                    currentPriceDiff = newPriceDiff;
+                    continue;
+                }
+            } else {
+                if (bestToBuy == null || bestToBuy.getCurrentBuyPrice() < currentBuyPrice) {
+                    bestToBuy = marketItem;
+                    isTree = plant.isTree;
+                    currentPriceDiff = (marketItem.getCurrentSellPrice() * avgDrop) - currentBuyPrice;
+                    continue;
+                }
             }
         }
 
         if (bestToBuy != null) {
-            return bestToBuy.getID();
+            return new Pair<Integer[], Double>(new Integer[]{bestToBuy.getID(), isTree ? 4 : 1}, bestToBuy.getCurrentBuyPrice());
         }
         return null;
     }

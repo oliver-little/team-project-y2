@@ -7,11 +7,7 @@ import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.networking.state.FarmState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -212,9 +208,6 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     public boolean canBePlaced(int row, int column, int w, int h) {
         if (this.areCoordinatesInvalid(row, column)) {
-            System.out.println("Invalid " + w);
-            System.out.println(row);
-            System.out.println(column);
             return false;
         }
         int rowMax = row + h;
@@ -225,12 +218,34 @@ public class FarmData implements StateUpdatable<FarmState> {
 
         for (int r = row; r < rowMax; r++) {
             for (int c = column; c < columnMax; c++) {
-                if (this.itemAt(r, c) != null) {
+                if (this.items.get(r).get(c) != null) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Checks if a given position at the farm is empty / an item can be placed on it.
+     *
+     * @param row Farm row
+     * @param column Farm column
+     * @param w Item width
+     * @param h Item height
+     * @return {@code true} if the position is empty, <br> otherwise {@code false}.
+     */
+    public int[] firstFreeSquareFor(int w, int h) {
+        for (int r = 0; r < this.farmRows; r++) {
+            for (int c = 0; c < this.farmColumns; c++) {
+                if (this.items.get(r).get(c) == null) {
+                    if (this.canBePlaced(r, c, w, h)) {
+                        return new int[]{r, c};
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -464,8 +479,8 @@ public class FarmData implements StateUpdatable<FarmState> {
     private int[] getFarmPosition(FarmItem item) {
         if (item != null && item.get() == null) {
             String[] coordinates = item.growth.getValue().toString().split("[.]");
-            int actualRow = Integer.parseInt(coordinates[0]) + this.expansionLevel;
-            int actualColumn = Integer.parseInt(coordinates[1]) + this.expansionLevel;
+            int actualRow = Integer.parseInt(coordinates[0]);
+            int actualColumn = Integer.parseInt(coordinates[1]);
             return new int[]{actualRow, actualColumn};
         }
         return null;

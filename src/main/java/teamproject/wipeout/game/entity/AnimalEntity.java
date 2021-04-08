@@ -237,7 +237,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         int y = (int) fullyGrownItems.get(rand).getY();
 
         Runnable onComplete = () ->  {
-            randFarm.pickItemAt(x, y, false);
+            //randFarm.pickItemAt(x, y, false);
             Platform.runLater(aiDecisionAlgorithm);
         };
 

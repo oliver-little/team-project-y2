@@ -226,6 +226,7 @@ public class App implements Controller {
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
         this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
+        world.setClock(() -> clockSystem);
 
         VBox topRight = new VBox();
         topRight.setAlignment(Pos.TOP_RIGHT);

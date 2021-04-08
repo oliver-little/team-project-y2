@@ -174,6 +174,10 @@ public class FarmEntity extends GameEntity {
         return new Point2D(this.data.farmColumns, this.data.farmRows);
     }
 
+    public int getExpansionLevel() {
+        return this.data.getExpansionLevel();
+    }
+
     public int getEmptySpaces() {
         int counter = 0;
         for (ArrayList<FarmItem> row : this.data.getItems()) {
@@ -184,6 +188,17 @@ public class FarmEntity extends GameEntity {
             }
         }
         return counter;
+    }
+
+    public boolean canPlaceTree() {
+        for (int row = 0; row < this.data.farmColumns; row++) {
+            for (int column = 0; column < this.data.farmColumns; column++) {
+                if (this.canBePlacedAtSquare(row, column, 2, 2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void assignPlayer(Integer playerID, boolean activePlayer, Supplier<GameClient> clientFunction) {
@@ -488,6 +503,10 @@ public class FarmEntity extends GameEntity {
         return this.data.canBePlaced(row, column, w ,h);
     }
 
+    public int[] firstFreeSquareFor(int w, int h) {
+        return this.data.firstFreeSquareFor(w ,h);
+    }
+
     /**
      * Checks if a given position at the farm contains fully grown plant.
      *
@@ -567,7 +586,7 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      * @param makePickable True if you want the item to be pickable, otherwise false.
      */
-    public Integer pickItemAt(double x, double y, boolean makePickable) {
+    public Integer[] pickItemAt(double x, double y, boolean makePickable) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
@@ -605,6 +624,12 @@ public class FarmEntity extends GameEntity {
             return null;
         }
 
+        ThreadLocalRandom randomiser = ThreadLocalRandom.current();
+        int numberOfPickables = pickedPlantComponent.minDrop;
+        if (pickedPlantComponent.maxDrop > pickedPlantComponent.minDrop) {
+            numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
+        }
+
         if (makePickable) {
             // Player picking the farm item
 
@@ -612,11 +637,6 @@ public class FarmEntity extends GameEntity {
             Point2D scenePlantMiddle = this.rescaleCoordinatesToScene(pickableColumn, pickableRow);
 
             int inventoryID = pickedPlantComponent.grownItemID;
-            ThreadLocalRandom randomiser = ThreadLocalRandom.current();
-            int numberOfPickables = pickedPlantComponent.minDrop;
-            if (pickedPlantComponent.maxDrop > pickedPlantComponent.minDrop) {
-                numberOfPickables = randomiser.nextInt(pickedPlantComponent.minDrop, pickedPlantComponent.maxDrop);
-            }
 
             Item inventoryItem = this.itemStore.getItem(inventoryID);
             this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
@@ -626,7 +646,7 @@ public class FarmEntity extends GameEntity {
             this.audio.play("chomp.wav");
         }
 
-        return pickedItem.id;
+        return new Integer[]{pickedItem.id, numberOfPickables};
     }
 
     /**

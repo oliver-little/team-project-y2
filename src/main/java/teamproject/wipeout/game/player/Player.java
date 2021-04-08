@@ -44,7 +44,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
     public final int MAX_SIZE = 10; //no. of inventory slots
-    public final int INITIAL_MONEY = 2500; //initial amount of money
+    public final int INITIAL_MONEY = 25; //initial amount of money
     public final int MAX_TASK_SIZE = 10; //no. of task slots
 
     public final Integer playerID;
@@ -147,7 +147,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
 
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
-        this.addComponent(new CollisionResolutionComponent());
+        //this.addComponent(new CollisionResolutionComponent());
 
         this.audio = new AudioComponent();
         this.addComponent(this.audio);
@@ -355,7 +355,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private int countFreeItemSpaces(Integer itemID) {
     	int counter = 0;
     	int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
-    	System.out.println(stackLimit);
     	for(InventoryItem pair : inventory) {
     		if((pair != null) && (pair.itemID == itemID)) {
     			counter += stackLimit - pair.quantity;
@@ -363,7 +362,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     			counter += stackLimit;
     		}
     	}
-        System.out.println(counter);
     	return counter;
     }
 
@@ -533,7 +531,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         	System.out.println("items being rearranged");
         	rearrangeItems(itemID, endQuantity, slotWithSpace, stackLimit); //rearranges items if slots are being wasted
         }
-        System.out.println("Removed " + (noOfThisItem - endQuantity) + " of itemID " + itemID);
     	return itemID;
     }
 
@@ -549,13 +546,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 inventory.set(selectedSlot, null); //free inventory slot
                 invUI.updateUI(inventory, selectedSlot);
                 occupiedSlots--; //inventory slot is freed
-                System.out.println("Removed " + quantity + " items from selected slot");
                 return true;
-            }else {
+            } else {
                 pair.quantity -= quantity;
                 inventory.set(selectedSlot, pair);
                 invUI.updateUI(inventory, selectedSlot);
-                System.out.println("Removed " + quantity + " items from selected slot");
                 return true;
             }
         }
@@ -675,8 +670,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * Checks what tasks have been completed
      */
     public void checkTasks() {
-        System.out.println("Checking tasks");
-        for(Task task : tasks) {
+        if (this.tasks == null) {
+            return;
+        }
+
+        for (Task task : tasks) {
             if(task.completed) {
                 continue;
             }

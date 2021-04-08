@@ -15,6 +15,10 @@ public class ClockSystem implements GameSystem {
         this.timeDifference = 0.0;
     }
 
+    public double getTime() {
+        return this.clockUI.getTime();
+    }
+
     public void cleanup() {
         this.clockUI.restart();
     }

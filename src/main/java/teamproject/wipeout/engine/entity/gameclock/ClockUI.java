@@ -6,13 +6,13 @@ import teamproject.wipeout.util.resources.ResourceType;
 public class ClockUI extends Label {
 
     private Double time;
-    private final Double INITIAL_TIME;
+    private final Double initialTime;
 
     public ClockUI(Double time) {
         super();
 
         this.time = time;
-        this.INITIAL_TIME = time;
+        this.initialTime = time;
         int min = (int)(this.time / 60);
         String seconds = String.format("%02d", (int)(this.time % 60));
         this.setText("Remaining Time: " + min + ":" + seconds);
@@ -20,6 +20,10 @@ public class ClockUI extends Label {
         this.setPrefWidth(150);
 
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "game-ui.css");
+    }
+
+    public Double getTime() {
+        return this.time;
     }
 
     public void showTime(Double timestep) {
@@ -30,6 +34,6 @@ public class ClockUI extends Label {
     }
 
     public void restart(){
-        this.time = this.INITIAL_TIME;
+        this.time = this.initialTime;
     }
 }

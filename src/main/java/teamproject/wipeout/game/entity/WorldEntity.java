@@ -17,6 +17,7 @@ import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.Item;
@@ -260,11 +261,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		});
 	}
 
+	Player aiPlayer = null;
+
 	private void createAIPlayer() {
-		Player player = new Player(this.scene, new Random().nextInt(1024), "Farmer", new Point2D(10, 10), this.itemStore, null);
+		aiPlayer = new Player(this.scene, new Random().nextInt(1024), "Farmer", new Point2D(10, 10), this.itemStore, null);
 		try {
-			player.addComponent(new RenderComponent(new Point2D(0, -3)));
-			player.addComponent(new PlayerAnimatorComponent(
+			aiPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
+			aiPlayer.addComponent(new PlayerAnimatorComponent(
 					spriteManager.getSpriteSet("player-red", "walk-up"),
 					spriteManager.getSpriteSet("player-red", "walk-right"),
 					spriteManager.getSpriteSet("player-red", "walk-down"),
@@ -273,8 +276,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.setFarmFor(player, false, this.farms.get(2));
-		player.addComponent(new AIPlayerComponent(player, this.market.getMarket(), this.navMesh, this.farms.get(2)));
+		this.setFarmFor(aiPlayer, false, this.farms.get(2));
+		aiPlayer.addComponent(new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(2)));
+	}
+
+	public void setClock(Supplier<ClockSystem> clock) {
+		this.aiPlayer.getComponent(AIPlayerComponent.class).clock = clock;
 	}
 
 	/**
