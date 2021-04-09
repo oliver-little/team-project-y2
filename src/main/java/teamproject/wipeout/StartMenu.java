@@ -81,7 +81,7 @@ public class StartMenu implements Controller {
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
-        hostPane.getStyleClass().add("vbox");
+        //hostPane.getStyleClass().add("vbox");
         hostPane.setMaxWidth(400);
 
         HBox nameBox = new HBox();
@@ -189,6 +189,7 @@ public class StartMenu implements Controller {
         HBox nameBox = new HBox();
         nameBox.setAlignment(Pos.CENTER);
         Label nameLabel = new Label("Name: ");
+        nameLabel.getStyleClass().add("label");
         TextField nameTF = new TextField();
         nameBox.getChildren().addAll(nameLabel,nameTF);
 

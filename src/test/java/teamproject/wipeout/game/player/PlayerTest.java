@@ -39,7 +39,7 @@ public class PlayerTest {
 		
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 		//player = scene.createPlayer(new Random().nextInt(1024), "testPlayer", new Point2D(0,0), invUI);
-		player = scene.createPlayer(new Random().nextInt(1024), "testPlayer", new Point2D(0, 0), invUI);
+		player = scene.createPlayer(new Random().nextInt(1024), "testPlayer", new Point2D(0, 0), invUI, spriteManager);
 		MAX_SIZE = player.MAX_SIZE;
 	}
 	

@@ -32,3 +32,7 @@
     -fx-padding: 20 20 20 20;
 
 }
+
+.label {
+	-fx-text-fill: white;
+}
