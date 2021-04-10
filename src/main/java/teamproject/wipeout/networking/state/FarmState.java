@@ -22,7 +22,10 @@ public class FarmState implements Serializable {
 
     private Integer farmID;
 
-    public List<List<Pair<Integer, Double>>> items;
+    private Integer expansions;
+    private List<List<Pair<Integer, Double>>> items;
+    private double growthMultiplier;
+    private double AIMultiplier;
 
     private long timestamp;
 
@@ -32,36 +35,27 @@ public class FarmState implements Serializable {
      * @param farmID Farm ID
      * @param items  Items at the farm
      */
-    public FarmState(Integer farmID, ArrayList<ArrayList<FarmItem>> items) {
+    public FarmState(Integer farmID, Integer expansions, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double AIMultiplier) {
         this.farmID = farmID;
+        this.expansions = expansions;
         this.items = items.stream().map((row) -> {
             return row.stream().map((item) -> {
                 if (item != null) {
                     Item currentItem = item.get();
-                    return currentItem == null ? null : new Pair<Integer, Double>(currentItem.id, item.growth);
+                    return currentItem == null ? null : new Pair<Integer, Double>(currentItem.id, item.growth.getValue());
                 }
                 return null;
             }).collect(Collectors.toList());
         }).collect(Collectors.toList());
+
+        this.growthMultiplier = growthMultiplier;
+        this.AIMultiplier = AIMultiplier;
+
         this.timestamp = System.currentTimeMillis();
     }
 
     /**
-     * Protected initializer for a {@link FarmState}.
-     *
-     * @param farmID Farm ID
-     * @param items  Items at the farm
-     * @param timestamp Timestamp of the state
-     */
-    protected FarmState(Integer farmID, List<List<Pair<Integer, Double>>> items, long timestamp) {
-        this.farmID = farmID;
-        this.items = items;
-        this.timestamp = timestamp;
-    }
-
-    /**
      * Farm ID getter
-     *
      * @return Farm ID
      */
     public Integer getFarmID() {
@@ -69,22 +63,43 @@ public class FarmState implements Serializable {
     }
 
     /**
-     * {@code timestamp} variable getter
-     *
+     * Expansions getter
+     * @return Number of expansions
+     */
+    public Integer getExpansions() {
+        return this.expansions;
+    }
+
+    /**
+     * Items getter
+     * @return {@code List<List<Pair<Integer, Double>>>} of items
+     */
+    public List<List<Pair<Integer, Double>>> getItems() {
+        return this.items;
+    }
+
+    /**
+     * Growth multiplier getter
+     * @return Growth multiplier
+     */
+    public double getGrowthMultiplier() {
+        return this.growthMultiplier;
+    }
+
+    /**
+     * AI multiplier getter
+     * @return AI multiplier
+     */
+    public double getAIMultiplier() {
+        return this.AIMultiplier;
+    }
+
+    /**
+     * Timestamp getter
      * @return Timestamp of the {@code FarmState}
      */
     public long getTimestamp() {
         return this.timestamp;
-    }
-
-
-    /**
-     * Creates a copy of the FarmState
-     *
-     * @return {@link FarmState} copy
-     */
-    public FarmState carbonCopy() {
-        return new FarmState(this.farmID, this.items, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -93,7 +108,12 @@ public class FarmState implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.farmID);
 
+        out.writeInt(this.expansions);
+
         out.writeObject(this.items);
+
+        out.writeDouble(this.growthMultiplier);
+        out.writeDouble(this.AIMultiplier);
 
         out.writeLong(this.timestamp);
     }
@@ -101,7 +121,12 @@ public class FarmState implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         this.farmID = in.readInt();
 
+        this.expansions = in.readInt();
+
         this.items = (List<List<Pair<Integer, Double>>>) in.readObject();
+
+        this.growthMultiplier = in.readDouble();
+        this.AIMultiplier = in.readDouble();
 
         this.timestamp = in.readLong();
     }

@@ -63,6 +63,26 @@
 				"height": 16
 			}
 		},
+		{
+			"name": "small-speed-booster",
+			"type": "sprite",
+			"parameters" : {
+				"x": 128,
+				"y": 32,
+				"width": 16,
+				"height": 16
+			}
+		},
+        {
+			"name": "large-speed-booster",
+			"type": "sprite",
+			"parameters" : {
+				"x": 144,
+				"y": 32,
+				"width": 16,
+				"height": 16
+			}
+		},
         {
 			"name": "small-slowness-potion",
 			"type": "sprite",
@@ -79,46 +99,6 @@
 			"parameters" : {
 				"x": 144,
 				"y": 64,
-				"width": 16,
-				"height": 16
-			}
-		},
-        {
-			"name": "small-reputation-booster",
-			"type": "sprite",
-			"parameters" : {
-				"x": 128,
-				"y": 32,
-				"width": 16,
-				"height": 16
-			}
-		},
-        {
-			"name": "large-reputation-booster",
-			"type": "sprite",
-			"parameters" : {
-				"x": 144,
-				"y": 32,
-				"width": 16,
-				"height": 16
-			}
-		},
-        {
-			"name": "small-reputation-poison",
-			"type": "sprite",
-			"parameters" : {
-				"x": 128,
-				"y": 96,
-				"width": 16,
-				"height": 16
-			}
-		},
-        {
-			"name": "large-reputation-poison",
-			"type": "sprite",
-			"parameters" : {
-				"x": 144,
-				"y": 96,
 				"width": 16,
 				"height": 16
 			}

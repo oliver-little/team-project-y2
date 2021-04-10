@@ -56,7 +56,7 @@ public class FarmUI extends VBox {
         Button closeButton = new Button("X");
         closeButton.setCancelButton(true);
         closeButton.setOnAction((event) -> {
-            this.data.removeGrowthDelegate(this.growthDelegate);
+            //this.data.removeGrowthDelegate(this.growthDelegate);
             this.parent.getChildren().remove(this);
         });
 
@@ -100,7 +100,7 @@ public class FarmUI extends VBox {
                 }
             });
         };
-        this.data.addGrowthDelegate(this.growthDelegate);
+        //this.data.addGrowthDelegate(this.growthDelegate);
 
         return itemList;
     }

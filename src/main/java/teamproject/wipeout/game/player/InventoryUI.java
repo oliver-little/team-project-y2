@@ -15,7 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-
+import java.util.List;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -29,15 +29,33 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent.SabotageType;
+import teamproject.wipeout.game.market.ui.ErrorUI;
+import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
+import teamproject.wipeout.game.potion.PotionThrowEntity;
+import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+/**
+ * Creates the player's inventory bar as a StackPane
+ */
 public class InventoryUI extends StackPane {
+
+	public static final int IMAGE_SIZE = 48;
+
+	public enum InventoryState {
+		NONE,
+		PLANTING,
+		THROWING
+	}
 
 	public Point2D size;
 	Group root;
@@ -47,11 +65,14 @@ public class InventoryUI extends StackPane {
 	
 	SpriteManager spriteManager;
 	
-	//Temporarily placed
 	private Rectangle[] rectangles = new Rectangle[MAX_SIZE];
 	private ImageView[] spriteViews = new ImageView[MAX_SIZE];
 	private Text[] quantityTexts = new Text[MAX_SIZE];
 	private int currentSelection = 0;
+
+	private InventoryState state = InventoryState.NONE;
+
+	private PotionThrowEntity currentPotion;
 
 	public InventoryUI(SpriteManager spriteManager, ItemStore itemStore) {
 		super();
@@ -76,21 +97,13 @@ public class InventoryUI extends StackPane {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);
 			quantityTexts[index].setText("" + items.get(index).quantity);
-			try {
-				Image sprite = spriteManager.getSpriteSet(inv.spriteSheetName, inv.spriteSetName)[0];
-				spriteViews[index].setImage(sprite);
-				spriteViews[index].setX(67*index + (32 - sprite.getWidth()/2));
-				if (sprite.getHeight() > 64) {
-					spriteViews[index].setY(32 - sprite.getHeight() / 1.3);
-				} else {
-					spriteViews[index].setY(32 - sprite.getHeight() / 2);
-				}
-				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
+			Image sprite = getScaledImage(inv.spriteSheetName, inv.spriteSetName);
+			spriteViews[index].setImage(sprite);
+
+			spriteViews[index].setX(67*index + (32 - Math.min(IMAGE_SIZE, sprite.getWidth())/2));
+			spriteViews[index].setY(32 - Math.min(IMAGE_SIZE, sprite.getHeight()) / 2);
+		} 
+		else {
 			quantityTexts[index].setText("");
 			spriteViews[index].setImage(null);
 		}
@@ -114,38 +127,10 @@ public class InventoryUI extends StackPane {
 	 */
 	public void onMouseClick(WorldEntity world) {
 		for(int i = 0; i < MAX_SIZE; i++) {
-			int hold = i;
+			final int count = i;
 			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
 				event.consume();
-
-				FarmEntity myFarm = world.getMyFarm();
-				Player myPlayer = world.getMyPlayer();
-
-				if (myFarm.isPlacingItem()) {
-					myFarm.stopPlacingItem(false);
-					if (hold == myPlayer.selectedSlot) {
-						return;
-					}
-				}
-
-				int selectedItemID = myPlayer.selectSlot(hold);
-				if (selectedItemID < 0) {
-					return;
-				}
-
-				try {
-					Item selectedItem = itemStore.getItem(selectedItemID);
-					if (!selectedItem.hasComponent(PlantComponent.class)) {
-						return;
-					}
-					myPlayer.dropItem();
-					myFarm.startPlacingItem(selectedItem, new Point2D(event.getSceneX(), event.getSceneY()), (item) -> {
-						myPlayer.acquireItem(item.id);
-					});
-
-				} catch (FileNotFoundException exception) {
-					exception.printStackTrace();
-				}
+				this.useSlot(count, world);
 			});
 		}
 	}
@@ -157,15 +142,17 @@ public class InventoryUI extends StackPane {
 	 */
 	public void useSlot(int slot, WorldEntity world) {
 		this.selectSlot(slot);
-		
-		FarmEntity myFarm = world.getMyFarm();
-		Player myPlayer = world.getMyPlayer();
 
-		if (myFarm.isPlacingItem()) {
-			myFarm.stopPlacingItem(false);
-			if (slot == myPlayer.selectedSlot) {
-				return;
+		Player myPlayer = world.myPlayer;
+		FarmEntity myFarm = world.getMyFarm();
+
+		if (state == InventoryState.PLANTING) {
+			if (myFarm.isPlacingItem()) {
+				myFarm.stopPlacingItem(false);
 			}
+		}
+		else if (state == InventoryState.THROWING) {
+			currentPotion.abortThrowing();
 		}
 		
 		int selectedItemID = myPlayer.selectSlot(currentSelection);
@@ -175,14 +162,43 @@ public class InventoryUI extends StackPane {
 
 		try {
 			Item selectedItem = itemStore.getItem(selectedItemID);
-			if (!selectedItem.hasComponent(PlantComponent.class)) {
+			if (selectedItem.hasComponent(PlantComponent.class)) {
+				myPlayer.dropItem();
+				state = InventoryState.PLANTING;
+				myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
+					myPlayer.acquireItem(item.id);
+					state = InventoryState.NONE;
+				});
+			}
+			else if (selectedItem.hasComponent(SabotageComponent.class)) {
+				SabotageComponent sc = selectedItem.getComponent(SabotageComponent.class);
+
+				List<GameEntity> possibleEffectEntities = null;
+
+				if (sc.type == SabotageType.SPEED) {
+					possibleEffectEntities = List.of(world.myPlayer, world.myAnimal);
+				}
+				else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
+					possibleEffectEntities = List.of(world.getMyFarm());
+				}
+
+				Runnable onComplete = () -> {
+					state = InventoryState.NONE;
+					currentPotion = null;
+				};
+				Runnable onAbort = () -> {
+					state = InventoryState.NONE; 
+					currentPotion = null;
+					myPlayer.acquireItem(selectedItem.id);
+				};
+
+				state = InventoryState.THROWING;
+				myPlayer.dropItem();
+				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
+			}
+			else {
 				return;
 			}
-			myPlayer.dropItem();
-			myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
-				myPlayer.acquireItem(item.id);
-			});
-
 		} catch (FileNotFoundException exception) {
 			exception.printStackTrace();
 		}
@@ -191,33 +207,31 @@ public class InventoryUI extends StackPane {
 	/**
 	 * Sets up the inventory key input.
 	 *
-	 * @param gameScene {@link GameScene} of the {@code InventoryUI}
 	 * @param player {@link Player} who owns the inventory
+	 * @param pickables {@link Pickables} class in the {@link WorldEntity}
 	 * @return {@link InputKeyAction} executed on a specified key event.
 	 */
-	public InputKeyAction dropOnKeyRelease(GameScene gameScene, Player player) {
+	public InputKeyAction dropOnKeyRelease(Player player, Pickables pickables) {
 		return () -> {
 			int id = player.dropItem();
 			System.out.println("***itemID: " + id);
-			if(id != -1) {
-				GameEntity e = gameScene.createEntity();
-				Transform tr = player.getComponent(Transform.class);
-				e.addComponent(new Transform (tr.getPosition().getX(), tr.getPosition().getY()));
-				e.addComponent(new HitboxComponent(new teamproject.wipeout.engine.component.shape.Rectangle(0, -20, 20, 20)));
-				Item eItem = itemStore.getItem(id);
-				e.addComponent(new PickableComponent(eItem));
-				InventoryComponent invComponent = eItem.getComponent(InventoryComponent.class);
-
-				try {
-					Image[] images = spriteManager.getSpriteSet(invComponent.spriteSheetName, invComponent.spriteSetName);
-					e.addComponent(new RenderComponent(new SpriteRenderable(images[0])));
-
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			if (id != -1) {
+				Transform transform = player.getComponent(Transform.class);
+				RenderComponent renderComponent = player.getComponent(RenderComponent.class);
+				double centreX = transform.getPosition().getX() + (renderComponent.getWidth() / 2);
+				double centreY = transform.getPosition().getY() + (renderComponent.getHeight() / 2);
+				pickables.createPickablesFor(this.itemStore.getItem(id), centreX, centreY, 1);
+				player.playSound("thud.wav");
 			}
 		};
+	}
+
+	/**
+	 * Displays an onscreen message.
+	 * @param errorType The type of error/message to display.
+	 */
+	public void displayMessage(ERROR_TYPE errorType) {
+		new ErrorUI(this, errorType);
 	}
 	
 	/**
@@ -236,7 +250,11 @@ public class InventoryUI extends StackPane {
 			rectangles[i] = r;
 			
 			ImageView spriteView = new ImageView();
+			spriteView.setFitWidth(IMAGE_SIZE);
+			spriteView.setFitHeight(IMAGE_SIZE);
+			spriteView.setPreserveRatio(true);
 			spriteView.setMouseTransparent(true);
+			spriteView.setStyle("-fx-stroke: cyan; -fx-stroke-width: 1;");
 			root.getChildren().add(spriteView);
 			spriteViews[i] = spriteView;
 		}
@@ -247,8 +265,7 @@ public class InventoryUI extends StackPane {
 	 */
 	private void createTexts() {
 		InputStream path;
-		try
-		{
+		try {
 			path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
 			Font font = Font.loadFont(path, 13);
 			for(int i = 0; i < MAX_SIZE; i++) {
@@ -264,8 +281,33 @@ public class InventoryUI extends StackPane {
 		}
 		catch (FileNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Gets an image from the spriteManager, scaled to fit the inventory image sizes
+	 * 
+	 * @param spriteSheetName The spriteSheet to retrieve an image from
+	 * @param spriteSetName The spriteSet to retrieve an image from
+	 * @return The requested image, scaled to IMAGE_SIZE
+	 */
+	private Image getScaledImage(String spriteSheetName, String spriteSetName) {
+		Image sprite = null;
+		try {
+			sprite = spriteManager.getSpriteSet(spriteSheetName, spriteSetName)[0];
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		if (sprite.getWidth() > sprite.getHeight() && sprite.getWidth() < IMAGE_SIZE) {
+			sprite = ImageUtil.scaleImage(sprite, ((double) IMAGE_SIZE)/sprite.getWidth());
+		}
+		else if (sprite.getHeight() < IMAGE_SIZE) {
+			sprite = ImageUtil.scaleImage(sprite, ((double) IMAGE_SIZE)/sprite.getHeight());
+		}
+
+		return sprite;
 	}
 }

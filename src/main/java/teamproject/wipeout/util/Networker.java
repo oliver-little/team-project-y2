@@ -81,6 +81,10 @@ public class Networker {
 
     public InputKeyAction initiateClient(GameScene gameScene, SpriteManager spriteManager) {
         return () -> {
+            if (this.client != null) {
+                return;
+            }
+
             try {
                 this.serverDiscovery = new ServerDiscovery(this.onServerDiscovery(gameScene, spriteManager));
                 this.serverDiscovery.startLookingForServers();
@@ -93,17 +97,17 @@ public class Networker {
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
         return (newPlayerState) -> {
-            if (newPlayerState.getPlayerID().equals(this.worldEntity.getMyPlayer().playerID)) {
+            if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
                 return null;
             }
 
-            Player newPlayer = gameScene.createPlayer(newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), null);
+            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), null);
 
             newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
             newPlayer.addComponent(new CollisionResolutionComponent());
 
             try {
-                newPlayer.addComponent(new RenderComponent(new Point2D(0, -32)));
+                newPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
                 newPlayer.addComponent(new PlayerAnimatorComponent(
                         spriteManager.getSpriteSet("player-red", "walk-up"),
                         spriteManager.getSpriteSet("player-red", "walk-right"),
@@ -126,15 +130,14 @@ public class Networker {
         return (name, address) -> {
             this.serverDiscovery.stopLookingForServers();
 
-            Player myPlayer = this.worldEntity.getMyPlayer();
+            Player myPlayer = this.worldEntity.myPlayer;
             Market myMarket = this.worldEntity.market.getMarket();
 
             Consumer<Pair<GameClient, Integer>> farmHandler = (farmPair) -> {
                 GameClient currentClient = farmPair.getKey();
                 Integer newFarmID = farmPair.getValue();
 
-                currentClient.myAnimal = this.worldEntity.getMyAnimal();
-                currentClient.market = this.worldEntity.market.getMarket();
+                currentClient.worldEntity = this.worldEntity;
 
                 myMarket.setIsLocal(true);
                 this.worldEntity.marketUpdater.stop();

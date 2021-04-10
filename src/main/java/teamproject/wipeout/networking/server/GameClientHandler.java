@@ -51,6 +51,7 @@ public class GameClientHandler {
 
         // Accept connection
         this.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, serverID));
+        this.out.reset();
 
         // Client ID is sent by the client -> sitting in the input stream
         GameUpdate handshake = (GameUpdate) this.in.readObject();
@@ -88,6 +89,7 @@ public class GameClientHandler {
         ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
         GameUpdate decline = new GameUpdate(GameUpdateType.DECLINE, serverID, null);
         outputStream.writeObject(decline);
+        outputStream.reset();
     }
 
     /**
@@ -133,6 +135,7 @@ public class GameClientHandler {
      */
     public void updateWith(GameUpdate update) throws IOException {
         this.out.writeObject(update);
+        this.out.reset();
     }
 
     /**
@@ -146,6 +149,7 @@ public class GameClientHandler {
         for (PlayerState playerState : playerStates.toArray(new PlayerState[0])) {
             this.out.writeObject(new GameUpdate(playerState));
         }
+        this.out.reset();
     }
 
     /**
@@ -159,6 +163,7 @@ public class GameClientHandler {
         if (serverSide) {
             GameUpdate disconnect = new GameUpdate(GameUpdateType.DISCONNECT, this.clientID);
             this.out.writeObject(disconnect);
+            this.out.reset();
         }
 
         if (!this.clientSocket.isClosed()) {

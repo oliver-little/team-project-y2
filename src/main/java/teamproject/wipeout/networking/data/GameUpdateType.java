@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public enum GameUpdateType implements Serializable {
     ACCEPT, DECLINE,
-    PLAYER_STATE, FARM_STATE, FARM_ID, MARKET_STATE, ANIMAL_STATE,
+    WORLD_STATE, PLAYER_STATE, FARM_STATE, FARM_ID, MARKET_STATE, ANIMAL_STATE,
     CLOCK_CALIB, REQUEST, RESPONSE,
     DISCONNECT
 }

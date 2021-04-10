@@ -54,10 +54,12 @@ public class SeedEntity extends GameEntity {
         seedRenderEntity.addComponent(new Transform(0, 0, 2));
 
         SpriteRenderable seedRenderable = new SpriteRenderable(seedImage);
+        double scaleFactor = FarmEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth(), seedImage.getHeight());
+        seedRenderable.spriteScale = new Point2D(scaleFactor, scaleFactor);
         RenderComponent seedRenderComponent = new RenderComponent(seedRenderable);
         seedRenderEntity.addComponent(seedRenderComponent);
         if (plant.height != 1) {
-            seedRenderComponent.offset = new Point2D(0.0, -1 * (seedImage.getHeight() / 1.5));
+            seedRenderComponent.offset = new Point2D(0, -1 * (seedRenderable.getHeight() / 2.5));
         }
         this.renderComponent = new RenderComponent();
         this.addComponent(this.renderComponent);

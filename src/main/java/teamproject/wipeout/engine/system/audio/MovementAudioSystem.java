@@ -14,6 +14,7 @@ public class MovementAudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
 	private double volume;
+	private double previousVolume = 0.05f;
 	public boolean muted;
 	
 	/**
@@ -71,16 +72,25 @@ public class MovementAudioSystem implements GameSystem {
 	
 	public void muteUnmute() {
 		if(muted) {
-			muted = false;
-			this.setVolume(0.05f);
+			unmute();
 		}else {
-			muted = true;
-			this.setVolume(0.0f);
-
-			List<GameEntity> entities = this.entityCollector.getEntities();
-			for (GameEntity entity: entities) {
-				entity.getComponent(MovementAudioComponent.class).stop();
-			}
+			mute();
 		}
+	}
+
+	public void mute(){
+		muted = true;
+		this.previousVolume = this.volume;
+		this.setVolume(0.0f);
+
+		List<GameEntity> entities = this.entityCollector.getEntities();
+		for (GameEntity entity: entities) {
+			entity.getComponent(MovementAudioComponent.class).stop();
+		}
+	}
+
+	public void unmute(){
+		muted = false;
+		this.setVolume(this.previousVolume);
 	}
 }

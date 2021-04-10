@@ -36,6 +36,10 @@ public class FarmRenderer implements Renderable {
         return this.farmSize.getY();
     }
 
+    public void setFarmSize(Point2D farmSize) {
+        this.farmSize = farmSize;
+    }
+
     public void render(GraphicsContext gc, double x, double y, double scale) {
         try {
             Point2D scaledFarmSize = this.farmSize.multiply(scale);

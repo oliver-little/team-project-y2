@@ -120,6 +120,16 @@ public class GameAudio {
     public boolean isPlaying() {
     	return playing;
     }
+
+	public void mute(){
+		audioClip.stop();
+		muted = true;
+	}
+
+	public void unmute(){
+		this.play();
+		muted = false;
+	}
     
     public void muteUnmute() {
 		if(muted) {
