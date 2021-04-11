@@ -64,7 +64,7 @@ public class FarmEntity extends GameEntity {
     protected Transform transform;
     protected Point2D size;
 
-    private final SpriteManager spriteManager;
+    public final SpriteManager spriteManager;
     private final ItemStore itemStore;
 
     private final List<ItemsRowEntity> rowEntities;

@@ -265,6 +265,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	private void createAIPlayer() {
 		aiPlayer = new Player(this.scene, new Random().nextInt(1024), "Farmer", new Point2D(10, 10), this.itemStore, null);
+		aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
 		try {
 			aiPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
 			aiPlayer.addComponent(new PlayerAnimatorComponent(
@@ -277,7 +278,10 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			e.printStackTrace();
 		}
 		this.setFarmFor(aiPlayer, false, this.farms.get(2));
-		aiPlayer.addComponent(new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(2)));
+		AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(2));
+		aiComp.allPlayers = new ArrayList<>();
+		aiComp.allPlayers.add(this.myPlayer);
+		aiPlayer.addComponent(aiComp);
 	}
 
 	public void setClock(Supplier<ClockSystem> clock) {

@@ -2,6 +2,7 @@ package teamproject.wipeout.game.player;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.scene.input.MouseButton;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
@@ -9,19 +10,19 @@ import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketItem;
 import teamproject.wipeout.game.market.ui.FarmExpansionUI;
+import teamproject.wipeout.game.potion.PotionThrowEntity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,10 +30,14 @@ import java.util.function.Supplier;
 
 public class AIPlayerComponent implements GameComponent  {
 
+    public static final int[] GOOD_POTIONS = {52, 53, 54, 55, 58, 59};
+    public static final int[] MEAN_POTIONS = {51, 56, 57, 60, 61};
+
     public static final int IDLE_TIME_SCALING_FACTOR = 3;
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
+    public ArrayList<Player> allPlayers;
     private Player myPlayer;
     private FarmEntity myFarm;
 
@@ -191,15 +196,21 @@ public class AIPlayerComponent implements GameComponent  {
                 }
 
             } else {
-                if (Math.random() < 0.6) {
+                usePotions();
+                return;/*
+                double randomiser = Math.random();
+                if (randomiser < 0.3) {
                     //Idle
                     System.out.println("Idle");
                     aiIdle();
-                } else {
+                } else if (randomiser < 0.7) {
                     //Pick random point
                     System.out.println("Wander");
                     aiPathFind();
-                }
+                } else {
+                    System.out.println("Potion");
+                    usePotions();
+                }*/
             }
         };
     }
@@ -247,6 +258,53 @@ public class AIPlayerComponent implements GameComponent  {
                 this.myFarm.placeItemAtSquare(item, row, column);
             }
         }
+    }
+
+    private void usePotions() {
+        boolean goodOrMean = Math.random() > 0.5;
+        ArrayList<Integer> potionPortfolio = new ArrayList<Integer>();
+
+        for (int id : goodOrMean ? GOOD_POTIONS : MEAN_POTIONS) {
+            if (this.myPlayer.hasEnoughMoney(this.market.stockDatabase.get(id).getCurrentBuyPrice())) {
+                potionPortfolio.add(id);
+            }
+        }
+
+        if (potionPortfolio.isEmpty()) {
+            this.aiDecisionAlgorithm().run();
+            return;
+        }
+
+        int potionID = potionPortfolio.get(new Random().nextInt(potionPortfolio.size()));
+
+        this.myPlayer.buyItem(this.market, potionID, 1);
+        this.myPlayer.removeItem(potionID, 1);
+
+        Player useOnPlayer;
+        if (goodOrMean) {
+            useOnPlayer = this.myPlayer;
+        } else {
+            if (allPlayers == null) {
+                return;
+            }
+            allPlayers.sort(Comparator.comparing(player -> player.getMoney())); // does it give me the richest???
+            useOnPlayer = allPlayers.get(0);
+        }
+
+        Item currentPotion = this.myPlayer.itemStore.getItem(potionID);
+        SabotageComponent sc = currentPotion.getComponent(SabotageComponent.class);
+        List<GameEntity> possibleEffectEntities = null;
+        if (sc.type == SabotageComponent.SabotageType.SPEED) {
+            possibleEffectEntities = List.of(useOnPlayer); // world.myAnimal); !!! ???
+        }
+        else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
+            possibleEffectEntities = List.of(this.myFarm); // get farm for the useOnPlayer !!! ???
+        }
+
+        Runnable onComplete = () -> this.aiDecisionAlgorithm().run();
+
+        PotionThrowEntity potionThrow = new PotionThrowEntity(this.myPlayer.getScene(), this.myFarm.spriteManager, this.myPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
+        potionThrow.onClick.performMouseClickAction(useOnPlayer.getPosition().getX(), useOnPlayer.getPosition().getY(), MouseButton.PRIMARY);
     }
 
     /**
