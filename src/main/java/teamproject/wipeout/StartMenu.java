@@ -236,7 +236,7 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
                 	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
-                	System.out.println("selectedItem: "+ selectedItem.getServerName());
+                	//System.out.println("selectedItem: "+ selectedItem.getServerName());
                     if(selectedItem != null){
                         joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
                     }
