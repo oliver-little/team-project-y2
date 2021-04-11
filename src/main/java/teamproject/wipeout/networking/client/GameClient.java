@@ -1,8 +1,12 @@
 package teamproject.wipeout.networking.client;
 
-import javafx.util.Pair;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
+import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -14,7 +18,9 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -28,7 +34,7 @@ import java.util.function.Consumer;
  */
 public class GameClient {
 
-    public final Integer id;
+    public final String clientName;
 
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
@@ -36,27 +42,36 @@ public class GameClient {
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
-    public NewPlayerAction newPlayerAction;
-
+    public final SimpleMapProperty<Integer, String> connectedClients;
+    public final HashSet<PlayerState> tempPlayerStates;
     public final HashMap<Integer, Player> players;
-    public WorldEntity worldEntity;
+    private WorldEntity worldEntity;
 
     public Consumer<Long> clockCalibration;
-    public Consumer<Pair<GameClient, Integer>> myFarmIDReceived;
+    public Integer myFarmID;
 
-    protected Map<Integer, FarmEntity> farmEntities;
+    public Map<Integer, FarmEntity> farmEntities;
+
+    private NewPlayerAction newPlayerAction;
+
+    private Integer id;
 
     /**
      * Default initializer for {@code GameClient}
-     *
-     * @param id ID of the current player (= client)
      */
-    protected GameClient(Integer id) {
-        this.id = id;
+    protected GameClient(String clientName) {
+        this.id = null;
+        this.clientName = clientName;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
+        this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
+        this.tempPlayerStates = new HashSet<PlayerState>();
         this.players = new HashMap<Integer, Player>();
         this.farmEntities = null;
+    }
+
+    public Integer getID() {
+        return this.id;
     }
 
     /**
@@ -68,23 +83,29 @@ public class GameClient {
         return this.isActive.get();
     }
 
+    public void setNewPlayerAction(NewPlayerAction newPlayerAction) {
+        this.newPlayerAction = newPlayerAction;
+        for (PlayerState state : this.tempPlayerStates) {
+            if (!this.players.containsKey(state.getPlayerID())) {
+                this.createPlayerFromState(state);
+            }
+        }
+        this.tempPlayerStates.clear();
+    }
+
     /**
      * Connects to a specified game server, sends client's ID and starts
      * listening for incoming updates({@link GameUpdate}) from the game server.
      * It does not allow the client to connect to multiple game servers simultaneously.
      *
-     * @param player Current player in the form of a {@link PlayerState}.
      * @param server {@link InetAddress} of the game server you want to connect to.
+     * @param clientName Player's name
      * @throws IOException Problem with establishing a connection to the given server.
      */
-    public static GameClient openConnection(InetSocketAddress server, Player player, Map<Integer, FarmEntity> farms, Consumer<Pair<GameClient, Integer>> myFarmIDReceived, NewPlayerAction newPlayerAction)
+    public static GameClient openConnection(InetSocketAddress server, String clientName)
             throws IOException, ClassNotFoundException {
 
-        GameClient client = new GameClient(player.playerID);
-        client.myFarmIDReceived = myFarmIDReceived;
-        client.newPlayerAction = newPlayerAction;
-        client.players.put(player.playerID, player);
-        client.farmEntities = farms;
+        GameClient client = new GameClient(clientName);
 
         // Connect the socket
         client.clientSocket.connect(server, 3000); // 3s timeout
@@ -92,20 +113,25 @@ public class GameClient {
         client.in = new ObjectInputStream(client.clientSocket.getInputStream());
         client.out = new ObjectOutputStream(client.clientSocket.getOutputStream());
 
-        GameUpdateType acceptedStatus = ((GameUpdate) client.in.readObject()).type;
+        GameUpdate receivedUpdate = (GameUpdate) client.in.readObject();
 
-        if (acceptedStatus == GameUpdateType.DECLINE) {
+        if (receivedUpdate.type == GameUpdateType.DECLINE) {
             return null;
         }
 
+        client.id = (Integer) receivedUpdate.content;
         client.isActive.set(true);
 
         // Send my ID and my latest playerState
-        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id));
+        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id, client.clientName));
 
         client.startReceivingUpdates();
 
         return client;
+    }
+
+    public void setWorldEntity(WorldEntity worldEntity) {
+        this.worldEntity = worldEntity;
     }
 
     /**
@@ -144,23 +170,29 @@ public class GameClient {
      * Method which disconnects the client from the game server it is currently connected to.
      *
      * @param clientSide Specifies whether the disconnect command comes from the client's side.
-     * @throws IOException Problem with closing the connection to the server.
      */
-    public void closeConnection(boolean clientSide) throws IOException {
+    public void closeConnection(boolean clientSide) {
         if (!this.isActive.get()) {
             return;
         }
         this.isActive.set(false);
 
-        if (clientSide) {
-            this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.id));
-            this.out.reset();
-        }
+        try {
+            if (clientSide) {
+                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.id));
+                this.out.reset();
+            }
 
-        if (!this.clientSocket.isClosed()) {
-            this.out.close();
-            this.in.close();
-            this.clientSocket.close();
+            if (!this.clientSocket.isClosed()) {
+                this.out.close();
+                this.in.close();
+                this.clientSocket.close();
+            }
+
+            this.connectedClients.clear();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -181,6 +213,9 @@ public class GameClient {
                     }
 
                     switch (receivedUpdate.type) {
+                        case CONNECTED:
+                            this.handleReceivedClientConnections((HashMap<Integer, String>) receivedUpdate.content);
+                            break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
@@ -194,8 +229,7 @@ public class GameClient {
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
                         case FARM_ID:
-                            Integer farmID = (Integer) receivedUpdate.content;
-                            this.myFarmIDReceived.accept(new Pair<GameClient, Integer>(this, farmID));
+                            this.myFarmID = (Integer) receivedUpdate.content;
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
@@ -206,22 +240,14 @@ public class GameClient {
                             this.worldEntity.updateFromState(wState);
                             break;
                         case CLOCK_CALIB:
-                            if (!receivedUpdate.originClientID.equals(this.id)) {
-                                this.clockCalibration.accept((Long) receivedUpdate.content);
-                            }
+                            this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
                             this.worldEntity.market.getMarket().responseArrived(response);
                             break;
                         case DISCONNECT:
-                            Integer disconnectedClientID = receivedUpdate.originClientID;
-                            if (disconnectedClientID.equals(this.id)) {
-                                this.closeConnection(false);
-                                return;
-                            } else {
-                                this.players.remove(disconnectedClientID);
-                            }
+                            this.handleDisconnectPlayer(receivedUpdate.originClientID);
                             break;
                         default:
                             break;
@@ -251,12 +277,37 @@ public class GameClient {
      */
     private void handlePlayerStateUpdate(PlayerState state) {
         if (!this.players.containsKey(state.getPlayerID())) {
-            Player newPlayer = this.newPlayerAction.createWith(state);
-            if (newPlayer != null) {
-                this.players.put(newPlayer.playerID, newPlayer);
+            if (this.newPlayerAction == null) {
+                this.tempPlayerStates.add(state);
+                return;
             }
+            this.createPlayerFromState(state);
+
         } else {
             this.players.get(state.getPlayerID()).updateFromState(state);
+        }
+    }
+
+    private void createPlayerFromState(PlayerState state) {
+        Player newPlayer = this.newPlayerAction.createWith(state);
+        if (newPlayer != null) {
+            this.players.put(newPlayer.playerID, newPlayer);
+        }
+    }
+
+    private void handleReceivedClientConnections(Map<Integer, String> clients) {
+        if (clients.size() != 1) {
+            this.connectedClients.clear();
+        }
+        this.connectedClients.putAll(clients);
+    }
+
+    private void handleDisconnectPlayer(Integer disconnectedClientID) {
+        if (disconnectedClientID.equals(this.id)) {
+            this.closeConnection(false);
+        } else {
+            this.connectedClients.remove(disconnectedClientID);
+            this.players.remove(disconnectedClientID);
         }
     }
 

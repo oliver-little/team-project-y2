@@ -18,6 +18,7 @@ import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -43,10 +44,12 @@ import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
 
+import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
@@ -55,6 +58,7 @@ import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,47 +80,43 @@ public class App implements Controller {
     private StackPane interfaceOverlay;
 
     Double TIME_FOR_GAME = 500.0;
-
-    // Temporarily placed variables
-    ItemStore itemStore;
+    private long gameStartTime;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
+
     private SpriteManager spriteManager;
+    private ItemStore itemStore;
+
+    private GameScene gameScene;
+    private WorldEntity worldEntity;
 
     // Store systems for cleanup
-    Networker networker;
+    private final Networker networker;
     RenderSystem renderer;
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
+    public App(Networker networker, Long givenGameStartTime) {
+        this.networker = networker;
+
+        if (givenGameStartTime == null) {
+            this.gameStartTime = System.currentTimeMillis();
+        } else {
+            this.gameStartTime = givenGameStartTime;
+        }
+    }
+
+    public Parent getParentWith(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
         this.widthProperty = widthProperty;
         this.heightProperty = heightProperty;
-        Parent contentRoot = this.getContent();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                GameClient client = this.networker.getClient();
-                if (client != null) {
-                    client.closeConnection(true);
-                }
-                this.networker.stopServer();
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }));
-
-        return contentRoot;
+        return this.getContent();
     }
 
     /**
      * Creates the content to be rendered onto the canvas.
      */
     public void createContent() {
-        this.networker = new Networker();
-
         try {
             this.itemStore = new ItemStore("items.json");
             this.spriteManager = new SpriteManager();
@@ -129,7 +129,7 @@ public class App implements Controller {
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
-        GameScene gameScene = new GameScene();
+        this.gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
@@ -163,7 +163,7 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
-    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI);
+    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -205,13 +205,15 @@ public class App implements Controller {
         ArrayList<Task> purchasableTasks = allTasks;
 
         //World Entity
-        WorldEntity world = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        this.worldEntity = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        player.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
 
-        world.setClientSupplier(this.networker.clientSupplier);
-        player.setThrownPotion((potion) ->  world.addPotion(potion));
-        this.networker.worldEntity = world;
+        if (this.networker != null) {
+            this.worldEntity.setClientSupplier(this.networker.clientSupplier);
+            this.networker.setWorldEntity(this.worldEntity);
+        }
         
-        addInvUIInput(input, invUI, world);
+        addInvUIInput(input, invUI, this.worldEntity);
 
         // Task UI
         TaskUI taskUI = new TaskUI(player);
@@ -223,8 +225,7 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
-        this.networker.clockSystem = clockSystem;
+        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
         systemUpdater.addSystem(clockSystem);
 
         VBox topRight = new VBox();
@@ -265,19 +266,21 @@ public class App implements Controller {
                 () -> player.addAcceleration(0f, -500f));
 
 
-        input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
-        input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
         /*
         input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
         									 mas.muteUnmute();
         									 audioSys.muteUnmute();});
         */
-        invUI.onMouseClick(world);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, world.pickables));
+        invUI.onMouseClick(this.worldEntity);
+        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
 
         input.onKeyRelease(KeyCode.X, () -> {
-            world.pickables.picked(player.pickup());
+            this.worldEntity.pickables.picked(player.pickup());
         });
+
+        if (this.networker != null) {
+            this.setUpNetworking();
+        }
 
         gl.start();
     }
@@ -435,6 +438,30 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DIGIT0,
                 () -> invUI.useSlot(9, world),
                 () -> {});
+    }
+
+    private void setUpNetworking() {
+        Player myPlayer = this.worldEntity.myPlayer;
+        Market myMarket = this.worldEntity.market.getMarket();
+
+        GameClient currentClient = this.networker.getClient();
+        currentClient.players.put(myPlayer.playerID, myPlayer);
+        currentClient.farmEntities = this.worldEntity.farms;
+        currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));
+        Integer newFarmID = currentClient.myFarmID;
+
+        myMarket.setIsLocal(false);
+        this.worldEntity.marketUpdater.stop();
+
+        FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
+        this.worldEntity.setMyFarm(myFarm);
+
+        try {
+            currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
 }

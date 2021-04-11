@@ -8,6 +8,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.component.render.RectRenderable;
@@ -144,6 +145,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), navMesh, spriteManager, new ArrayList<>(farms.values()));
+		TextRenderable tag= new TextRenderable("Remy", 20);
+		GameEntity nameTag = new GameEntity(gameScene);
+		nameTag.addComponent(new RenderComponent(tag));
+		RenderComponent ratRender = this.myAnimal.getComponent(RenderComponent.class);
+		nameTag.addComponent(new Transform(ratRender.getWidth()/2f -tag.getWidth()/1f, -tag.getHeight()*1f, 10));
+		nameTag.setParent(this.myAnimal);
 
 		this.setMyFarm(this.farms.get(1));
 		this.setupFarmPickingKey();
@@ -254,7 +261,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		GameClient client = this.clientSupplier.get();
 		if (client != null) {
 			try {
-				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.id, this.getCurrentState()));
+				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
 
 			} catch (IOException exception) {
 				exception.printStackTrace();
