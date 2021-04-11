@@ -2,6 +2,9 @@ package teamproject.wipeout.engine.entity.gameclock;
 
 import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.system.GameSystem;
+import teamproject.wipeout.game.player.Player;
+
+import java.util.HashMap;
 
 public class ClockSystem implements GameSystem {
 
@@ -11,8 +14,8 @@ public class ClockSystem implements GameSystem {
 
     private double timeDifference;
 
-    public ClockSystem(Double time) {
-        this.gameOverUI = new GameOverUI();
+    public ClockSystem(Double time, HashMap<Integer, Player> players) {
+        this.gameOverUI = new GameOverUI(players);
         this.clockUI = new ClockUI(time, gameOverUI);
         this.gameStartTime = System.currentTimeMillis();
         this.timeDifference = 0.0;
