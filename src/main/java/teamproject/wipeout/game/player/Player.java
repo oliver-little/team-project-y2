@@ -5,12 +5,15 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PickableComponent;
+import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
@@ -18,7 +21,7 @@ import teamproject.wipeout.engine.component.render.particle.property.OvalParticl
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
@@ -32,6 +35,7 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
 import java.io.IOException;
 import java.util.*;
@@ -85,22 +89,22 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, InventoryUI invUI) {
+    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, InventoryUI invUI, SpriteManager spriteManager) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
         this.occupiedSlots = 0;
 
-        this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
+        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
 
-        ParticleParameters parameters = new ParticleParameters(100, true, 
-            FAST_PARTICLE, 
-            ParticleSimulationSpace.WORLD, 
-            SupplierGenerator.rangeSupplier(0.5, 1.5), 
-            SupplierGenerator.rangeSupplier(1.0, 4.0), 
-            null, 
-            SupplierGenerator.staticSupplier(0.0), 
+        ParticleParameters parameters = new ParticleParameters(100, true,
+            FAST_PARTICLE,
+            ParticleSimulationSpace.WORLD,
+            SupplierGenerator.rangeSupplier(0.5, 1.5),
+            SupplierGenerator.rangeSupplier(1.0, 4.0),
+            null,
+            SupplierGenerator.staticSupplier(0.0),
             SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
 
         parameters.setEmissionRate(20);
@@ -159,6 +163,26 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
+
+        try {
+            this.addComponent(new RenderComponent(new Point2D(0, -3)));
+            this.addComponent(new PlayerAnimatorComponent(
+                    spriteManager.getSpriteSet("player-red", "walk-up"),
+                    spriteManager.getSpriteSet("player-red", "walk-right"),
+                    spriteManager.getSpriteSet("player-red", "walk-down"),
+                    spriteManager.getSpriteSet("player-red", "walk-left"),
+                    spriteManager.getSpriteSet("player-red", "idle")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        TextRenderable tag= new TextRenderable(playerName, 20);
+        GameEntity nameTag = new GameEntity(scene);
+        nameTag.addComponent(new RenderComponent(tag));
+        RenderComponent playerRender = this.getComponent(RenderComponent.class);
+        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
+        nameTag.setParent(this);
+
     }
 
     public void setTaskUI(TaskUI taskUI) {
@@ -199,6 +223,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public void setWorldPosition(Point2D position) {
         this.position.setPosition(position);
+        this.playerState.setPosition(position);
+        this.sendPlayerStateUpdate();
     }
 
     /**
