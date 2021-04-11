@@ -26,25 +26,20 @@ public class ServerDiscovery {
 
     protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
     protected final HashMap<String, Long> lastHeardServers;
-    protected final NewServerDiscovery onDiscovery;
 
     private ScheduledExecutorService executorService;
 
     /**
      * Default initializer for {@code ServerDiscovery}
      *
-     * @param onDiscovery Action of type {@link NewServerDiscovery} that will be executed
-     *                    when a new available game server is discovered.
      * @throws UnknownHostException {@code ServerDiscovery} instance cannot be initialized properly.
      */
-    public ServerDiscovery(NewServerDiscovery onDiscovery) throws UnknownHostException {
+    public ServerDiscovery() throws UnknownHostException {
         this.availableServers = new SimpleMapProperty<String, InetSocketAddress>(FXCollections.observableHashMap());
         this.lastHeardServers = new HashMap<String, Long>();
 
         this.searchGroup = new InetSocketAddress(InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT);
         this.isActive = new AtomicBoolean(false);
-
-        this.onDiscovery = onDiscovery;
     }
 
     /**
@@ -137,7 +132,6 @@ public class ServerDiscovery {
                         InetAddress serverAddress = packet.getAddress();
                         InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, GameServer.GAME_PORT);
                         this.availableServers.put(serverName, socketAddress);
-                        this.onDiscovery.discovered(serverName, socketAddress);
                     }
 
                     this.lastHeardServers.put(serverName, System.currentTimeMillis());

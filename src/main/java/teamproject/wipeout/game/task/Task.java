@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.task;
 
+import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.player.Player;
 
 import java.util.function.Function;
@@ -10,8 +11,10 @@ public class Task {
     public Integer id;
     public Integer reward;
     public String description;
+    public String descriptionWithoutMoney;
     public Boolean completed;
-    public Integer priceToBuy;
+    public double priceToBuy;
+    public Item relatedItem;
     public Function<Player, Boolean> condition;
 
     /**
@@ -20,12 +23,14 @@ public class Task {
      * @param reward - how much money does the player get when they complete the task
      * @param condition - the condition under which the task is considered completed by the player
      */
-    public Task(Integer id, String description, Integer reward, Function<Player, Boolean> condition) {
+    public Task(Integer id, String descriptionWithoutMoney, Integer reward, Function<Player, Boolean> condition, Item relatedItem) {
         this.id = id;
-        this.description = description;
+        this.descriptionWithoutMoney = descriptionWithoutMoney;
+        this.description = descriptionWithoutMoney + " ($" + reward.toString() + ")";
         this.reward = reward;
         this.condition = condition;
         this.completed = false;
-        this.priceToBuy = reward/5;
+        this.priceToBuy = (double) reward / 2;
+        this.relatedItem = relatedItem;
     }
 }

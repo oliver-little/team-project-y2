@@ -99,9 +99,10 @@ public class GameServerRunner {
             this.processWriter.flush();
 
             String confirmation = this.processReader.readLine();
-            if (confirmation.equals(ProcessMessage.CONFIRMATION.rawValue)) {
+            if (confirmation != null && confirmation.equals(ProcessMessage.CONFIRMATION.rawValue)) {
                 return true;
             }
+
         } catch (IOException exception) {
             exception.printStackTrace();
         }

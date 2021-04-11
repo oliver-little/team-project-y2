@@ -12,9 +12,12 @@ public class PlantComponent implements ItemComponent {
     public final int grownItemID;
     public final int maxGrowthStage; // counting from 0., 1., 2.,...
     public final double growthRate;
+    public final int maxDrop;
+    public final int minDrop;
 
     public final int width;
     public final int height;
+    public final boolean isTree;
 
     /**
      * Creates a {@code PlantComponent} from a given {@code JSON Map} data.
@@ -27,9 +30,13 @@ public class PlantComponent implements ItemComponent {
         this.grownItemID = ((Double) data.get("grownItemID")).intValue();
         this.maxGrowthStage = ((Double) data.get("maxGrowthStage")).intValue();
         this.growthRate = (Double) data.get("growthRate");
+        this.maxDrop = ((Double) data.get("maxDrop")).intValue();
+        this.minDrop = ((Double) data.get("minDrop")).intValue();
 
         Double width = (Double) data.get("width");
         Double height = (Double) data.get("height");
+        Boolean isTree = (Boolean) data.get("isTree");
+
         if (width == null) {
             this.width = 1;
         } else {
@@ -39,6 +46,11 @@ public class PlantComponent implements ItemComponent {
             this.height = 1;
         } else {
             this.height = height.intValue();
+        }
+        if (isTree == null) {
+            this.isTree = false;
+        } else {
+            this.isTree = true;
         }
     }
 

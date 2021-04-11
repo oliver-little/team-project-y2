@@ -3,40 +3,53 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
+import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.TextRenderable;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
+import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
+import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
+import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.entity.ParticleEntity;
+import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
+import teamproject.wipeout.game.potion.PotionEntity;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
+import teamproject.wipeout.util.SupplierGenerator;
+import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
+    public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
+    public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
+
     public final int MAX_SIZE = 10; //no. of inventory slots
-    public final int INITIAL_MONEY = 25; //initial amount of money
+    public final int INITIAL_MONEY = 2500; //initial amount of money
+    public final int MAX_TASK_SIZE = 10; //no. of task slots
 
     public final Integer playerID;
     public String playerName;
@@ -53,6 +66,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public Integer size;
 
     public ArrayList<Task> tasks;
+    public LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
     private TaskUI taskUI;
 
     private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
@@ -61,10 +75,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private DoubleProperty money;
 
+    private Consumer<PotionEntity> thrownPotion;
     private Supplier<GameClient> clientSupplier;
     private final PlayerState playerState;
     private final Transform position;
     private final MovementComponent physics;
+    private final AudioComponent audio;
+
+    private ParticleEntity sabotageEffect;
 
     /**
      * Creates a new instance of GameEntity
@@ -80,23 +98,66 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
 
+        ParticleParameters parameters = new ParticleParameters(100, true,
+            FAST_PARTICLE,
+            ParticleSimulationSpace.WORLD,
+            SupplierGenerator.rangeSupplier(0.5, 1.5),
+            SupplierGenerator.rangeSupplier(1.0, 4.0),
+            null,
+            SupplierGenerator.staticSupplier(0.0),
+            SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
+
+        parameters.setEmissionRate(20);
+        parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(12, 0), new Point2D(52, 40)));
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
+            particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage);
+        });
+
+        this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
+        this.sabotageEffect.setParent(this);
+
         this.position = new Transform(position, 0.0, 1);
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);
         this.physics.stopCallback = (newPosition) -> {
             this.playerState.setPosition(newPosition);
             this.sendPlayerStateUpdate();
         };
+        this.physics.speedMultiplierChanged = (newMultiplier) -> {
+            // Updates local player when sabotage applied
+            if (newMultiplier != 1) {
+                if (newMultiplier < 1) {
+                    sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+                }
+                else {
+                    sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+                }
+
+                if (!sabotageEffect.isPlaying()) {
+                    sabotageEffect.play();
+                }
+            }
+            else if (sabotageEffect.isPlaying()) {
+                sabotageEffect.stop();
+            }
+
+            this.playerState.setSpeedMultiplier(newMultiplier);
+            this.sendPlayerStateUpdate();
+        };
+
         this.addComponent(this.position);
         this.addComponent(this.physics);
         this.addComponent(new MovementAudioComponent(this.getComponent(MovementComponent.class), "steps.wav"));
 
-        this.addComponent(new HitboxComponent(new Rectangle(20, 12, 24, 16)));
+        this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
         this.addComponent(new CollisionResolutionComponent());
+
+        this.audio = new AudioComponent();
+        this.addComponent(this.audio);
 
         this.invUI = invUI;
         if (invUI != null) {
             for (int i = 0; i < MAX_SIZE; i++) {
-                inventory.add(null);
+                this.inventory.add(null);
             }
             selectSlot(0);
 
@@ -136,6 +197,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public void setMoney(double value) {
         this.money.set(value);
         this.playerState.setMoney(value);
+        this.sendPlayerStateUpdate();
     }
 
     public DoubleProperty moneyProperty() {
@@ -146,8 +208,27 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.clientSupplier = supplier;
     }
 
+    public Consumer<PotionEntity> getThrownPotion() {
+        return this.thrownPotion;
+    }
+
+    public void setThrownPotion(Consumer<PotionEntity> thrownPotion) {
+        this.thrownPotion = thrownPotion;
+    }
+
     /**
-     * Adds acceleration to the physics component of the Player
+     * Sets world position of the Player.
+     *
+     * @param position {@link Point2D} position of the Player
+     */
+    public void setWorldPosition(Point2D position) {
+        this.position.setPosition(position);
+        this.playerState.setPosition(position);
+        this.sendPlayerStateUpdate();
+    }
+
+    /**
+     * Adds acceleration to the physics component of the Player.
      *
      * @param x X axis acceleration
      * @param y Y axis acceleration
@@ -164,12 +245,30 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public void updateFromState(PlayerState newState) {
+        this.physics.setSpeedMultiplier(newState.getSpeedMultiplier());
         this.physics.acceleration = newState.getAcceleration();
         if (newState.getAcceleration().equals(Point2D.ZERO)) {
             this.position.setPosition(newState.getPosition());
         }
         this.money.set(newState.getMoney());
         this.playerState.updateStateFrom(newState);
+
+        // Update remote players
+        if (newState.getSpeedMultiplier() != 1) {
+            if (newState.getSpeedMultiplier() < 1) {
+                sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
+            }
+            else {
+                sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
+            }
+
+            if (!sabotageEffect.isPlaying()) {
+                sabotageEffect.play();
+            }
+        }
+        else if (sabotageEffect.isPlaying()) {
+            sabotageEffect.stop();
+        }
     }
 
     /**
@@ -180,22 +279,35 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @return true if successful, false if unsuccessful
      */
     public boolean buyItem(Market market, int id, int quantity) {
-        if (market.calculateTotalCost(id, quantity, true) > this.money.getValue()) {
+        if (!this.hasEnoughMoney(market.calculateTotalCost(id, quantity, true))) {
             return false;
         }
         if (!this.acquireItem(id, quantity)) {
         	return false;
         };
         this.setMoney(this.money.getValue() - market.buyItem(id, quantity));
+        this.playSound("coins.wav");
         return true;
     }
 
-    // if you want to purchase some task from the market
+    /**
+     * If you want to buy a task from the market.
+     * @param task The task you want to buy.
+     * @return TRUE if successful, otherwise FALSE.
+     */
     public boolean buyTask(Task task) {
-        if(task.priceToBuy > this.money.getValue()) {
+        if(currentAvailableTasks.containsKey(task.id)) {
+            invUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
+            return false;
+        } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
+            invUI.displayMessage(ERROR_TYPE.TASKS_FULL);
+            return false;
+        } else if (!hasEnoughMoney(task.priceToBuy)) {
+            invUI.displayMessage(ERROR_TYPE.MONEY);
             return false;
         }
-        tasks.add(task);
+        this.addNewTask(task);
+        this.playSound("coins.wav");
         this.setMoney(this.money.getValue() - task.priceToBuy);
         return true;
     }
@@ -212,7 +324,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             return false;
         }
         this.setMoney(this.money.getValue() + market.sellItem(id, quantity));
-
+        this.playSound("coins.wav");
         this.soldItems.putIfAbsent(id, 0);
         this.soldItems.put(id, this.soldItems.get(id) + quantity);
         checkTasks();
@@ -236,6 +348,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (!addToInventory(itemID, quantity)) {
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
             System.out.println("No space in inventory for item(s)");
             return false;
         }
@@ -396,8 +509,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     	int noOfThisItem = countItems(itemID);
     	int stackLimit = invUI.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
     	if(quantity > noOfThisItem) {
+            invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
     		System.out.println("There isn't " + quantity + " of itemID " + itemID + " in the inventory");
-    		
     		return -1;
     	}
     	int endQuantity = noOfThisItem - quantity;
@@ -540,31 +653,32 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     /**
      * Scan all entities for items the player is standing over, and pick them up, and delete them from the map
      */
-    public void pickup() {
+    public Set<Pickables.Pickable> pickup() {
         List<GameEntity> entities = this.pickableCollector.getEntities();
-        List<GameEntity> removedItems = new ArrayList<>();
+        HashSet<Pickables.Pickable> picked = new HashSet<Pickables.Pickable>();
+
         for (GameEntity ge: entities){
             // Check if entity is pickable
             if (ge.hasComponent(PickableComponent.class)){
                 if(HitboxComponent.checkCollides(this, ge)) {
-                	PickableComponent item = ge.getComponent(PickableComponent.class);
-                    if (!this.acquireItem(item.item.id)) {
-                    	System.out.println("No space for item with id: " + item.item.id);
-                    }else {
-                    	removedItems.add(ge);
+                    Pickables.Pickable pickable = ge.getComponent(PickableComponent.class).pickable;
+                    if (!this.acquireItem(pickable.getID())) {
+                    	System.out.println("No space for item with id: " + pickable.getID());
+                    } else {
+                        picked.add(pickable);
+                        this.playSound("pop.wav");
                     }
                 }
             }
         }
-        //cleanup
-        for (GameEntity ge: removedItems) {
-            entities.remove(ge);
-            ge.destroy();
-        }
 
         this.checkTasks();
         System.out.println("Inventory itemID to count:" + this.getInventory().toString());
+
+        return picked;
     }
+
+    // Tasks
 
     /**
      * Checks what tasks have been completed
@@ -577,7 +691,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             }
             if(task.condition.apply(this)) {
                 task.completed = true;
+                currentAvailableTasks.remove(task.id);
                 this.money.set(this.money.getValue() + task.reward);
+                this.playSound("coinPrize.wav");
+                invUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
                 System.out.println("Task is completed");
             }
         }
@@ -587,14 +704,53 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public int getNumberOfCompletedTasks() {
         int completedTasks = 0;
-        for(Task task : tasks) {
+        for(Task task : this.tasks) {
             if(task.completed) {
                 completedTasks += 1;
             }
         }
         return completedTasks;
     }
-    
+
+    public void setTasks(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+        for (Task task: this.tasks) {
+            currentAvailableTasks.putIfAbsent(task.id, 1);
+        }
+    }
+
+    /**
+     * Adds a task to the player's list of tasks.
+     * @param task The task to add.
+     */
+    public void addNewTask(Task task) {
+        if(currentAvailableTasks.containsKey(task.id)) {
+            return;
+        } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
+            return;
+        }
+        this.currentAvailableTasks.putIfAbsent(task.id, 1);
+        this.tasks.add(task);
+        this.checkTasks();
+    }
+
+    /**
+     * Checks if a player has enough money to purchase something and displays an error if not.
+     * @param price The item/task they wish to buy.
+     * @return FALSE (and displays error message) if they do not have enough money, otherwise TRUE.
+     */
+    public boolean hasEnoughMoney(double price) {
+        if (getMoney() < price) {
+            invUI.displayMessage(ERROR_TYPE.MONEY);
+            return false;
+        }
+        return true;
+    }
+
+    public void playSound(String fileName){
+        audio.play(fileName);
+    }
+
     /**
      * method to clear/empty the inventory
      */

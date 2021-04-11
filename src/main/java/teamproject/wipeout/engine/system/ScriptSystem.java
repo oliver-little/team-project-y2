@@ -23,8 +23,17 @@ public class ScriptSystem implements GameSystem {
     public void accept(Double timeStep) {
         List<GameEntity> entities = this.entityCollector.getEntities();
 
-        for (GameEntity entity : entities) {
-            entity.getComponent(ScriptComponent.class).onStep.run();
+        int i = 0;
+        while (i < entities.size()) {
+            GameEntity entity = entities.get(i);
+            ScriptComponent sc = entity.getComponent(ScriptComponent.class);
+            sc.onStep.accept(timeStep);
+            if (sc.requestDeletion) {
+                entity.removeComponent(ScriptComponent.class);
+            }
+            else {
+                i++;
+            }
         }
     }
 }

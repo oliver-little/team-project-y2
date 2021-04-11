@@ -28,16 +28,17 @@ public class FunnelData {
         leftIndex = 0;
     }
 
-    public FunnelData(Point2D apex, NavigationEdge edge) {
-        this.setData(apex, edge);
+    public FunnelData(Point2D apex, NavigationEdge edge, int index) {
+        this.setData(apex, edge, index);
     }
 
     public Point2D getLeft() {
         return this.left;
     }
 
-    public void setLeft(Point2D newLeft) {
+    public void setLeft(Point2D newLeft, int index) {
         this.left = newLeft;
+        this.leftIndex = index;
         this.leftVector = left.add(negApex);
         this.angle = leftVector.angle(rightVector);
     }
@@ -46,13 +47,14 @@ public class FunnelData {
         return this.left;
     }
 
-    public void setRight(Point2D newRight) {
+    public void setRight(Point2D newRight, int index) {
         this.right = newRight;
+        this.rightIndex = index;
         this.rightVector = right.add(negApex);
         this.angle = leftVector.angle(rightVector);
     }
 
-    public void setData(Point2D apex, NavigationEdge edge) {
+    public void setData(Point2D apex, NavigationEdge edge, int index) {
         this.apex = apex;
         this.negApex = apex.multiply(-1);
         
@@ -65,6 +67,8 @@ public class FunnelData {
             this.left = edge.end;
             this.right = edge.start;
         }
+        this.leftIndex = index;
+        this.rightIndex = index;
         this.leftVector = left.add(negApex);
         this.rightVector = right.add(negApex);
         this.angle = leftVector.angle(rightVector);

@@ -142,17 +142,25 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().addAll(playerList);
 
-        List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> startServerGame()),
-                new Pair<String, Runnable>("Back", () -> {
-                    if (isHost) {
-                        networker.stopServer();
-                    } else {
-                        networker.getClient().closeConnection(true);
-                    }
-                    createMainMenu();
-                })
-        );
+        Pair<String, Runnable> backButton = new Pair<String, Runnable>("Back", () -> {
+            if (isHost) {
+                networker.stopServer();
+            } else {
+                networker.getClient().closeConnection(true);
+            }
+            createMainMenu();
+        });
+
+        List<Pair<String, Runnable>> menuData;
+        if (isHost) {
+            menuData =Arrays.asList(
+                    new Pair<String, Runnable>("Start Game", () -> startServerGame()),
+                    backButton
+            );
+        } else {
+            menuData =Arrays.asList(backButton);
+        }
+
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 

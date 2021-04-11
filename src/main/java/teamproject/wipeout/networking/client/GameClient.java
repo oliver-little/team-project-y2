@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import teamproject.wipeout.game.entity.AnimalEntity;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.Player;
@@ -44,8 +45,7 @@ public class GameClient {
     public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
     public final HashMap<Integer, Player> players;
-    public AnimalEntity myAnimal;
-    public Market market;
+    private WorldEntity worldEntity;
 
     public Consumer<Long> clockCalibration;
     public Integer myFarmID;
@@ -106,10 +106,6 @@ public class GameClient {
             throws IOException, ClassNotFoundException {
 
         GameClient client = new GameClient(clientName);
-        /*client.myFarmIDReceived = myFarmIDReceived;
-        client.newPlayerAction = newPlayerAction;
-        client.players.put(player.playerID, player);
-        client.farmEntities = farms;*/
 
         // Connect the socket
         client.clientSocket.connect(server, 3000); // 3s timeout
@@ -132,6 +128,10 @@ public class GameClient {
         client.startReceivingUpdates();
 
         return client;
+    }
+
+    public void setWorldEntity(WorldEntity worldEntity) {
+        this.worldEntity = worldEntity;
     }
 
     /**
@@ -163,7 +163,7 @@ public class GameClient {
         this.out.writeObject(new GameUpdate(updatedState));
         this.out.reset();
 
-        this.handlePlayerStateUpdate(updatedState.carbonCopy());
+        this.handlePlayerStateUpdate(updatedState);
     }
 
     /**
@@ -204,7 +204,7 @@ public class GameClient {
         new ServerThread(() -> {
             while (this.isActive.get()) {
                 try {
-                    GameUpdate receivedUpdate = null;
+                    GameUpdate receivedUpdate;
                     Object object = this.in.readObject();
                     if (object instanceof GameUpdate) {
                         receivedUpdate = (GameUpdate) object;
@@ -221,7 +221,7 @@ public class GameClient {
                             break;
                         case ANIMAL_STATE:
                             if (!receivedUpdate.originClientID.equals(this.id)) {
-                                this.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
+                                this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
                         case FARM_STATE:
@@ -233,14 +233,18 @@ public class GameClient {
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
-                            this.market.updateFromState(mState);
+                            this.worldEntity.market.getMarket().updateFromState(mState);
+                            break;
+                        case WORLD_STATE:
+                            WorldState wState = (WorldState) receivedUpdate.content;
+                            this.worldEntity.updateFromState(wState);
                             break;
                         case CLOCK_CALIB:
                             this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.market.responseArrived(response);
+                            this.worldEntity.market.getMarket().responseArrived(response);
                             break;
                         case DISCONNECT:
                             this.handleDisconnectPlayer(receivedUpdate.originClientID);
@@ -249,8 +253,9 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | StreamCorruptedException ignore) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
+                    ignore.printStackTrace();
                 } catch (EOFException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;
