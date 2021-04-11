@@ -57,10 +57,8 @@ import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
 
 /**
  * App is a class for containing the components for game play.
@@ -224,7 +222,12 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
+        HashMap<Integer, Player> playersNotNull = new HashMap<Integer, Player>();
+        GameClient client =  this.networker.getClient();
+        if(client != null) {
+            playersNotNull = this.networker.getClient().players;
+        }
+        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, playersNotNull);
         this.networker.clockSystem = clockSystem;
         systemUpdater.addSystem(clockSystem);
 
