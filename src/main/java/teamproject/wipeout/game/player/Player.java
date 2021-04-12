@@ -165,7 +165,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
 
         try {
-            this.addComponent(new RenderComponent(new Point2D(0, -32)));
+            this.addComponent(new RenderComponent(new Point2D(0, -3)));
             this.addComponent(new PlayerAnimatorComponent(
                     spriteManager.getSpriteSet("player-red", "walk-up"),
                     spriteManager.getSpriteSet("player-red", "walk-right"),

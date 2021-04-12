@@ -144,7 +144,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
-		this.myAnimal = new AnimalEntity(gameScene, new Point2D(50, 50), navMesh, spriteManager, new ArrayList<>(farms.values()));
+		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), navMesh, spriteManager, new ArrayList<>(farms.values()));
 		TextRenderable tag= new TextRenderable("Remy", 20);
 		GameEntity nameTag = new GameEntity(gameScene);
 		nameTag.addComponent(new RenderComponent(tag));

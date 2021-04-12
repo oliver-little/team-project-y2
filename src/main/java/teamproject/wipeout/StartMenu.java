@@ -4,9 +4,7 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -28,9 +26,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +51,7 @@ public class StartMenu implements Controller {
         this.root = new StackPane();
         this.menuBox = new VBox(30);
         this.networker = new Networker();
-        createDefaultBindings();       
+        createDefaultBindings();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             GameClient client = this.networker.getClient();
@@ -81,6 +76,7 @@ public class StartMenu implements Controller {
         keyBindings.put("Destroy", KeyCode.D);
         keyBindings.put("Harvest", KeyCode.H);
     }
+
 
     public void cleanup() {
     }
@@ -264,7 +260,7 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
                 	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
-                	System.out.println("selectedItem: "+ selectedItem.getServerName());
+                	//System.out.println("selectedItem: "+ selectedItem.getServerName());
                     if(selectedItem != null){
                         joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
                     }
