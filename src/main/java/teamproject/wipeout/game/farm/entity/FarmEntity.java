@@ -523,6 +523,13 @@ public class FarmEntity extends GameEntity {
         return this.data.canBePicked(row, column);
     }
 
+    public FarmItem itemAt(double x, double y) {
+        Point2D coors = this.rescaleCoordinatesToFarm(x, y);
+        int row = (int) coors.getY();
+        int column = (int) coors.getX();
+        return this.data.itemAt(row, column);
+    }
+
     /**
      * Puts a given Item on a given position defined by the X and Y coordinates.
      *
@@ -577,7 +584,7 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      */
     public void pickItemAt(double x, double y) {
-        pickItemAt(x, y, true);
+        pickItemAt(x, y, true, this.isDestroyingItem());
     }
 
     /**
@@ -586,7 +593,7 @@ public class FarmEntity extends GameEntity {
      * @param y Y scene coordinate
      * @param makePickable True if you want the item to be pickable, otherwise false.
      */
-    public Integer[] pickItemAt(double x, double y, boolean makePickable) {
+    public Integer[] pickItemAt(double x, double y, boolean makePickable, boolean isDestroying) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
         int row = (int) coors.getY();
         int column = (int) coors.getX();
@@ -611,7 +618,7 @@ public class FarmEntity extends GameEntity {
         }
 
         // Actually try to pick/destroy the item
-        if (isDestroyingItem()) {
+        if (isDestroying) {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
             this.audio.play("slice.wav");
@@ -864,7 +871,7 @@ public class FarmEntity extends GameEntity {
                 this.stopPickingItem();
 
             } else if (this.isDestroyingItem()) {
-                this.pickItemAt(x, y, true); //Destroying a plant
+                this.pickItemAt(x, y, false, false); //Destroying a plant
                 this.stopPickingItem();
 
             } else if (this.placingItem != null && this.placeItem(placingItem, x, y)) {

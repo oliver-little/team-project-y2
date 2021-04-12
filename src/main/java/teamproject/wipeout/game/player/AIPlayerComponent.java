@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
+import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -38,6 +39,8 @@ public class AIPlayerComponent implements GameComponent  {
     public static final int IDLE_TIME_MINIMUM = 2;
 
     public ArrayList<Player> allPlayers;
+    public AnimalEntity theAnimal;
+    public List<FarmEntity> otherFarms;
     private Player myPlayer;
     private FarmEntity myFarm;
 
@@ -100,20 +103,30 @@ public class AIPlayerComponent implements GameComponent  {
         }
 
         int rand = new Random().nextInt(fullyGrownItems.size());
-
         int x = (int) fullyGrownItems.get(rand).getX();
-
         int y = (int) fullyGrownItems.get(rand).getY();
 
         Runnable onComplete = () ->  {
-            Integer[] picked = this.myFarm.pickItemAt(x, y, false);
-            if (picked != null) {
-                Integer pickedID = picked[0];
-                int pickedQuantity = picked[1];
-                this.myPlayer.acquireItem(pickedID, pickedQuantity);
-                this.myPlayer.sellItem(this.market, pickedID, pickedQuantity);
+            double randDestroy = Math.random();
+            if (this.myPlayer.getMoney() > 100.0 && (randDestroy < 0.05 || (randDestroy < 0.1 && this.myFarm.itemAt(x, y).get().getComponent(PlantComponent.class).isTree))) {
+                System.out.println("Destroy");
+                this.myFarm.pickItemAt(x, y, false, true);
+            } else {
+                System.out.println("Harvest");
+                Integer[] picked = this.myFarm.pickItemAt(x, y, false, false);
+                if (picked != null) {
+                    Integer pickedID = picked[0];
+                    int pickedQuantity = picked[1];
+                    this.myPlayer.acquireItem(pickedID, pickedQuantity);
+                    this.myPlayer.sellItem(this.market, pickedID, pickedQuantity);
+                }
             }
+            System.out.println(this.myPlayer.getMoney());
             if (fullyGrownItems.size() - 1 > 0) {
+                if (this.clock != null && this.clock.get().clockUI.getTime() <= 0.0) {
+                    this.aiDecisionAlgorithm().run();
+                    return;
+                }
                 this.aiHarvestCrops();
             } else {
                 Platform.runLater(this.aiDecisionAlgorithm());
@@ -150,29 +163,26 @@ public class AIPlayerComponent implements GameComponent  {
                 System.out.println("AI: " + this.myPlayer.getInventory().toString());
                 return;
             }
-            double stealProbability = 0.3; //Probability of stealing crops.
-            double buyProbability = 0.8; //Probability of stealing crops.
 
             //Make decision on what to do next.
             double probability = Math.random();
 
-            if (probability <= 0.8) {
+            if (probability < 0.75) {
                 if (this.clock != null && this.clock.get().clockUI.getTime() < 30.0) {
                     System.out.println("Harvest STOP");
                     aiHarvestCrops();
                     return;
                 }
 
-                if (Math.random() <= 0.6) {
+                if (Math.random() < 0.65) {
                     //Steal plants
-                    System.out.println("Harvest");
                     aiHarvestCrops();
 
                 } else {
                     if (Math.random() > 0.8) {
                         double expansionAddition = (this.myFarm.getExpansionLevel() * FarmExpansionUI.PRICE_MULTIPLIER);
                         double expansionPrice = 100 * (expansionAddition == 0.0 ? 1.0 : expansionAddition);
-                        if (this.myPlayer.hasEnoughMoney(expansionPrice)) {
+                        if (this.myPlayer.hasEnoughMoney(expansionPrice + 30)) {
                             System.out.println("Expand");
                             this.myPlayer.setMoney(this.myPlayer.getMoney() - expansionPrice);
                             this.myFarm.expandFarmBy(1);
@@ -180,37 +190,36 @@ public class AIPlayerComponent implements GameComponent  {
                         } else {
                             System.out.println("Buy 2");
                             aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
-                                System.out.println("Before");
                                 this.buyPlants();
+                                System.out.println(this.myPlayer.getMoney());
                                 this.aiDecisionAlgorithm().run();
-                                System.out.println("After");
                             });
                         }
                     } else {
                         System.out.println("Buy 1");
                         aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
                             this.buyPlants();
+                            System.out.println(this.myPlayer.getMoney());
                             this.aiDecisionAlgorithm().run();
                         });
                     }
                 }
 
             } else {
-                usePotions();
-                return;/*
                 double randomiser = Math.random();
-                if (randomiser < 0.3) {
-                    //Idle
-                    System.out.println("Idle");
-                    aiIdle();
-                } else if (randomiser < 0.7) {
+                if (randomiser < 0.2 && this.myPlayer.hasEnoughMoney(130)) {
+                    System.out.println("Potion");
+                    usePotions();
+
+                } else if (randomiser < 0.5) {
                     //Pick random point
                     System.out.println("Wander");
                     aiPathFind();
                 } else {
-                    System.out.println("Potion");
-                    usePotions();
-                }*/
+                    //Idle
+                    System.out.println("Idle");
+                    aiIdle();
+                }
             }
         };
     }
@@ -250,7 +259,6 @@ public class AIPlayerComponent implements GameComponent  {
                 int[] freeSquare = this.myFarm.firstFreeSquareFor(plant.isTree ? 2 : 1, plant.isTree ? 2 : 1);
 
                 if (freeSquare == null) {
-                    System.out.println(item.name);
                     continue;
                 }
                 int row = freeSquare[0];
@@ -295,10 +303,10 @@ public class AIPlayerComponent implements GameComponent  {
         SabotageComponent sc = currentPotion.getComponent(SabotageComponent.class);
         List<GameEntity> possibleEffectEntities = null;
         if (sc.type == SabotageComponent.SabotageType.SPEED) {
-            possibleEffectEntities = List.of(useOnPlayer); // world.myAnimal); !!! ???
+            possibleEffectEntities = List.of(useOnPlayer, this.theAnimal);
         }
         else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
-            possibleEffectEntities = List.of(this.myFarm); // get farm for the useOnPlayer !!! ???
+            possibleEffectEntities = List.copyOf(this.otherFarms);
         }
 
         Runnable onComplete = () -> this.aiDecisionAlgorithm().run();
@@ -337,7 +345,7 @@ public class AIPlayerComponent implements GameComponent  {
             }
 
             int avgDrop = (plant.minDrop + plant.maxDrop) / 2;
-            if (Math.random() > 0.4) {
+            if (Math.random() > 0.5) {
                 double newPriceDiff = (marketItem.getCurrentSellPrice() * avgDrop) - currentBuyPrice;
                 if (bestToBuy == null || newPriceDiff > currentPriceDiff) {
                     bestToBuy = marketItem;

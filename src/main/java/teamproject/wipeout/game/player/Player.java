@@ -44,7 +44,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
     public final int MAX_SIZE = 10; //no. of inventory slots
-    public final int INITIAL_MONEY = 2500; //initial amount of money
+    public final int INITIAL_MONEY = 25; //initial amount of money
     public final int MAX_TASK_SIZE = 10; //no. of task slots
 
     public final Integer playerID;

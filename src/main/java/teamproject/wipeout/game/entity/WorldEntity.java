@@ -41,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
@@ -58,6 +59,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	private InputHandler inputHandler;
 	private Supplier<GameClient> clientSupplier;
+	private ArrayList<Player> players;
 
 	public SpriteManager spriteManager;
 	public ItemStore itemStore;
@@ -109,6 +111,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 
 		this.myPlayer = player;
+		this.players = new ArrayList<Player>();
+		this.players.add(player);
 
 		if (numberOfPlayers == 4) {
 			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
@@ -279,8 +283,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 		this.setFarmFor(aiPlayer, false, this.farms.get(2));
 		AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(2));
-		aiComp.allPlayers = new ArrayList<>();
-		aiComp.allPlayers.add(this.myPlayer);
+		aiComp.allPlayers = this.players;
+		aiComp.otherFarms = this.farms.values().stream().filter((farm) -> !farm.farmID.equals(2)).collect(Collectors.toList());
+		aiComp.theAnimal = this.myAnimal;
 		aiPlayer.addComponent(aiComp);
 	}
 

@@ -79,8 +79,8 @@ public class PotionThrowEntity extends GameEntity {
     public EntityClickAction onClick = (x, y, button) -> {
         if (button == MouseButton.SECONDARY) {
             this.abortThrowing();
-        }
-        else {
+
+        } else {
             // Throw potion
             Point2D startPos = throwingPlayer.getComponent(Transform.class).getWorldPosition();
             Point2D clickPos = new Point2D(x, y);
@@ -93,11 +93,18 @@ public class PotionThrowEntity extends GameEntity {
                 endPos = startPos.add(vector);
             }
 
+            if (startPos.equals(endPos)) {
+                endPos = endPos.add(1.0, 1.0);
+            }
+
+            System.out.println("Potion throw: " + startPos.toString() + ", " + endPos.toString());
+
             PotionEntity potionEntity = new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
             this.throwingPlayer.getThrownPotion().accept(potionEntity);
 
             this.onComplete.run();
             this.destroy();
+            System.out.println("Destroy throw");
         }
     };
 }
