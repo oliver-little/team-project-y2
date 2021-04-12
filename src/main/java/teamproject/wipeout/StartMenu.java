@@ -352,7 +352,6 @@ public class StartMenu implements Controller {
             {
                 public void changed(ObservableValue<? extends String> ov, final String oldvalue, final String newvalue){
                     keyBindings.put(action, KeyCode.valueOf(newvalue));
-                    printBindings();
                     updateDisabledItems(); //greys out taken bindings
                 }
             });
@@ -371,17 +370,6 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
-    }
-
-    //for testing
-    private void printBindings(){
-        System.out.println();
-        for(Map.Entry<String, KeyCode> entry : keyBindings.entrySet()) {
-            String action = entry.getKey();
-            KeyCode code = entry.getValue();
-            System.out.print(action + ":" + code + " , ");
-        }
-        System.out.println();
     }
 
     private void createMainMenu(){
