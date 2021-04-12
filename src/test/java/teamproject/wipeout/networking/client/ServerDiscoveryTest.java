@@ -1,5 +1,6 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.collections.MapChangeListener;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.networking.server.GameServer;
 
@@ -25,9 +26,10 @@ class ServerDiscoveryTest {
         this.serverAddress = new AtomicReference<InetSocketAddress>(null);
 
         try {
-            this.serverDiscovery = new ServerDiscovery((name, address) -> {
-                this.serverName.set(name);
-                this.serverAddress.set(address);
+            this.serverDiscovery = new ServerDiscovery();
+            this.serverDiscovery.availableServers.addListener((MapChangeListener.Change<? extends String, ? extends InetSocketAddress> change) -> {
+                this.serverName.set(change.getKey());
+                this.serverAddress.set(change.getValueAdded());
             });
 
         } catch (UnknownHostException e) {
@@ -47,21 +49,6 @@ class ServerDiscoveryTest {
             this.serverDiscovery.stopLookingForServers();
         }
         this.serverDiscovery.availableServers.clear();
-    }
-
-    @RepeatedTest(5)
-    @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
-    void testOnDiscovery() {
-        Assertions.assertTrue(this.serverDiscovery.availableServers.isEmpty());
-
-        String testServerName = "TestServer#123";
-        InetSocketAddress testServerAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), GameServer.GAME_PORT);
-        this.serverDiscovery.onDiscovery.discovered(testServerName, testServerAddress);
-
-        Assertions.assertEquals(testServerName, this.serverName.get());
-        Assertions.assertEquals(testServerAddress, this.serverAddress.get());
-
-        Assertions.assertNull(this.serverDiscovery.getAvailableServers().get(testServerName));
     }
 
     @RepeatedTest(5)

@@ -36,21 +36,24 @@ public class Networker {
 
     public final GameServerRunner serverRunner;
 
-    public WorldEntity worldEntity;
-
     protected ServerDiscovery serverDiscovery;
     protected GameClient client;
+
+    private WorldEntity worldEntity;
 
     public Networker() {
         this.serverRunner = new GameServerRunner();
         try {
-            this.serverDiscovery = new ServerDiscovery((name, address) -> {
-                System.out.println(name);
-            });
+            this.serverDiscovery = new ServerDiscovery();
 
         } catch (UnknownHostException exception) {
             exception.printStackTrace();
         }
+    }
+
+    public void setWorldEntity(WorldEntity worldEntity) {
+        this.worldEntity = worldEntity;
+        this.client.setWorldEntity(worldEntity);
     }
 
     public ServerDiscovery getServerDiscovery() {
@@ -90,17 +93,32 @@ public class Networker {
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
         return (newPlayerState) -> {
-            if (newPlayerState.getPlayerID().equals(this.worldEntity.getMyPlayer().playerID)) {
+            if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
                 return null;
             }
 
-            Player newPlayer = gameScene.createPlayer(newPlayerState.getPlayerID(), "test", newPlayerState.getPosition(), null, spriteManager);
+            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), null, spriteManager);
 
             newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
             newPlayer.addComponent(new CollisionResolutionComponent());
 
+            try {
+                newPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
+                newPlayer.addComponent(new PlayerAnimatorComponent(
+                        spriteManager.getSpriteSet("player-red", "walk-up"),
+                        spriteManager.getSpriteSet("player-red", "walk-right"),
+                        spriteManager.getSpriteSet("player-red", "walk-down"),
+                        spriteManager.getSpriteSet("player-red", "walk-left"),
+                        spriteManager.getSpriteSet("player-red", "idle")));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
-            myFarm.assignPlayer(newPlayer.playerID, false, () -> this.client);
+            if (myFarm != null) {
+                myFarm.assignPlayer(newPlayer.playerID, false, () -> this.client);
+            }
 
             return newPlayer;
         };
@@ -110,57 +128,11 @@ public class Networker {
         try {
             this.client = GameClient.openConnection(address, clientName);
             // TODO client can be null
-            this.client.clockCalibration = (originalGameStart) -> {
-                //double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
-                //this.clockSystem.setTimeDifference(timeDifference);
-                gameStart.accept(originalGameStart);
-            };
+            this.client.clockCalibration = (originalGameStart) -> gameStart.accept(originalGameStart);
 
         } catch (IOException | ClassNotFoundException exception) {
             exception.printStackTrace();
         }
     }
 
-    protected NewServerDiscovery onServerDiscovery(GameScene gameScene, SpriteManager spriteManager) {
-        return (name, address) -> {
-            /*this.serverDiscovery.stopLookingForServers();
-
-            Player myPlayer = this.worldEntity.getMyPlayer();
-            Market myMarket = this.worldEntity.market.getMarket();
-
-            Consumer<Pair<GameClient, Integer>> farmHandler = (farmPair) -> {
-                GameClient currentClient = farmPair.getKey();
-                Integer newFarmID = farmPair.getValue();
-
-                currentClient.myAnimal = this.worldEntity.getMyAnimal();
-                currentClient.market = this.worldEntity.market.getMarket();
-
-                myMarket.setIsLocal(true);
-                this.worldEntity.marketUpdater.stop();
-
-                FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
-                this.worldEntity.setMyFarm(myFarm);
-
-                System.out.println("Connected client with ID: " + currentClient.getID());
-
-                try {
-                    currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
-
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                }
-            };
-
-            try {
-                this.client = GameClient.openConnection(address, myPlayer, this.worldEntity.farms, farmHandler, this.onPlayerConnection(gameScene, spriteManager));
-                this.client.clockCalibration = (originalGameStart) -> {
-                    double timeDifference = this.clockSystem.gameStartTime - originalGameStart;
-                    this.clockSystem.setTimeDifference(timeDifference);
-                };
-
-            } catch (IOException | ClassNotFoundException exception) {
-                exception.printStackTrace();
-            }*/
-        };
-    }
 }

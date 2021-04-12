@@ -16,42 +16,65 @@ import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
+import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.state.StateUpdatable;
+import teamproject.wipeout.networking.state.WorldState;
+
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Supplier;
 
-public class WorldEntity extends GameEntity {
+public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
 	public final MarketPriceUpdater marketUpdater;
 	public final MarketEntity market;
 	public final Map<Integer, FarmEntity> farms;
+	public final Player myPlayer;
+	public final AnimalEntity myAnimal;
+	public final Pickables pickables;
 
-	private final Player myPlayer;
-	private AnimalEntity myAnimal;
+	private HashMap<Integer, Point2D[]> potions;
+
 	private FarmEntity myFarm;
 	private NavigationMesh navMesh;
 
 	private InputHandler inputHandler;
-
 	private Supplier<GameClient> clientSupplier;
 
-	public WorldEntity(GameScene gameScene, double width, double height, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input) {
+	private SpriteManager spriteManager;
+	private ItemStore itemStore;
+
+	public WorldEntity(GameScene gameScene, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input, ArrayList<Task> purchasableTasks) {
 		super(gameScene);
+		this.spriteManager = spriteManager;
+		this.itemStore = itemStore;
 
 		this.farms = new HashMap<Integer, FarmEntity>();
+		this.pickables = new Pickables(gameScene, itemStore, spriteManager);
+		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
+
+		this.potions = new HashMap<Integer, Point2D[]>();
+
 		this.inputHandler = input;
 
 		this.addComponent(new Transform(0,0));
+
+		int width = 1461;
+		int height = 1184;
 
 		//grass background
 		GameEntity grass = new GameEntity(gameScene);
@@ -72,24 +95,22 @@ public class WorldEntity extends GameEntity {
 		this.addComponent(new CollisionResolutionComponent(false));
 		
 		try {
-			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(800,0), spriteManager);
-			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,750), spriteManager);
-			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,600), new Point2D(800,0), spriteManager);
-			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(800,-100), new Point2D(0,750), spriteManager);
+			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(1461,0), spriteManager);
+			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,1411), spriteManager);
+			ForestEntity forestBottom = new ForestEntity(gameScene, new Point2D(0,1184), new Point2D(1461,0), spriteManager);
+			ForestEntity forestRight = new ForestEntity(gameScene, new Point2D(1461,-100), new Point2D(0,1411), spriteManager);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		//TreeEntity tree = new TreeEntity(gameScene, -50,-100, spriteManager);
-		//TreeEntity tree2 = new TreeEntity(gameScene, new Point2D(20,20));
 
 		this.myPlayer = player;
 
 		if (numberOfPlayers == 4) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 50), spriteManager, itemStore);
-			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(50, 400), spriteManager, itemStore);
-			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(500, 400), spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(981, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity3 = new FarmEntity(gameScene, 3, new Point2D(220, 800), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity4 = new FarmEntity(gameScene, 4, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
@@ -97,14 +118,14 @@ public class WorldEntity extends GameEntity {
 			this.farms.put(farmEntity4.farmID, farmEntity4);
 
 		} else if (numberOfPlayers == 2) {
-			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(50, 50), spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(500, 400), spriteManager, itemStore);
+			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(gameScene, 2, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
 
 			this.farms.put(farmEntity1.farmID, farmEntity1);
 			this.farms.put(farmEntity2.farmID, farmEntity2);
 		}
 
-		this.market = new MarketEntity(gameScene, 260, 250, itemStore, player, spriteManager, uiContainer);
+		this.market = new MarketEntity(gameScene, 576, 544, itemStore, player, spriteManager, uiContainer, this,  purchasableTasks);
 		this.market.setOnUIOpen(() -> input.setDisableInput(true));
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);
@@ -133,14 +154,14 @@ public class WorldEntity extends GameEntity {
 
 		this.setMyFarm(this.farms.get(1));
 		//this.setupFarmPickingKey();
+		//this.setupFarmDestroyingKey();
 	}
 
-	public Player getMyPlayer() {
-		return this.myPlayer;
-	}
-
-	public AnimalEntity getMyAnimal() {
-		return this.myAnimal;
+	public void addPotion(PotionEntity potionEntity) {
+		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
+		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
+		this.potions.put(potionEntity.getPotionID(), pointPoints);
+		this.sendStateUpdate();
 	}
 
 	public FarmEntity getMyFarm() {
@@ -162,16 +183,90 @@ public class WorldEntity extends GameEntity {
 		this.myFarm = farm;
 		if (farm != null) {
 			this.myPlayer.getCurrentState().assignFarm(farm.farmID);
+			this.setMyPlayerPosition(farm);
 			farm.assignPlayer(this.myPlayer.playerID, true, this.clientSupplier);
 		} else {
 			this.myPlayer.getCurrentState().assignFarm(null);
 		}
 	}
 
+	public WorldState getCurrentState() {
+		return new WorldState(this.pickables.get(), this.potions);
+	}
+
+	public void updateFromState(WorldState newState) {
+		this.pickables.updateFrom(newState.getPickables());
+
+		Set<Map.Entry<Integer, Point2D[]>> currentEntrySet = this.potions.entrySet();
+		for (Map.Entry<Integer, Point2D[]> entry : newState.getPotions().entrySet()) {
+			if (!currentEntrySet.contains(entry)) {
+				Item potion = this.itemStore.getItem(entry.getKey());
+				SabotageComponent sc = potion.getComponent(SabotageComponent.class);
+
+				List<GameEntity> possibleEffectEntities = null;
+
+				if (sc.type == SabotageComponent.SabotageType.SPEED) {
+					possibleEffectEntities = List.of(this.myPlayer, this.myAnimal);
+				}
+				else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
+					possibleEffectEntities = List.of(this.myFarm);
+				}
+				new PotionEntity(this.getScene(), this.spriteManager, potion, possibleEffectEntities, entry.getValue()[0], entry.getValue()[1]);
+			}
+		}
+	}
+
+	protected void setMyPlayerPosition(FarmEntity farm) {
+		Point2D playerPosition;
+		switch (farm.farmID) {
+			case 1:
+				playerPosition = farm.getWorldPosition().add(farm.getSize());
+				break;
+			case 2:
+				playerPosition = farm.getWorldPosition().add(-45, farm.getSize().getY());
+				break;
+			case 3:
+				playerPosition = farm.getWorldPosition().add(farm.getSize().getX(), 0);
+				break;
+			case 4:
+				playerPosition = farm.getWorldPosition().subtract(45, 0);
+				break;
+			default:
+				playerPosition = Point2D.ZERO;
+				break;
+		}
+		this.myPlayer.setWorldPosition(playerPosition);
+	}
+
 	public void setupFarmPickingKey(KeyCode code) {
 		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
+	}
+
+	public void setupFarmDestroyingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
+			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	/**
+	 * If possible, sends an updated state of the world to the server.
+	 */
+	private void sendStateUpdate() {
+		if (this.clientSupplier == null) {
+			return;
+		}
+
+		GameClient client = this.clientSupplier.get();
+		if (client != null) {
+			try {
+				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
+
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
 	}
 
 }

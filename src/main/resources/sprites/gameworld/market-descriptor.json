@@ -4,13 +4,133 @@
   "name": "market",
   "sprites": [
     {
-      "name": "market",
+      "name": "market-core",
       "type": "sprite",
       "parameters" : {
-        "x": 0,
-        "y": 0,
-        "width": 305,
-        "height": 200
+        "x": 49,
+        "y": 11,
+        "width": 209,
+        "height": 128
+      }
+    },
+    {
+      "name": "sword-sign",
+      "type": "sprite",
+      "parameters" : {
+        "x": 8,
+        "y": 45,
+        "width": 41,
+        "height": 66
+      }
+    },
+    {
+      "name": "fruit-boxes-left",
+      "type": "sprite",
+      "parameters" : {
+        "x": 16,
+        "y": 78,
+        "width": 33,
+        "height": 53
+      }
+    },
+    {
+      "name": "spear-rack",
+      "type": "sprite",
+      "parameters" : {
+        "x": 5,
+        "y": 127,
+        "width": 49,
+        "height": 29
+      }
+    },
+    {
+      "name": "blank-sign",
+      "type": "sprite",
+      "parameters" : {
+        "x": 22,
+        "y": 152,
+        "width": 30,
+        "height": 32
+      }
+    },
+    {
+      "name": "woodpile-left",
+      "type": "sprite",
+      "parameters" : {
+        "x": 58,
+        "y": 147,
+        "width": 29,
+        "height": 32
+      }
+    },
+    {
+      "name": "red-plantpot",
+      "type": "sprite",
+      "parameters" : {
+        "x": 88,
+        "y": 122,
+        "width": 20,
+        "height": 30
+      }
+    },
+    {
+      "name": "bow-rack",
+      "type": "sprite",
+      "parameters" : {
+        "x": 172,
+        "y": 115,
+        "width": 33,
+        "height": 54
+      }
+    },
+    {
+      "name": "green-plantpot",
+      "type": "sprite",
+      "parameters" : {
+        "x": 211,
+        "y": 130,
+        "width": 19,
+        "height": 27
+      }
+    },
+    {
+      "name": "woodpile-right",
+      "type": "sprite",
+      "parameters" : {
+        "x": 225,
+        "y": 153,
+        "width": 22,
+        "height": 30
+      }
+    },
+    {
+      "name": "target",
+      "type": "sprite",
+      "parameters" : {
+        "x": 240,
+        "y": 106,
+        "width": 35,
+        "height": 48
+      }
+    },
+    {
+      "name": "scarecrow",
+      "type": "sprite",
+      "parameters" : {
+        "x": 261,
+        "y": 76,
+        "width": 31,
+        "height": 61
+      }
+    },
+    {
+      "name": "tools-sign",
+      "type": "sprite",
+      "parameters" : {
+        "x": 252,
+        "y": 42,
+        "width": 46,
+        "height": 66
       }
     }
   ]

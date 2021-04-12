@@ -19,12 +19,14 @@ public class PlayerState implements Serializable {
     private Integer playerID;
     private String playerName;
 
-    private Integer farmID;
+    private int farmID;
 
     private Point2D position;
     private Point2D acceleration;
 
-    private Double money;
+    private double speedMultiplier;
+
+    private double money;
 
     private long timestamp;
 
@@ -37,32 +39,15 @@ public class PlayerState implements Serializable {
      * @param position Player's position represented by {@link Point2D}.
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    public PlayerState(Integer playerID, String playerName, Double money, Point2D position, Point2D acceleration) {
+    public PlayerState(Integer playerID, String playerName, double money, Point2D position, Point2D acceleration) {
         this.playerID = playerID;
         this.playerName = playerName;
         this.farmID = -1;
         this.position = position;
         this.acceleration = acceleration;
+        this.speedMultiplier = 1.0;
         this.money = money;
         this.timestamp = System.currentTimeMillis();
-    }
-
-    /**
-     * Protected initializer for a {@link PlayerState}.
-     *
-     * @param playerID Player's ID
-     * @param timestamp Timestamp of the state
-     * @param position Player's position represented by {@link Point2D}
-     * @param acceleration Player's acceleration represented by {@link Point2D}
-     */
-    protected PlayerState(Integer playerID, String playerName, Integer farmID, Point2D position, Point2D acceleration, Double money, long timestamp) {
-        this.playerID = playerID;
-        this.playerName = playerName;
-        this.farmID = farmID;
-        this.position = position;
-        this.acceleration = acceleration;
-        this.money = money;
-        this.timestamp = timestamp;
     }
 
     /**
@@ -75,9 +60,9 @@ public class PlayerState implements Serializable {
     }
 
     /**
-     * Player's name getter
+     * Player name getter
      *
-     * @return Player's name associated with the {@link PlayerState}.
+     * @return Player name
      */
     public String getPlayerName() {
         return this.playerName;
@@ -88,7 +73,7 @@ public class PlayerState implements Serializable {
      *
      * @return Farm ID associated with the player.
      */
-    public Integer getFarmID() {
+    public int getFarmID() {
         return this.farmID;
     }
 
@@ -119,6 +104,10 @@ public class PlayerState implements Serializable {
         return this.acceleration;
     }
 
+    public Double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
     /**
      * {@code money} getter
      *
@@ -134,7 +123,7 @@ public class PlayerState implements Serializable {
      * @param farmID ID of the farm assigned to the player.
      */
     public void assignFarm(Integer farmID) {
-        this.farmID = farmID;
+        this.farmID = farmID == null ? -1 : farmID;
     }
 
     /**
@@ -157,6 +146,10 @@ public class PlayerState implements Serializable {
         this.acceleration = newAcceleration;
     }
 
+    public void setSpeedMultiplier(Double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
     /**
      * {@code money} setter
      *
@@ -176,17 +169,9 @@ public class PlayerState implements Serializable {
         this.farmID = state.farmID;
         this.position = state.position;
         this.acceleration = state.acceleration;
+        this.speedMultiplier = state.speedMultiplier;
         this.money = state.money;
         this.timestamp = state.timestamp;
-    }
-
-    /**
-     * Creates a copy of the PlayerState
-     *
-     * @return {@link PlayerState} copy
-     */
-    public PlayerState carbonCopy() {
-        return new PlayerState(this.playerID, this.playerName, this.farmID, this.position, this.acceleration, this.money, this.timestamp);
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -194,6 +179,7 @@ public class PlayerState implements Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.playerID);
+        out.writeUTF(this.playerName);
         out.writeInt(this.farmID);
 
         out.writeDouble(this.position.getX());
@@ -202,6 +188,8 @@ public class PlayerState implements Serializable {
         out.writeDouble(this.acceleration.getX());
         out.writeDouble(this.acceleration.getY());
 
+        out.writeDouble(this.speedMultiplier);
+
         out.writeDouble(this.money);
 
         out.writeLong(this.timestamp);
@@ -209,10 +197,13 @@ public class PlayerState implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException {
         this.playerID = in.readInt();
+        this.playerName = in.readUTF();
         this.farmID = in.readInt();
 
         this.position = new Point2D(in.readDouble(), in.readDouble());
         this.acceleration = new Point2D(in.readDouble(), in.readDouble());
+
+        this.speedMultiplier = in.readDouble();
 
         this.money = in.readDouble();
 

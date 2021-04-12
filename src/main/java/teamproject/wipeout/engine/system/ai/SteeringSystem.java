@@ -43,6 +43,9 @@ public class SteeringSystem implements GameSystem{
             MovementComponent m = entity.getComponent(MovementComponent.class);
             Transform t = entity.getComponent(Transform.class);
             SteeringComponent s = entity.getComponent(SteeringComponent.class);
+            if (s == null) {
+                continue;
+            }
 
             Point2D currentPosition = t.getWorldPosition();
 

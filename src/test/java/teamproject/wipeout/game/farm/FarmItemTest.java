@@ -30,7 +30,7 @@ class FarmItemTest {
     @BeforeEach
     void setUp() {
         farmItem = new FarmItem(item);
-        farmItem.growth = GROWTH;
+        farmItem.growth.set(GROWTH);
 
         finishedFarmItem = new FarmItem(finishedItem, FINISHED_GROWTH);
     }

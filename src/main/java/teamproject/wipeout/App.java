@@ -11,15 +11,17 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import javafx.scene.layout.VBox;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.render.*;
+import teamproject.wipeout.engine.component.render.CameraComponent;
+import teamproject.wipeout.engine.component.render.CameraFollowComponent;
+import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
@@ -31,16 +33,18 @@ import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
 import teamproject.wipeout.engine.system.physics.CollisionSystem;
 import teamproject.wipeout.engine.system.physics.MovementSystem;
 import teamproject.wipeout.engine.system.render.CameraFollowSystem;
-import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.engine.system.render.ParticleSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.*;
 import teamproject.wipeout.engine.system.ai.SteeringSystem;
+import teamproject.wipeout.engine.system.farm.FarmSpriteSystem;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 
 import java.io.IOException;
@@ -50,18 +54,17 @@ import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
+import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
-
 
 /**
  * App is a class for containing the components for game play.
@@ -127,28 +130,32 @@ public class App implements Controller {
             exception.printStackTrace();
         }
 
+        // Input
+        InputHandler input = new InputHandler(root.getScene());
+
         this.gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
+        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         AudioSystem audioSys = new AudioSystem(gameScene, 0.1f);
         systemUpdater.addSystem(new MovementSystem(gameScene));
         systemUpdater.addSystem(new CollisionSystem(gameScene));
+        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
+        systemUpdater.addSystem(new FarmSpriteSystem(gameScene, spriteManager));
+        systemUpdater.addSystem(mhs);
+        systemUpdater.addSystem(new ParticleSystem(gameScene));
         systemUpdater.addSystem(audioSys);
         systemUpdater.addSystem(new GrowthSystem(gameScene));
-        systemUpdater.addSystem(new CameraFollowSystem(gameScene));
-        systemUpdater.addSystem(new ScriptSystem(gameScene));
         systemUpdater.addSystem(mas);
         systemUpdater.addSystem(new SteeringSystem(gameScene));
+        systemUpdater.addSystem(new ScriptSystem(gameScene));
         GameLoop gl = new GameLoop(systemUpdater, renderer);
 
-        // Input
-        InputHandler input = new InputHandler(root.getScene());
-
         MouseClickSystem mcs = new MouseClickSystem(gameScene, input);
-        MouseHoverSystem mhs = new MouseHoverSystem(gameScene, input);
         PlayerAnimatorSystem pas = new PlayerAnimatorSystem(gameScene);
-        eventSystems = List.of(mcs, mhs, pas);
+        SabotageSystem sas = new SabotageSystem(gameScene);
+        eventSystems = List.of(mcs, pas, sas);
 
         input.mouseHoverSystem = mhs;
 
@@ -159,9 +166,8 @@ public class App implements Controller {
         
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-        
 
-    	Player player = gameScene.createPlayer(new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
+    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -169,6 +175,17 @@ public class App implements Controller {
         //player.acquireItem( 43, 2);
 
 
+        try {
+            player.addComponent(new RenderComponent(new Point2D(0, -3)));
+            player.addComponent(new PlayerAnimatorComponent(
+                spriteManager.getSpriteSet("player-red", "walk-up"), 
+                spriteManager.getSpriteSet("player-red", "walk-right"), 
+                spriteManager.getSpriteSet("player-red", "walk-down"), 
+                spriteManager.getSpriteSet("player-red", "walk-left"), 
+                spriteManager.getSpriteSet("player-red", "idle")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
@@ -181,20 +198,30 @@ public class App implements Controller {
         camPos.bind(camPosBinding);
         camera.addComponent(new CameraFollowComponent(player, camPos));
 
-        this.worldEntity = new WorldEntity(gameScene, this.widthProperty.doubleValue(), this.heightProperty.doubleValue(), 2, player, itemStore, spriteManager, this.interfaceOverlay, input);
+        // Create tasks
+        ArrayList<Task> allTasks = createAllTasks(itemStore);
+        ArrayList<Task> playerTasks = new ArrayList<>();
+        for(int t = 0; t < 7; t++) {
+            playerTasks.add(allTasks.get(t));
+        }
+        player.setTasks(playerTasks);
+
+        ArrayList<Task> purchasableTasks = allTasks;
+
+        //World Entity
+        this.worldEntity = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
         this.worldEntity.setupFarmPickingKey(keyBindings.get("Harvest"));
-        
+        this.worldEntity.setupFarmDestroyingKey(keyBindings.get("Destroy"));
+        player.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
+
         if (this.networker != null) {
             this.worldEntity.setClientSupplier(this.networker.clientSupplier);
-            this.networker.worldEntity = this.worldEntity;
+            this.networker.setWorldEntity(this.worldEntity);
         }
         
         addInvUIInput(input, invUI, this.worldEntity);
 
-        // Create tasks
-        ArrayList<Task> allTasks = createAllTasks(itemStore);
-        player.tasks = allTasks;
-
+        // Task UI
         TaskUI taskUI = new TaskUI(player);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
         player.setTaskUI(taskUI);
@@ -207,14 +234,26 @@ public class App implements Controller {
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
         systemUpdater.addSystem(clockSystem);
 
-        ClockUI clockUI = clockSystem.clockUI;
-        StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
-        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, clockUI);
+        VBox topRight = new VBox();
+        topRight.setAlignment(Pos.TOP_RIGHT);
+        topRight.setPickOnBounds(false);
+        topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        AudioComponent playerSound = new AudioComponent("glassSmashing2.wav");
-        player.addComponent(playerSound);
-        
+        ClockUI clockUI = clockSystem.clockUI;
+        //StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
+
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
+        ga.play();
+
+        SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
+        //StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
+
+        StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+        topRight.getChildren().addAll(clockUI, settingsUI);
+        this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
+
+        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the G key will trigger the sound
 
         input.addKeyAction(keyBindings.get("Move left"),
                 () -> player.addAcceleration(-500f, 0f),
@@ -230,21 +269,14 @@ public class App implements Controller {
 
         input.addKeyAction(keyBindings.get("Move down"),
                 () -> player.addAcceleration(0f, 500f),
-                () -> player.addAcceleration(0f, -500f)); //moving down
-                
-        /*
-        input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
-        									 mas.muteUnmute();
-        									 audioSys.muteUnmute();});
-        */
+                () -> player.addAcceleration(0f, -500f));
 
         invUI.onMouseClick(this.worldEntity);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(gameScene, player));
-        
-        input.addKeyAction(keyBindings.get("Pick-up"),
-                () -> {player.pickup();
-                	   },
-                () -> {});
+        input.onKeyRelease(keyBindings.get("Drop"), invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
+
+        input.onKeyRelease(keyBindings.get("Pick-up"), () -> {
+            this.worldEntity.pickables.picked(player.pickup());
+        });
 
         if (this.networker != null) {
             this.setUpNetworking();
@@ -258,8 +290,10 @@ public class App implements Controller {
 
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
-        for(int i = 1; i < 7; i++) {
-            itemIds.add(i);
+        for(int i = 1; i < 25; i++) {
+            if(itemStore.getItem(i) != null) {
+                itemIds.add(i);
+            }
         }
 
         int nrOfTask = 0;
@@ -268,18 +302,17 @@ public class App implements Controller {
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
-            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name + " ($" + reward.toString() + ")", reward * quantityCollected,
+            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, reward * quantityCollected,
                     (Player inputPlayer) ->
                     {
                     	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
-                        //LinkedHashMap<Integer, Integer> inventory = inputPlayer.getInventory();  //inventory is now an ArrayList
                     	int index = inputPlayer.containsItem(itemId);
                     	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
                     		return true;
                     	}
                     	return false;
-                        //return inventory.containsKey(itemId) && inventory.get(itemId) == quantityCollected;
-                    }
+                    },
+                    itemStore.getItem(itemId)
             );
             tasks.add(currentTask);
             nrOfTask += 1;
@@ -290,11 +323,12 @@ public class App implements Controller {
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name + " ($" + reward.toString() + ")", reward * quantitySold,
+            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
                     (Player inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
-                    }
+                    },
+                    itemStore.getItem(itemId)
             );
             tasks.add(currentTask);
             nrOfTask += 1;
@@ -369,6 +403,7 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
         spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
+        spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
     }
     
 
@@ -406,7 +441,7 @@ public class App implements Controller {
     }
 
     private void setUpNetworking() {
-        Player myPlayer = this.worldEntity.getMyPlayer();
+        Player myPlayer = this.worldEntity.myPlayer;
         Market myMarket = this.worldEntity.market.getMarket();
 
         GameClient currentClient = this.networker.getClient();
@@ -414,9 +449,6 @@ public class App implements Controller {
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
-
-        currentClient.myAnimal = this.worldEntity.getMyAnimal();
-        currentClient.market = this.worldEntity.market.getMarket();
 
         myMarket.setIsLocal(false);
         this.worldEntity.marketUpdater.stop();

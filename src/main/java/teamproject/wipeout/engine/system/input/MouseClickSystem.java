@@ -14,7 +14,7 @@ import teamproject.wipeout.engine.input.InputClickableAction;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.EventSystem;
 import teamproject.wipeout.util.sort.InsertionSort;
-import teamproject.wipeout.util.sort.TransformComparator;
+import teamproject.wipeout.util.sort.RenderOrderComparator;
 
 import java.util.List;
 import java.util.Set;
@@ -23,7 +23,7 @@ public class MouseClickSystem implements EventSystem {
 
     public static final Set<Class<? extends GameComponent>> signature = Set.of(Transform.class, RenderComponent.class, Clickable.class);
 
-    private static final TransformComparator comparator = new TransformComparator();
+    private static final RenderOrderComparator comparator = new RenderOrderComparator();
     private SignatureEntityCollector collector;
     private CameraEntityCollector cameraCollector;
     
@@ -48,7 +48,7 @@ public class MouseClickSystem implements EventSystem {
         if (clicked != null) {
             Clickable entityClickable = clicked.getKey().getComponent(Clickable.class);
             if (entityClickable != null) {
-                entityClickable.onClick.performMouseClickAction(clicked.getValue().getX(), clicked.getValue().getY(), button, clicked.getKey());
+                entityClickable.onClick.performMouseClickAction(clicked.getValue().getX(), clicked.getValue().getY(), button);
             }
         }
     };
