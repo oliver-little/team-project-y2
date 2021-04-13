@@ -229,8 +229,6 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Checks if a given position at the farm is empty / an item can be placed on it.
      *
-     * @param row Farm row
-     * @param column Farm column
      * @param w Item width
      * @param h Item height
      * @return {@code true} if the position is empty, <br> otherwise {@code false}.

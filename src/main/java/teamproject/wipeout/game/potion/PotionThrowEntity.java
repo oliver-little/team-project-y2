@@ -1,9 +1,5 @@
 package teamproject.wipeout.game.potion;
 
-
-import java.io.FileNotFoundException;
-import java.util.Collection;
-
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
@@ -20,7 +16,10 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.player.CurrentPlayer;
+import teamproject.wipeout.game.player.Player;
+
+import java.io.FileNotFoundException;
+import java.util.Collection;
 
 /**
  * Generates an icon following the mouse
@@ -29,7 +28,7 @@ public class PotionThrowEntity extends GameEntity {
 
     public static final double MAX_THROW_DISTANCE = 250.0;
 
-    public CurrentPlayer throwingCurrentPlayer;
+    public Player throwingPlayer;
     public Item potion;
 
     private Transform potionTransform;
@@ -39,11 +38,11 @@ public class PotionThrowEntity extends GameEntity {
     private Runnable onComplete;
     private Runnable onAbort;
 
-    public PotionThrowEntity(GameScene scene, SpriteManager sm, CurrentPlayer throwingCurrentPlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
+    public PotionThrowEntity(GameScene scene, SpriteManager sm, Player throwingPlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
         super(scene);
 
         this.possibleEffectEntities = possibleEffectEntities;
-        this.throwingCurrentPlayer = throwingCurrentPlayer;
+        this.throwingPlayer = throwingPlayer;
         this.potion = potion;
         this.onComplete = onComplete;
         this.onAbort = onAbort;
@@ -82,7 +81,7 @@ public class PotionThrowEntity extends GameEntity {
 
         } else {
             // Throw potion
-            Point2D startPos = throwingCurrentPlayer.getComponent(Transform.class).getWorldPosition();
+            Point2D startPos = throwingPlayer.getWorldPosition();
             Point2D clickPos = new Point2D(x, y);
             Point2D vector = clickPos.subtract(startPos);
             Point2D endPos = null;
@@ -98,11 +97,10 @@ public class PotionThrowEntity extends GameEntity {
             }
 
             PotionEntity potionEntity = new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
-            this.throwingCurrentPlayer.getThrownPotion().accept(potionEntity);
+            this.throwingPlayer.getThrownPotion().accept(potionEntity);
 
             this.onComplete.run();
             this.destroy();
-            System.out.println("Destroy throw");
         }
     };
 }

@@ -53,7 +53,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public final String playerName;
     public final String spriteSheetName;
 
-    public Integer occupiedSlots;
+    public Integer occupiedSlots; // ??? !!! Why?
 
     protected ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
 
@@ -164,7 +164,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     }
 
-    public Point2D getPosition() {
+    public Point2D getWorldPosition() {
         return this.position.getWorldPosition();
     }
 

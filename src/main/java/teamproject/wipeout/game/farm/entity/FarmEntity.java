@@ -495,8 +495,8 @@ public class FarmEntity extends GameEntity {
     /**
      * Checks if a given position at the farm is empty.
      *
-     * @param x X coordinate of the "square"
-     * @param y Y coordinate of the "square"
+     * @param row Row of the "square"
+     * @param column Column of the "square"
      * @return {@code true} if the "square" is empty, <br> otherwise {@code false}
      */
     public boolean canBePlacedAtSquare(int row, int column, int w, int h) {
@@ -560,8 +560,8 @@ public class FarmEntity extends GameEntity {
      * Puts a given Item on a given position defined by the X and Y coordinates.
      *
      * @param item {@link Item} to be stored
-     * @param x X scene coordinate
-     * @param y Y scene coordinate
+     * @param row Row for the item
+     * @param column Column for the item
      * @return True if the item was placed, otherwise false
      */
     public boolean placeItemAtSquare(Item item, int row, int column) {

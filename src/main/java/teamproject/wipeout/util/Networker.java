@@ -4,12 +4,11 @@ import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.player.CurrentPlayer;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.client.ServerDiscovery;
@@ -28,7 +27,6 @@ public class Networker {
     public final GameServerRunner serverRunner;
 
     public WorldEntity worldEntity;
-    public ClockSystem clockSystem;
 
     protected ServerDiscovery serverDiscovery;
     protected GameClient client;
@@ -87,10 +85,7 @@ public class Networker {
                 return null;
             }
 
-            CurrentPlayer newCurrentPlayer = new CurrentPlayer(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), spriteManager, itemStore, null);
-
-            newCurrentPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
-            newCurrentPlayer.addComponent(new CollisionResolutionComponent());
+            Player newCurrentPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), spriteManager, itemStore);
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
             if (myFarm != null) {

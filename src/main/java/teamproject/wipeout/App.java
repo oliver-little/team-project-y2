@@ -165,10 +165,10 @@ public class App implements Controller {
 
     	CurrentPlayer currentPlayer = new CurrentPlayer(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), this.spriteManager, this.itemStore, invUI);
 
-        //player.acquireItem(6, 98); //for checking stack/inventory limits
-        //player.acquireItem(1, 2);
-        //player.acquireItem(28, 98);
-        //player.acquireItem( 43, 2);
+        //currentPlayer.acquireItem(6, 98); //for checking stack/inventory limits
+        //currentPlayer.acquireItem(1, 2);
+        //currentPlayer.acquireItem(28, 98);
+        //currentPlayer.acquireItem( 43, 2);
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
