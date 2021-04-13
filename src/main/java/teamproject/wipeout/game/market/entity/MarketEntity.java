@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.ScriptComponent;
@@ -30,7 +29,7 @@ import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 
 public class MarketEntity extends GameEntity {
@@ -52,11 +51,11 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, Player player, SpriteManager spriteManager, StackPane uiContainer, WorldEntity world,  ArrayList<Task> purchasableTasks) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, CurrentPlayer currentPlayer, SpriteManager spriteManager, StackPane uiContainer, WorldEntity world, ArrayList<Task> purchasableTasks) {
         super(scene);
 
         this.uiContainer = uiContainer;
-        this.playerTransform = player.getComponent(Transform.class);
+        this.playerTransform = currentPlayer.getComponent(Transform.class);
 
         this.addComponent(new Transform(x, y, 1));
 
@@ -127,7 +126,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world, purchasableTasks);
+        this.marketUI = new MarketUI(items.getData().values(), market, currentPlayer, spriteManager, world, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 

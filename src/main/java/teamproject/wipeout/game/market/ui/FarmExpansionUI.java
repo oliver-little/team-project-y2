@@ -13,7 +13,7 @@ import javafx.scene.layout.VBox;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 
 /**
  * Creates the UI for a single farm expansion element in the market.
@@ -26,7 +26,7 @@ public class FarmExpansionUI extends VBox {
 
     public double expansionPrice = 100.00; //Initial expansion price.
 
-    public FarmExpansionUI(Market market, Player player, SpriteManager spriteManager, WorldEntity world) {
+    public FarmExpansionUI(Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world) {
         super();
 
         this.getStyleClass().add("vbox");
@@ -67,8 +67,8 @@ public class FarmExpansionUI extends VBox {
 
         // Set buy click event
         expandButton.setOnAction((e) -> {
-            if ((player.hasEnoughMoney(expansionPrice)) && world.getMyFarm() != null) {
-                player.setMoney(player.getMoney() - expansionPrice);
+            if ((currentPlayer.hasEnoughMoney(expansionPrice)) && world.getMyFarm() != null) {
+                currentPlayer.setMoney(currentPlayer.getMoney() - expansionPrice);
                 world.getMyFarm().expandFarmBy(1);
 
                 //Update price.

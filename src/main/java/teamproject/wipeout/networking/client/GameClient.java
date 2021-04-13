@@ -4,7 +4,7 @@ import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.server.GameServer;
@@ -40,7 +40,7 @@ public class GameClient {
 
     public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
-    public final HashMap<Integer, Player> players;
+    public final HashMap<Integer, CurrentPlayer> players;
     private WorldEntity worldEntity;
 
     public Consumer<Long> clockCalibration;
@@ -62,7 +62,7 @@ public class GameClient {
         this.isActive = new AtomicBoolean(false);
         this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
         this.tempPlayerStates = new HashSet<PlayerState>();
-        this.players = new HashMap<Integer, Player>();
+        this.players = new HashMap<Integer, CurrentPlayer>();
         this.farmEntities = null;
     }
 
@@ -285,9 +285,9 @@ public class GameClient {
     }
 
     private void createPlayerFromState(PlayerState state) {
-        Player newPlayer = this.newPlayerAction.createWith(state);
-        if (newPlayer != null) {
-            this.players.put(newPlayer.playerID, newPlayer);
+        CurrentPlayer newCurrentPlayer = this.newPlayerAction.createWith(state);
+        if (newCurrentPlayer != null) {
+            this.players.put(newCurrentPlayer.playerID, newCurrentPlayer);
         }
     }
 

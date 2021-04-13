@@ -20,7 +20,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 
 /**
  * Generates an icon following the mouse
@@ -29,7 +29,7 @@ public class PotionThrowEntity extends GameEntity {
 
     public static final double MAX_THROW_DISTANCE = 250.0;
 
-    public Player throwingPlayer;
+    public CurrentPlayer throwingCurrentPlayer;
     public Item potion;
 
     private Transform potionTransform;
@@ -39,11 +39,11 @@ public class PotionThrowEntity extends GameEntity {
     private Runnable onComplete;
     private Runnable onAbort;
 
-    public PotionThrowEntity(GameScene scene, SpriteManager sm, Player throwingPlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
+    public PotionThrowEntity(GameScene scene, SpriteManager sm, CurrentPlayer throwingCurrentPlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
         super(scene);
 
         this.possibleEffectEntities = possibleEffectEntities;
-        this.throwingPlayer = throwingPlayer;
+        this.throwingCurrentPlayer = throwingCurrentPlayer;
         this.potion = potion;
         this.onComplete = onComplete;
         this.onAbort = onAbort;
@@ -82,7 +82,7 @@ public class PotionThrowEntity extends GameEntity {
 
         } else {
             // Throw potion
-            Point2D startPos = throwingPlayer.getComponent(Transform.class).getWorldPosition();
+            Point2D startPos = throwingCurrentPlayer.getComponent(Transform.class).getWorldPosition();
             Point2D clickPos = new Point2D(x, y);
             Point2D vector = clickPos.subtract(startPos);
             Point2D endPos = null;
@@ -97,10 +97,8 @@ public class PotionThrowEntity extends GameEntity {
                 endPos = endPos.add(1.0, 1.0);
             }
 
-            System.out.println("Potion throw: " + startPos.toString() + ", " + endPos.toString());
-
             PotionEntity potionEntity = new PotionEntity(this.getScene(), spriteManager, potion, possibleEffectEntities, startPos, endPos);
-            this.throwingPlayer.getThrownPotion().accept(potionEntity);
+            this.throwingCurrentPlayer.getThrownPotion().accept(potionEntity);
 
             this.onComplete.run();
             this.destroy();

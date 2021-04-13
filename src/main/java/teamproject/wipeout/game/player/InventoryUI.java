@@ -19,12 +19,8 @@ import java.util.List;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
-import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
-import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
@@ -93,7 +89,7 @@ public class InventoryUI extends StackPane {
 	 * @param index slot where change happened so only one slot needs to be updated.
 	 */
 	public void updateUI(ArrayList<InventoryItem> items, Integer index) {
-		if(items.get(index) != null) {
+		if (items.get(index) != null) {
 			Item item = itemStore.getItem(items.get(index).itemID);
 			InventoryComponent inv = item.getComponent(InventoryComponent.class);
 			quantityTexts[index].setText("" + items.get(index).quantity);
@@ -102,8 +98,8 @@ public class InventoryUI extends StackPane {
 
 			spriteViews[index].setX(67*index + (32 - Math.min(IMAGE_SIZE, sprite.getWidth())/2));
 			spriteViews[index].setY(32 - Math.min(IMAGE_SIZE, sprite.getHeight()) / 2);
-		} 
-		else {
+
+		} else {
 			quantityTexts[index].setText("");
 			spriteViews[index].setImage(null);
 		}
@@ -143,7 +139,7 @@ public class InventoryUI extends StackPane {
 	public void useSlot(int slot, WorldEntity world) {
 		this.selectSlot(slot);
 
-		Player myPlayer = world.myPlayer;
+		CurrentPlayer myCurrentPlayer = world.myCurrentPlayer;
 		FarmEntity myFarm = world.getMyFarm();
 
 		if (state == InventoryState.PLANTING) {
@@ -155,7 +151,7 @@ public class InventoryUI extends StackPane {
 			currentPotion.abortThrowing();
 		}
 		
-		int selectedItemID = myPlayer.selectSlot(currentSelection);
+		int selectedItemID = myCurrentPlayer.selectSlot(currentSelection);
 		if (selectedItemID < 0) {
 			return;
 		}
@@ -163,10 +159,10 @@ public class InventoryUI extends StackPane {
 		try {
 			Item selectedItem = itemStore.getItem(selectedItemID);
 			if (selectedItem.hasComponent(PlantComponent.class)) {
-				myPlayer.dropItem();
+				myCurrentPlayer.dropItem();
 				state = InventoryState.PLANTING;
 				myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
-					myPlayer.acquireItem(item.id);
+					myCurrentPlayer.acquireItem(item.id);
 					state = InventoryState.NONE;
 				});
 			}
@@ -176,7 +172,7 @@ public class InventoryUI extends StackPane {
 				List<GameEntity> possibleEffectEntities = null;
 
 				if (sc.type == SabotageType.SPEED) {
-					possibleEffectEntities = List.of(world.myPlayer, world.myAnimal);
+					possibleEffectEntities = List.of(world.myCurrentPlayer, world.myAnimal);
 				}
 				else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
 					possibleEffectEntities = List.of(world.getMyFarm());
@@ -189,12 +185,12 @@ public class InventoryUI extends StackPane {
 				Runnable onAbort = () -> {
 					state = InventoryState.NONE; 
 					currentPotion = null;
-					myPlayer.acquireItem(selectedItem.id);
+					myCurrentPlayer.acquireItem(selectedItem.id);
 				};
 
 				state = InventoryState.THROWING;
-				myPlayer.dropItem();
-				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
+				myCurrentPlayer.dropItem();
+				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myCurrentPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
 			}
 			else {
 				return;
@@ -207,21 +203,21 @@ public class InventoryUI extends StackPane {
 	/**
 	 * Sets up the inventory key input.
 	 *
-	 * @param player {@link Player} who owns the inventory
+	 * @param currentPlayer {@link CurrentPlayer} who owns the inventory
 	 * @param pickables {@link Pickables} class in the {@link WorldEntity}
 	 * @return {@link InputKeyAction} executed on a specified key event.
 	 */
-	public InputKeyAction dropOnKeyRelease(Player player, Pickables pickables) {
+	public InputKeyAction dropOnKeyRelease(CurrentPlayer currentPlayer, Pickables pickables) {
 		return () -> {
-			int id = player.dropItem();
+			int id = currentPlayer.dropItem();
 			System.out.println("***itemID: " + id);
 			if (id != -1) {
-				Transform transform = player.getComponent(Transform.class);
-				RenderComponent renderComponent = player.getComponent(RenderComponent.class);
+				Transform transform = currentPlayer.getComponent(Transform.class);
+				RenderComponent renderComponent = currentPlayer.getComponent(RenderComponent.class);
 				double centreX = transform.getPosition().getX() + (renderComponent.getWidth() / 2);
 				double centreY = transform.getPosition().getY() + (renderComponent.getHeight() / 2);
 				pickables.createPickablesFor(this.itemStore.getItem(id), centreX, centreY, 1);
-				player.playSound("thud.wav");
+				currentPlayer.playSound("thud.wav");
 			}
 		};
 	}

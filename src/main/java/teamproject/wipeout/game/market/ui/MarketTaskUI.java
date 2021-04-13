@@ -14,7 +14,7 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.ImageUtil;
 
@@ -24,7 +24,7 @@ import teamproject.wipeout.util.ImageUtil;
 public class MarketTaskUI extends VBox {
     public static final int IMAGE_SIZE = 48;
 
-    public MarketTaskUI(Task task, Item item, Market market, Player player, SpriteManager spriteManager) {
+    public MarketTaskUI(Task task, Item item, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager) {
         super();
 
         this.getStyleClass().add("vbox");
@@ -72,7 +72,7 @@ public class MarketTaskUI extends VBox {
         buy.textProperty().bind(Bindings.concat("Buy: " + String.format("%.2f", (task.priceToBuy))));
 
         buy.setOnAction((e) -> {
-            if (player.buyTask(task)) {
+            if (currentPlayer.buyTask(task)) {
                 buy.textProperty().bind(Bindings.concat("TASK ALREADY PURCHASHED"));
                 buy.setDisable(true);
             }

@@ -9,7 +9,7 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.client.ServerDiscovery;
@@ -83,21 +83,21 @@ public class Networker {
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, ItemStore itemStore, SpriteManager spriteManager) {
         return (newPlayerState) -> {
-            if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
+            if (newPlayerState.getPlayerID().equals(this.worldEntity.myCurrentPlayer.playerID)) {
                 return null;
             }
 
-            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), spriteManager, itemStore, null);
+            CurrentPlayer newCurrentPlayer = new CurrentPlayer(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), spriteManager, itemStore, null);
 
-            newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
-            newPlayer.addComponent(new CollisionResolutionComponent());
+            newCurrentPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
+            newCurrentPlayer.addComponent(new CollisionResolutionComponent());
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
             if (myFarm != null) {
-                myFarm.assignPlayer(newPlayer.playerID, false, () -> this.client);
+                myFarm.assignPlayer(newCurrentPlayer.playerID, false, () -> this.client);
             }
 
-            return newPlayer;
+            return newCurrentPlayer;
         };
     }
 

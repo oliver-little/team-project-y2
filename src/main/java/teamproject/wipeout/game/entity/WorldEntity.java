@@ -26,7 +26,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.AIPlayerComponent;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
@@ -46,7 +46,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	public final MarketPriceUpdater marketUpdater;
 	public final MarketEntity market;
 	public final Map<Integer, FarmEntity> farms;
-	public final Player myPlayer;
+	public final CurrentPlayer myCurrentPlayer;
 	public final AnimalEntity myAnimal;
 	public final Pickables pickables;
 
@@ -57,12 +57,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	private InputHandler inputHandler;
 	private Supplier<GameClient> clientSupplier;
-	private ArrayList<Player> players;
+	private ArrayList<CurrentPlayer> currentPlayers;
 
 	public SpriteManager spriteManager;
 	public ItemStore itemStore;
 
-	public WorldEntity(GameScene gameScene, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input, ArrayList<Task> purchasableTasks) {
+	public WorldEntity(GameScene gameScene, int numberOfPlayers, CurrentPlayer currentPlayer, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input, ArrayList<Task> purchasableTasks) {
 		super(gameScene);
 		this.spriteManager = spriteManager;
 		this.itemStore = itemStore;
@@ -108,9 +108,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			e.printStackTrace();
 		}
 
-		this.myPlayer = player;
-		this.players = new ArrayList<Player>();
-		this.players.add(player);
+		this.myCurrentPlayer = currentPlayer;
+		this.currentPlayers = new ArrayList<CurrentPlayer>();
+		this.currentPlayers.add(currentPlayer);
 
 		if (numberOfPlayers == 4) {
 			FarmEntity farmEntity1 = new FarmEntity(gameScene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
@@ -131,7 +131,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			this.farms.put(farmEntity2.farmID, farmEntity2);
 		}
 
-		this.market = new MarketEntity(gameScene, 576, 544, itemStore, player, spriteManager, uiContainer, this,  purchasableTasks);
+		this.market = new MarketEntity(gameScene, 576, 544, itemStore, currentPlayer, spriteManager, uiContainer, this,  purchasableTasks);
 		this.market.setOnUIOpen(() -> input.setDisableInput(true));
 		this.market.setOnUIClose(() -> input.setDisableInput(false));
 		this.marketUpdater = new MarketPriceUpdater(this.market.getMarket(), true);
@@ -158,7 +158,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		nameTag.addComponent(new Transform(ratRender.getWidth()/2f -tag.getWidth()/1f, -tag.getHeight()*1f, 10));
 		nameTag.setParent(this.myAnimal);
 
-		this.setFarmFor(this.myPlayer, true, this.farms.get(1));
+		this.setFarmFor(this.myCurrentPlayer, true, this.farms.get(1));
 
 		this.createAIPlayers();
 	}
@@ -180,21 +180,21 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public void setClientSupplier(Supplier<GameClient> supplier) {
 		this.clientSupplier = supplier;
-		this.myPlayer.setClientSupplier(supplier);
+		this.myCurrentPlayer.setClientSupplier(supplier);
 		this.market.getMarket().setClientSupplier(supplier);
 		this.myAnimal.setClientSupplier(supplier);
 	}
 
-	public void setFarmFor(Player player, boolean activePlayer, FarmEntity farm) {
+	public void setFarmFor(CurrentPlayer currentPlayer, boolean activePlayer, FarmEntity farm) {
 		if (activePlayer) {
 			this.myFarm = farm;
 		}
 		if (farm != null) {
-			player.getCurrentState().assignFarm(farm.farmID);
-			this.setPositionForPlayer(player, farm);
-			farm.assignPlayer(player.playerID, activePlayer, this.clientSupplier);
+			currentPlayer.getCurrentState().assignFarm(farm.farmID);
+			this.setPositionForPlayer(currentPlayer, farm);
+			farm.assignPlayer(currentPlayer.playerID, activePlayer, this.clientSupplier);
 		} else {
-			player.getCurrentState().assignFarm(null);
+			currentPlayer.getCurrentState().assignFarm(null);
 		}
 	}
 
@@ -214,7 +214,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				List<GameEntity> possibleEffectEntities = null;
 
 				if (sc.type == SabotageComponent.SabotageType.SPEED) {
-					possibleEffectEntities = List.of(this.myPlayer, this.myAnimal);
+					possibleEffectEntities = List.of(this.myCurrentPlayer, this.myAnimal);
 				}
 				else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
 					possibleEffectEntities = List.of(this.myFarm);
@@ -224,7 +224,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	protected void setPositionForPlayer(Player player, FarmEntity farm) {
+	protected void setPositionForPlayer(CurrentPlayer currentPlayer, FarmEntity farm) {
 		Point2D playerPosition;
 		switch (farm.farmID) {
 			case 1:
@@ -243,7 +243,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				playerPosition = Point2D.ZERO;
 				break;
 		}
-		player.setWorldPosition(playerPosition);
+		currentPlayer.setWorldPosition(playerPosition);
 	}
 
 	public void setupFarmPickingKey(KeyCode code) {
@@ -259,29 +259,29 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createAIPlayers() {
-		ArrayList<Player> aiPlayers = new ArrayList<Player>();
+		ArrayList<CurrentPlayer> aiCurrentPlayers = new ArrayList<CurrentPlayer>();
 		for (int i = 2; i < 5; i++) {
-			Player aiPlayer = new Player(this.scene, i + 1, "Farmer", new Point2D(10, 10), this.spriteManager, this.itemStore, null);
-			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
-			this.setFarmFor(aiPlayer, false, this.farms.get(i));
-			aiPlayers.add(aiPlayer);
+			CurrentPlayer aiCurrentPlayer = new CurrentPlayer(this.scene, i + 1, "Farmer", new Point2D(10, 10), this.spriteManager, this.itemStore, null);
+			aiCurrentPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
+			this.setFarmFor(aiCurrentPlayer, false, this.farms.get(i));
+			aiCurrentPlayers.add(aiCurrentPlayer);
 		}
-		this.players.addAll(aiPlayers);
+		this.currentPlayers.addAll(aiCurrentPlayers);
 
-		for (Player aiPlayer : aiPlayers) {
-			int aiFarmID = aiPlayer.getCurrentState().getFarmID();
-			AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(aiFarmID));
-			aiComp.allPlayers = this.players.stream().filter((player) -> !player.playerID.equals(aiPlayer.playerID)).collect(Collectors.toList());
+		for (CurrentPlayer aiCurrentPlayer : aiCurrentPlayers) {
+			int aiFarmID = aiCurrentPlayer.getCurrentState().getFarmID();
+			AIPlayerComponent aiComp = new AIPlayerComponent(aiCurrentPlayer, this.market.getMarket(), this.navMesh, this.farms.get(aiFarmID));
+			aiComp.allCurrentPlayers = this.currentPlayers.stream().filter((player) -> !player.playerID.equals(aiCurrentPlayer.playerID)).collect(Collectors.toList());
 			aiComp.otherFarms = this.farms.values().stream().filter((farm) -> !farm.farmID.equals(aiFarmID)).collect(Collectors.toList());
 			aiComp.theAnimal = this.myAnimal;
-			aiPlayer.addComponent(aiComp);
+			aiCurrentPlayer.addComponent(aiComp);
 		}
 	}
 
 	public void setClock(Supplier<ClockSystem> clock) {
-		for (Player player : this.players) {
-			if (player.hasComponent(AIPlayerComponent.class)) {
-				player.getComponent(AIPlayerComponent.class).clock = clock;
+		for (CurrentPlayer currentPlayer : this.currentPlayers) {
+			if (currentPlayer.hasComponent(AIPlayerComponent.class)) {
+				currentPlayer.getComponent(AIPlayerComponent.class).clock = clock;
 			}
 		}
 	}

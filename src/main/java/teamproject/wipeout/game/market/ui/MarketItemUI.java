@@ -16,7 +16,7 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketItem;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.util.ImageUtil;
 
 /**
@@ -26,7 +26,7 @@ public class MarketItemUI extends VBox {
 
     public static final int IMAGE_SIZE = 48;
 
-    public MarketItemUI(Item item, Market market, Player player, SpriteManager spriteManager) {
+    public MarketItemUI(Item item, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager) {
         super();
 
         final double doubleCompare = 0.0000001;
@@ -95,7 +95,7 @@ public class MarketItemUI extends VBox {
 
         // Set buy click event
         buy.setOnAction((e) -> {
-            player.buyItem(market, item.id, quantity.getValue());
+            currentPlayer.buyItem(market, item.id, quantity.getValue());
         });
 
 
@@ -115,7 +115,7 @@ public class MarketItemUI extends VBox {
 
             // Set sell click event
             sell.setOnAction((e) -> {
-                player.sellItem(market, item.id, quantity.getValue());
+                currentPlayer.sellItem(market, item.id, quantity.getValue());
             });
         }
 

@@ -1,6 +1,6 @@
 package teamproject.wipeout.networking.client;
 
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.networking.state.PlayerState;
 
 /**
@@ -15,5 +15,5 @@ public interface NewPlayerAction {
      *
      * @param playerState {@link PlayerState} of the newly detected player
      */
-    public Player createWith(PlayerState playerState);
+    public CurrentPlayer createWith(PlayerState playerState);
 }

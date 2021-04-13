@@ -16,7 +16,6 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
@@ -24,7 +23,7 @@ import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
@@ -38,7 +37,7 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks) {
+    public MarketUI(Collection<Item> items, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks) {
         super();
 
         try {
@@ -62,25 +61,25 @@ public class MarketUI extends AnchorPane {
 
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
-                seedsList.add(new MarketItemUI(item, market, player, spriteManager));
+                seedsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
             }
             else if (item.hasComponent(SabotageComponent.class)) {
-                potionsList.add(new MarketItemUI(item, market, player, spriteManager));
+                potionsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
             }
             else {
-                plantsList.add(new MarketItemUI(item, market, player, spriteManager));
+                plantsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
             }
         }
 
         for (Task purchasableTask : purchasableTasks) {
-            if(player.currentAvailableTasks.containsKey(purchasableTask.id) || purchasableTask.completed) {
+            if(currentPlayer.currentAvailableTasks.containsKey(purchasableTask.id) || purchasableTask.completed) {
                 continue;
             }
             Item relatedItem = purchasableTask.relatedItem;
-            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, player, spriteManager));
+            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager));
         }
 
-        farmsList.add(new FarmExpansionUI(market, player, spriteManager, world));
+        farmsList.add(new FarmExpansionUI(market, currentPlayer, spriteManager, world));
 
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));

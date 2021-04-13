@@ -9,7 +9,6 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
@@ -38,10 +37,10 @@ public class AIPlayerComponent implements GameComponent  {
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
-    public List<Player> allPlayers;
+    public List<CurrentPlayer> allCurrentPlayers;
     public AnimalEntity theAnimal;
     public List<FarmEntity> otherFarms;
-    private Player myPlayer;
+    private CurrentPlayer myCurrentPlayer;
     private FarmEntity myFarm;
 
     private NavigationMesh navMesh;
@@ -56,8 +55,8 @@ public class AIPlayerComponent implements GameComponent  {
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
-    public AIPlayerComponent(Player player, Market market, NavigationMesh navMesh, FarmEntity myFarm) {
-        this.myPlayer = player;
+    public AIPlayerComponent(CurrentPlayer currentPlayer, Market market, NavigationMesh navMesh, FarmEntity myFarm) {
+        this.myCurrentPlayer = currentPlayer;
         this.myFarm = myFarm;
         this.market = market;
 
@@ -65,7 +64,7 @@ public class AIPlayerComponent implements GameComponent  {
 
         this.executor = Executors.newSingleThreadScheduledExecutor();
 
-        this.transformComponent = player.getComponent(Transform.class);
+        this.transformComponent = currentPlayer.getComponent(Transform.class);
 
         this.aiDecisionAlgorithm().run();
     }
@@ -78,7 +77,7 @@ public class AIPlayerComponent implements GameComponent  {
 
         List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 100);
 
-        this.myPlayer.addComponent(new SteeringComponent(path, callback, 250));
+        this.myCurrentPlayer.addComponent(new SteeringComponent(path, callback, 250));
     }
 
     /**
@@ -108,20 +107,19 @@ public class AIPlayerComponent implements GameComponent  {
 
         Runnable onComplete = () ->  {
             double randDestroy = Math.random();
-            if (this.myPlayer.getMoney() > 100.0 && (randDestroy < 0.05 || (randDestroy < 0.1 && this.myFarm.itemAt(x, y).get().getComponent(PlantComponent.class).isTree))) {
-                System.out.println("Destroy");
+            if (this.myCurrentPlayer.getMoney() > 100.0 && (randDestroy < 0.05 || (randDestroy < 0.1 && this.myFarm.itemAt(x, y).get().getComponent(PlantComponent.class).isTree))) {
+                System.out.println("Destroy " + this.myCurrentPlayer.playerID);
                 this.myFarm.pickItemAt(x, y, false, true);
             } else {
-                System.out.println("Harvest");
                 Integer[] picked = this.myFarm.pickItemAt(x, y, false, false);
                 if (picked != null) {
                     Integer pickedID = picked[0];
                     int pickedQuantity = picked[1];
-                    this.myPlayer.acquireItem(pickedID, pickedQuantity);
-                    this.myPlayer.sellItem(this.market, pickedID, pickedQuantity);
+                    this.myCurrentPlayer.acquireItem(pickedID, pickedQuantity);
+                    this.myCurrentPlayer.sellItem(this.market, pickedID, pickedQuantity);
                 }
             }
-            System.out.println(this.myPlayer.getMoney());
+
             if (fullyGrownItems.size() - 1 > 0) {
                 if (this.clock != null && this.clock.get().clockUI.getTime() <= 0.0) {
                     this.aiDecisionAlgorithm().run();
@@ -158,18 +156,17 @@ public class AIPlayerComponent implements GameComponent  {
     private Runnable aiDecisionAlgorithm() {
         return () -> {
             if (this.clock != null && this.clock.get().clockUI.getTime() <= 0.0) {
-                System.out.println("STOP");
-                System.out.println("AI: " + this.myPlayer.getMoney());
-                System.out.println("AI: " + this.myPlayer.getInventory().toString());
+                System.out.println("STOP " + this.myCurrentPlayer.playerID);
+                System.out.println("AI: " + this.myCurrentPlayer.getMoney());
+                System.out.println("AI: " + this.myCurrentPlayer.getInventory().toString());
                 return;
             }
 
             //Make decision on what to do next.
             double probability = Math.random();
 
-            if (probability < 0.75) {
+            if (probability < 0.8) {
                 if (this.clock != null && this.clock.get().clockUI.getTime() < 30.0) {
-                    System.out.println("Harvest STOP");
                     aiHarvestCrops();
                     return;
                 }
@@ -182,24 +179,20 @@ public class AIPlayerComponent implements GameComponent  {
                     if (Math.random() > 0.8) {
                         double expansionAddition = (this.myFarm.getExpansionLevel() * FarmExpansionUI.PRICE_MULTIPLIER);
                         double expansionPrice = 100 * (expansionAddition == 0.0 ? 1.0 : expansionAddition);
-                        if (this.myPlayer.hasEnoughMoney(expansionPrice + 30)) {
-                            System.out.println("Expand");
-                            this.myPlayer.setMoney(this.myPlayer.getMoney() - expansionPrice);
+                        if (this.myCurrentPlayer.hasEnoughMoney(expansionPrice + 30)) {
+                            System.out.println("Expand " + this.myCurrentPlayer.playerID);
+                            this.myCurrentPlayer.setMoney(this.myCurrentPlayer.getMoney() - expansionPrice);
                             this.myFarm.expandFarmBy(1);
                             this.aiDecisionAlgorithm().run();
                         } else {
-                            System.out.println("Buy 2");
                             aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
                                 this.buyPlants();
-                                System.out.println(this.myPlayer.getMoney());
                                 this.aiDecisionAlgorithm().run();
                             });
                         }
                     } else {
-                        System.out.println("Buy 1");
                         aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
                             this.buyPlants();
-                            System.out.println(this.myPlayer.getMoney());
                             this.aiDecisionAlgorithm().run();
                         });
                     }
@@ -207,17 +200,15 @@ public class AIPlayerComponent implements GameComponent  {
 
             } else {
                 double randomiser = Math.random();
-                if (randomiser < 0.2 && this.myPlayer.hasEnoughMoney(130)) {
-                    System.out.println("Potion");
+                if (randomiser < 0.2 && this.myCurrentPlayer.hasEnoughMoney(130)) {
                     usePotions();
 
-                } else if (randomiser < 0.5) {
+                } else if (randomiser < 0.4) {
                     //Pick random point
-                    System.out.println("Wander");
                     aiPathFind();
+
                 } else {
                     //Idle
-                    System.out.println("Idle");
                     aiIdle();
                 }
             }
@@ -226,7 +217,7 @@ public class AIPlayerComponent implements GameComponent  {
 
     private void buyPlants() {
         double emptySpaces = this.myFarm.getEmptySpaces();
-        double currentBalance = this.myPlayer.getMoney();
+        double currentBalance = this.myCurrentPlayer.getMoney();
 
         if (emptySpaces > 0 && currentBalance > 0.0) {
             ArrayList<Integer> boughtPlants = new ArrayList<>();
@@ -250,10 +241,10 @@ public class AIPlayerComponent implements GameComponent  {
             }
 
             for (Integer boughtID : boughtPlants) {
-                this.myPlayer.buyItem(this.market, boughtID, 1);
-                this.myPlayer.removeItem(boughtID, 1);
+                this.myCurrentPlayer.buyItem(this.market, boughtID, 1);
+                this.myCurrentPlayer.removeItem(boughtID, 1);
 
-                Item item = this.myPlayer.itemStore.getItem(boughtID);
+                Item item = this.myCurrentPlayer.itemStore.getItem(boughtID);
                 PlantComponent plant = item.getComponent(PlantComponent.class);
 
                 int[] freeSquare = this.myFarm.firstFreeSquareFor(plant.isTree ? 2 : 1, plant.isTree ? 2 : 1);
@@ -273,7 +264,7 @@ public class AIPlayerComponent implements GameComponent  {
         ArrayList<Integer> potionPortfolio = new ArrayList<Integer>();
 
         for (int id : goodOrMean ? GOOD_POTIONS : MEAN_POTIONS) {
-            if (this.myPlayer.hasEnoughMoney(this.market.stockDatabase.get(id).getCurrentBuyPrice())) {
+            if (this.myCurrentPlayer.hasEnoughMoney(this.market.stockDatabase.get(id).getCurrentBuyPrice())) {
                 potionPortfolio.add(id);
             }
         }
@@ -285,25 +276,25 @@ public class AIPlayerComponent implements GameComponent  {
 
         int potionID = potionPortfolio.get(new Random().nextInt(potionPortfolio.size()));
 
-        this.myPlayer.buyItem(this.market, potionID, 1);
-        this.myPlayer.removeItem(potionID, 1);
+        this.myCurrentPlayer.buyItem(this.market, potionID, 1);
+        this.myCurrentPlayer.removeItem(potionID, 1);
 
-        Player useOnPlayer;
+        CurrentPlayer useOnCurrentPlayer;
         if (goodOrMean) {
-            useOnPlayer = this.myPlayer;
+            useOnCurrentPlayer = this.myCurrentPlayer;
         } else {
-            if (allPlayers == null) {
+            if (allCurrentPlayers == null) {
                 return;
             }
-            allPlayers.sort(Comparator.comparing(player -> player.getMoney())); // does it give me the richest???
-            useOnPlayer = allPlayers.get(0);
+            allCurrentPlayers.sort(Comparator.comparing(player -> player.getMoney())); // does it give me the richest???
+            useOnCurrentPlayer = allCurrentPlayers.get(0);
         }
 
-        Item currentPotion = this.myPlayer.itemStore.getItem(potionID);
+        Item currentPotion = this.myCurrentPlayer.itemStore.getItem(potionID);
         SabotageComponent sc = currentPotion.getComponent(SabotageComponent.class);
         List<GameEntity> possibleEffectEntities = null;
         if (sc.type == SabotageComponent.SabotageType.SPEED) {
-            possibleEffectEntities = List.of(useOnPlayer, this.theAnimal);
+            possibleEffectEntities = List.of(useOnCurrentPlayer, this.theAnimal);
         }
         else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
             possibleEffectEntities = List.copyOf(this.otherFarms);
@@ -311,8 +302,11 @@ public class AIPlayerComponent implements GameComponent  {
 
         Runnable onComplete = () -> this.aiDecisionAlgorithm().run();
 
-        PotionThrowEntity potionThrow = new PotionThrowEntity(this.myPlayer.getScene(), this.myFarm.spriteManager, this.myPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
-        potionThrow.onClick.performMouseClickAction(useOnPlayer.getPosition().getX(), useOnPlayer.getPosition().getY(), MouseButton.PRIMARY);
+        System.out.println("Potion from " + this.myCurrentPlayer.playerID);
+        System.out.println("used on " + useOnCurrentPlayer.playerID);
+
+        PotionThrowEntity potionThrow = new PotionThrowEntity(this.myCurrentPlayer.getScene(), this.myFarm.spriteManager, this.myCurrentPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
+        potionThrow.onClick.performMouseClickAction(useOnCurrentPlayer.getPosition().getX(), useOnCurrentPlayer.getPosition().getY(), MouseButton.PRIMARY);
     }
 
     /**
@@ -338,7 +332,7 @@ public class AIPlayerComponent implements GameComponent  {
                 continue;
             }
 
-            Item item = this.myPlayer.itemStore.getItem(marketItem.getID());
+            Item item = this.myCurrentPlayer.itemStore.getItem(marketItem.getID());
             PlantComponent plant = item.getComponent(PlantComponent.class);
             if (!canBeTree && plant.isTree) {
                 continue;

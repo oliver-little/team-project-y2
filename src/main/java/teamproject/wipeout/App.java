@@ -50,7 +50,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.InventoryUI;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -163,7 +163,7 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
-    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), this.spriteManager, this.itemStore, invUI);
+    	CurrentPlayer currentPlayer = new CurrentPlayer(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), this.spriteManager, this.itemStore, invUI);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
@@ -172,14 +172,14 @@ public class App implements Controller {
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
-        RenderComponent targetRC = player.getComponent(RenderComponent.class);
+        RenderComponent targetRC = currentPlayer.getComponent(RenderComponent.class);
 		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
 
         // Use JavaFX binding to ensure camera is in correct position even when screen size changes
         ObjectBinding<Point2D> camPosBinding = Bindings.createObjectBinding(() -> {return new Point2D(this.widthProperty.doubleValue(), this.heightProperty.doubleValue()).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);}, this.widthProperty, this.heightProperty);
         ObjectProperty<Point2D> camPos = new SimpleObjectProperty<>();
         camPos.bind(camPosBinding);
-        camera.addComponent(new CameraFollowComponent(player, camPos));
+        camera.addComponent(new CameraFollowComponent(currentPlayer, camPos));
 
         // Create tasks
         ArrayList<Task> allTasks = createAllTasks(itemStore);
@@ -187,15 +187,15 @@ public class App implements Controller {
         for(int t = 0; t < 7; t++) {
             playerTasks.add(allTasks.get(t));
         }
-        player.setTasks(playerTasks);
+        currentPlayer.setTasks(playerTasks);
 
         ArrayList<Task> purchasableTasks = allTasks;
 
         //World Entity
-        this.worldEntity = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        this.worldEntity = new WorldEntity(gameScene, 4, currentPlayer, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
         this.worldEntity.setupFarmPickingKey(keyBindings.get("Harvest"));
         this.worldEntity.setupFarmDestroyingKey(keyBindings.get("Destroy"));
-        player.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
+        currentPlayer.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
 
         if (this.networker != null) {
             this.worldEntity.setClientSupplier(this.networker.clientSupplier);
@@ -205,12 +205,12 @@ public class App implements Controller {
         addInvUIInput(input, invUI, this.worldEntity);
 
         // Task UI
-        TaskUI taskUI = new TaskUI(player);
+        TaskUI taskUI = new TaskUI(currentPlayer);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
-        player.setTaskUI(taskUI);
+        currentPlayer.setTaskUI(taskUI);
 
         // Money icon
-        MoneyUI moneyUI = new MoneyUI(player);
+        MoneyUI moneyUI = new MoneyUI(currentPlayer);
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
@@ -238,26 +238,26 @@ public class App implements Controller {
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
 
         input.addKeyAction(keyBindings.get("Move left"),
-                () -> player.addAcceleration(-500f, 0f),
-                () -> player.addAcceleration(500f, 0f)); //moving left
+                () -> currentPlayer.addAcceleration(-500f, 0f),
+                () -> currentPlayer.addAcceleration(500f, 0f)); //moving left
 
         input.addKeyAction(keyBindings.get("Move right"),
-                () -> player.addAcceleration(500f, 0f),
-                () -> player.addAcceleration(-500f, 0f)); //moving right
+                () -> currentPlayer.addAcceleration(500f, 0f),
+                () -> currentPlayer.addAcceleration(-500f, 0f)); //moving right
 
         input.addKeyAction(keyBindings.get("Move up"),
-                () -> player.addAcceleration(0f, -500f),
-                () -> player.addAcceleration(0f, 500f)); //moving up
+                () -> currentPlayer.addAcceleration(0f, -500f),
+                () -> currentPlayer.addAcceleration(0f, 500f)); //moving up
 
         input.addKeyAction(keyBindings.get("Move down"),
-                () -> player.addAcceleration(0f, 500f),
-                () -> player.addAcceleration(0f, -500f));
+                () -> currentPlayer.addAcceleration(0f, 500f),
+                () -> currentPlayer.addAcceleration(0f, -500f));
 
         invUI.onMouseClick(this.worldEntity);
-        input.onKeyRelease(keyBindings.get("Drop"), invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
+        input.onKeyRelease(keyBindings.get("Drop"), invUI.dropOnKeyRelease(currentPlayer, this.worldEntity.pickables));
 
         input.onKeyRelease(keyBindings.get("Pick-up"), () -> {
-            this.worldEntity.pickables.picked(player.pickup());
+            this.worldEntity.pickables.picked(currentPlayer.pickup());
         });
 
         if (this.networker != null) {
@@ -285,7 +285,7 @@ public class App implements Controller {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
             Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, reward * quantityCollected,
-                    (Player inputPlayer) ->
+                    (CurrentPlayer inputPlayer) ->
                     {
                     	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
                     	int index = inputPlayer.containsItem(itemId);
@@ -306,7 +306,7 @@ public class App implements Controller {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
             Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
-                    (Player inputPlayer) ->
+                    (CurrentPlayer inputPlayer) ->
                     {
                         return inputPlayer.getSoldItems().containsKey(itemId);
                     },
@@ -423,11 +423,11 @@ public class App implements Controller {
     }
 
     private void setUpNetworking() {
-        Player myPlayer = this.worldEntity.myPlayer;
+        CurrentPlayer myCurrentPlayer = this.worldEntity.myCurrentPlayer;
         Market myMarket = this.worldEntity.market.getMarket();
 
         GameClient currentClient = this.networker.getClient();
-        currentClient.players.put(myPlayer.playerID, myPlayer);
+        currentClient.players.put(myCurrentPlayer.playerID, myCurrentPlayer);
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
@@ -436,10 +436,10 @@ public class App implements Controller {
         this.worldEntity.marketUpdater.stop();
 
         FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
-        this.worldEntity.setFarmFor(myPlayer, true, myFarm);
+        this.worldEntity.setFarmFor(myCurrentPlayer, true, myFarm);
 
         try {
-            currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
+            currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
 
         } catch (IOException exception) {
             exception.printStackTrace();
