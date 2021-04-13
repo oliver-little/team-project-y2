@@ -5,12 +5,14 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PickableComponent;
+import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
@@ -19,6 +21,7 @@ import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
@@ -85,7 +88,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, ItemStore itemStore, InventoryUI invUI) {
+    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
@@ -148,6 +151,18 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
         //this.addComponent(new CollisionResolutionComponent());
+
+        try {
+            this.addComponent(new RenderComponent(new Point2D(0, -3)));
+            this.addComponent(new PlayerAnimatorComponent(
+                    spriteManager.getSpriteSet("player-red", "walk-up"),
+                    spriteManager.getSpriteSet("player-red", "walk-right"),
+                    spriteManager.getSpriteSet("player-red", "walk-down"),
+                    spriteManager.getSpriteSet("player-red", "walk-left"),
+                    spriteManager.getSpriteSet("player-red", "idle")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         this.audio = new AudioComponent();
         this.addComponent(this.audio);

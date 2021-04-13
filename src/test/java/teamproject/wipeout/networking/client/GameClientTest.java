@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.data.GameUpdate;
@@ -24,6 +25,8 @@ class GameClientTest {
     private static final Integer DUMMY_CLIENT_ID = 999;
     private static final String SERVER_NAME = "TestServer#1";
     private static final int CATCHUP_TIME = 80;
+
+    private SpriteManager spriteManager;
 
     private GameClient gameClient;
     private Player clientPlayer;
@@ -50,12 +53,13 @@ class GameClientTest {
     private HashSet<PlayerState> newPlayers;
     private final NewPlayerAction newPlayerAction = (newPlayer) -> {
         newPlayers.add(newPlayer);
-        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null, null);
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), this.spriteManager, null, null);
     };
 
     @BeforeAll
     void initializeGameClient() throws IOException, InterruptedException, ReflectiveOperationException {
-        this.clientPlayer = new Player(new GameScene(), CLIENT_ID, "Test", Point2D.ZERO, null, null);
+        this.spriteManager = new SpriteManager();
+        this.clientPlayer = new Player(new GameScene(), CLIENT_ID, "Test", Point2D.ZERO, this.spriteManager, null, null);
         this.newPlayers = new HashSet<>();
 
         this.gameServer = new GameServer(SERVER_NAME);
@@ -314,7 +318,7 @@ class GameClientTest {
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
-            Player secondPlayer = new Player(new GameScene(), DUMMY_CLIENT_ID, "Test", Point2D.ZERO, null, null);
+            Player secondPlayer = new Player(new GameScene(), DUMMY_CLIENT_ID, "Test", Point2D.ZERO, this.spriteManager, null, null);
             this.playerWaitingForFarmID = secondPlayer;
             GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer, new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
             this.clientWaitingForFarmID = secondClient;

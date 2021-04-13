@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.state.PlayerState;
@@ -25,6 +26,8 @@ class GameServerTest {
     private static final String SERVER_NAME = "TestServer#99";
     private static final int CATCHUP_TIME = 80;
     private static final int MAX_CONNECTIONS = 6;
+
+    private SpriteManager spriteManager;
 
     private GameClient[] gameClients;
     private Player[] clientPlayers;
@@ -53,12 +56,13 @@ class GameServerTest {
                 return player;
             }
         }
-        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), null, null);
+        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), this.spriteManager, null, null);
     };
 
     @BeforeAll
     void initializeGameServer() {
         try {
+            this.spriteManager = new SpriteManager();
             this.newPlayers = new HashSet<PlayerState>();
             this.gameServer = new GameServer(SERVER_NAME);
             this.gameServer.startClientSearch();
@@ -75,7 +79,7 @@ class GameServerTest {
 
             this.clientPlayers = new Player[CLIENT_IDs.length];
             for (int i = 0; i < CLIENT_IDs.length; i++) {
-                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), null, null);
+                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), this.spriteManager, null, null);
             }
 
         } catch (IOException | InterruptedException | ReflectiveOperationException exception) {

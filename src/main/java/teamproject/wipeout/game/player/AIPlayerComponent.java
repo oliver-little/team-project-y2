@@ -38,7 +38,7 @@ public class AIPlayerComponent implements GameComponent  {
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
-    public ArrayList<Player> allPlayers;
+    public List<Player> allPlayers;
     public AnimalEntity theAnimal;
     public List<FarmEntity> otherFarms;
     private Player myPlayer;

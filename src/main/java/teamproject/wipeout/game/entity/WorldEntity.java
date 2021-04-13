@@ -152,22 +152,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
-		/*boolean xxx = true;
-		for (NavigationSquare square : this.navMesh.squares) {
-			GameEntity eSquare = this.scene.createEntity();
-			eSquare.addComponent(new Transform(square.topLeft, 0.0));
-			RectRenderable renderable = new RectRenderable(xxx ? Color.RED : Color.BLUE, square.bottomRight.getX() - square.topLeft.getX(), square.bottomRight.getY() - square.topLeft.getY());
-			xxx = !xxx;
-			eSquare.addComponent(new RenderComponent(renderable));
-		}*/
-
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
 
 		this.setFarmFor(this.myPlayer, true, this.farms.get(1));
 		this.setupFarmPickingKey();
 		this.setupFarmDestroyingKey();
 
-		this.createAIPlayer();
+		this.createAIPlayers();
 	}
 
 	public void addPotion(PotionEntity potionEntity) {
@@ -265,32 +256,32 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		});
 	}
 
-	Player aiPlayer = null;
-
-	private void createAIPlayer() {
-		aiPlayer = new Player(this.scene, new Random().nextInt(1024), "Farmer", new Point2D(10, 10), this.itemStore, null);
-		aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
-		try {
-			aiPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
-			aiPlayer.addComponent(new PlayerAnimatorComponent(
-					spriteManager.getSpriteSet("player-red", "walk-up"),
-					spriteManager.getSpriteSet("player-red", "walk-right"),
-					spriteManager.getSpriteSet("player-red", "walk-down"),
-					spriteManager.getSpriteSet("player-red", "walk-left"),
-					spriteManager.getSpriteSet("player-red", "idle")));
-		} catch (Exception e) {
-			e.printStackTrace();
+	private void createAIPlayers() {
+		ArrayList<Player> aiPlayers = new ArrayList<Player>();
+		for (int i = 2; i < 5; i++) {
+			Player aiPlayer = new Player(this.scene, i + 1, "Farmer", new Point2D(10, 10), this.spriteManager, this.itemStore, null);
+			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
+			this.setFarmFor(aiPlayer, false, this.farms.get(i));
+			aiPlayers.add(aiPlayer);
 		}
-		this.setFarmFor(aiPlayer, false, this.farms.get(2));
-		AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(2));
-		aiComp.allPlayers = this.players;
-		aiComp.otherFarms = this.farms.values().stream().filter((farm) -> !farm.farmID.equals(2)).collect(Collectors.toList());
-		aiComp.theAnimal = this.myAnimal;
-		aiPlayer.addComponent(aiComp);
+		this.players.addAll(aiPlayers);
+
+		for (Player aiPlayer : aiPlayers) {
+			int aiFarmID = aiPlayer.getCurrentState().getFarmID();
+			AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(aiFarmID));
+			aiComp.allPlayers = this.players.stream().filter((player) -> !player.playerID.equals(aiPlayer.playerID)).collect(Collectors.toList());
+			aiComp.otherFarms = this.farms.values().stream().filter((farm) -> !farm.farmID.equals(aiFarmID)).collect(Collectors.toList());
+			aiComp.theAnimal = this.myAnimal;
+			aiPlayer.addComponent(aiComp);
+		}
 	}
 
 	public void setClock(Supplier<ClockSystem> clock) {
-		this.aiPlayer.getComponent(AIPlayerComponent.class).clock = clock;
+		for (Player player : this.players) {
+			if (player.hasComponent(AIPlayerComponent.class)) {
+				player.getComponent(AIPlayerComponent.class).clock = clock;
+			}
+		}
 	}
 
 	/**

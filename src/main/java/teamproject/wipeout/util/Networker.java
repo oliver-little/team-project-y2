@@ -102,23 +102,10 @@ public class Networker {
                 return null;
             }
 
-            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), itemStore, null);
+            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), "NAME", newPlayerState.getPosition(), spriteManager, itemStore, null);
 
             newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
             newPlayer.addComponent(new CollisionResolutionComponent());
-
-            try {
-                newPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
-                newPlayer.addComponent(new PlayerAnimatorComponent(
-                        spriteManager.getSpriteSet("player-red", "walk-up"),
-                        spriteManager.getSpriteSet("player-red", "walk-right"),
-                        spriteManager.getSpriteSet("player-red", "walk-down"),
-                        spriteManager.getSpriteSet("player-red", "walk-left"),
-                        spriteManager.getSpriteSet("player-red", "idle")));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
             myFarm.assignPlayer(newPlayer.playerID, false, () -> this.client);

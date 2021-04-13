@@ -163,25 +163,12 @@ public class App implements Controller {
 
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
-    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), this.itemStore, invUI);
+    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), this.spriteManager, this.itemStore, invUI);
 
         //player.acquireItem(6, 98); //for checking stack/inventory limits
         //player.acquireItem(1, 2);
         //player.acquireItem(28, 98);
         //player.acquireItem( 43, 2);
-
-
-        try {
-            player.addComponent(new RenderComponent(new Point2D(0, -3)));
-            player.addComponent(new PlayerAnimatorComponent(
-                spriteManager.getSpriteSet("player-red", "walk-up"), 
-                spriteManager.getSpriteSet("player-red", "walk-right"), 
-                spriteManager.getSpriteSet("player-red", "walk-down"), 
-                spriteManager.getSpriteSet("player-red", "walk-left"), 
-                spriteManager.getSpriteSet("player-red", "idle")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         
         //camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;

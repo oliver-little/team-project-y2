@@ -16,9 +16,9 @@ import java.util.Map;
  */
 public class ItemStore {
 
-    private static final String VERSION = "2.0.0";
-
     protected Map<Integer, Item> data;
+
+    private static final String VERSION = "2.0.0";
 
     /**
      * Initializes an {@code ItemStore} instance container by loading items from a given file.
