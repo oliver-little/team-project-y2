@@ -17,8 +17,6 @@
     -fx-background-color:rgba(172, 172, 172, 0.8);
 }
 
-
-
 .vbox {
     -fx-background-color:rgba(255, 205, 112, 0.8);
     -fx-background-radius: 5px;
@@ -34,5 +32,9 @@
 }
 
 .label {
-	-fx-text-fill: white;
+    -fx-text-fill: WHITE;
+}
+
+.combo-box-popup .list-cell:disabled  {
+    -fx-opacity: 0.4 ;
 }

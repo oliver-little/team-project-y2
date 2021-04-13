@@ -2,13 +2,14 @@ package teamproject.wipeout;
 
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Window;
@@ -23,7 +24,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,10 +43,15 @@ public class StartMenu implements Controller {
 
     Networker networker;
 
+    private LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
+    private ArrayList<String> dropDownItems = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT"));
+    private ArrayList<ComboBox<String>> dropDowns = new ArrayList<>();
+
     public StartMenu() {
         this.root = new StackPane();
         this.menuBox = new VBox(30);
         this.networker = new Networker();
+        createDefaultBindings();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             GameClient client = this.networker.getClient();
@@ -53,6 +61,22 @@ public class StartMenu implements Controller {
             this.networker.stopServer();
         }));
     }
+
+    /**
+     * Creates default key bindings to be passed into game
+     */
+    private void createDefaultBindings(){
+        keyBindings = new LinkedHashMap<String, KeyCode>();
+        keyBindings.put("Move left", KeyCode.LEFT);
+        keyBindings.put("Move right", KeyCode.RIGHT);
+        keyBindings.put("Move up", KeyCode.UP);
+        keyBindings.put("Move down", KeyCode.DOWN);
+        keyBindings.put("Drop", KeyCode.U);
+        keyBindings.put("Pick-up", KeyCode.X);
+        keyBindings.put("Destroy", KeyCode.D);
+        keyBindings.put("Harvest", KeyCode.H);
+    }
+
 
     public void cleanup() {
     }
@@ -270,6 +294,98 @@ public class StartMenu implements Controller {
         return true;
     }
 
+    /**
+     * Gets key bindings which are taken
+     * @return ArrayList of strings representing key bindings which are taken
+     */
+    private ArrayList<String> getTakenBindings(){
+        ArrayList<String> result = new ArrayList<>();
+        for(Map.Entry<String, KeyCode> entry2 : keyBindings.entrySet()){
+            result.add(entry2.getValue().getName().toUpperCase());
+        } 
+
+        return result;
+    }
+
+    /**
+     * Method to grey out items in all of the comboboxes which are already taken
+     */
+    private void updateDisabledItems(){
+        ArrayList<String> takenBindings = getTakenBindings();
+        for(ComboBox<String> d : dropDowns){
+            d.setCellFactory(lv -> new ListCell<String>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                        setDisable(takenBindings.contains(item.toString()));
+                    }
+                    
+                }
+            });
+        }
+    }
+
+    /**
+     * Creates settings menu for changing key bindings
+     */
+    private void createSettingsMenu(){
+        root.getChildren().remove(menuBox);
+
+        menuBox.getChildren().clear();
+
+        menuBox.getChildren().add(UIUtil.createTitle("Settings"));
+
+        TilePane tilePane = new TilePane();
+        tilePane.setAlignment(Pos.TOP_CENTER);
+        tilePane.setVgap(20);
+        tilePane.setHgap(20);
+
+        //create a HBox for each drop down menu (key-binding)
+        for(Map.Entry<String, KeyCode> entry : keyBindings.entrySet()) {
+            String action = entry.getKey();
+            KeyCode code = entry.getValue();
+
+            HBox box = new HBox();
+            box.setAlignment(Pos.CENTER_RIGHT);
+            box.setPrefWidth(200);
+
+            Label label = new Label(action + ":  ");
+            
+            ComboBox<String> dropDown = new ComboBox<String>();
+
+            dropDown.getItems().addAll(dropDownItems); //adds all possible key bindings
+            dropDown.setValue(code.getName().toUpperCase()); //sets default value
+
+            dropDowns.add(dropDown); 
+            
+            dropDown.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
+            {
+                public void changed(ObservableValue<? extends String> ov, final String oldvalue, final String newvalue){
+                    keyBindings.put(action, KeyCode.valueOf(newvalue));
+                    updateDisabledItems(); //greys out taken bindings
+                }
+            });
+            box.getChildren().addAll(label, dropDown);
+            tilePane.getChildren().add(box);
+        }
+        updateDisabledItems();
+
+        menuBox.getChildren().add(tilePane);
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
+        );
+        
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().add(buttonBox);
+
+        root.getChildren().add(menuBox);
+    }
+
     private void createMainMenu(){
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -314,7 +430,7 @@ public class StartMenu implements Controller {
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),
                 new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
-                new Pair<String, Runnable>("Settings", () -> {}),
+                new Pair<String, Runnable>("Settings", () -> createSettingsMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
@@ -330,7 +446,7 @@ public class StartMenu implements Controller {
     }
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        App game = new App(givenNetworker, gameStartTime);
+        App game = new App(givenNetworker, gameStartTime, keyBindings);
         Window window = root.getScene().getWindow();
         Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
         root.getScene().setRoot(content);

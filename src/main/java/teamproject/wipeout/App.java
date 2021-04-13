@@ -62,6 +62,7 @@ import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -97,8 +98,11 @@ public class App implements Controller {
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public App(Networker networker, Long givenGameStartTime) {
+    private LinkedHashMap<String, KeyCode> keyBindings;
+
+    public App(Networker networker, Long givenGameStartTime, LinkedHashMap<String, KeyCode> bindings) {
         this.networker = networker;
+        this.keyBindings = bindings;
 
         if (givenGameStartTime == null) {
             this.gameStartTime = System.currentTimeMillis();
@@ -206,6 +210,8 @@ public class App implements Controller {
 
         //World Entity
         this.worldEntity = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        this.worldEntity.setupFarmPickingKey(keyBindings.get("Harvest"));
+        this.worldEntity.setupFarmDestroyingKey(keyBindings.get("Destroy"));
         player.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
 
         if (this.networker != null) {
@@ -247,34 +253,26 @@ public class App implements Controller {
         topRight.getChildren().addAll(clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
 
-        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the G key will trigger the sound
-
-        input.addKeyAction(KeyCode.LEFT,
+        input.addKeyAction(keyBindings.get("Move left"),
                 () -> player.addAcceleration(-500f, 0f),
-                () -> player.addAcceleration(500f, 0f));
+                () -> player.addAcceleration(500f, 0f)); //moving left
 
-        input.addKeyAction(KeyCode.RIGHT,
+        input.addKeyAction(keyBindings.get("Move right"),
                 () -> player.addAcceleration(500f, 0f),
-                () -> player.addAcceleration(-500f, 0f));
+                () -> player.addAcceleration(-500f, 0f)); //moving right
 
-        input.addKeyAction(KeyCode.UP,
+        input.addKeyAction(keyBindings.get("Move up"),
                 () -> player.addAcceleration(0f, -500f),
-                () -> player.addAcceleration(0f, 500f));
+                () -> player.addAcceleration(0f, 500f)); //moving up
 
-        input.addKeyAction(KeyCode.DOWN,
+        input.addKeyAction(keyBindings.get("Move down"),
                 () -> player.addAcceleration(0f, 500f),
                 () -> player.addAcceleration(0f, -500f));
 
-
-        /*
-        input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
-        									 mas.muteUnmute();
-        									 audioSys.muteUnmute();});
-        */
         invUI.onMouseClick(this.worldEntity);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
+        input.onKeyRelease(keyBindings.get("Drop"), invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
 
-        input.onKeyRelease(KeyCode.X, () -> {
+        input.onKeyRelease(keyBindings.get("Pick-up"), () -> {
             this.worldEntity.pickables.picked(player.pickup());
         });
 

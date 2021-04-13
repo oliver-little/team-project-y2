@@ -153,8 +153,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		nameTag.setParent(this.myAnimal);
 
 		this.setMyFarm(this.farms.get(1));
-		this.setupFarmPickingKey();
-		this.setupFarmDestroyingKey();
+		//this.setupFarmPickingKey();
+		//this.setupFarmDestroyingKey();
 	}
 
 	public void addPotion(PotionEntity potionEntity) {
@@ -238,14 +238,14 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.myPlayer.setWorldPosition(playerPosition);
 	}
 
-	protected void setupFarmPickingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
+	public void setupFarmPickingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
 
-	protected void setupFarmDestroyingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
+	public void setupFarmDestroyingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
