@@ -13,12 +13,16 @@ import teamproject.wipeout.util.threads.UtilityThread;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.IntFunction;
 
 /**
  * {@code GameServer} class represents the server-part of the client-server network architecture.
@@ -31,16 +35,16 @@ import java.util.function.IntFunction;
 public class GameServer {
 
     // Constants important for the whole ...networking. package
-    public static final int HANDSHAKE_PORT = 9919;
-    public static final String HANDSHAKE_GROUP = "229.1.2.3";
-    public static final int GAME_PORT = 9913;
+    public static final int HANDSHAKE_PORT = 1025;
+    public static final String HANDSHAKE_GROUP = "229.22.29.51";
     public static final int MAX_CONNECTIONS = 4;
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
 
-    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
+    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4}; // TODO where to put private static final?
 
     public final String name;
     public final Integer id;
+    public final short serverPort;
 
     protected DatagramSocket searchSocket;
     protected boolean isSearching;
@@ -79,7 +83,23 @@ public class GameServer {
 
         this.isSearching = false;
 
-        this.serverSocket = new ServerSocket(GAME_PORT);
+        ServerSocket interimServerSocket = null;
+        short interimServerPort = -1;
+        for (short port = 1026; port < 10000; port++) {
+            try {
+                interimServerSocket = new ServerSocket(port);
+            } catch (IOException ignore) {
+                continue;
+            }
+            interimServerPort = port;
+            break;
+        }
+        if (interimServerSocket == null || interimServerPort < 1026) {
+            throw new IOException("Address already in use. There are no available ports left.");
+        }
+
+        this.serverPort = interimServerPort;
+        this.serverSocket = interimServerSocket;
 
         this.isActive = false;
         this.gameStartTime = -1;
@@ -261,7 +281,7 @@ public class GameServer {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
         new BackgroundThread(() -> {
             try {
-                writer.write(ProcessMessage.START_SERVER.rawValue + '\n');
+                writer.write(Short.toString(server.serverPort) + '\n');
                 writer.flush();
 
                 String line;
@@ -519,9 +539,15 @@ public class GameServer {
             while (this.isSearching) {
                 try {
                     // Construct packet which will be multicasted (packet contains server name and address)
-                    byte[] nameBytes = this.name.getBytes();
+                    byte[] portBytes = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(this.serverPort).array();
+                    byte[] nameBytes = this.name.getBytes(StandardCharsets.UTF_8);
+
+                    byte[] packetBytes = new byte[128];
+                    System.arraycopy(portBytes, 0, packetBytes, 0, portBytes.length);
+                    System.arraycopy(nameBytes, 0, packetBytes, portBytes.length, nameBytes.length);
+
                     DatagramPacket packet = new DatagramPacket(
-                            nameBytes, nameBytes.length,
+                            packetBytes, packetBytes.length,
                             InetAddress.getByName(HANDSHAKE_GROUP),
                             HANDSHAKE_PORT
                     );

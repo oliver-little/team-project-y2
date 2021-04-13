@@ -68,10 +68,8 @@ public class Networker {
 
     public InetSocketAddress startServer(String serverName) {
         try {
-            boolean started = this.serverRunner.startServer(serverName);
-            if (started) {
-                return new InetSocketAddress(InetAddress.getLocalHost(), GameServer.GAME_PORT);
-            }
+            short startedOnPort = this.serverRunner.startServer(serverName);
+            return new InetSocketAddress(InetAddress.getLocalHost(), startedOnPort);
 
         } catch (ServerRunningException | IOException exception) {
             exception.printStackTrace();

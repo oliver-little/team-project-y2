@@ -73,7 +73,7 @@ public class StartMenu implements Controller {
         root.getChildren().add(menuBox);
     }
 
-    private void createHostGameMenu(){
+    private void createHostGameMenu() { // TODO limit length of server name
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
@@ -224,12 +224,10 @@ public class StartMenu implements Controller {
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
         servers.addListener((MapChangeListener<? super String, ? super InetSocketAddress>) (change) -> {
             Platform.runLater(() -> {
-                serverBox.getChildren().clear();
-
+                serverList.getItems().clear();
                 for (Map.Entry<String, InetSocketAddress> entry : servers.entrySet()) {
                 	serverList.getItems().add(new Server(entry.getKey(), entry.getValue()));
                 }
-                serverBox.getChildren().add(serverList);
             });
         });
 
@@ -241,7 +239,10 @@ public class StartMenu implements Controller {
                         joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
                     }
                 }),
-                new Pair<String, Runnable>("Back", () -> createMainMenu())
+                new Pair<String, Runnable>("Back", () -> {
+                    this.networker.getServerDiscovery().stopLookingForServers();
+                    createMainMenu();
+                })
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);

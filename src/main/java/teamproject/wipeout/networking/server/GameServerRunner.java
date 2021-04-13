@@ -28,7 +28,7 @@ public class GameServerRunner {
      * @throws IOException Thrown when the child process cannot be started.
      */
     // Running a child process: https://www.programmersought.com/article/95206092506/ (template)
-    public boolean startServer(String serverName) throws ServerRunningException, IOException {
+    public short startServer(String serverName) throws ServerRunningException, IOException {
         // Only one game server can be running
         if (this.serverProcess != null) {
             throw new ServerRunningException(this.serverName + " - server is already running!");
@@ -62,7 +62,7 @@ public class GameServerRunner {
         this.processWriter = new BufferedWriter(new OutputStreamWriter(newProcess.getOutputStream()));
         this.processReader = new BufferedReader(new InputStreamReader(newProcess.getInputStream()));
 
-        return this.processReader.readLine().equals(ProcessMessage.START_SERVER.rawValue);
+        return Short.parseShort(this.processReader.readLine());
     }
 
     /**
