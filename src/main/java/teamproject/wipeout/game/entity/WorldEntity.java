@@ -4,33 +4,31 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
-import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.render.Renderable;
-import teamproject.wipeout.engine.component.shape.Rectangle;
-import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
+import teamproject.wipeout.engine.component.shape.Rectangle;
+import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.AIPlayerComponent;
 import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.potion.PotionEntity;
+import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -153,10 +151,14 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
         this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
+		TextRenderable tag= new TextRenderable("Remy", 20);
+		GameEntity nameTag = new GameEntity(gameScene);
+		nameTag.addComponent(new RenderComponent(tag));
+		RenderComponent ratRender = this.myAnimal.getComponent(RenderComponent.class);
+		nameTag.addComponent(new Transform(ratRender.getWidth()/2f -tag.getWidth()/1f, -tag.getHeight()*1f, 10));
+		nameTag.setParent(this.myAnimal);
 
 		this.setFarmFor(this.myPlayer, true, this.farms.get(1));
-		this.setupFarmPickingKey();
-		this.setupFarmDestroyingKey();
 
 		this.createAIPlayers();
 	}
@@ -244,14 +246,14 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		player.setWorldPosition(playerPosition);
 	}
 
-	protected void setupFarmPickingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.H, () -> {
+	public void setupFarmPickingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
 
-	protected void setupFarmDestroyingKey() {
-		this.inputHandler.onKeyRelease(KeyCode.D, () -> {
+	public void setupFarmDestroyingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
 			this.myFarm.onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
 		});
 	}
@@ -295,7 +297,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		GameClient client = this.clientSupplier.get();
 		if (client != null) {
 			try {
-				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.id, this.getCurrentState()));
+				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
 
 			} catch (IOException exception) {
 				exception.printStackTrace();

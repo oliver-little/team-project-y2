@@ -17,14 +17,16 @@ import java.io.Serializable;
 public class PlayerState implements Serializable {
 
     private Integer playerID;
-    private Integer farmID;
+    private String playerName;
+
+    private int farmID;
 
     private Point2D position;
     private Point2D acceleration;
 
-    private Double speedMultiplier;
+    private double speedMultiplier;
 
-    private Double money;
+    private double money;
 
     private long timestamp;
 
@@ -32,11 +34,14 @@ public class PlayerState implements Serializable {
      * Default initializer for a {@link PlayerState}.
      *
      * @param playerID Player's ID
+     * @param playerName Player's name
+     * @param money Player's money balance
      * @param position Player's position represented by {@link Point2D}.
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    public PlayerState(Integer playerID, Point2D position, Point2D acceleration, Double money) {
+    public PlayerState(Integer playerID, String playerName, double money, Point2D position, Point2D acceleration) {
         this.playerID = playerID;
+        this.playerName = playerName;
         this.farmID = -1;
         this.position = position;
         this.acceleration = acceleration;
@@ -55,11 +60,20 @@ public class PlayerState implements Serializable {
     }
 
     /**
+     * Player name getter
+     *
+     * @return Player name
+     */
+    public String getPlayerName() {
+        return this.playerName;
+    }
+
+    /**
      * Gets ID of the farm assigned to the player.
      *
      * @return Farm ID associated with the player.
      */
-    public Integer getFarmID() {
+    public int getFarmID() {
         return this.farmID;
     }
 
@@ -109,7 +123,7 @@ public class PlayerState implements Serializable {
      * @param farmID ID of the farm assigned to the player.
      */
     public void assignFarm(Integer farmID) {
-        this.farmID = farmID;
+        this.farmID = farmID == null ? -1 : farmID;
     }
 
     /**
@@ -165,6 +179,7 @@ public class PlayerState implements Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.playerID);
+        out.writeUTF(this.playerName);
         out.writeInt(this.farmID);
 
         out.writeDouble(this.position.getX());
@@ -182,6 +197,7 @@ public class PlayerState implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException {
         this.playerID = in.readInt();
+        this.playerName = in.readUTF();
         this.farmID = in.readInt();
 
         this.position = new Point2D(in.readDouble(), in.readDouble());

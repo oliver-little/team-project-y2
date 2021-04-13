@@ -1,15 +1,11 @@
 package teamproject.wipeout.engine.system.ai;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
-
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.ai.NavigationEdge;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
+
+import java.util.*;
 
 
 /**
@@ -200,7 +196,7 @@ public class PathFindingSystem {
         // In order to simplify the code inside the for loop, add a fake navigation edge at the end point
         edges[squarePath.size() - 1] = new NavigationEdge(endPoint, endPoint, new NavigationSquare(endPoint, endPoint));
 
-        FunnelData funnel = new FunnelData(startPoint, edges[startEdge]);
+        FunnelData funnel = new FunnelData(startPoint, edges[startEdge], startEdge);
 
         Point2D newPoint = Point2D.ZERO;
         Point2D newVector = Point2D.ZERO;
@@ -227,11 +223,11 @@ public class PathFindingSystem {
             // Crossed over, move apex
             if (newCrossProduct < 0) {
                 output.add(funnel.apex);
-                funnel.setData(funnel.right, edges[i]);
+                funnel.setData(funnel.right, edges[funnel.rightIndex+1], funnel.rightIndex+1);
                 continue;
             }
             else if (newAngle <= funnel.angle) {
-                funnel.setLeft(newPoint);
+                funnel.setLeft(newPoint, i);
             }
 
             // Parse right point
@@ -248,11 +244,11 @@ public class PathFindingSystem {
             // Crossed over, move apex
             if (newCrossProduct < 0) {
                 output.add(funnel.apex);
-                funnel.setData(funnel.left, edges[i]);
+                funnel.setData(funnel.left, edges[funnel.leftIndex+1], funnel.leftIndex+1);
                 continue;
             }
             else if (newAngle <= funnel.angle) {
-                funnel.setRight(newPoint);
+                funnel.setRight(newPoint, i);
             }
         }
 
@@ -261,10 +257,12 @@ public class PathFindingSystem {
         output.add(endPoint);
 
         // If there is a radius > 0, increase the angle around the points
-        if (output.size() > 2) {
+        if (output.size() > 2 && radius > 0) {
+            // Clone the output list so we're always referencing the original points, not the modified points
+            List<Point2D> originalOutput = new ArrayList<>(output);
             for (int i = 1; i < output.size() - 1; i++) {
                 Point2D currentPoint = output.get(i);
-                Point2D prevVector = currentPoint.subtract(output.get(i-1)).normalize();
+                Point2D prevVector = currentPoint.subtract(originalOutput.get(i-1)).normalize();
                 Point2D nextVector = currentPoint.subtract(output.get(i+1)).normalize();
                 Point2D normal = prevVector.add(nextVector).normalize();
                 Point2D after = currentPoint.add(normal.multiply(radius));

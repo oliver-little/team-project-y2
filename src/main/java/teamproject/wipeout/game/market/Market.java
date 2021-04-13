@@ -1,11 +1,5 @@
 package teamproject.wipeout.game.market;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import javafx.application.Platform;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
@@ -17,6 +11,12 @@ import teamproject.wipeout.networking.state.MarketOperationRequest;
 import teamproject.wipeout.networking.state.MarketOperationResponse;
 import teamproject.wipeout.networking.state.MarketState;
 import teamproject.wipeout.networking.state.StateUpdatable;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Defines the market in which players can buy and sell goods for. The market also regulates the quantites and prices of the goods for sale.
@@ -235,7 +235,7 @@ public class Market implements StateUpdatable<MarketState> {
         GameClient client = this.clientSupplier.get();
         if (client != null) {
             try {
-                client.send(new GameUpdate(GameUpdateType.REQUEST, client.id, request));
+                client.send(new GameUpdate(GameUpdateType.REQUEST, client.getID(), request));
 
             } catch (IOException exception) {
                 exception.printStackTrace();

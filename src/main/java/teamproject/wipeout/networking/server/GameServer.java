@@ -13,12 +13,15 @@ import teamproject.wipeout.util.threads.UtilityThread;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -32,27 +35,27 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GameServer {
 
     // Constants important for the whole ...networking. package
-    public static final int HANDSHAKE_PORT = 9919;
-    public static final String HANDSHAKE_GROUP = "229.1.2.3";
-    public static final int GAME_PORT = 9913;
+    public static final int HANDSHAKE_PORT = 1025;
+    public static final String HANDSHAKE_GROUP = "229.22.29.51";
     public static final int MAX_CONNECTIONS = 4;
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
 
-    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
+    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4}; // TODO where to put private static final?
 
     public final String name;
     public final Integer id;
+    public final short serverPort;
 
     protected DatagramSocket searchSocket;
-    protected final AtomicBoolean isSearching;
+    protected boolean isSearching;
 
     protected final ServerSocket serverSocket;
-    protected final AtomicBoolean isActive;
     protected ServerThread newConnectionsThread;
 
-    protected final AtomicReference<HashSet<GameClientHandler>> connectedClients;
+    protected boolean isActive;
+    protected long gameStartTime;
 
-    protected final AtomicReference<Pair<Integer, Long>> gameStartTime;
+    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
 
     protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
 
@@ -62,6 +65,8 @@ public class GameServer {
     protected final AtomicReference<ArrayList<Integer>> availableFarms;
 
     protected final Market serverMarket;
+
+    private final HashSet<Integer> generatedIDs;
 
     // Atomic variables above used because of multi-threading
 
@@ -76,14 +81,30 @@ public class GameServer {
         this.name = name;
         this.id = name.hashCode();
 
-        this.isSearching = new AtomicBoolean(false);
+        this.isSearching = false;
 
-        this.serverSocket = new ServerSocket(GAME_PORT);
-        this.isActive = new AtomicBoolean(false);
+        ServerSocket interimServerSocket = null;
+        short interimServerPort = -1;
+        for (short port = 1026; port < 10000; port++) {
+            try {
+                interimServerSocket = new ServerSocket(port);
+            } catch (IOException ignore) {
+                continue;
+            }
+            interimServerPort = port;
+            break;
+        }
+        if (interimServerSocket == null || interimServerPort < 1026) {
+            throw new IOException("Address already in use. There are no available ports left.");
+        }
 
-        this.connectedClients = new AtomicReference<HashSet<GameClientHandler>>(new HashSet<GameClientHandler>());
+        this.serverPort = interimServerPort;
+        this.serverSocket = interimServerSocket;
 
-        this.gameStartTime = new AtomicReference<Pair<Integer, Long>>(null);
+        this.isActive = false;
+        this.gameStartTime = -1;
+
+        this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
 
         this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
 
@@ -103,6 +124,8 @@ public class GameServer {
             }
         };
         new MarketPriceUpdater(this.serverMarket, false);
+
+        this.generatedIDs = new HashSet<Integer>();
 
         this.handleNewConnections();
     }
@@ -135,10 +158,10 @@ public class GameServer {
      * @throws IOException Network problem
      */
     public void startClientSearch() throws IOException {
-        if (this.isSearching.get()) {
+        if (this.isSearching) {
             return;
         }
-        this.isSearching.set(true);
+        this.isSearching = true;
         this.searchSocket = new DatagramSocket();
         this.startMulticasting();
     }
@@ -147,7 +170,7 @@ public class GameServer {
      * Stops multicasting the server's IP address.
      */
     public void stopClientSearch() {
-        this.isSearching.set(false);
+        this.isSearching = false;
         this.searchSocket.close();
         this.searchSocket = null;
     }
@@ -156,22 +179,22 @@ public class GameServer {
      * Starts a game session and rejects all new connection attempts.
      */
     public void startNewGame() {
-        if (this.isActive.get()) {
-            return;
+        if (this.isActive) {
+            this.stopGame();
         }
-
-        this.isActive.set(true);
+        this.isActive = true;
+        this.calibrateClocks();
     }
 
     /**
      * Stops a running game session and starts accepting new connection attempts.
      */
     public void stopGame() {
-        this.isActive.set(false);
         this.playerStates.set(new HashMap<Integer, PlayerState>());
         this.farmStates.set(new HashMap<Integer, FarmState>());
         this.availableFarms.set(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
-        this.gameStartTime.set(null);
+        this.gameStartTime = -1;
+        this.isActive = false;
     }
 
     /**
@@ -197,7 +220,7 @@ public class GameServer {
      * @throws IOException Problem with closing the connection
      */
     public void disconnectClient(Integer deleteClientID, boolean serverSide) throws IOException {
-        HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         for (GameClientHandler client : clientHandlers) {
             if (client.clientID.equals(deleteClientID)) {
@@ -209,6 +232,7 @@ public class GameServer {
         this.handleFarmStateDelete(deleteClientID);
 
         this.connectedClients.setRelease(clientHandlers);
+        this.generatedIDs.remove(deleteClientID);
     }
 
     /**
@@ -217,14 +241,15 @@ public class GameServer {
      * @throws IOException Problem with closing connections
      */
     public void disconnectClients() throws IOException {
-        HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         for (GameClientHandler client : clientHandlers) {
             client.closeConnection(true);
         }
         this.stopGame();
 
-        this.connectedClients.setRelease(new HashSet<GameClientHandler>());
+        this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
+        this.generatedIDs.clear();
     }
 
     /**
@@ -233,11 +258,11 @@ public class GameServer {
      * @throws IOException Problem with closing connections
      */
     public void stopServer() throws IOException {
-        if (this.isSearching.get()) {
+        if (this.isSearching) {
             this.stopClientSearch();
         }
 
-        if (this.isActive.get()) {
+        if (this.isActive) {
             this.stopGame();
         }
 
@@ -256,6 +281,9 @@ public class GameServer {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
         new BackgroundThread(() -> {
             try {
+                writer.write(Short.toString(server.serverPort) + '\n');
+                writer.flush();
+
                 String line;
                 while ((line = reader.readLine()) != null) {
                     ProcessMessage message = ProcessMessage.fromRawValue(line);
@@ -285,9 +313,24 @@ public class GameServer {
                 }
 
             } catch (IOException exception) {
-                System.out.println(exception.toString());
+                exception.printStackTrace();
             }
         }).start();
+    }
+
+    /**
+     * Synchronizes client game clocks
+     */
+    private void calibrateClocks() {
+        try {
+            Long currentTime = System.currentTimeMillis();
+            this.updateClients(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.id, currentTime));
+
+            this.gameStartTime = currentTime;
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
@@ -309,9 +352,6 @@ public class GameServer {
             case FARM_ID:
                 this.handleFarmRequest(update.originClientID);
                 return;
-            case CLOCK_CALIB:
-                this.handleClockCalibration(update.originClientID, (Long) update.content);
-                return;
             case REQUEST:
                 this.handleRequest((MarketOperationRequest) update.content, update.originClientID);
                 return;
@@ -322,25 +362,6 @@ public class GameServer {
                 break;
         }
         this.updateClients(update);
-    }
-
-    /**
-     * Handles a given {@code Long} update.
-     *
-     * @param clockCalibration {@code Long} value - time of the game start.
-     */
-    private void handleClockCalibration(Integer clientID, Long clockCalibration) throws IOException {
-        Pair<Integer, Long> currentGameStartTime = this.gameStartTime.getAcquire();
-        if (currentGameStartTime == null) {
-            currentGameStartTime = new Pair<Integer, Long>(clientID, clockCalibration);
-        } else if (!currentGameStartTime.getKey().equals(clientID)) {
-            for (GameClientHandler client : this.connectedClients.get()) {
-                if (client.clientID.equals(clientID)) {
-                    client.updateWith(new GameUpdate(GameUpdateType.CLOCK_CALIB, currentGameStartTime.getKey(), currentGameStartTime.getValue()));
-                }
-            }
-        }
-        this.gameStartTime.setRelease(currentGameStartTime);
     }
 
     /**
@@ -451,21 +472,21 @@ public class GameServer {
             while (!this.serverSocket.isClosed()) {
                 try {
                     Socket clientSocket = this.serverSocket.accept();
-                    HashSet<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+                    ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
                     // (1.) Game session is not active and the number of clients is under the limit
-                    if (!this.isActive.get() && clientHandlers.size() < MAX_CONNECTIONS) {
-                        GameClientHandler client = GameClientHandler.allowConnection(this.id, clientSocket, this::clientUpdateArrived);
+                    if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
+                        GameClientHandler client = GameClientHandler.allowConnection(this.id, this.generateClientID(), clientSocket, this::clientUpdateArrived);
 
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
-                            client.updateWith(this.playerStates.get().values());
-                            for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
-                                GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
-                                client.updateWith(gameUpdate);
-                            }
+                            this.sendFirstUpdatesToClient(client, clientHandlers);
                         }
+
+                        HashMap<Integer, String> newClientMap = new HashMap<Integer, String>();
+                        newClientMap.put(client.clientID, client.clientName);
+                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, newClientMap));
 
                     } else { // (2.) Otherwise deny attempts to connect
                         GameClientHandler.denyConnection(clientSocket, this.id);
@@ -486,25 +507,56 @@ public class GameServer {
         this.newConnectionsThread.start();
     }
 
+    private int generateClientID() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int randID = random.nextInt(128);
+        while (this.generatedIDs.contains(randID)) {
+            randID = random.nextInt(128);
+        }
+        return randID;
+    }
+
+    private void sendFirstUpdatesToClient(GameClientHandler client, ArrayList<GameClientHandler> clientHandlers) throws IOException {
+        HashMap<Integer, String> connectedClients = new HashMap<Integer, String>();
+        for (GameClientHandler clientHandler : clientHandlers) {
+            connectedClients.put(clientHandler.clientID, clientHandler.clientName);
+        }
+        client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClients));
+
+        client.updateWith(this.playerStates.get().values());
+
+        for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
+            GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
+            client.updateWith(gameUpdate);
+        }
+    }
+
     /**
      * Multicasts a packet via {@code this.searchSocket} on a separate {@link UtilityThread} thread.
      */
     private void startMulticasting() {
         new UtilityThread(() -> {
-            while (this.isSearching.get()) {
+            while (this.isSearching) {
                 try {
                     // Construct packet which will be multicasted (packet contains server name and address)
-                    byte[] nameBytes = this.name.getBytes();
+                    byte[] portBytes = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(this.serverPort).array();
+                    byte[] nameBytes = this.name.getBytes(StandardCharsets.UTF_8);
+
+                    byte[] packetBytes = new byte[128];
+                    System.arraycopy(portBytes, 0, packetBytes, 0, portBytes.length);
+                    System.arraycopy(nameBytes, 0, packetBytes, portBytes.length, nameBytes.length);
+
                     DatagramPacket packet = new DatagramPacket(
-                            nameBytes, nameBytes.length,
+                            packetBytes, packetBytes.length,
                             InetAddress.getByName(HANDSHAKE_GROUP),
                             HANDSHAKE_PORT
                     );
 
                     this.searchSocket.send(packet);
                     Thread.sleep(MULTICAST_DELAY); // == sends the packet each 0.5 second
+
                 } catch (IOException | InterruptedException exception) {
-                    if (this.isSearching.get()) {
+                    if (this.isSearching) {
                         exception.printStackTrace();
                     } else {
                         break;

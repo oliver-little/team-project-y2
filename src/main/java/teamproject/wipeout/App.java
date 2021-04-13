@@ -15,7 +15,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import teamproject.wipeout.engine.audio.GameAudio;
-import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.TagComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.render.CameraComponent;
@@ -27,39 +26,41 @@ import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.entity.gameclock.ClockUI;
+import teamproject.wipeout.engine.input.InputHandler;
+import teamproject.wipeout.engine.system.EventSystem;
+import teamproject.wipeout.engine.system.PlayerAnimatorSystem;
+import teamproject.wipeout.engine.system.SabotageSystem;
+import teamproject.wipeout.engine.system.ScriptSystem;
+import teamproject.wipeout.engine.system.ai.SteeringSystem;
 import teamproject.wipeout.engine.system.audio.AudioSystem;
 import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
-import teamproject.wipeout.engine.system.physics.CollisionSystem;
-import teamproject.wipeout.engine.system.physics.MovementSystem;
-import teamproject.wipeout.engine.system.render.CameraFollowSystem;
-import teamproject.wipeout.engine.system.render.ParticleSystem;
-import teamproject.wipeout.engine.input.InputHandler;
-import teamproject.wipeout.engine.system.*;
-import teamproject.wipeout.engine.system.ai.SteeringSystem;
 import teamproject.wipeout.engine.system.farm.FarmSpriteSystem;
 import teamproject.wipeout.engine.system.farm.GrowthSystem;
 import teamproject.wipeout.engine.system.input.MouseClickSystem;
 import teamproject.wipeout.engine.system.input.MouseHoverSystem;
+import teamproject.wipeout.engine.system.physics.CollisionSystem;
+import teamproject.wipeout.engine.system.physics.MovementSystem;
+import teamproject.wipeout.engine.system.render.CameraFollowSystem;
+import teamproject.wipeout.engine.system.render.ParticleSystem;
 import teamproject.wipeout.engine.system.render.RenderSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-
-import java.io.IOException;
-
+import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.InventoryUI;
 import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.game.player.InventoryItem;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * App is a class for containing the components for game play.
@@ -76,47 +77,46 @@ public class App implements Controller {
     private StackPane interfaceOverlay;
 
     Double TIME_FOR_GAME = 500.0;
-
-    // Temporarily placed variables
-    ItemStore itemStore;
+    private long gameStartTime;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
+
     private SpriteManager spriteManager;
+    private ItemStore itemStore;
+
+    private GameScene gameScene;
+    private WorldEntity worldEntity;
 
     // Store systems for cleanup
-    Networker networker;
+    private final Networker networker;
     RenderSystem renderer;
     SystemUpdater systemUpdater;
     List<EventSystem> eventSystems;
 
-    public Parent init(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
+    private LinkedHashMap<String, KeyCode> keyBindings;
+
+    public App(Networker networker, Long givenGameStartTime, LinkedHashMap<String, KeyCode> bindings) {
+        this.networker = networker;
+        this.keyBindings = bindings;
+
+        if (givenGameStartTime == null) {
+            this.gameStartTime = System.currentTimeMillis();
+        } else {
+            this.gameStartTime = givenGameStartTime;
+        }
+    }
+
+    public Parent getParentWith(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
         this.widthProperty = widthProperty;
         this.heightProperty = heightProperty;
-        Parent contentRoot = this.getContent();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                GameClient client = this.networker.getClient();
-                if (client != null) {
-                    client.closeConnection(true);
-                }
-                this.networker.stopServer();
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }));
-
-        return contentRoot;
+        return this.getContent();
     }
 
     /**
      * Creates the content to be rendered onto the canvas.
      */
     public void createContent() {
-        this.networker = new Networker();
-
         try {
             this.itemStore = new ItemStore("items.json");
             this.spriteManager = new SpriteManager();
@@ -129,7 +129,7 @@ public class App implements Controller {
         // Input
         InputHandler input = new InputHandler(root.getScene());
 
-        GameScene gameScene = new GameScene();
+        this.gameScene = new GameScene();
         RenderSystem renderer = new RenderSystem(gameScene, dynamicCanvas, staticCanvas);
         SystemUpdater systemUpdater = new SystemUpdater();
         MovementAudioSystem mas = new MovementAudioSystem(gameScene, 0.05f);
@@ -192,13 +192,17 @@ public class App implements Controller {
         ArrayList<Task> purchasableTasks = allTasks;
 
         //World Entity
-        WorldEntity world = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        this.worldEntity = new WorldEntity(gameScene, 4, player, itemStore, spriteManager, this.interfaceOverlay, input, purchasableTasks);
+        this.worldEntity.setupFarmPickingKey(keyBindings.get("Harvest"));
+        this.worldEntity.setupFarmDestroyingKey(keyBindings.get("Destroy"));
+        player.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
 
-        world.setClientSupplier(this.networker.clientSupplier);
-        player.setThrownPotion((potion) ->  world.addPotion(potion));
-        this.networker.worldEntity = world;
+        if (this.networker != null) {
+            this.worldEntity.setClientSupplier(this.networker.clientSupplier);
+            this.networker.setWorldEntity(this.worldEntity);
+        }
         
-        addInvUIInput(input, invUI, world);
+        addInvUIInput(input, invUI, this.worldEntity);
 
         // Task UI
         TaskUI taskUI = new TaskUI(player);
@@ -210,10 +214,9 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME);
-        this.networker.clockSystem = clockSystem;
+        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
         systemUpdater.addSystem(clockSystem);
-        world.setClock(() -> clockSystem);
+        this.worldEntity.setClock(() -> clockSystem);
 
         VBox topRight = new VBox();
         topRight.setAlignment(Pos.TOP_RIGHT);
@@ -234,38 +237,32 @@ public class App implements Controller {
         topRight.getChildren().addAll(clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight);
 
-        input.onKeyRelease(KeyCode.G, () -> player.playSound("glassSmashing2.wav")); //example - pressing the G key will trigger the sound
-
-        input.addKeyAction(KeyCode.LEFT,
+        input.addKeyAction(keyBindings.get("Move left"),
                 () -> player.addAcceleration(-500f, 0f),
-                () -> player.addAcceleration(500f, 0f));
+                () -> player.addAcceleration(500f, 0f)); //moving left
 
-        input.addKeyAction(KeyCode.RIGHT,
+        input.addKeyAction(keyBindings.get("Move right"),
                 () -> player.addAcceleration(500f, 0f),
-                () -> player.addAcceleration(-500f, 0f));
+                () -> player.addAcceleration(-500f, 0f)); //moving right
 
-        input.addKeyAction(KeyCode.UP,
+        input.addKeyAction(keyBindings.get("Move up"),
                 () -> player.addAcceleration(0f, -500f),
-                () -> player.addAcceleration(0f, 500f));
+                () -> player.addAcceleration(0f, 500f)); //moving up
 
-        input.addKeyAction(KeyCode.DOWN,
+        input.addKeyAction(keyBindings.get("Move down"),
                 () -> player.addAcceleration(0f, 500f),
                 () -> player.addAcceleration(0f, -500f));
 
+        invUI.onMouseClick(this.worldEntity);
+        input.onKeyRelease(keyBindings.get("Drop"), invUI.dropOnKeyRelease(player, this.worldEntity.pickables));
 
-        input.onKeyRelease(KeyCode.S, networker.startServer("ServerName"));
-        input.onKeyRelease(KeyCode.C, networker.initiateClient(gameScene, spriteManager));
-        /*
-        input.onKeyRelease(KeyCode.M, () -> {ga.muteUnmute();
-        									 mas.muteUnmute();
-        									 audioSys.muteUnmute();});
-        */
-        invUI.onMouseClick(world);
-        input.onKeyRelease(KeyCode.U, invUI.dropOnKeyRelease(player, world.pickables));
-
-        input.onKeyRelease(KeyCode.X, () -> {
-            world.pickables.picked(player.pickup());
+        input.onKeyRelease(keyBindings.get("Pick-up"), () -> {
+            this.worldEntity.pickables.picked(player.pickup());
         });
+
+        if (this.networker != null) {
+            this.setUpNetworking();
+        }
 
         gl.start();
     }
@@ -423,6 +420,30 @@ public class App implements Controller {
         input.addKeyAction(KeyCode.DIGIT0,
                 () -> invUI.useSlot(9, world),
                 () -> {});
+    }
+
+    private void setUpNetworking() {
+        Player myPlayer = this.worldEntity.myPlayer;
+        Market myMarket = this.worldEntity.market.getMarket();
+
+        GameClient currentClient = this.networker.getClient();
+        currentClient.players.put(myPlayer.playerID, myPlayer);
+        currentClient.farmEntities = this.worldEntity.farms;
+        currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
+        Integer newFarmID = currentClient.myFarmID;
+
+        myMarket.setIsLocal(false);
+        this.worldEntity.marketUpdater.stop();
+
+        FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
+        this.worldEntity.setFarmFor(myPlayer, true, myFarm);
+
+        try {
+            currentClient.send(new GameUpdate(myPlayer.getCurrentState()));
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
 }

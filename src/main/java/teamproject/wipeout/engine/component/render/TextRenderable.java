@@ -1,42 +1,53 @@
 package teamproject.wipeout.engine.component.render;
 
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 //TODO: add multiple contructors for different fonts, sizes and colors etc
 public class TextRenderable implements Renderable {
 
 	public Font font;
 	public Color color;
-	public float width;
-	public float height;
-	public String text;
+	public Text text;
 	
 	public TextRenderable(String text) {
 		this.font = new Font("Arial", 10);
-		this.height = 10;
-		this.width = 10;
-		this.text = text;
+		this.setFont(font);
+		this.text = new Text(text);
+	}
+
+	public TextRenderable(String text, int size){
+		this.font = new Font("Arial", size);
+		this.setFont(font);
+		this.text = new Text(text);
 	}
 	
 	public void setText(String text) {
-		this.text = text;
+		this.text = new Text(text);;
 	}
 	
 	public String getText() {
-		return this.text;
+		return this.text.getText();
 	}
 	
 	public double getWidth()
 	{
-		return this.width;
+		double width = text.getLayoutBounds().getWidth()*font.getSize()/17.5f;
+		//System.out.println("textWidth "+ width);
+		return width;
 	}
 
 	public double getHeight()
 	{
-		return this.height;
+		double height = text.getLayoutBounds().getHeight()*font.getSize()/17.5f;
+		//System.out.println("textHeight "+ height);
+		return height;
+	}
+
+	public void setFont(Font font){
+		this.font = font;
 	}
 
 	@Override
@@ -44,7 +55,7 @@ public class TextRenderable implements Renderable {
 	{
 		gc.setFill(Color.WHITE);
 		gc.setFont(font);
-		gc.fillText(text, scale * x, scale * y);
+		gc.fillText(text.getText(), scale * x, scale * y);
 	}
 	
 }

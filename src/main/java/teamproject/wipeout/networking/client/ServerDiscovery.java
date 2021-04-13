@@ -1,13 +1,22 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.beans.property.SimpleMapProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.threads.UtilityThread;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -19,25 +28,22 @@ public class ServerDiscovery {
     protected MulticastSocket multicastSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
-    protected final HashMap<String, InetSocketAddress> foundServers;
-    protected final NewServerDiscovery onDiscovery;
+    protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
+    protected final HashMap<String, Long> lastHeardServers;
+
+    private ScheduledExecutorService executorService;
 
     /**
      * Default initializer for {@code ServerDiscovery}
      *
-     * @param onDiscovery Action of type {@link NewServerDiscovery} that will be executed
-     *                    when a new available game server is discovered.
      * @throws UnknownHostException {@code ServerDiscovery} instance cannot be initialized properly.
      */
-    public ServerDiscovery(NewServerDiscovery onDiscovery) throws UnknownHostException {
-        this.foundServers = new HashMap<String, InetSocketAddress>();
+    public ServerDiscovery() throws UnknownHostException {
+        this.availableServers = new SimpleMapProperty<String, InetSocketAddress>(FXCollections.observableHashMap());
+        this.lastHeardServers = new HashMap<String, Long>();
 
-        this.searchGroup = new InetSocketAddress(
-                InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT
-        );
+        this.searchGroup = new InetSocketAddress(InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT);
         this.isActive = new AtomicBoolean(false);
-
-        this.onDiscovery = onDiscovery;
     }
 
     /**
@@ -50,12 +56,12 @@ public class ServerDiscovery {
     }
 
     /**
-     * {@code foundServers} variable getter
+     * {@code availableServers} variable getter
      *
-     * @return {@code HashMap<String, InetAddress>} of a particular server name and its address
+     * @return {@code ObservableMap<String, InetAddress>} of a particular server name and its address
      */
-    public HashMap<String, InetSocketAddress> getFoundServers() {
-        return this.foundServers;
+    public ObservableMap<String, InetSocketAddress> getAvailableServers() {
+        return this.availableServers.get();
     }
 
     public static ArrayList<NetworkInterface> getNetworkInterfaces() throws SocketException {
@@ -86,7 +92,7 @@ public class ServerDiscovery {
             return;
         }
         this.isActive.set(true);
-        this.foundServers.clear();
+        this.availableServers.clear();
 
         ArrayList<NetworkInterface> multicastInterfaces = ServerDiscovery.getNetworkInterfaces();
 
@@ -98,25 +104,49 @@ public class ServerDiscovery {
         }
 
         this.receiveMulticasts();
+
+        this.executorService = Executors.newSingleThreadScheduledExecutor();
+        this.executorService.scheduleWithFixedDelay(() -> {
+            long currentTime = System.currentTimeMillis();
+            String removeServerNamed = null;
+            for (Map.Entry<String, Long> entry : this.lastHeardServers.entrySet()) {
+                if (currentTime - entry.getValue() > 505) {
+                    removeServerNamed = entry.getKey();
+                    break;
+                }
+            }
+            this.lastHeardServers.remove(removeServerNamed);
+            this.availableServers.remove(removeServerNamed);
+
+        }, 505, 505, TimeUnit.MILLISECONDS);
     }
 
     private void receiveMulticasts() {
         new UtilityThread(() -> {
             // Construct packet which will be used to receive multicast packets (packet contains server name and address)
-            byte[] nameBytes = new byte[128]; // TODO: Server name limited in length?
-            DatagramPacket packet = new DatagramPacket(nameBytes, nameBytes.length);
+            byte[] packetBytes = new byte[128]; // TODO: Server name limited in length?
+            DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length);
 
             try {
                 while (this.isActive.get()) {
                     this.multicastSocket.receive(packet);
+
+                    byte[] portBytes = new byte[2];
+                    byte[] nameBytes = new byte[126];
+
+                    System.arraycopy(packetBytes, 0, portBytes, 0, portBytes.length);
+                    System.arraycopy(packetBytes, portBytes.length, nameBytes, 0, nameBytes.length);
+
+                    short serverPort = ByteBuffer.wrap(portBytes).order(ByteOrder.LITTLE_ENDIAN).getShort();
                     String serverName = new String(nameBytes).trim();
 
-                    if (!this.foundServers.containsKey(serverName)) {
+                    if (!this.availableServers.containsKey(serverName)) {
                         InetAddress serverAddress = packet.getAddress();
-                        InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, GameServer.GAME_PORT);
-                        this.foundServers.put(serverName, socketAddress);
-                        this.onDiscovery.discovered(serverName, socketAddress);
+                        InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, serverPort);
+                        this.availableServers.put(serverName, socketAddress);
                     }
+
+                    this.lastHeardServers.put(serverName, System.currentTimeMillis());
                 }
 
             } catch (IOException exception) {
@@ -132,6 +162,7 @@ public class ServerDiscovery {
      */
     public void stopLookingForServers() {
         this.isActive.set(false);
+        this.executorService.shutdown();
         this.multicastSocket.close();
         this.multicastSocket = null;
     }

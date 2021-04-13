@@ -1,10 +1,10 @@
 package teamproject.wipeout.networking.client;
 
+import javafx.collections.MapChangeListener;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.networking.server.GameServer;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
@@ -25,9 +25,10 @@ class ServerDiscoveryTest {
         this.serverAddress = new AtomicReference<InetSocketAddress>(null);
 
         try {
-            this.serverDiscovery = new ServerDiscovery((name, address) -> {
-                this.serverName.set(name);
-                this.serverAddress.set(address);
+            this.serverDiscovery = new ServerDiscovery();
+            this.serverDiscovery.availableServers.addListener((MapChangeListener.Change<? extends String, ? extends InetSocketAddress> change) -> {
+                this.serverName.set(change.getKey());
+                this.serverAddress.set(change.getValueAdded());
             });
 
         } catch (UnknownHostException e) {
@@ -46,22 +47,7 @@ class ServerDiscoveryTest {
         if (this.serverDiscovery.isActive.get()) {
             this.serverDiscovery.stopLookingForServers();
         }
-        this.serverDiscovery.foundServers.clear();
-    }
-
-    @RepeatedTest(5)
-    @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
-    void testOnDiscovery() {
-        Assertions.assertTrue(this.serverDiscovery.foundServers.isEmpty());
-
-        String testServerName = "TestServer#123";
-        InetSocketAddress testServerAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), GameServer.GAME_PORT);
-        this.serverDiscovery.onDiscovery.discovered(testServerName, testServerAddress);
-
-        Assertions.assertEquals(testServerName, this.serverName.get());
-        Assertions.assertEquals(testServerAddress, this.serverAddress.get());
-
-        Assertions.assertNull(this.serverDiscovery.getFoundServers().get(testServerName));
+        this.serverDiscovery.availableServers.clear();
     }
 
     @RepeatedTest(5)
@@ -88,8 +74,8 @@ class ServerDiscoveryTest {
         Assertions.assertNotNull(this.serverAddress.get());
 
         Assertions.assertEquals(
-                this.serverDiscovery.foundServers.get(testServerName),
-                this.serverDiscovery.getFoundServers().get(testServerName)
+                this.serverDiscovery.availableServers.get(testServerName),
+                this.serverDiscovery.getAvailableServers().get(testServerName)
         );
     }
 

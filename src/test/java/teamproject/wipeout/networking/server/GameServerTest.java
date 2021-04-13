@@ -1,27 +1,10 @@
 package teamproject.wipeout.networking.server;
 
-import javafx.geometry.Point2D;
-import javafx.util.Pair;
-import org.junit.jupiter.api.*;
-import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.networking.client.NewPlayerAction;
-import teamproject.wipeout.networking.state.PlayerState;
-import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.networking.client.ServerDiscovery;
-import teamproject.wipeout.networking.data.GameUpdate;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.function.Consumer;
+import org.junit.jupiter.api.TestInstance;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GameServerTest {
-
+/*
     private static final Integer[] CLIENT_IDs = {0, 1, 2, 3, 4, 5, 6};
     private static final String SERVER_NAME = "TestServer#99";
     private static final int CATCHUP_TIME = 80;
@@ -292,5 +275,5 @@ class GameServerTest {
         } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
-    }
+    }*/
 }

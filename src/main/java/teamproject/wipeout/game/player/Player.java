@@ -9,10 +9,10 @@ import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
-import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
@@ -97,15 +97,15 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.itemStore = itemStore;
 
-        this.playerState = new PlayerState(this.playerID, position, Point2D.ZERO, this.money.getValue());
+        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
 
-        ParticleParameters parameters = new ParticleParameters(100, true, 
-            FAST_PARTICLE, 
-            ParticleSimulationSpace.WORLD, 
-            SupplierGenerator.rangeSupplier(0.5, 1.5), 
-            SupplierGenerator.rangeSupplier(1.0, 4.0), 
-            null, 
-            SupplierGenerator.staticSupplier(0.0), 
+        ParticleParameters parameters = new ParticleParameters(100, true,
+            FAST_PARTICLE,
+            ParticleSimulationSpace.WORLD,
+            SupplierGenerator.rangeSupplier(0.5, 1.5),
+            SupplierGenerator.rangeSupplier(1.0, 4.0),
+            null,
+            SupplierGenerator.staticSupplier(0.0),
             SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
 
         parameters.setEmissionRate(20);
@@ -152,18 +152,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
         //this.addComponent(new CollisionResolutionComponent());
 
-        try {
-            this.addComponent(new RenderComponent(new Point2D(0, -3)));
-            this.addComponent(new PlayerAnimatorComponent(
-                    spriteManager.getSpriteSet("player-red", "walk-up"),
-                    spriteManager.getSpriteSet("player-red", "walk-right"),
-                    spriteManager.getSpriteSet("player-red", "walk-down"),
-                    spriteManager.getSpriteSet("player-red", "walk-left"),
-                    spriteManager.getSpriteSet("player-red", "idle")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         this.audio = new AudioComponent();
         this.addComponent(this.audio);
 
@@ -176,6 +164,26 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             selectSlot(0);
             this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
         }
+
+        try {
+            this.addComponent(new RenderComponent(new Point2D(0, -3)));
+            this.addComponent(new PlayerAnimatorComponent(
+                    spriteManager.getSpriteSet("player-red", "walk-up"),
+                    spriteManager.getSpriteSet("player-red", "walk-right"),
+                    spriteManager.getSpriteSet("player-red", "walk-down"),
+                    spriteManager.getSpriteSet("player-red", "walk-left"),
+                    spriteManager.getSpriteSet("player-red", "idle")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        TextRenderable tag= new TextRenderable(playerName, 20);
+        GameEntity nameTag = new GameEntity(scene);
+        nameTag.addComponent(new RenderComponent(tag));
+        RenderComponent playerRender = this.getComponent(RenderComponent.class);
+        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
+        nameTag.setParent(this);
+
     }
 
     public Point2D getPosition() {
@@ -220,6 +228,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      */
     public void setWorldPosition(Point2D position) {
         this.position.setPosition(position);
+        this.playerState.setPosition(position);
+        this.sendPlayerStateUpdate();
     }
 
     /**

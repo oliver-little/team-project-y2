@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -26,6 +25,7 @@ import java.util.Collection;
 public class GameClientHandler {
 
     public final Integer clientID;
+    public final String clientName;
 
     protected final Socket clientSocket;
     protected final ObjectInputStream in;
@@ -40,7 +40,8 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     written to(= send updates) or when the client declines to connect.
      */
-    protected GameClientHandler(Integer serverID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
+    protected GameClientHandler(Integer serverID, Integer clientID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
+        this.clientID = clientID;
         this.clientSocket = socket;
         this.updater = updater;
 
@@ -50,7 +51,7 @@ public class GameClientHandler {
         this.in = new ObjectInputStream(this.clientSocket.getInputStream());
 
         // Accept connection
-        this.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, serverID));
+        this.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, serverID, clientID));
         this.out.reset();
 
         // Client ID is sent by the client -> sitting in the input stream
@@ -58,7 +59,10 @@ public class GameClientHandler {
         if (handshake.type != GameUpdateType.ACCEPT) {
             throw new IOException("Client did not accepted connection");
         }
-        this.clientID = handshake.originClientID;
+        if (!this.clientID.equals(handshake.originClientID)) {
+            throw new IOException("Client connection has been altered");
+        }
+        this.clientName = (String) handshake.content;
     }
 
     /**
@@ -69,10 +73,10 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     *                     written to(= send updates) or when the client declines to connect.
      */
-    static public GameClientHandler allowConnection(Integer serverID, Socket socket, GameUpdatable updater)
+    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Socket socket, GameUpdatable updater)
             throws IOException, ClassNotFoundException {
 
-        GameClientHandler newInstance = new GameClientHandler(serverID, socket, updater);
+        GameClientHandler newInstance = new GameClientHandler(serverID, clientID, socket, updater);
 
         newInstance.startReceivingUpdates();
 
