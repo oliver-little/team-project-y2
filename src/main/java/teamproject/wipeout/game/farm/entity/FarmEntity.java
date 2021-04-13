@@ -82,9 +82,7 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
-    private boolean belongsToActivePlayer;
-
-    private final AudioComponent audio;
+    private AudioComponent audio;
 
     private final Pickables pickables;
 
@@ -124,10 +122,6 @@ public class FarmEntity extends GameEntity {
 
         this.farmRenderer = new FarmRenderer(this.size, this.spriteManager);
         this.addComponent(new RenderComponent(false, this.farmRenderer));
-
-        this.audio = new AudioComponent();
-        this.addComponent(this.audio);
-        this.belongsToActivePlayer = false;
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
@@ -217,8 +211,9 @@ public class FarmEntity extends GameEntity {
 
         this.clientSupplier = clientFunction;
 
-        this.belongsToActivePlayer = activePlayer;
         if (activePlayer) {
+            this.audio = new AudioComponent();
+            this.addComponent(this.audio);
             //this.farmUI = new FarmUI(this.data, spriteManager);
             //this.farmUI.setParent(uiContainer);
             this.addComponent(this.makeClickable());
@@ -654,7 +649,7 @@ public class FarmEntity extends GameEntity {
             this.playAudio("shovel.wav");
         } else {
             // Animal eating the farm item
-            this.audio.play("chomp.wav");
+            this.playAudio("chomp.wav");
         }
 
         return new Integer[]{pickedItem.id, numberOfPickables};
@@ -987,7 +982,7 @@ public class FarmEntity extends GameEntity {
     }
 
     private void playAudio(String audioName) {
-        if (this.belongsToActivePlayer) {
+        if (this.audio != null) {
             this.audio.play(audioName);
         }
     }
