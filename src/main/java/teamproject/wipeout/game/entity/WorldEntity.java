@@ -212,15 +212,16 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				Item potion = this.itemStore.getItem(entry.getKey());
 				SabotageComponent sc = potion.getComponent(SabotageComponent.class);
 
-				List<GameEntity> possibleEffectEntities = null;
+				ArrayList<GameEntity> possibleEffectEntities = new ArrayList<GameEntity>();
 
 				if (sc.type == SabotageComponent.SabotageType.SPEED) {
-					possibleEffectEntities = List.of(this.myCurrentPlayer, this.myAnimal);
+					possibleEffectEntities.addAll(this.players);
+					possibleEffectEntities.add(this.myAnimal);
 				}
 				else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
-					possibleEffectEntities = List.of(this.myFarm);
+					possibleEffectEntities.add(this.myFarm);
 				}
-				new PotionEntity(this.getScene(), this.spriteManager, potion, possibleEffectEntities, entry.getValue()[0], entry.getValue()[1]);
+				new PotionEntity(this.getScene(), this.spriteManager, potion, possibleEffectEntities, this.myCurrentPlayer, false, entry.getValue()[0], entry.getValue()[1]);
 			}
 		}
 	}
@@ -271,9 +272,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		for (Player aiPlayer : aiPlayers) {
 			int aiFarmID = aiPlayer.getCurrentState().getFarmID();
-			AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(aiFarmID));
-			aiComp.allPlayers = this.players.stream().filter((player) -> !player.playerID.equals(aiPlayer.playerID)).collect(Collectors.toList());
-			aiComp.otherFarms = this.farms.values().stream().filter((farm) -> !farm.farmID.equals(aiFarmID)).collect(Collectors.toList());
+			AIPlayerComponent aiComp = new AIPlayerComponent(aiPlayer, this.market.getMarket(), this.navMesh, this.farms.get(aiFarmID), this);
+			aiComp.allPlayers = this.players;
+			aiComp.otherFarms = new ArrayList<FarmEntity>(this.farms.values());
 			aiComp.theAnimal = this.myAnimal;
 			aiPlayer.addComponent(aiComp);
 		}

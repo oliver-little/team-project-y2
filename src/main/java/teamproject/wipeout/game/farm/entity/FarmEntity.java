@@ -82,6 +82,8 @@ public class FarmEntity extends GameEntity {
 
     private Supplier<GameClient> clientSupplier;
 
+    private boolean belongsToActivePlayer;
+
     private final AudioComponent audio;
 
     private final Pickables pickables;
@@ -123,8 +125,9 @@ public class FarmEntity extends GameEntity {
         this.farmRenderer = new FarmRenderer(this.size, this.spriteManager);
         this.addComponent(new RenderComponent(false, this.farmRenderer));
 
-        audio = new AudioComponent();
-        this.addComponent(audio);
+        this.audio = new AudioComponent();
+        this.addComponent(this.audio);
+        this.belongsToActivePlayer = false;
 
         //Create row entities for the rows of the farm
         for (int r = 0; r < this.data.getNumberOfRows(); r++) {
@@ -214,6 +217,7 @@ public class FarmEntity extends GameEntity {
 
         this.clientSupplier = clientFunction;
 
+        this.belongsToActivePlayer = activePlayer;
         if (activePlayer) {
             //this.farmUI = new FarmUI(this.data, spriteManager);
             //this.farmUI.setParent(uiContainer);
@@ -546,7 +550,7 @@ public class FarmEntity extends GameEntity {
         boolean placed = this.data.placeItem(item, 0.0, row, column);
 
         if (placed) {
-            this.audio.play("shovel.wav");
+            this.playAudio("shovel.wav");
             PlantComponent pc = item.getComponent(PlantComponent.class);
             Point2D startPos = this.rescaleCoordinatesToScene(column, row).add((pc.width * FarmEntity.SQUARE_SIZE / 2), (pc.height * FarmEntity.SQUARE_SIZE / 1.8));
             new PlantParticleEntity(this.getScene(), startPos.getX(), startPos.getY());
@@ -621,7 +625,7 @@ public class FarmEntity extends GameEntity {
         if (isDestroying) {
             this.data.destroyItemAt(row, column);
             pickedItem = null;
-            this.audio.play("slice.wav");
+            this.playAudio("slice.wav");
         } else {
             pickedItem = this.data.pickItemAt(row, column);
         }
@@ -647,7 +651,7 @@ public class FarmEntity extends GameEntity {
 
             Item inventoryItem = this.itemStore.getItem(inventoryID);
             this.pickables.createPickablesFor(inventoryItem, scenePlantMiddle.getX(), scenePlantMiddle.getY(), numberOfPickables);
-            this.audio.play("shovel.wav");
+            this.playAudio("shovel.wav");
         } else {
             // Animal eating the farm item
             this.audio.play("chomp.wav");
@@ -981,4 +985,11 @@ public class FarmEntity extends GameEntity {
             sabotageEffect.stop();
         }
     }
+
+    private void playAudio(String audioName) {
+        if (this.belongsToActivePlayer) {
+            this.audio.play(audioName);
+        }
+    }
+
 }

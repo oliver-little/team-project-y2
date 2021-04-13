@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.entity.AnimalEntity;
+import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -37,6 +38,7 @@ public class AIPlayerComponent implements GameComponent  {
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
+    private WorldEntity worldEntity;
     public List<Player> allPlayers;
     public AnimalEntity theAnimal;
     public List<FarmEntity> otherFarms;
@@ -55,10 +57,11 @@ public class AIPlayerComponent implements GameComponent  {
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
-    public AIPlayerComponent(Player player, Market market, NavigationMesh navMesh, FarmEntity myFarm) {
+    public AIPlayerComponent(Player player, Market market, NavigationMesh navMesh, FarmEntity myFarm, WorldEntity worldEntity) {
         this.myPlayer = player;
         this.myFarm = myFarm;
         this.market = market;
+        this.worldEntity = worldEntity;
 
         this.navMesh = navMesh;
 
@@ -73,9 +76,15 @@ public class AIPlayerComponent implements GameComponent  {
      * Helper function to calculate the path from the AI's current location to its destination, then initiates the traverse method.
      */
     private void aiTraverse(int x, int y, Runnable callback) {
-        Point2D wp = transformComponent.getWorldPosition();
+        Point2D wp = this.transformComponent.getWorldPosition();
+        wp = new Point2D((int) wp.getX(), (int) wp.getY());
+        Point2D endPosition = new Point2D(x, y);
+        if (wp.equals(endPosition)) {
+            callback.run();
+            return;
+        }
 
-        List<Point2D> path = PathFindingSystem.findPath(new Point2D((int) wp.getX(), (int) wp.getY()), new Point2D(x, y), navMesh, 100);
+        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 50);
 
         this.myPlayer.addComponent(new SteeringComponent(path, callback, 250));
     }
@@ -165,13 +174,13 @@ public class AIPlayerComponent implements GameComponent  {
             //Make decision on what to do next.
             double probability = Math.random();
 
-            if (probability < 0.8) {
+            if (probability < 0.84) {
                 if (this.clock != null && this.clock.get().clockUI.getTime() < 30.0) {
                     aiHarvestCrops();
                     return;
                 }
 
-                if (Math.random() < 0.65) {
+                if (Math.random() < 0.6) {
                     //Steal plants
                     aiHarvestCrops();
 
@@ -287,17 +296,18 @@ public class AIPlayerComponent implements GameComponent  {
                 return;
             }
             allPlayers.sort(Comparator.comparing(player -> player.getMoney())); // does it give me the richest???
-            useOnPlayer = allPlayers.get(0);
+            useOnPlayer = allPlayers.get(new Random().nextInt(allPlayers.size()));
         }
 
         Item currentPotion = this.myPlayer.itemStore.getItem(potionID);
         SabotageComponent sc = currentPotion.getComponent(SabotageComponent.class);
-        List<GameEntity> possibleEffectEntities = null;
+        ArrayList<GameEntity> possibleEffectEntities = new ArrayList<GameEntity>();
         if (sc.type == SabotageComponent.SabotageType.SPEED) {
-            possibleEffectEntities = List.of(useOnPlayer, this.theAnimal);
+            possibleEffectEntities.addAll(this.allPlayers);
+            possibleEffectEntities.add(this.theAnimal);
         }
         else if (sc.type == SabotageComponent.SabotageType.GROWTHRATE || sc.type == SabotageComponent.SabotageType.AI) {
-            possibleEffectEntities = List.copyOf(this.otherFarms);
+            possibleEffectEntities.addAll(this.otherFarms); // other farm position ???? !!!!
         }
 
         Runnable onComplete = () -> this.aiDecisionAlgorithm().run();
@@ -305,7 +315,7 @@ public class AIPlayerComponent implements GameComponent  {
         System.out.println("Potion from " + this.myPlayer.playerID);
         System.out.println("used on " + useOnPlayer.playerID);
 
-        PotionThrowEntity potionThrow = new PotionThrowEntity(this.myPlayer.getScene(), this.myFarm.spriteManager, this.myPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
+        PotionThrowEntity potionThrow = new PotionThrowEntity(this.myPlayer.getScene(), this.myFarm.spriteManager, this.myPlayer, this.worldEntity.myCurrentPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
 
         Point2D useOnPlayerPosition = useOnPlayer.getWorldPosition();
         potionThrow.onClick.performMouseClickAction(useOnPlayerPosition.getX(), useOnPlayerPosition.getY(), MouseButton.PRIMARY);

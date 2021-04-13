@@ -190,7 +190,7 @@ public class InventoryUI extends StackPane {
 
 				state = InventoryState.THROWING;
 				myCurrentPlayer.dropItem();
-				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myCurrentPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
+				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myCurrentPlayer, myCurrentPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
 			}
 			else {
 				return;
