@@ -33,7 +33,7 @@ public class GameServer {
     // Constants important for the whole ...networking. package
     public static final int HANDSHAKE_PORT = 9919;
     public static final String HANDSHAKE_GROUP = "229.1.2.3";
-    public static final int GAME_PORT = 9913;
+    public static final int GAME_PORT = 8769;
     public static final int MAX_CONNECTIONS = 4;
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
 
