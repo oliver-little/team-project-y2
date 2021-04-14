@@ -3,12 +3,11 @@ package teamproject.wipeout.game.player;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
-import teamproject.wipeout.engine.component.audio.AudioComponent;
-import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -20,24 +19,19 @@ import teamproject.wipeout.engine.component.render.particle.property.OvalParticl
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
-import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.potion.PotionEntity;
-import teamproject.wipeout.game.task.Task;
-import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -52,6 +46,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public final Integer playerID;
     public final String playerName;
     public final String spriteSheetName;
+
+    public final Point2D size;
 
     public Integer occupiedSlots; // ??? !!! Why?
 
@@ -137,23 +133,30 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(this.physics);
 
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
-        //this.addComponent(new CollisionResolutionComponent());
+        this.addComponent(new CollisionResolutionComponent());
 
         for (int i = 0; i < MAX_SIZE; i++) {
             this.inventory.add(null);
         }
 
+        Point2D tempSize = null;
         try {
             this.addComponent(new RenderComponent(new Point2D(0, -3)));
+            Image[] idleSpriteSet = spriteManager.getSpriteSet(this.spriteSheetName, "idle");
             this.addComponent(new PlayerAnimatorComponent(
                     spriteManager.getSpriteSet(this.spriteSheetName, "walk-up"),
                     spriteManager.getSpriteSet(this.spriteSheetName, "walk-right"),
                     spriteManager.getSpriteSet(this.spriteSheetName, "walk-down"),
                     spriteManager.getSpriteSet(this.spriteSheetName, "walk-left"),
-                    spriteManager.getSpriteSet(this.spriteSheetName, "idle")));
+                    idleSpriteSet
+            ));
+
+            Image idleSprite = idleSpriteSet[0];
+            tempSize = new Point2D(idleSprite.getWidth(), idleSprite.getHeight());
         } catch (Exception e) {
             e.printStackTrace();
         }
+        this.size = tempSize;
 
         TextRenderable tag= new TextRenderable(playerName, 20);
         GameEntity nameTag = new GameEntity(scene);

@@ -101,7 +101,7 @@ public class AIPlayerComponent implements GameComponent  {
             return;
         }
 
-        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 50);
+        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 30);
 
         this.myPlayer.addComponent(new SteeringComponent(path, callback, 250));
     }
@@ -191,7 +191,7 @@ public class AIPlayerComponent implements GameComponent  {
             //Make decision on what to do next.
             double probability = Math.random();
 
-            if (probability < 0.84) {
+            if (probability < 0.85) {
                 if (this.clock != null && this.clock.get().clockUI.getTime() < 30.0) {
                     aiHarvestCrops();
                     return;

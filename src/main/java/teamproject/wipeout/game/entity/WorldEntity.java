@@ -6,6 +6,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
+import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.render.RectRenderable;
@@ -149,7 +150,19 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			}
 		}
 
-        this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
+        this.navMesh = NavigationMesh.generateMesh(
+        		Point2D.ZERO,
+				new Point2D(width - this.myCurrentPlayer.size.getX(), height - this.myCurrentPlayer.size.getY()),
+				rectangles);
+
+		boolean xxx = true;
+		for (NavigationSquare square : this.navMesh.squares) {
+			GameEntity eSquare = this.scene.createEntity();
+			eSquare.addComponent(new Transform(square.topLeft, 0.0));
+			RectRenderable renderable = new RectRenderable(xxx ? Color.RED : Color.BLUE, square.bottomRight.getX() - square.topLeft.getX(), square.bottomRight.getY() - square.topLeft.getY());
+			xxx = !xxx;
+			eSquare.addComponent(new RenderComponent(renderable));
+		}
 
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
 		TextRenderable tag= new TextRenderable("Remy", 20);
