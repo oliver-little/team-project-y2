@@ -8,11 +8,15 @@ import teamproject.wipeout.util.threads.UtilityThread;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -120,17 +124,25 @@ public class ServerDiscovery {
     private void receiveMulticasts() {
         new UtilityThread(() -> {
             // Construct packet which will be used to receive multicast packets (packet contains server name and address)
-            byte[] nameBytes = new byte[128]; // TODO: Server name limited in length?
-            DatagramPacket packet = new DatagramPacket(nameBytes, nameBytes.length);
+            byte[] packetBytes = new byte[128]; // TODO: Server name limited in length?
+            DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length);
 
             try {
                 while (this.isActive.get()) {
                     this.multicastSocket.receive(packet);
+
+                    byte[] portBytes = new byte[2];
+                    byte[] nameBytes = new byte[126];
+
+                    System.arraycopy(packetBytes, 0, portBytes, 0, portBytes.length);
+                    System.arraycopy(packetBytes, portBytes.length, nameBytes, 0, nameBytes.length);
+
+                    short serverPort = ByteBuffer.wrap(portBytes).order(ByteOrder.LITTLE_ENDIAN).getShort();
                     String serverName = new String(nameBytes).trim();
 
                     if (!this.availableServers.containsKey(serverName)) {
                         InetAddress serverAddress = packet.getAddress();
-                        InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, GameServer.GAME_PORT);
+                        InetSocketAddress socketAddress = new InetSocketAddress(serverAddress, serverPort);
                         this.availableServers.put(serverName, socketAddress);
                     }
 
