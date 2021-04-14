@@ -291,7 +291,9 @@ public class GameClient {
     private void createPlayerFromState(PlayerState state) {
         Player newPlayer = this.newPlayerAction.createWith(state);
         if (newPlayer != null) {
+            newPlayer.setName(this.clientName);
             this.players.put(newPlayer.playerID, newPlayer);
+            System.out.println("Added new player");
         }
     }
 
