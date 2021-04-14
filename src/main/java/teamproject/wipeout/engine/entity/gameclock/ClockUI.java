@@ -29,6 +29,7 @@ public class ClockUI extends Label {
         this.time = Math.max(0, this.time - timestep);
         if(this.time < 1.0) {
             this.gameOverUI.setVisible(true);
+            this.gameOverUI.refreshText();
 //            System.out.println("Game over");
         }
         int min = (int)(this.time / 60);
