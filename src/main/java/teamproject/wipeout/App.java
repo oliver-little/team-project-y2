@@ -78,7 +78,7 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    Double TIME_FOR_GAME = 200.0;
+    Double TIME_FOR_GAME = 10.0;
 
     // Temporarily placed variables
     ItemStore itemStore;
@@ -228,10 +228,15 @@ public class App implements Controller {
         //Time left
 //<<<<<<< HEAD
         HashMap<Integer, Player> playersNotNull = new HashMap<Integer, Player>();
-        GameClient client =  this.networker.getClient();
-        if(client != null) {
-            playersNotNull = this.networker.getClient().players;
+
+        if (this.networker != null) {
+            GameClient client =  this.networker.getClient();
+            if(client != null) {
+                playersNotNull = this.networker.getClient().players;
+                System.out.println(this.networker.getClient().players);
+            }
         }
+        System.out.println(playersNotNull);
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime, playersNotNull);
 //        this.networker.clockSystem = clockSystem;
 //=======
@@ -464,6 +469,7 @@ public class App implements Controller {
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
+
 
         myMarket.setIsLocal(false);
         this.worldEntity.marketUpdater.stop();
