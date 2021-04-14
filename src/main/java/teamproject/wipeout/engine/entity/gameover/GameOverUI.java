@@ -27,16 +27,10 @@ public class GameOverUI extends VBox {
     public GameOverUI(HashMap<Integer, Player> players) {
         super();
         this.players = players;
-
-//        this.setText(players.size() + "");
-//
-//        this.setPrefWidth(150);
-//
-//        this.getStylesheets().add(ResourceType.STYLESHEET.path + "game-ui.css");
         list = new ListView<>();
 
         list.setMaxWidth(180);
-        list.setMaxHeight(240);
+        list.setMaxHeight(100);
         list.setMouseTransparent( true );
         list.setFocusTraversable( false );
         list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
@@ -49,15 +43,10 @@ public class GameOverUI extends VBox {
         int i = 0;
         list.getItems().clear();
         ArrayList<Player> allPlayers = new ArrayList<>(this.players.values());
-        Collections.sort(allPlayers, new Sortbymoney());
+        Collections.sort(allPlayers, new Sortbymoney().reversed());
         for(Player player: this.players.values()) {
-            list.getItems().add(player.playerName);
+            list.getItems().add(player.playerName + " " + "$" + player.getMoney());
             i += 1;
         }
-//        while(i < MAX_TASKS) {
-//            list.getItems().add("");
-//            i += 1;
-//        }
-//        this.setText(this.players.size() + "");
     }
 }

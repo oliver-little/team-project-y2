@@ -78,7 +78,7 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    Double TIME_FOR_GAME = 10.0;
+    Double TIME_FOR_GAME = 100.0;
 
     // Temporarily placed variables
     ItemStore itemStore;
