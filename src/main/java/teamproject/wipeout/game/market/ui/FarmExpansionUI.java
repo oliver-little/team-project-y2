@@ -81,7 +81,7 @@ public class FarmExpansionUI extends VBox {
                     expandButton.setDisable(true);
                 }
             }
-            
+
         });
 
         layout.getChildren().addAll(expandButton);

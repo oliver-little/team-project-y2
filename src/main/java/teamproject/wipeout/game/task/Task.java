@@ -23,7 +23,13 @@ public class Task {
      * @param reward - how much money does the player get when they complete the task
      * @param condition - the condition under which the task is considered completed by the player
      */
-    public Task(Integer id, String descriptionWithoutMoney, Integer reward, Function<Player, Boolean> condition, Item relatedItem) {
+    public Task(
+            Integer id,
+            String descriptionWithoutMoney,
+            Integer reward,
+            Function<Player, Boolean> condition,
+            Item relatedItem
+    ) {
         this.id = id;
         this.descriptionWithoutMoney = descriptionWithoutMoney;
         this.description = descriptionWithoutMoney + " ($" + reward.toString() + ")";

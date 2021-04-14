@@ -58,7 +58,16 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	private SpriteManager spriteManager;
 	private ItemStore itemStore;
 
-	public WorldEntity(GameScene gameScene, int numberOfPlayers, Player player, ItemStore itemStore, SpriteManager spriteManager, StackPane uiContainer, InputHandler input, ArrayList<Task> purchasableTasks) {
+	public WorldEntity(
+			GameScene gameScene,
+			int numberOfPlayers,
+			Player player,
+			ItemStore itemStore,
+			SpriteManager spriteManager,
+			StackPane uiContainer,
+			InputHandler input,
+			ArrayList<Task> purchasableTasks
+	) {
 		super(gameScene);
 		this.spriteManager = spriteManager;
 		this.itemStore = itemStore;
@@ -81,19 +90,19 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		grass.setParent(this);
 		grass.addComponent(new Transform(-width * 4, -height * 4, -100));
 		grass.addComponent(new RenderComponent(new RectRenderable(Color.rgb(47, 129, 54), width * 8, height * 8)));
-		
+
 
 		//boundaries
 		GameEntity worldBoundaries = gameScene.createEntity();
 		worldBoundaries.addComponent(new Transform(0,0));
 		Rectangle[] hitboxes = {new Rectangle(-5,-5,5,height+10),
-								new Rectangle(-5,-5,width+10,5),
-								new Rectangle(-5,height,width+10,5),
-								new Rectangle(width,-5,5,height+10)
-								};
+				new Rectangle(-5,-5,width+10,5),
+				new Rectangle(-5,height,width+10,5),
+				new Rectangle(width,-5,5,height+10)
+		};
 		this.addComponent(new HitboxComponent(hitboxes));
 		this.addComponent(new CollisionResolutionComponent(false));
-		
+
 		try {
 			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(1461,0), spriteManager);
 			ForestEntity forestLeft = new ForestEntity(gameScene, new Point2D(-100,-100), new Point2D(0,1411), spriteManager);
@@ -142,7 +151,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			}
 		}
 
-        this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
+		this.navMesh = NavigationMesh.generateMesh(Point2D.ZERO, new Point2D(width, height), rectangles);
 
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), navMesh, spriteManager, new ArrayList<>(farms.values()));
 		TextRenderable tag= new TextRenderable("Remy", 20);
@@ -268,6 +277,5 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			}
 		}
 	}
-
 }
 

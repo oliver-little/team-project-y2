@@ -47,9 +47,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
     public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
-    public final int MAX_SIZE = 10; //no. of inventory slots
-    public final int INITIAL_MONEY = 2500; //initial amount of money
-    public final int MAX_TASK_SIZE = 10; //no. of task slots
+    //no. of inventory slots
+    public final int MAX_SIZE = 10;
+    //initial amount of money
+    public final int INITIAL_MONEY = 2500;
+    //no. of task slots
+    public final int MAX_TASK_SIZE = 10;
 
     public final Integer playerID;
     public String playerName;
@@ -58,7 +61,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public int selectedSlot;
 
-    private ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
+    //ArrayList used to store inventory
+    private ArrayList<InventoryItem> inventory = new ArrayList<>();
 
     public InventoryUI invUI;
     public ItemStore itemStore;
@@ -91,7 +95,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, InventoryUI invUI, SpriteManager spriteManager) {
+    public Player(
+            GameScene scene,
+            Integer playerID,
+            String playerName,
+            Point2D position,
+            InventoryUI invUI,
+            SpriteManager spriteManager
+    ) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
@@ -100,6 +111,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
 
+        // Particle simulation
         ParticleParameters parameters = new ParticleParameters(100, true,
             FAST_PARTICLE,
             ParticleSimulationSpace.WORLD,
@@ -115,9 +127,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage);
         });
 
+        // Sabotage
         this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
         this.sabotageEffect.setParent(this);
 
+        // Physics
         this.position = new Transform(position, 0.0, 1);
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);
         this.physics.stopCallback = (newPosition) -> {
@@ -153,9 +167,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
         this.addComponent(new CollisionResolutionComponent());
 
+        // Audio
         this.audio = new AudioComponent();
         this.addComponent(this.audio);
 
+        // Inventory
         this.invUI = invUI;
         if (invUI != null) {
             for (int i = 0; i < MAX_SIZE; i++) {
@@ -178,6 +194,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             e.printStackTrace();
         }
 
+        // Name tag
         TextRenderable tag= new TextRenderable(playerName, 20);
         this.nameText = tag;
         GameEntity nameTag = new GameEntity(scene);

@@ -90,7 +90,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
                 else {
                     sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
                 }
-    
+
                 if (!sabotageEffect.isPlaying()) {
                     sabotageEffect.play();
                 }
@@ -105,14 +105,14 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         this.addComponent(new RenderComponent());
         this.addComponent(new HitboxComponent(new Rectangle(0, 0, 32, 32)));
 
-        ParticleParameters parameters = new ParticleParameters(100, true, 
-            FAST_PARTICLE, 
-            ParticleSimulationSpace.WORLD, 
-            SupplierGenerator.rangeSupplier(1.0, 1.75), 
-            SupplierGenerator.rangeSupplier(1.0, 2.0), 
-            null, 
-            SupplierGenerator.staticSupplier(0.0), 
-            SupplierGenerator.rangeSupplier(new Point2D(-20, -5), new Point2D(20, 0)));
+        ParticleParameters parameters = new ParticleParameters(100, true,
+                FAST_PARTICLE,
+                ParticleSimulationSpace.WORLD,
+                SupplierGenerator.rangeSupplier(1.0, 1.75),
+                SupplierGenerator.rangeSupplier(1.0, 2.0),
+                null,
+                SupplierGenerator.staticSupplier(0.0),
+                SupplierGenerator.rangeSupplier(new Point2D(-20, -5), new Point2D(20, 0)));
 
         parameters.setEmissionRate(20);
         parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(11, 22), new Point2D(20, 32)));
@@ -127,11 +127,11 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
 
         try {
             this.addComponent(new PlayerAnimatorComponent(
-                spriteManager.getSpriteSet("mouse", "up"),
-                spriteManager.getSpriteSet("mouse", "right"),
-                spriteManager.getSpriteSet("mouse", "down"),
-                spriteManager.getSpriteSet("mouse", "left"),
-                spriteManager.getSpriteSet("mouse", "idle")));
+                    spriteManager.getSpriteSet("mouse", "up"),
+                    spriteManager.getSpriteSet("mouse", "right"),
+                    spriteManager.getSpriteSet("mouse", "down"),
+                    spriteManager.getSpriteSet("mouse", "left"),
+                    spriteManager.getSpriteSet("mouse", "idle")));
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -252,7 +252,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         int rand = new Random().nextInt(navMesh.squares.size());
 
         NavigationSquare randomSquare = navMesh.squares.get(rand);
-        
+
         int randX = randomInteger((int) randomSquare.topLeft.getX(), (int) randomSquare.bottomRight.getX());
 
         int randY = randomInteger((int) randomSquare.topLeft.getY(), (int) randomSquare.bottomRight.getY());
@@ -296,7 +296,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         } else {
             selectedFarm = farms.get(randomInteger(0, farms.size()));
         }
-        
+
         //Make decision on what to do next.
         double probability = Math.random();
 

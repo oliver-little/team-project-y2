@@ -38,7 +38,14 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, Player player, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks) {
+    public MarketUI(
+            Collection<Item> items,
+            Market market,
+            Player player,
+            SpriteManager spriteManager,
+            WorldEntity world,
+            ArrayList<Task> purchasableTasks
+    ) {
         super();
 
         try {
@@ -50,7 +57,8 @@ public class MarketUI extends AnchorPane {
         }
 
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "market-menu.css");
-        
+
+        // Tabs
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
@@ -60,6 +68,7 @@ public class MarketUI extends AnchorPane {
         List<Node> tasksList = new ArrayList<>();
         List<Node> farmsList = new ArrayList<>();
 
+        // Services
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
                 seedsList.add(new MarketItemUI(item, market, player, spriteManager));
@@ -72,6 +81,7 @@ public class MarketUI extends AnchorPane {
             }
         }
 
+        // Purchasable tasks
         for (Task purchasableTask : purchasableTasks) {
             if(player.currentAvailableTasks.containsKey(purchasableTask.id) || purchasableTask.completed) {
                 continue;

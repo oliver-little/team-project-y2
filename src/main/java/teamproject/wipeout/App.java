@@ -71,7 +71,7 @@ import java.util.*;
 /**
  * App is a class for containing the components for game play.
  * It implements the Controller interface.
- * 
+ *
  * Begin by creating an instance, then call init, add App to a scene, then call createContent
  *
  */
@@ -167,34 +167,29 @@ public class App implements Controller {
         camera.addComponent(new Transform(0, 0));
         camera.addComponent(new CameraComponent(1.5f));
         camera.addComponent(new TagComponent("MainCamera"));
-        
 
+        // Inventory
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 
-    	Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
-
-        //player.acquireItem(6, 98); //for checking stack/inventory limits
-        //player.acquireItem(1, 2);
-        //player.acquireItem(28, 98);
-        //player.acquireItem( 43, 2);
-
+        // Player
+        Player player = new Player(gameScene, new Random().nextInt(1024), "Farmer", new Point2D(250, 250), invUI, spriteManager);
 
         try {
             player.addComponent(new RenderComponent(new Point2D(0, -3)));
             player.addComponent(new PlayerAnimatorComponent(
-                spriteManager.getSpriteSet("player-red", "walk-up"), 
-                spriteManager.getSpriteSet("player-red", "walk-right"), 
-                spriteManager.getSpriteSet("player-red", "walk-down"), 
-                spriteManager.getSpriteSet("player-red", "walk-left"), 
-                spriteManager.getSpriteSet("player-red", "idle")));
+                    spriteManager.getSpriteSet("player-red", "walk-up"),
+                    spriteManager.getSpriteSet("player-red", "walk-right"),
+                    spriteManager.getSpriteSet("player-red", "walk-down"),
+                    spriteManager.getSpriteSet("player-red", "walk-left"),
+                    spriteManager.getSpriteSet("player-red", "idle")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        //camera follows player
+
+        //Camera follows player
         float cameraZoom = camera.getComponent(CameraComponent.class).zoom;
         RenderComponent targetRC = player.getComponent(RenderComponent.class);
-		Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
+        Point2D targetDimensions = new Point2D(targetRC.getWidth(), targetRC.getHeight()).multiply(0.5);
 
         // Use JavaFX binding to ensure camera is in correct position even when screen size changes
         ObjectBinding<Point2D> camPosBinding = Bindings.createObjectBinding(() -> {return new Point2D(this.widthProperty.doubleValue(), this.heightProperty.doubleValue()).multiply(-0.5).multiply(1/cameraZoom).add(targetDimensions);}, this.widthProperty, this.heightProperty);
@@ -210,6 +205,7 @@ public class App implements Controller {
         }
         player.setTasks(playerTasks);
 
+        // Purchasable tasks
         ArrayList<Task> purchasableTasks = allTasks;
 
         //World Entity
@@ -222,7 +218,7 @@ public class App implements Controller {
             this.worldEntity.setClientSupplier(this.networker.clientSupplier);
             this.networker.setWorldEntity(this.worldEntity);
         }
-        
+
         addInvUIInput(input, invUI, this.worldEntity);
 
         // Task UI
@@ -234,17 +230,15 @@ public class App implements Controller {
         MoneyUI moneyUI = new MoneyUI(player);
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
-        //Time left
+        //Clock system
         HashMap<Integer, Player> playersNotNull = new HashMap<Integer, Player>();
 
         if (this.networker != null) {
             GameClient client =  this.networker.getClient();
             if(client != null) {
                 playersNotNull = this.networker.getClient().players;
-                System.out.println(this.networker.getClient().players);
             }
         }
-        System.out.println(playersNotNull);
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime, playersNotNull);
         systemUpdater.addSystem(clockSystem);
 
@@ -253,24 +247,25 @@ public class App implements Controller {
         gameOverUI.setVisible(false);
         StackPane.setAlignment(gameOverUI, Pos.CENTER);
 
+        // Top right UI - Clock + Settings
         VBox topRight = new VBox();
         topRight.setAlignment(Pos.TOP_RIGHT);
         topRight.setPickOnBounds(false);
         topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         ClockUI clockUI = clockSystem.clockUI;
-        //StackPane.setAlignment(clockUI, Pos.TOP_RIGHT);
 
         GameAudio ga = new GameAudio("backingTrack2.wav", true);
         ga.play();
 
+        // Settings
         SettingsUI settingsUI = new SettingsUI(audioSys, mas, ga);
-        //StackPane.setAlignment(settingsUI, Pos.CENTER_RIGHT);
 
         StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
 
         topRight.getChildren().addAll(clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(invUI, taskUI, moneyUI, topRight, gameOverUI);
 
+        // Input key actions
         input.addKeyAction(keyBindings.get("Move left"),
                 () -> player.addAcceleration(-500f, 0f),
                 () -> player.addAcceleration(500f, 0f)); //moving left
@@ -294,6 +289,7 @@ public class App implements Controller {
             this.worldEntity.pickables.picked(player.pickup());
         });
 
+        // Networker setup
         if (this.networker != null) {
             this.setUpNetworking();
         }
@@ -303,7 +299,7 @@ public class App implements Controller {
 
 
     public ArrayList<Task> createAllTasks(ItemStore itemStore) {
-
+        // All tasks Items
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
         for(int i = 1; i < 25; i++) {
@@ -313,6 +309,7 @@ public class App implements Controller {
         }
 
         int nrOfTask = 0;
+
         // Collect tasks
         Integer reward = 5;
         for(Integer itemId : itemIds) {
@@ -321,12 +318,12 @@ public class App implements Controller {
             Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, reward * quantityCollected,
                     (Player inputPlayer) ->
                     {
-                    	ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
-                    	int index = inputPlayer.containsItem(itemId);
-                    	if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
-                    		return true;
-                    	}
-                    	return false;
+                        ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
+                        int index = inputPlayer.containsItem(itemId);
+                        if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
+                            return true;
+                        }
+                        return false;
                     },
                     itemStore.getItem(itemId)
             );
@@ -358,9 +355,9 @@ public class App implements Controller {
      * Gets the root node of this class.
      * @return StackPane which contains the canvas.
      */
-	@Override
-	public Parent getContent() {
-		dynamicCanvas = new Canvas();
+    @Override
+    public Parent getContent() {
+        dynamicCanvas = new Canvas();
         staticCanvas = new Canvas();
         if (widthProperty != null) {
             dynamicCanvas.widthProperty().bind(this.widthProperty);
@@ -381,7 +378,7 @@ public class App implements Controller {
 
         interfaceOverlay = new StackPane();
         AnchorPane anchorPane = new AnchorPane();
-        
+
         anchorPane.getChildren().add(interfaceOverlay);
         AnchorPane.setTopAnchor(interfaceOverlay, 10.0);
         AnchorPane.setRightAnchor(interfaceOverlay, 10.0);
@@ -389,8 +386,8 @@ public class App implements Controller {
         AnchorPane.setLeftAnchor(interfaceOverlay, 10.0);
 
         root = new StackPane(dynamicCanvas, staticCanvas, anchorPane);
-		return root;
-	}
+        return root;
+    }
 
     public void cleanup() {
         if (renderer != null) {
@@ -421,7 +418,7 @@ public class App implements Controller {
         spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
         spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
     }
-    
+
 
     private void addInvUIInput(InputHandler input, InventoryUI invUI, WorldEntity world) {
         input.addKeyAction(KeyCode.DIGIT1,
