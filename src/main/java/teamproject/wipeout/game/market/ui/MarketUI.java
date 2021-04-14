@@ -79,7 +79,7 @@ public class MarketUI extends AnchorPane {
             tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager));
         }
 
-        farmsList.add(new FarmExpansionUI(market, currentPlayer, spriteManager, world));
+        farmsList.add(new FarmExpansionUI(currentPlayer, spriteManager, world));
 
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));

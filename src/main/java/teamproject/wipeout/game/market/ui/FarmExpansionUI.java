@@ -26,7 +26,7 @@ public class FarmExpansionUI extends VBox {
 
     public double expansionPrice = 100.00; //Initial expansion price.
 
-    public FarmExpansionUI(Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world) {
+    public FarmExpansionUI(CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world) {
         super();
 
         this.getStyleClass().add("vbox");

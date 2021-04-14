@@ -54,6 +54,12 @@ public class AIPlayerComponent implements GameComponent  {
 
     public Supplier<ClockSystem> clock;
 
+    private double currentFarmExpansionPrice;
+
+    private final MarketItem[] seedStockDatabase;
+    private final HashMap<Integer, MarketItem> grownUpStockDatabase;
+    private final HashMap<Integer, Integer> boughtItems;
+
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
@@ -68,6 +74,17 @@ public class AIPlayerComponent implements GameComponent  {
         this.executor = Executors.newSingleThreadScheduledExecutor();
 
         this.transformComponent = player.getComponent(Transform.class);
+
+        this.seedStockDatabase = this.market.stockDatabase.values().stream().filter((mItm) -> mItm.getID() > 28 && mItm.getID() < 50).toArray((arrSize) -> new MarketItem[arrSize]);
+        this.grownUpStockDatabase = new HashMap<Integer, MarketItem>();
+        for (Iterator<Map.Entry<Integer, MarketItem>> it = this.market.stockDatabase.entrySet().stream().filter((entry) -> entry.getKey() < 28).iterator(); it.hasNext();) {
+            Map.Entry<Integer, MarketItem> entry = it.next();
+            grownUpStockDatabase.put(entry.getKey(), entry.getValue());
+
+        }
+        this.boughtItems = new HashMap<Integer, Integer>();
+
+        this.currentFarmExpansionPrice = 100.0;
 
         this.aiDecisionAlgorithm().run();
     }
@@ -185,13 +202,13 @@ public class AIPlayerComponent implements GameComponent  {
                     aiHarvestCrops();
 
                 } else {
-                    if (Math.random() > 0.8) {
-                        double expansionAddition = (this.myFarm.getExpansionLevel() * FarmExpansionUI.PRICE_MULTIPLIER);
-                        double expansionPrice = 100 * (expansionAddition == 0.0 ? 1.0 : expansionAddition);
-                        if (this.myPlayer.hasEnoughMoney(expansionPrice + 30)) {
+                    if (Math.random() > 0.8 && !this.myFarm.isMaxSize()) {
+                        System.out.println("Expansion price: " + this.currentFarmExpansionPrice);
+                        if (this.myPlayer.hasEnoughMoney(this.currentFarmExpansionPrice + 30)) {
                             System.out.println("Expand " + this.myPlayer.playerID);
-                            this.myPlayer.setMoney(this.myPlayer.getMoney() - expansionPrice);
+                            this.myPlayer.setMoney(this.myPlayer.getMoney() - this.currentFarmExpansionPrice);
                             this.myFarm.expandFarmBy(1);
+                            this.currentFarmExpansionPrice *= FarmExpansionUI.PRICE_MULTIPLIER;
                             this.aiDecisionAlgorithm().run();
                         } else {
                             aiTraverse((int) this.myFarm.getWorldPosition().getX(), (int) this.myFarm.getWorldPosition().getY(), () -> {
@@ -331,13 +348,11 @@ public class AIPlayerComponent implements GameComponent  {
         return new Random().nextInt(Math.abs(max - min)) + min;
     }
 
-    private HashMap<Integer, Integer> boughtItems = new HashMap<>();
     private Pair<Integer[], Double> chooseItemToBuy(double withinPrice, boolean canBeTree) {
         MarketItem bestToBuy = null;
         boolean isTree = false;
         double currentPriceDiff = 0.0;
-        MarketItem[] seedStockDatabase = this.market.stockDatabase.values().stream().filter((mItm) -> mItm.getID() > 28 && mItm.getID() < 50).toArray((arrSize) -> new MarketItem[arrSize]);;
-        for (MarketItem marketItem : seedStockDatabase) {
+        for (MarketItem marketItem : this.seedStockDatabase) {
             int randBoundary = new Random().nextInt(5);
             double currentBuyPrice = marketItem.getCurrentBuyPrice();
             if (currentBuyPrice > withinPrice || this.boughtItems.getOrDefault(marketItem.getID(), 0) > randBoundary) {
@@ -352,7 +367,8 @@ public class AIPlayerComponent implements GameComponent  {
 
             int avgDrop = (plant.minDrop + plant.maxDrop) / 2;
             if (Math.random() > 0.5) {
-                double newPriceDiff = (marketItem.getCurrentSellPrice() * avgDrop) - currentBuyPrice;
+                double grownItemCurrentSellPrice = this.grownUpStockDatabase.get(plant.grownItemID).getCurrentSellPrice();
+                double newPriceDiff = (grownItemCurrentSellPrice * avgDrop) - currentBuyPrice;
                 if (bestToBuy == null || newPriceDiff > currentPriceDiff) {
                     bestToBuy = marketItem;
                     isTree = plant.isTree;
