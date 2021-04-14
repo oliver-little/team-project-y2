@@ -84,6 +84,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     private ParticleEntity sabotageEffect;
 
+    private TextRenderable nameText;
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -177,12 +179,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
 
         TextRenderable tag= new TextRenderable(playerName, 20);
+        this.nameText = tag;
         GameEntity nameTag = new GameEntity(scene);
         nameTag.addComponent(new RenderComponent(tag));
         RenderComponent playerRender = this.getComponent(RenderComponent.class);
         nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
         nameTag.setParent(this);
-
     }
 
     public void setTaskUI(TaskUI taskUI) {
@@ -198,6 +200,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.money.set(value);
         this.playerState.setMoney(value);
         this.sendPlayerStateUpdate();
+    }
+
+    public void setName(String name) {
+        this.playerName = name;
+        this.playerState.setPlayerName(playerName);
+        this.sendPlayerStateUpdate();
+        this.nameText.setText(this.playerName);
     }
 
     public DoubleProperty moneyProperty() {
