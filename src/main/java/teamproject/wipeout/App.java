@@ -226,7 +226,6 @@ public class App implements Controller {
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
         //Time left
-//<<<<<<< HEAD
         HashMap<Integer, Player> playersNotNull = new HashMap<Integer, Player>();
 
         if (this.networker != null) {
@@ -238,10 +237,6 @@ public class App implements Controller {
         }
         System.out.println(playersNotNull);
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime, playersNotNull);
-//        this.networker.clockSystem = clockSystem;
-//=======
-//        ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
-//>>>>>>> develop
         systemUpdater.addSystem(clockSystem);
 
         // Game over UI
@@ -465,6 +460,7 @@ public class App implements Controller {
         Market myMarket = this.worldEntity.market.getMarket();
 
         GameClient currentClient = this.networker.getClient();
+        myPlayer.setName(currentClient.clientName);
         currentClient.players.put(myPlayer.playerID, myPlayer);
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.spriteManager));

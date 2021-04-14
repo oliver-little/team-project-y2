@@ -159,6 +159,14 @@ public class PlayerState implements Serializable {
         this.timestamp = System.currentTimeMillis();
         this.money = newMoney;
     }
+    /**
+     * {@code playerName} setter
+     *
+     * @param newPlayerName
+     */
+    public void setPlayerName(String newPlayerName) {
+        this.playerName = newPlayerName;
+    }
 
     /**
      * Updates this {@code PlayerState} based on another {@code PlayerState}.
