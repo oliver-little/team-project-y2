@@ -1,7 +1,13 @@
 package teamproject.wipeout.engine.component.physics;
 
-
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
@@ -16,65 +22,97 @@ import teamproject.wipeout.engine.entity.GameEntity;
  *  Made up of an array of shapes that act as the collision boundaries.
  */
 public class CollisionResolutionComponent implements GameComponent {
-	
+
 	/**
 	 * Boolean flag that indicates whether this entity should be affected by collisions
 	 */
-	public boolean isMoveable = true;
+	private final boolean isMoveable;
 
+	private boolean deactivateOnCollision;
+	private int timeMultiplier;
+
+	private final Function<Point2D, Consumer<Runnable>> onCollision;
+	private final ScheduledExecutorService avoidanceExecutorService;
+	private final Timer timer;
 	
 	public CollisionResolutionComponent() {
 		this.isMoveable = true;
-	}
-	
-	//varargs constructor. See https://www.baeldung.com/java-varargs for info
-	public CollisionResolutionComponent(boolean isMoveable) {
-		this.isMoveable = isMoveable;
-	}
-	
 
-	
-    public String getType() {
-        return "collisionResolution";
-    }
+		this.deactivateOnCollision = true;
+		this.timeMultiplier = 0;
+
+		this.onCollision = null;
+		this.avoidanceExecutorService = null;
+		this.timer = null;
+	}
+
+	public CollisionResolutionComponent(boolean isMoveable, Function<Point2D, Consumer<Runnable>> onCollision) {
+		this.isMoveable = isMoveable;
+
+		this.deactivateOnCollision = false;
+		this.timeMultiplier = 1;
+
+		this.onCollision = onCollision;
+		this.avoidanceExecutorService = Executors.newSingleThreadScheduledExecutor();
+		this.timer = new Timer();
+	}
+
+	public static void resolveCollision(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
+		for (Pair<Shape, Shape> shapePair : p) {
+			resolveCollision(g1, g2, shapePair);
+		}
+	}
     
-   
-    
-    public static void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
+    private static void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
     	Point2D resolutionVector = GeometryUtil.getResolutionVector(p.getKey(), p.getValue());
-    	if (resolutionVector==null) {
+    	if (resolutionVector == null) {
     		return;
     	}
+
     	Transform t1 = g1.getComponent(Transform.class);
-    	//HitboxComponent h1 = g1.getComponent(HitboxComponent.class);
     	CollisionResolutionComponent c1 = g1.getComponent(CollisionResolutionComponent.class);
     	
     	Transform t2 = g2.getComponent(Transform.class);
-    	//HitboxComponent h2 = g2.getComponent(HitboxComponent.class);
     	CollisionResolutionComponent c2 = g2.getComponent(CollisionResolutionComponent.class);
     	    	
     	
-    	if(c1.isMoveable) {
-        	if(c2.isMoveable) {
+    	if (c1.isMoveable) {
+        	if (c2.isMoveable) {
         		t1.setPosition(t1.getPosition().add(resolutionVector.multiply(0.5)));
         		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-0.5)));
-        	}
-        	else {
+				processOnCollision(c2, resolutionVector);
+
+        	} else {
         		t1.setPosition(t1.getPosition().add(resolutionVector));
         	}
-    	}
-    	else if(c2.isMoveable) {
-    		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-1)));
-    	}
+			processOnCollision(c1, resolutionVector);
 
-    }
-    
-    public static void resolveCollision2(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
-    	for(int i=0; i<p.size();i++) {
-    		resolveCollision(g1,g2,p.get(i));
+    	} else if (c2.isMoveable) {
+    		t2.setPosition(t2.getPosition().add(resolutionVector.multiply(-1)));
+    		processOnCollision(c2, resolutionVector);
     	}
     }
-   
-    
+
+    private static void processOnCollision(CollisionResolutionComponent c, Point2D resolutionVector) {
+		if (c.onCollision != null && !c.deactivateOnCollision) {
+			c.deactivateOnCollision = true;
+			Consumer<Runnable> task = c.onCollision.apply(resolutionVector);
+
+			long delay = 250L * c.timeMultiplier;
+			c.timeMultiplier += 1;
+
+			Runnable blockingTask = () -> {
+				task.accept(() -> c.timeMultiplier = 1);
+				c.deactivateOnCollision = false;
+			};
+
+			c.avoidanceExecutorService.schedule(blockingTask, delay, TimeUnit.MILLISECONDS);
+		}
+	}
+
+	public String getType() {
+		return "collisionResolution";
+	}
+
 }
 

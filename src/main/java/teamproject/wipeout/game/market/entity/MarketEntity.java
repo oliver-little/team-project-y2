@@ -131,7 +131,7 @@ public class MarketEntity extends GameEntity {
                 new Rectangle(246, 118, 37, 34)
         };
         this.addComponent(new HitboxComponent(hitboxes));
-        this.addComponent(new CollisionResolutionComponent(false));
+        this.addComponent(new CollisionResolutionComponent(false, null));
 
         // Create logic market
         market = new Market(items, false);

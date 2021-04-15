@@ -6,6 +6,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
+import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.render.RectRenderable;
@@ -105,7 +106,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 								new Rectangle(width,-5,5,height+10)
 								};
 		this.addComponent(new HitboxComponent(hitboxes));
-		this.addComponent(new CollisionResolutionComponent(false));
+		this.addComponent(new CollisionResolutionComponent(false, null));
 		
 		try {
 			ForestEntity forestTop = new ForestEntity(gameScene, new Point2D(-50,-100), new Point2D(1461,0), spriteManager);
@@ -147,22 +148,26 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
 
-		List<Rectangle> rectangles = new ArrayList<>();
-
-		Point2D marketPos = this.marketEntity.getComponent(Transform.class).getWorldPosition();
-
-		for (Shape shape : this.marketEntity.getComponent(HitboxComponent.class).getHitboxes()) {
-			if (shape instanceof Rectangle) {
-				Rectangle rect = (Rectangle) shape;
-				Rectangle newRect = new Rectangle(marketPos.add(rect.getX(), rect.getY()), rect.getWidth(), rect.getHeight());
-				rectangles.add(newRect);
-			}
-		}
+		Point2D marketTopLeftCorner = this.marketEntity.corners[0];
+		Point2D marketBottomRightCorner = this.marketEntity.corners[3];
+		double marketWidth = marketBottomRightCorner.getX() - marketTopLeftCorner.getX();
+		double marketHeight = marketBottomRightCorner.getY() - marketTopLeftCorner.getY();
+		Rectangle marketRect = new Rectangle(marketTopLeftCorner, marketWidth, marketHeight);
+		List<Rectangle> navMarketRectangle = List.of(marketRect);
 
         this.navMesh = NavigationMesh.generateMesh(
         		Point2D.ZERO,
 				new Point2D(width - this.myCurrentPlayer.size.getX(), height - this.myCurrentPlayer.size.getY()),
-				rectangles);
+				navMarketRectangle);
+
+        boolean xxx = true;
+		for (NavigationSquare square : this.navMesh.squares) {
+			GameEntity eSquare = this.scene.createEntity();
+			eSquare.addComponent(new Transform(square.topLeft, 0.0));
+			RectRenderable renderable = new RectRenderable(xxx ? Color.RED : Color.BLUE, square.bottomRight.getX() - square.topLeft.getX(), square.bottomRight.getY() - square.topLeft.getY());
+			xxx = !xxx;
+			eSquare.addComponent(new RenderComponent(renderable));
+		}
 
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
 		TextRenderable tag= new TextRenderable("Remy", 20);
@@ -284,7 +289,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createAIPlayers() {
-		for (int i = 2; i < 5; i++) {
+		for (int i = 2; i < 3; i++) {
 			AIPlayer aiPlayer = new AIPlayer(this.scene, i, AI_NAMES[i - 2], new Point2D(10, 10), this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));

@@ -215,7 +215,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param x X axis acceleration
      * @param y Y axis acceleration
      */
-    public void addAcceleration(float x, float y) {
+    public void addAcceleration(double x, double y) {
         this.physics.acceleration = this.physics.acceleration.add(x, y);
         this.playerState.setPosition(this.position.getWorldPosition());
         this.playerState.setAcceleration(this.physics.acceleration);

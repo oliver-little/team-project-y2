@@ -3,10 +3,15 @@ package teamproject.wipeout.game.player;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
+import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
+import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
+import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
@@ -60,12 +65,44 @@ public class AIPlayer extends Player  {
         this.navMesh = worldEntity.getNavMesh();
         this.executor = Executors.newSingleThreadScheduledExecutor();
 
-        this.aiDecisionAlgorithm();
+        this.removeComponent(CollisionResolutionComponent.class);
+
+        this.addComponent(new CollisionResolutionComponent(true, (resolutionVector) -> {
+            SteeringComponent steeringComponent = this.removeComponent(SteeringComponent.class);
+
+            if (resolutionVector.getX() == 0) {
+                if (resolutionVector.getY() < 0) {
+                    this.physics.acceleration = new Point2D(250, 50);
+                } else {
+                    this.physics.acceleration = new Point2D(-250, -50);
+                }
+            } else {
+                if (resolutionVector.getX() < 0) {
+                    this.physics.acceleration = new Point2D(50, -250);
+                } else {
+                    this.physics.acceleration = new Point2D(-50, 250);
+                }
+            }
+
+            return (task) -> {
+                this.physics.acceleration = new Point2D(0, 0);
+                this.addComponent(new SteeringComponent(
+                        steeringComponent.path,
+                        () -> {
+                            task.run();
+                            steeringComponent.onArrive.run();
+                        },
+                        steeringComponent.accelerationMultiplier
+                ));
+            };
+        }));
     }
 
     public void assignFarm(FarmEntity farm) {
         super.assignFarm(farm);
         this.aiFarm = farm;
+
+        this.aiDecisionAlgorithm();
     }
 
     /**
@@ -80,9 +117,9 @@ public class AIPlayer extends Player  {
             return;
         }
 
-        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 30);
+        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 25);
 
-        this.addComponent(new SteeringComponent(path, callback, 250));
+        this.addComponent(new SteeringComponent(path, callback, 300));
     }
 
     /**
@@ -98,10 +135,6 @@ public class AIPlayer extends Player  {
      * Steals crops from a given farm.
      */
     private void aiHarvestCrops() {
-        if (this.aiFarm == null) {
-            aiDecisionAlgorithm();
-            return;
-        }
         List<Point2D> fullyGrownItems = this.aiFarm.getGrownItemPositions();
 
         //If there are no fully grown crops in the selected farm, just find a random location instead.
@@ -165,6 +198,7 @@ public class AIPlayer extends Player  {
      * Runnable method which runs when the animal arrives at its destination, in this case, steals vegetables, picks a new destination to go to or idles.
      */
     private void aiDecisionAlgorithm() {
+        aiPathFind();
         Supplier<ClockSystem> clockSupplier = this.worldEntity.getClockSupplier();
         if (clockSupplier != null && clockSupplier.get().getTime() <= 0.0) {
             System.out.println("STOP " + this.playerID);
