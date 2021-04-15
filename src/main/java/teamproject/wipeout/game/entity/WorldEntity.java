@@ -175,10 +175,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.createAIPlayers();
 	}
 
-	public MarketEntity getMarketEntity() {
-		return this.marketEntity;
-	}
-
 	public Market getMarket() {
 		return this.marketEntity.getMarket();
 	}
@@ -220,9 +216,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public void setFarmFor(AIPlayer aiPlayer, FarmEntity farm) {
 		if (farm != null) {
-			Point2D farmCorner = this.setPositionForPlayer(aiPlayer, farm);
-			aiPlayer.assignFarm(farm, farmCorner);
+			Point2D[] corners = this.setPositionForPlayer(aiPlayer, farm);
+			aiPlayer.setDesignatedMarketPoint(corners[0]);
+			aiPlayer.assignFarm(farm, corners[1]);
 			farm.assignPlayer(aiPlayer.playerID, false, this.clientSupplier);
+
+			aiPlayer.start();
 		} else {
 			aiPlayer.getCurrentState().assignFarm(null);
 		}
@@ -255,7 +254,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	protected Point2D setPositionForPlayer(Player player, FarmEntity farm) {
+	protected Point2D[] setPositionForPlayer(Player player, FarmEntity farm) {
+		Point2D marketCorner = this.marketEntity.corners[farm.farmID - 1].subtract(player.size.getX() / 2, player.size.getY() / 2);
+
 		Point2D playerPosition;
 		Point2D farmCorner;
 		switch (farm.farmID) {
@@ -280,8 +281,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				farmCorner = Point2D.ZERO;
 				break;
 		}
+
 		player.setWorldPosition(playerPosition);
-		return farmCorner;
+		return new Point2D[]{marketCorner, farmCorner};
 	}
 
 	public void setupFarmPickingKey(KeyCode code) {

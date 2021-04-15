@@ -37,6 +37,8 @@ public class AIPlayer extends Player  {
 
     public static final int IDLE_TIME_MINIMUM = 2;
 
+    private Point2D designatedMarketPoint;
+
     private FarmEntity aiFarm;
     private Point2D designatedFarmPoint;
     private double currentFarmExpansionPrice;
@@ -100,11 +102,17 @@ public class AIPlayer extends Player  {
         }));
     }
 
+    public void setDesignatedMarketPoint(Point2D designatedMarketPoint) {
+        this.designatedMarketPoint = designatedMarketPoint;
+    }
+
     public void assignFarm(FarmEntity farm, Point2D designatedPoint) {
         super.assignFarm(farm);
         this.aiFarm = farm;
         this.designatedFarmPoint = designatedPoint;
+    }
 
+    public void start() {
         this.aiDecisionAlgorithm();
     }
 
@@ -128,10 +136,14 @@ public class AIPlayer extends Player  {
     /**
      * Idles for a random, short period of time.
      */
-    private void aiIdle() {
+    private void aiIdle(Runnable completion) {
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
 
-        executor.schedule(() -> Platform.runLater(() -> this.aiDecisionAlgorithm()), idleTime, TimeUnit.SECONDS);
+        if (completion == null) {
+            executor.schedule(() -> Platform.runLater(() -> this.aiDecisionAlgorithm()), idleTime, TimeUnit.SECONDS);
+        } else {
+            executor.schedule(() -> Platform.runLater(completion), idleTime, TimeUnit.SECONDS);
+        }
     }
 
     /**
@@ -237,21 +249,22 @@ public class AIPlayer extends Player  {
 
             } else {
                 //Idle
-                aiIdle();
+                aiIdle(null);
             }
         }
     }
 
     private void goToMarket() {
-        Point2D cornerPosition = this.worldEntity.getMarketEntity().corners[this.playerID - 1];
-        aiTraverse((int) cornerPosition.getX(), (int) cornerPosition.getY(), () -> {
+        aiTraverse((int) this.designatedMarketPoint.getX(), (int) this.designatedMarketPoint.getY(), () -> {
 
             Runnable buyPlantsAction = () -> this.buyPlants((boughtPlants) -> {
-                if (boughtPlants) {
-                    this.plantPlants();
-                } else {
-                    this.aiDecisionAlgorithm();
-                }
+                this.aiIdle(() -> {
+                    if (boughtPlants) {
+                        this.plantPlants();
+                    } else {
+                        this.aiDecisionAlgorithm();
+                    }
+                });
             });
 
             if (Math.random() > 0.8 && !this.aiFarm.isMaxSize()) {
@@ -343,7 +356,7 @@ public class AIPlayer extends Player  {
                         int column = freeSquare[1];
                         this.aiFarm.placeItemAtSquare(plantable, row, column);
                     }
-                    //this.aiDecisionAlgorithm();
+                    this.aiDecisionAlgorithm();
                 }
         );
     }
