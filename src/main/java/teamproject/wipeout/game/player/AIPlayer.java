@@ -3,15 +3,11 @@ package teamproject.wipeout.game.player;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseButton;
-import javafx.scene.paint.Color;
 import javafx.util.Pair;
-import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
-import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
@@ -42,6 +38,7 @@ public class AIPlayer extends Player  {
     public static final int IDLE_TIME_MINIMUM = 2;
 
     private FarmEntity aiFarm;
+    private Point2D designatedFarmPoint;
     private double currentFarmExpansionPrice;
     private final HashMap<Integer, Integer> boughtItems;
 
@@ -103,9 +100,10 @@ public class AIPlayer extends Player  {
         }));
     }
 
-    public void assignFarm(FarmEntity farm) {
+    public void assignFarm(FarmEntity farm, Point2D designatedPoint) {
         super.assignFarm(farm);
         this.aiFarm = farm;
+        this.designatedFarmPoint = designatedPoint;
 
         this.aiDecisionAlgorithm();
     }
@@ -329,8 +327,8 @@ public class AIPlayer extends Player  {
         }
 
         this.aiTraverse(
-                (int) this.aiFarm.getWorldPosition().getX(),
-                (int) this.aiFarm.getWorldPosition().getY(),
+                (int) this.designatedFarmPoint.getX(),
+                (int) this.designatedFarmPoint.getY(),
                 () -> {
                     for (Item plantable : itemsToPlant) {
                         this.removeItem(plantable.id, 1);
@@ -345,7 +343,7 @@ public class AIPlayer extends Player  {
                         int column = freeSquare[1];
                         this.aiFarm.placeItemAtSquare(plantable, row, column);
                     }
-                    this.aiDecisionAlgorithm();
+                    //this.aiDecisionAlgorithm();
                 }
         );
     }

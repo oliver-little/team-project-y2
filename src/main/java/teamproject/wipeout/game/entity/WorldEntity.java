@@ -210,11 +210,21 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			this.myFarm = farm;
 		}
 		if (farm != null) {
-			player.assignFarm(farm);
 			this.setPositionForPlayer(player, farm);
+			player.assignFarm(farm);
 			farm.assignPlayer(player.playerID, activePlayer, this.clientSupplier);
 		} else {
 			player.getCurrentState().assignFarm(null);
+		}
+	}
+
+	public void setFarmFor(AIPlayer aiPlayer, FarmEntity farm) {
+		if (farm != null) {
+			Point2D farmCorner = this.setPositionForPlayer(aiPlayer, farm);
+			aiPlayer.assignFarm(farm, farmCorner);
+			farm.assignPlayer(aiPlayer.playerID, false, this.clientSupplier);
+		} else {
+			aiPlayer.getCurrentState().assignFarm(null);
 		}
 	}
 
@@ -245,26 +255,33 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	protected void setPositionForPlayer(Player player, FarmEntity farm) {
+	protected Point2D setPositionForPlayer(Player player, FarmEntity farm) {
 		Point2D playerPosition;
+		Point2D farmCorner;
 		switch (farm.farmID) {
 			case 1:
 				playerPosition = farm.getWorldPosition().add(farm.getSize());
+				farmCorner = playerPosition.subtract(player.size);
 				break;
 			case 2:
-				playerPosition = farm.getWorldPosition().add(-45, farm.getSize().getY());
+				playerPosition = farm.getWorldPosition().add(-player.size.getX(), farm.getSize().getY());
+				farmCorner = playerPosition.add(player.size.getX(), -player.size.getY());
 				break;
 			case 3:
-				playerPosition = farm.getWorldPosition().add(farm.getSize().getX(), 0);
+				playerPosition = farm.getWorldPosition().add(farm.getSize().getX(), -player.size.getY());
+				farmCorner = playerPosition.add(-player.size.getX(), player.size.getY());
 				break;
 			case 4:
-				playerPosition = farm.getWorldPosition().subtract(45, 0);
+				playerPosition = farm.getWorldPosition().subtract(player.size.getX(), player.size.getY());
+				farmCorner = farm.getWorldPosition();
 				break;
 			default:
 				playerPosition = Point2D.ZERO;
+				farmCorner = Point2D.ZERO;
 				break;
 		}
 		player.setWorldPosition(playerPosition);
+		return farmCorner;
 	}
 
 	public void setupFarmPickingKey(KeyCode code) {
@@ -284,7 +301,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			AIPlayer aiPlayer = new AIPlayer(this.scene, i, AI_NAMES[i - 2], new Point2D(10, 10), this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
-			this.setFarmFor(aiPlayer, false, this.farms.get(i));
+			this.setFarmFor(aiPlayer, this.farms.get(i));
 
 			this.players.add(aiPlayer);
 		}

@@ -11,6 +11,7 @@ import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
+import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
