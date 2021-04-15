@@ -28,7 +28,7 @@ public class FarmExpansionUI extends VBox {
 
     public double expansionPrice; //Initial expansion price.
 
-    public FarmExpansionUI(CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world) {
+    public FarmExpansionUI(CurrentPlayer currentPlayer, SpriteManager spriteManager) {
         super();
         this.expansionPrice = FARM_EXPANSION_START_PRICE;
 
@@ -70,16 +70,16 @@ public class FarmExpansionUI extends VBox {
 
         // Set buy click event
         expandButton.setOnAction((e) -> {
-            if ((currentPlayer.hasEnoughMoney(expansionPrice)) && world.getMyFarm() != null) {
+            if ((currentPlayer.hasEnoughMoney(expansionPrice)) && currentPlayer.getMyFarm() != null) {
                 currentPlayer.setMoney(currentPlayer.getMoney() - expansionPrice);
-                world.getMyFarm().expandFarmBy(1);
+                currentPlayer.getMyFarm().expandFarmBy(1);
 
                 //Update price.
                 expansionPrice *= PRICE_MULTIPLIER;
                 expandButton.textProperty().bind(Bindings.concat("Expand: " + String.format("%.2f",expansionPrice)));
 
                 //Check if the size has the farm has hit the maximum limit, if it has, disable the expand button.
-                if (world.getMyFarm().isMaxSize()) {
+                if (currentPlayer.getMyFarm().isMaxSize()) {
                     expandButton.textProperty().bind(Bindings.concat("MAX SIZE REACHED"));
                     expandButton.setDisable(true);
                 }

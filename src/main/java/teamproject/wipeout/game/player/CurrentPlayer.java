@@ -1,46 +1,24 @@
 package teamproject.wipeout.game.player;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.PickableComponent;
-import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
-import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
-import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.TextRenderable;
-import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
-import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
-import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
-import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
-import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
-import teamproject.wipeout.game.potion.PotionEntity;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.game.task.ui.TaskUI;
-import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
-import teamproject.wipeout.util.SupplierGenerator;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class CurrentPlayer extends Player implements StateUpdatable<PlayerState> {
 
@@ -52,9 +30,12 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     public ArrayList<Task> tasks;
     public LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
+
+    private FarmEntity myFarm;
+
     private TaskUI taskUI;
 
-    private LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
+    private final LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
 
     private final SignatureEntityCollector pickableCollector;
 
@@ -65,8 +46,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      *
      * @param scene The GameScene this entity is part of
      */
-    public CurrentPlayer(GameScene scene, int playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
-        super(scene, playerID, playerName, position, spriteManager, itemStore);
+    public CurrentPlayer(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
+        super(scene, playerID, playerName, spriteManager, itemStore);
 
         this.addComponent(new MovementAudioComponent(this.physics, "steps.wav"));
 
@@ -76,6 +57,18 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         this.invUI = invUI;
         selectSlot(0);
         this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
+
+        this.myFarm = null;
+        this.taskUI = null;
+    }
+
+    public void assignFarm(FarmEntity farm) {
+        super.assignFarm(farm);
+        this.myFarm = farm;
+    }
+
+    public FarmEntity getMyFarm() {
+        return this.myFarm;
     }
 
     public void setTaskUI(TaskUI taskUI) {

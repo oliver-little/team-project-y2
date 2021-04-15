@@ -18,7 +18,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
@@ -37,7 +36,7 @@ public class MarketUI extends AnchorPane {
 
     private Pane parent;
 
-    public MarketUI(Collection<Item> items, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world, ArrayList<Task> purchasableTasks) {
+    public MarketUI(Collection<Item> items, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, ArrayList<Task> purchasableTasks) {
         super();
 
         try {
@@ -79,7 +78,7 @@ public class MarketUI extends AnchorPane {
             tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager));
         }
 
-        farmsList.add(new FarmExpansionUI(currentPlayer, spriteManager, world));
+        farmsList.add(new FarmExpansionUI(currentPlayer, spriteManager));
 
         Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));

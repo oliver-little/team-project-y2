@@ -46,6 +46,7 @@ import teamproject.wipeout.util.resources.ResourceType;
 public class InventoryUI extends StackPane {
 
 	public static final int IMAGE_SIZE = 48;
+	public static final int MAX_SIZE = 10;
 
 	public enum InventoryState {
 		NONE,
@@ -54,21 +55,20 @@ public class InventoryUI extends StackPane {
 	}
 
 	public Point2D size;
-	Group root;
-	
-	public static int MAX_SIZE = 10;
-	public ItemStore itemStore;
-	
-	SpriteManager spriteManager;
-	
-	private Rectangle[] rectangles = new Rectangle[MAX_SIZE];
-	private ImageView[] spriteViews = new ImageView[MAX_SIZE];
-	private Text[] quantityTexts = new Text[MAX_SIZE];
+	public Group root;
+
 	private int currentSelection = 0;
 
 	private InventoryState state = InventoryState.NONE;
 
 	private PotionThrowEntity currentPotion;
+
+	private final ItemStore itemStore;
+	private final SpriteManager spriteManager;
+	
+	private final Rectangle[] rectangles = new Rectangle[MAX_SIZE];
+	private final ImageView[] spriteViews = new ImageView[MAX_SIZE];
+	private final Text[] quantityTexts = new Text[MAX_SIZE];
 
 	public InventoryUI(SpriteManager spriteManager, ItemStore itemStore) {
 		super();
@@ -140,7 +140,7 @@ public class InventoryUI extends StackPane {
 		this.selectSlot(slot);
 
 		CurrentPlayer myCurrentPlayer = world.myCurrentPlayer;
-		FarmEntity myFarm = world.getMyFarm();
+		FarmEntity myFarm = world.myCurrentPlayer.getMyFarm();
 
 		if (state == InventoryState.PLANTING) {
 			if (myFarm.isPlacingItem()) {
@@ -175,7 +175,7 @@ public class InventoryUI extends StackPane {
 					possibleEffectEntities = List.of(world.myCurrentPlayer, world.myAnimal);
 				}
 				else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
-					possibleEffectEntities = List.of(world.getMyFarm());
+					possibleEffectEntities = List.copyOf(world.farms.values());
 				}
 
 				Runnable onComplete = () -> {

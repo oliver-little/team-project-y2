@@ -85,7 +85,8 @@ public class Networker {
                 return null;
             }
 
-            Player newCurrentPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), spriteManager, itemStore);
+            Player newCurrentPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), spriteManager, itemStore);
+            newCurrentPlayer.setWorldPosition(newPlayerState.getPosition());
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
             if (myFarm != null) {

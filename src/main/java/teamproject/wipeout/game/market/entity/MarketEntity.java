@@ -25,7 +25,6 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpriteSetDescriptor;
 import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpritesheetDescriptor;
-import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
@@ -53,7 +52,7 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, CurrentPlayer currentPlayer, SpriteManager spriteManager, StackPane uiContainer, WorldEntity world, ArrayList<Task> purchasableTasks) {
+    public MarketEntity(GameScene scene, double x, double y, ItemStore items, CurrentPlayer currentPlayer, SpriteManager spriteManager, StackPane uiContainer, ArrayList<Task> purchasableTasks) {
         super(scene);
 
         this.uiContainer = uiContainer;
@@ -136,7 +135,7 @@ public class MarketEntity extends GameEntity {
         // Create logic market
         market = new Market(items, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, currentPlayer, spriteManager, world, purchasableTasks);
+        this.marketUI = new MarketUI(items.getData().values(), market, currentPlayer, spriteManager, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 

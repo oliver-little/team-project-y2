@@ -53,8 +53,8 @@ public class AIPlayer extends Player  {
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
-    public AIPlayer(GameScene scene, int playerID, String playerName, Point2D position, WorldEntity worldEntity) {
-        super(scene, playerID, playerName, position, worldEntity.spriteManager, worldEntity.itemStore);
+    public AIPlayer(GameScene scene, int playerID, String playerName, WorldEntity worldEntity) {
+        super(scene, playerID, playerName, worldEntity.spriteManager, worldEntity.itemStore);
 
         this.aiFarm = null;
         this.currentFarmExpansionPrice = FarmExpansionUI.FARM_EXPANSION_START_PRICE;
@@ -67,8 +67,14 @@ public class AIPlayer extends Player  {
 
         this.removeComponent(CollisionResolutionComponent.class);
 
-        this.collisionResolution = new CollisionResolutionComponent(true, (resolutionVector) -> {
-            SteeringComponent steeringComponent = this.removeComponent(SteeringComponent.class);
+        this.collisionResolution = new CollisionResolutionComponent(true, (resolutionVector) -> { // TODO gets stuck here == aiDecision isn't called
+            SteeringComponent steeringComponent = this.getComponent(SteeringComponent.class);
+            if (steeringComponent == null) {
+                return (pair) -> {
+                    pair.getValue().run();
+                };
+            }
+            steeringComponent.paused = true;
 
             if (resolutionVector.getX() == 0) {
                 if (resolutionVector.getY() < 0) {
@@ -87,6 +93,7 @@ public class AIPlayer extends Player  {
             return (pair) -> {
                 this.physics.acceleration = new Point2D(0, 0);
                 if (pair.getKey() > 4) {
+                    steeringComponent.currentPoint = steeringComponent.path.size() - 1;
                     pair.getValue().run();
                     this.aiDecisionAlgorithm();
 
@@ -96,7 +103,7 @@ public class AIPlayer extends Player  {
                         pair.getValue().run();
                         oldOnArrive.run();
                     };
-                    this.addComponent(steeringComponent);
+                    steeringComponent.paused = false;
                 }
             };
         });
@@ -132,7 +139,11 @@ public class AIPlayer extends Player  {
         List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, this.navMesh, 25);
 
         this.collisionResolution.resetControlVariables();
-        this.addComponent(new SteeringComponent(path, callback, 300));
+        if (!this.hasComponent(SteeringComponent.class)) {
+            this.addComponent(new SteeringComponent(path, callback, 300));
+        } else {
+            this.aiDecisionAlgorithm();
+        }
     }
 
     /**
@@ -243,7 +254,7 @@ public class AIPlayer extends Player  {
 
         } else {
             double randomiser = Math.random();
-            if (randomiser < 0.2 && this.hasEnoughMoney(130)) {
+            if (randomiser < 0.1 && this.hasEnoughMoney(130)) {
                 usePotions();
 
             } else if (randomiser < 0.4) {

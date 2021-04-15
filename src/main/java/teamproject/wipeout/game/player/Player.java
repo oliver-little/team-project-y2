@@ -55,25 +55,24 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public Integer occupiedSlots; // ??? !!! Why?
 
     protected ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
+    protected final MovementComponent physics;
 
-    public ItemStore itemStore;
-
-    private DoubleProperty money;
-
+    private Transform position;
     private Supplier<GameClient> clientSupplier;
     private Consumer<PotionEntity> thrownPotion;
 
+    private final DoubleProperty money;
     private final PlayerState playerState;
-    private final Transform position;
-    protected final MovementComponent physics;
     private final ParticleEntity sabotageEffect;
+
+    protected final ItemStore itemStore;
 
     /**
      * Creates a new instance of GameEntity
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, int playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore) {
+    public Player(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
@@ -84,7 +83,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.itemStore = itemStore;
 
-        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), position, Point2D.ZERO);
+        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), Point2D.ZERO, Point2D.ZERO);
 
         ParticleParameters parameters = new ParticleParameters(100, true,
                 FAST_PARTICLE,
@@ -104,7 +103,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
         this.sabotageEffect.setParent(this);
 
-        this.position = new Transform(position, 0.0, 1);
+        this.position = null;
+
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);
         this.physics.stopCallback = (newPosition) -> {
             this.playerState.setPosition(newPosition);
@@ -131,8 +131,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             this.playerState.setSpeedMultiplier(newMultiplier);
             this.sendPlayerStateUpdate();
         };
-
-        this.addComponent(this.position);
         this.addComponent(this.physics);
 
         this.addComponent(new HitboxComponent(new Rectangle(20, 45, 24, 16)));
@@ -206,8 +204,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param position {@link Point2D} position of the Player
      */
     public void setWorldPosition(Point2D position) {
-        this.position.setPosition(position);
         this.playerState.setPosition(position);
+        if (this.position == null) {
+            this.position = new Transform(position, 0.0, 1);
+            this.addComponent(this.position);
+        } else {
+            this.position.setPosition(position);
+        }
         this.sendPlayerStateUpdate();
     }
 
