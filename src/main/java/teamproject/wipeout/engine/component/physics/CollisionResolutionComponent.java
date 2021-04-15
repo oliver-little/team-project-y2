@@ -1,20 +1,18 @@
 package teamproject.wipeout.engine.component.physics;
 
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.entity.GameEntity;
+
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Component that, when added to an entity, will resolve collisions between other entities with this component.
@@ -31,10 +29,9 @@ public class CollisionResolutionComponent implements GameComponent {
 	private boolean deactivateOnCollision;
 	private int timeMultiplier;
 
-	private final Function<Point2D, Consumer<Runnable>> onCollision;
+	private final Function<Point2D, Consumer<Pair<Integer, Runnable>>> onCollision;
 	private final ScheduledExecutorService avoidanceExecutorService;
-	private final Timer timer;
-	
+
 	public CollisionResolutionComponent() {
 		this.isMoveable = true;
 
@@ -43,10 +40,9 @@ public class CollisionResolutionComponent implements GameComponent {
 
 		this.onCollision = null;
 		this.avoidanceExecutorService = null;
-		this.timer = null;
 	}
 
-	public CollisionResolutionComponent(boolean isMoveable, Function<Point2D, Consumer<Runnable>> onCollision) {
+	public CollisionResolutionComponent(boolean isMoveable, Function<Point2D, Consumer<Pair<Integer, Runnable>>> onCollision) {
 		this.isMoveable = isMoveable;
 
 		this.deactivateOnCollision = false;
@@ -54,7 +50,6 @@ public class CollisionResolutionComponent implements GameComponent {
 
 		this.onCollision = onCollision;
 		this.avoidanceExecutorService = Executors.newSingleThreadScheduledExecutor();
-		this.timer = new Timer();
 	}
 
 	public static void resolveCollision(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
@@ -96,13 +91,14 @@ public class CollisionResolutionComponent implements GameComponent {
     private static void processOnCollision(CollisionResolutionComponent c, Point2D resolutionVector) {
 		if (c.onCollision != null && !c.deactivateOnCollision) {
 			c.deactivateOnCollision = true;
-			Consumer<Runnable> task = c.onCollision.apply(resolutionVector);
+			Consumer<Pair<Integer, Runnable>> task = c.onCollision.apply(resolutionVector);
 
 			long delay = 250L * c.timeMultiplier;
 			c.timeMultiplier += 1;
 
 			Runnable blockingTask = () -> {
-				task.accept(() -> c.timeMultiplier = 1);
+				Runnable resetMultiplier = () -> c.timeMultiplier = 1;
+				task.accept(new Pair<Integer, Runnable>(c.timeMultiplier, resetMultiplier));
 				c.deactivateOnCollision = false;
 			};
 

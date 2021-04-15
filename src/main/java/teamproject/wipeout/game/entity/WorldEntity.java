@@ -160,15 +160,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				new Point2D(width - this.myCurrentPlayer.size.getX(), height - this.myCurrentPlayer.size.getY()),
 				navMarketRectangle);
 
-        boolean xxx = true;
-		for (NavigationSquare square : this.navMesh.squares) {
-			GameEntity eSquare = this.scene.createEntity();
-			eSquare.addComponent(new Transform(square.topLeft, 0.0));
-			RectRenderable renderable = new RectRenderable(xxx ? Color.RED : Color.BLUE, square.bottomRight.getX() - square.topLeft.getX(), square.bottomRight.getY() - square.topLeft.getY());
-			xxx = !xxx;
-			eSquare.addComponent(new RenderComponent(renderable));
-		}
-
 		this.myAnimal = new AnimalEntity(gameScene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
 		TextRenderable tag= new TextRenderable("Remy", 20);
 		GameEntity nameTag = new GameEntity(gameScene);
@@ -289,7 +280,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createAIPlayers() {
-		for (int i = 2; i < 3; i++) {
+		for (int i = 2; i < 5; i++) {
 			AIPlayer aiPlayer = new AIPlayer(this.scene, i, AI_NAMES[i - 2], new Point2D(10, 10), this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));

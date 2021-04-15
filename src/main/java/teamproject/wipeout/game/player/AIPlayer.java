@@ -84,16 +84,21 @@ public class AIPlayer extends Player  {
                 }
             }
 
-            return (task) -> {
+            return (pair) -> {
                 this.physics.acceleration = new Point2D(0, 0);
-                this.addComponent(new SteeringComponent(
-                        steeringComponent.path,
-                        () -> {
-                            task.run();
-                            steeringComponent.onArrive.run();
-                        },
-                        steeringComponent.accelerationMultiplier
-                ));
+                if (pair.getKey() > 4) {
+                    this.aiDecisionAlgorithm();
+
+                } else {
+                    this.addComponent(new SteeringComponent(
+                            steeringComponent.path,
+                            () -> {
+                                pair.getValue().run();
+                                steeringComponent.onArrive.run();
+                            },
+                            steeringComponent.accelerationMultiplier
+                    ));
+                }
             };
         }));
     }
@@ -198,7 +203,6 @@ public class AIPlayer extends Player  {
      * Runnable method which runs when the animal arrives at its destination, in this case, steals vegetables, picks a new destination to go to or idles.
      */
     private void aiDecisionAlgorithm() {
-        aiPathFind();
         Supplier<ClockSystem> clockSupplier = this.worldEntity.getClockSupplier();
         if (clockSupplier != null && clockSupplier.get().getTime() <= 0.0) {
             System.out.println("STOP " + this.playerID);
