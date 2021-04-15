@@ -64,7 +64,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      *
      * @param scene The GameScene this entity is part of
      */
-    public CurrentPlayer(GameScene scene, Integer playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
+    public CurrentPlayer(GameScene scene, int playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
         super(scene, playerID, playerName, position, spriteManager, itemStore);
 
         this.addComponent(new MovementAudioComponent(this.physics, "steps.wav"));

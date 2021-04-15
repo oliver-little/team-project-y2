@@ -20,14 +20,17 @@ import teamproject.wipeout.game.player.CurrentPlayer;
  */
 public class FarmExpansionUI extends VBox {
 
+    public static final double FARM_EXPANSION_START_PRICE = 100.0;
+
     public static final int IMAGE_SIZE = 48;
 
     public static final double PRICE_MULTIPLIER = 1.5; //Amount to multiply price by after each purchase.
 
-    public double expansionPrice = 100.00; //Initial expansion price.
+    public double expansionPrice; //Initial expansion price.
 
     public FarmExpansionUI(CurrentPlayer currentPlayer, SpriteManager spriteManager, WorldEntity world) {
         super();
+        this.expansionPrice = FARM_EXPANSION_START_PRICE;
 
         this.getStyleClass().add("vbox");
         this.setPrefWidth(300);

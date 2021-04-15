@@ -21,6 +21,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
+import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
@@ -70,7 +71,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Integer playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore) {
+    public Player(GameScene scene, int playerID, String playerName, Point2D position, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
         this.playerID = playerID;
         this.playerName = playerName;
@@ -250,6 +251,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         else if (sabotageEffect.isPlaying()) {
             sabotageEffect.stop();
         }
+    }
+
+    public void assignFarm(FarmEntity farm) {
+        this.playerState.assignFarm(farm.farmID);
     }
 
     /**

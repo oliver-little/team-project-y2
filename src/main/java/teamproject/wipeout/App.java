@@ -216,7 +216,7 @@ public class App implements Controller {
         //Time left
         ClockSystem clockSystem = new ClockSystem(TIME_FOR_GAME, this.gameStartTime);
         systemUpdater.addSystem(clockSystem);
-        this.worldEntity.setClock(() -> clockSystem);
+        this.worldEntity.setClockSupplier(() -> clockSystem);
 
         VBox topRight = new VBox();
         topRight.setAlignment(Pos.TOP_RIGHT);
@@ -424,7 +424,7 @@ public class App implements Controller {
 
     private void setUpNetworking() {
         CurrentPlayer myCurrentPlayer = this.worldEntity.myCurrentPlayer;
-        Market myMarket = this.worldEntity.market.getMarket();
+        Market myMarket = this.worldEntity.getMarket();
 
         GameClient currentClient = this.networker.getClient();
         currentClient.players.put(myCurrentPlayer.playerID, myCurrentPlayer);

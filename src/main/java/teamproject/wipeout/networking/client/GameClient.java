@@ -229,7 +229,7 @@ public class GameClient {
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
-                            this.worldEntity.market.getMarket().updateFromState(mState);
+                            this.worldEntity.getMarket().updateFromState(mState);
                             break;
                         case WORLD_STATE:
                             WorldState wState = (WorldState) receivedUpdate.content;
@@ -240,7 +240,7 @@ public class GameClient {
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.worldEntity.market.getMarket().responseArrived(response);
+                            this.worldEntity.getMarket().responseArrived(response);
                             break;
                         case DISCONNECT:
                             this.handleDisconnectPlayer(receivedUpdate.originClientID);

@@ -36,6 +36,8 @@ public class MarketEntity extends GameEntity {
 
     public static final double PLAYER_INTERACTION_DISTANCE = 250;
 
+    public final Point2D[] corners;
+
     protected MarketUI marketUI;
     protected Market market;
 
@@ -68,10 +70,18 @@ public class MarketEntity extends GameEntity {
         hoverEntity.addComponent(new Clickable(this.onClick));
         hoverEntity.addComponent(new ScriptComponent(this.onStep));
 
+        int width = 306;
+        int height = 203;
+        this.addComponent(new RenderComponent(new RectRenderable(Color.TRANSPARENT, width, height)));
+        this.corners = new Point2D[]{
+                new Point2D(x, y),
+                new Point2D(x + width, y),
+                new Point2D(x, y + height),
+                new Point2D(x + width, y + height),
+        };
+
         try {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
-
-            this.addComponent(new RenderComponent(new RectRenderable(Color.TRANSPARENT, 306, 203)));
 
             RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
             this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
