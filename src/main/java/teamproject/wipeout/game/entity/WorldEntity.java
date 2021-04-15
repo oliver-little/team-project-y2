@@ -299,7 +299,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createAIPlayers() {
-		for (int i = 2; i < 5; i++) {
+		for (int i = 2; i < 3; i++) {
 			AIPlayer aiPlayer = new AIPlayer(this.scene, i, AI_NAMES[i - 2], new Point2D(10, 10), this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));

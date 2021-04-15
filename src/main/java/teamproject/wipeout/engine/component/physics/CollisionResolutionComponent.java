@@ -52,6 +52,11 @@ public class CollisionResolutionComponent implements GameComponent {
 		this.avoidanceExecutorService = Executors.newSingleThreadScheduledExecutor();
 	}
 
+	public void resetControlVariables() {
+		this.deactivateOnCollision = false;
+		this.timeMultiplier = 1;
+	}
+
 	public static void resolveCollision(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
 		for (Pair<Shape, Shape> shapePair : p) {
 			resolveCollision(g1, g2, shapePair);
@@ -97,9 +102,9 @@ public class CollisionResolutionComponent implements GameComponent {
 			c.timeMultiplier += 1;
 
 			Runnable blockingTask = () -> {
+				c.deactivateOnCollision = false;
 				Runnable resetMultiplier = () -> c.timeMultiplier = 1;
 				task.accept(new Pair<Integer, Runnable>(c.timeMultiplier, resetMultiplier));
-				c.deactivateOnCollision = false;
 			};
 
 			c.avoidanceExecutorService.schedule(blockingTask, delay, TimeUnit.MILLISECONDS);

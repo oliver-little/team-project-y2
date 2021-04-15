@@ -46,6 +46,7 @@ public class AIPlayer extends Player  {
 
     private final WorldEntity worldEntity;
 
+    private final CollisionResolutionComponent collisionResolution;
     private final NavigationMesh navMesh;
     private final ScheduledExecutorService executor;
 
@@ -66,7 +67,7 @@ public class AIPlayer extends Player  {
 
         this.removeComponent(CollisionResolutionComponent.class);
 
-        this.addComponent(new CollisionResolutionComponent(true, (resolutionVector) -> {
+        this.collisionResolution = new CollisionResolutionComponent(true, (resolutionVector) -> {
             SteeringComponent steeringComponent = this.removeComponent(SteeringComponent.class);
 
             if (resolutionVector.getX() == 0) {
@@ -86,20 +87,20 @@ public class AIPlayer extends Player  {
             return (pair) -> {
                 this.physics.acceleration = new Point2D(0, 0);
                 if (pair.getKey() > 4) {
+                    pair.getValue().run();
                     this.aiDecisionAlgorithm();
 
                 } else {
-                    this.addComponent(new SteeringComponent(
-                            steeringComponent.path,
-                            () -> {
-                                pair.getValue().run();
-                                steeringComponent.onArrive.run();
-                            },
-                            steeringComponent.accelerationMultiplier
-                    ));
+                    Runnable oldOnArrive = steeringComponent.onArrive;
+                    steeringComponent.onArrive = () -> {
+                        pair.getValue().run();
+                        oldOnArrive.run();
+                    };
+                    this.addComponent(steeringComponent);
                 }
             };
-        }));
+        });
+        this.addComponent(this.collisionResolution);
     }
 
     public void setDesignatedMarketPoint(Point2D designatedMarketPoint) {
@@ -128,8 +129,9 @@ public class AIPlayer extends Player  {
             return;
         }
 
-        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, navMesh, 25);
+        List<Point2D> path = PathFindingSystem.findPath(wp, endPosition, this.navMesh, 25);
 
+        this.collisionResolution.resetControlVariables();
         this.addComponent(new SteeringComponent(path, callback, 300));
     }
 
@@ -138,12 +140,13 @@ public class AIPlayer extends Player  {
      */
     private void aiIdle(Runnable completion) {
         long idleTime = (long) (Math.random() * IDLE_TIME_SCALING_FACTOR) + IDLE_TIME_MINIMUM;
-
+        Runnable finishedIdling;
         if (completion == null) {
-            executor.schedule(() -> Platform.runLater(() -> this.aiDecisionAlgorithm()), idleTime, TimeUnit.SECONDS);
+            finishedIdling = () -> Platform.runLater(() -> this.aiDecisionAlgorithm());
         } else {
-            executor.schedule(() -> Platform.runLater(completion), idleTime, TimeUnit.SECONDS);
+            finishedIdling = () -> Platform.runLater(completion);
         }
+        this.executor.schedule(finishedIdling, idleTime, TimeUnit.SECONDS);
     }
 
     /**
