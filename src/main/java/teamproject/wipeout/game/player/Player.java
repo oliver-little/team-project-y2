@@ -53,8 +53,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final Point2D size;
 
-    public Integer occupiedSlots; // ??? !!! Why?
-
     protected ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
     protected final MovementComponent physics;
 
@@ -80,7 +78,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         this.spriteSheetName = "player-red";
 
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
-        this.occupiedSlots = 0;
 
         this.itemStore = itemStore;
 
@@ -318,6 +315,20 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     /**
+     * Method to count how many slots are occupied.
+     * @return - number of occupied slots
+     */
+    protected int countOccupiedSlots() {
+        int counter = 0;
+        for (InventoryItem pair : inventory) {
+            if (pair != null) {
+                counter += 1;
+            }
+        }
+        return counter;
+    }
+
+    /**
      * Method to count the number of items with a specific itemID
      * @param itemID - id of item to be counted
      * @return - quantity of item in inventory
@@ -385,13 +396,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 if ((pair == null) && (quantity <= stackLimit)) {
                     pair = new InventoryItem(itemID, quantity);
                     inventory.set(i, pair);
-                    occupiedSlots++;
                     return i;
+
                 } else if (pair == null) {
                     pair = new InventoryItem(itemID, stackLimit);
                     quantity -= stackLimit;
                     inventory.set(i, pair);
-                    occupiedSlots++;
                 }
                 i++;
             }
@@ -483,11 +493,11 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
                 if(quantity >= pair.quantity) {
                     quantity -= pair.quantity;
                     inventory.set(i, null); //free inventory slot
-                    occupiedSlots--; //inventory slot is freed
                     if(quantity == 0) {
                         break;
                     }
-                }else {
+
+                } else {
                     pair.quantity -= quantity;
                     inventory.set(i, pair);
                     slotWithSpace = i;
@@ -552,7 +562,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         for (int i = 0; i < MAX_SIZE; i++) {
             this.inventory.set(i, null);
         }
-        this.occupiedSlots = 0;
     }
 
     private void sendPlayerStateUpdate() {

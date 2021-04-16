@@ -210,8 +210,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
             if ((pair.quantity - quantity) == 0) {
                 inventory.set(selectedSlot, null); //free inventory slot
                 inventoryUI.updateUI(inventory, selectedSlot);
-                occupiedSlots--; //inventory slot is freed
                 return true;
+
             } else {
                 pair.quantity -= quantity;
                 inventory.set(selectedSlot, pair);

@@ -55,7 +55,7 @@ public class CurrentPlayerTest {
 		for(int i = (MAX_SIZE + 1); i <= (2*MAX_SIZE); i++) {
 			Assertions.assertFalse(currentPlayer.acquireItem(i, 1));
 		}
-		Assertions.assertEquals(MAX_SIZE, currentPlayer.occupiedSlots);
+		Assertions.assertEquals(MAX_SIZE, currentPlayer.countOccupiedSlots());
 		
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		for(InventoryItem pair : inventory) {
@@ -86,15 +86,15 @@ public class CurrentPlayerTest {
 	void testOccupiedSlotsCounter() {
 		for(int i = 1; i <= MAX_SIZE; i++) {
 			Assertions.assertTrue(currentPlayer.acquireItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit));
-			Assertions.assertEquals(i, currentPlayer.occupiedSlots);
+			Assertions.assertEquals(i, currentPlayer.countOccupiedSlots());
 		}
 		for(int i = 1; i <= MAX_SIZE; i++) {
 			Assertions.assertEquals(i, currentPlayer.removeItem(i, 1));
-			Assertions.assertEquals(MAX_SIZE, currentPlayer.occupiedSlots);
+			Assertions.assertEquals(MAX_SIZE, currentPlayer.countOccupiedSlots());
 		}
 		for(int i = 1; i <= MAX_SIZE; i++) {
 			Assertions.assertEquals(i, currentPlayer.removeItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit - 1));
-			Assertions.assertEquals(MAX_SIZE - i, currentPlayer.occupiedSlots);
+			Assertions.assertEquals(MAX_SIZE - i, currentPlayer.countOccupiedSlots());
 		}
 	}
 	
@@ -121,7 +121,7 @@ public class CurrentPlayerTest {
 			Assertions.assertFalse(currentPlayer.removeItemFromSelectedSlot(1));
 		}
 		
-		Assertions.assertEquals(0, currentPlayer.occupiedSlots); //checks slots are all unoccupied
+		Assertions.assertEquals(0, currentPlayer.countOccupiedSlots()); //checks slots are all unoccupied
 		
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		for(InventoryItem pair : inventory) {
