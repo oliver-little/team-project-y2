@@ -78,8 +78,7 @@ public class StartMenu implements Controller {
     }
 
 
-    public void cleanup() {
-    }
+    public void cleanup() {}
 
     private void createMultiplayerMenu(){
         root.getChildren().remove(menuBox);
@@ -156,7 +155,7 @@ public class StartMenu implements Controller {
 
         //addTitle("Lobby");
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
-        
+
         ListView<String> playerList = new ListView<>();
         playerList.setMaxWidth(180);
         playerList.setMaxHeight(120);
@@ -233,7 +232,7 @@ public class StartMenu implements Controller {
         serverBox.getStyleClass().add("pane");
         serverBox.setAlignment(Pos.CENTER);
 
-        
+
         ListView<Server> serverList = new ListView<>();
         serverList.setMaxWidth(180);
         serverList.setMaxHeight(120);
@@ -302,7 +301,7 @@ public class StartMenu implements Controller {
         ArrayList<String> result = new ArrayList<>();
         for(Map.Entry<String, KeyCode> entry2 : keyBindings.entrySet()){
             result.add(entry2.getValue().getName().toUpperCase());
-        } 
+        }
 
         return result;
     }
@@ -323,7 +322,7 @@ public class StartMenu implements Controller {
                         setText(item.toString());
                         setDisable(takenBindings.contains(item.toString()));
                     }
-                    
+
                 }
             });
         }
@@ -354,14 +353,14 @@ public class StartMenu implements Controller {
             box.setPrefWidth(200);
 
             Label label = new Label(action + ":  ");
-            
+
             ComboBox<String> dropDown = new ComboBox<String>();
 
             dropDown.getItems().addAll(dropDownItems); //adds all possible key bindings
             dropDown.setValue(code.getName().toUpperCase()); //sets default value
 
-            dropDowns.add(dropDown); 
-            
+            dropDowns.add(dropDown);
+
             dropDown.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
             {
                 public void changed(ObservableValue<? extends String> ov, final String oldvalue, final String newvalue){
@@ -379,7 +378,7 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
-        
+
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
@@ -416,7 +415,7 @@ public class StartMenu implements Controller {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        
+
 
         menuBox.setAlignment(Pos.CENTER);
         StackPane.setAlignment(menuBox, Pos.CENTER);
@@ -425,7 +424,7 @@ public class StartMenu implements Controller {
         startAnimation();
     }
 
-    private List<Pair<String, Runnable>> getMainMenuData(){
+    private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),

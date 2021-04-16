@@ -66,7 +66,7 @@ public class InventoryUI extends StackPane {
 
 	private final ItemStore itemStore;
 	private final SpriteManager spriteManager;
-	
+
 	private final Rectangle[] rectangles = new Rectangle[MAX_SIZE];
 	private final ImageView[] spriteViews = new ImageView[MAX_SIZE];
 	private final Text[] quantityTexts = new Text[MAX_SIZE];
@@ -75,7 +75,7 @@ public class InventoryUI extends StackPane {
 		super();
 		this.root = new Group(); //sets the root node of the inventory UI scene graph
 		this.getChildren().add(this.root);
-		
+
 		StackPane.setAlignment(root, Pos.BOTTOM_CENTER);
 
 		this.itemStore = itemStore;
@@ -83,7 +83,7 @@ public class InventoryUI extends StackPane {
 		createSquares();
 		createTexts();
 	}
-	
+
 	/**
 	 * Used to update the UI when a change is made at a specific index
 	 * @param items updated inventory arraylist
@@ -105,7 +105,7 @@ public class InventoryUI extends StackPane {
 			spriteViews[index].setImage(null);
 		}
 	}
-	
+
 	/**
 	 * highlights selected slot (changes border colour)
 	 * @param slot index of slot to be selected
@@ -131,7 +131,7 @@ public class InventoryUI extends StackPane {
 			});
 		}
 	}
-	
+
 	/**
 	 * Selects a slot and then starts/stops placing item
 	 * @param slot Index of the slot selected
@@ -227,13 +227,13 @@ public class InventoryUI extends StackPane {
 	public void displayMessage(ERROR_TYPE errorType) {
 		new ErrorUI(this, errorType);
 	}
-	
+
 	/**
 	 * creates squares for inventory slots, and adds ImageViews ready for sprite frames
 	 */
 	private void createSquares() {
 		for(int i = 0; i < MAX_SIZE ; i++) {
-			
+
 			Rectangle r = new Rectangle();
 			r.setWidth(62);
 			r.setHeight(62);
@@ -242,7 +242,7 @@ public class InventoryUI extends StackPane {
 			r.setX((67*i));
 			root.getChildren().add(r);
 			rectangles[i] = r;
-			
+
 			ImageView spriteView = new ImageView();
 			spriteView.setFitWidth(IMAGE_SIZE);
 			spriteView.setFitHeight(IMAGE_SIZE);
@@ -253,7 +253,7 @@ public class InventoryUI extends StackPane {
 			spriteViews[i] = spriteView;
 		}
 	}
-	
+
 	/**
 	 * Creates text nodes ready to display quantities in the inventory
 	 */
@@ -281,7 +281,7 @@ public class InventoryUI extends StackPane {
 
 	/**
 	 * Gets an image from the spriteManager, scaled to fit the inventory image sizes
-	 * 
+	 *
 	 * @param spriteSheetName The spriteSheet to retrieve an image from
 	 * @param spriteSetName The spriteSet to retrieve an image from
 	 * @return The requested image, scaled to IMAGE_SIZE

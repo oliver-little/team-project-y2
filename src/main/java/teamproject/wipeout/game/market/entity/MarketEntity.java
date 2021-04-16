@@ -122,7 +122,7 @@ public class MarketEntity extends GameEntity {
         // Physics
         Shape[] hitboxes = {
                 // Main body right
-        		new Rectangle(96, 44, 159, 95),
+                new Rectangle(96, 44, 159, 95),
                 // Main body left
                 new Rectangle(49, 44, 47, 108),
                 // Sign and wood pile left

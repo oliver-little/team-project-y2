@@ -48,7 +48,7 @@ public class TaskUI extends VBox {
         this.getChildren().addAll(openCloseButton, list);
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        showTasks(currentPlayer.tasks);
+        showTasks(currentPlayer.getTasks());
     }
 
     public void showTasks(ArrayList<Task> tasks) {

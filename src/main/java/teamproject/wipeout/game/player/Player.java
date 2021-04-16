@@ -43,8 +43,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
     public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
-    public static final int MAX_SIZE = 10; //no. of inventory slots
-    public static final int INITIAL_MONEY = 25; //initial amount of money
+    //no. of inventory slots
+    public static final int MAX_SIZE = 10;
+    //initial amount of money
+    public static final int INITIAL_MONEY = 25;
 
     private static final double NOMINAL_SPEED = 500.0;
 
@@ -54,15 +56,17 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final Point2D size;
 
-    protected ArrayList<InventoryItem> inventory = new ArrayList<>(); //ArrayList used to store inventory
+    //ArrayList used to store inventory
+    protected ArrayList<InventoryItem> inventory = new ArrayList<InventoryItem>();
+
     protected final MovementComponent physics;
 
     private Transform position;
     private Supplier<GameClient> clientSupplier;
     private Consumer<PotionEntity> thrownPotion;
 
-    private final DoubleProperty money;
     private final PlayerState playerState;
+    private final DoubleProperty money;
     private final ParticleEntity sabotageEffect;
 
     protected final ItemStore itemStore;
@@ -84,24 +88,27 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), Point2D.ZERO, Point2D.ZERO);
 
+        // Particle simulation
         ParticleParameters parameters = new ParticleParameters(100, true,
-                FAST_PARTICLE,
-                ParticleSimulationSpace.WORLD,
-                SupplierGenerator.rangeSupplier(0.5, 1.5),
-                SupplierGenerator.rangeSupplier(1.0, 4.0),
-                null,
-                SupplierGenerator.staticSupplier(0.0),
-                SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
+            FAST_PARTICLE,
+            ParticleSimulationSpace.WORLD,
+            SupplierGenerator.rangeSupplier(0.5, 1.5),
+            SupplierGenerator.rangeSupplier(1.0, 4.0),
+            null,
+            SupplierGenerator.staticSupplier(0.0),
+            SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
 
         parameters.setEmissionRate(20);
         parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(12, 0), new Point2D(52, 40)));
         parameters.addUpdateFunction((particle, percentage, timeStep) -> particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage));
 
+        // Sabotage
         this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
         this.sabotageEffect.setParent(this);
 
         this.position = null;
 
+        // Physics
         this.physics = new MovementComponent(0f, 0f, 0f, 0f);
         this.physics.stopCallback = (newPosition) -> {
             this.playerState.setPosition(newPosition);

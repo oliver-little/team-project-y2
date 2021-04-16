@@ -47,7 +47,6 @@ public class UIUtil {
 
     public static VBox createMenu(List<Pair<String, Runnable>> menuData) {
         VBox buttonBox = new VBox(10);
-        //menuBox = new VBox(30);
         buttonBox.setAlignment(Pos.CENTER);
 
         menuData.forEach(data -> {
@@ -77,6 +76,5 @@ public class UIUtil {
         return imageView;
 
     }
-
 
 }

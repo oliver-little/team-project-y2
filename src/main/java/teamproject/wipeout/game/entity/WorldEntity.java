@@ -2,18 +2,15 @@ package teamproject.wipeout.game.entity;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
-import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
-import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
@@ -32,7 +29,6 @@ import teamproject.wipeout.game.player.AIPlayerHelper;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.potion.PotionEntity;
-import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -46,35 +42,34 @@ import java.util.function.Supplier;
 
 public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
+	public static final int[] WORLD_SIZE = new int[]{1461, 1184};
 	public static final Point2D MARKET_START = new Point2D(576, 544);
 	public static final String[] AI_NAMES = new String[]{"Siri", "Alexa", "Cortana"};
 
-	public final MarketPriceUpdater marketUpdater;
-	public final Map<Integer, FarmEntity> farms;
+	public final ItemStore itemStore;
+	public final SpriteManager spriteManager;
+
 	public final CurrentPlayer myCurrentPlayer;
 	public final AnimalEntity myAnimal;
+	public final MarketPriceUpdater marketUpdater;
+	public final Map<Integer, FarmEntity> farms;
 	public final Pickables pickables;
 
 	public final AIPlayerHelper aiPlayerHelper;
 
-	private final HashMap<Integer, Point2D[]> potions;
+	private Supplier<GameClient> clientSupplier;
+	private Supplier<ClockSystem> clockSupplier;
 
-	//private FarmEntity myFarm;
-
-	private final MarketEntity marketEntity;
+	private final ArrayList<Player> players;
+	private final InputHandler inputHandler;
 	private final NavigationMesh navMesh;
 
-	private final InputHandler inputHandler;
-	private Supplier<GameClient> clientSupplier;
-	private ArrayList<Player> players;
-
-	public SpriteManager spriteManager;
-	public ItemStore itemStore;
-
-	private Supplier<ClockSystem> clockSupplier;
+	private final MarketEntity marketEntity;
+	private final HashMap<Integer, Point2D[]> potions;
 
 	public WorldEntity(Map<String, Object> worldPack) {
 		super((GameScene) worldPack.get("gameScene"));
+
 		this.spriteManager = (SpriteManager) worldPack.get("spriteManager");
 		this.itemStore = (ItemStore) worldPack.get("itemStore");
 
@@ -88,103 +83,50 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		this.addComponent(new Transform(0,0));
 
-		int width = 1461;
-		int height = 1184;
+		int width = WORLD_SIZE[0];
+		int height = WORLD_SIZE[1];
 
-		//grass background
+		// Grass Background
 		GameEntity grass = this.scene.createEntity();
 		grass.setParent(this);
 		grass.addComponent(new Transform(-width * 4, -height * 4, -100));
 		grass.addComponent(new RenderComponent(new RectRenderable(Color.rgb(47, 129, 54), width * 8, height * 8)));
 		
+		// World Boundary
+		this.createEndOfTheWorld(width, height);
 
-		//boundaries
-		GameEntity worldBoundaries = this.scene.createEntity();
-		worldBoundaries.addComponent(new Transform(0,0));
-		Rectangle[] hitboxes = {
-				new Rectangle(-5,-5,5,height+10),
-				new Rectangle(-5,-5,width+10,5),
-				new Rectangle(-5,height,width+10,5),
-				new Rectangle(width,-5,5,height+10)
-		};
-		this.addComponent(new HitboxComponent(hitboxes));
-		this.addComponent(new CollisionResolutionComponent(false, null));
-		
-		try {
-			ForestEntity forestTop = new ForestEntity(this.scene, new Point2D(-50,-100), new Point2D(1461,0), this.spriteManager);
-			ForestEntity forestLeft = new ForestEntity(this.scene, new Point2D(-100,-100), new Point2D(0,1411), this.spriteManager);
-			ForestEntity forestBottom = new ForestEntity(this.scene, new Point2D(0,1184), new Point2D(1461,0), this.spriteManager);
-			ForestEntity forestRight = new ForestEntity(this.scene, new Point2D(1461,-100), new Point2D(0,1411), this.spriteManager);
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
+		// Current Player
 		this.myCurrentPlayer = (CurrentPlayer) worldPack.get("currentPlayer");
 		this.players = new ArrayList<Player>();
 		this.players.add(this.myCurrentPlayer);
 
+		// Farms
 		Integer numberOfPlayers = (Integer) worldPack.get("players");
-		if (numberOfPlayers == 4) {
-			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 240), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity3 = new FarmEntity(this.scene, 3, new Point2D(220, 800), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity4 = new FarmEntity(this.scene, 4, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
+		this.createFarmsFor(numberOfPlayers);
 
-			this.farms.put(farmEntity1.farmID, farmEntity1);
-			this.farms.put(farmEntity2.farmID, farmEntity2);
-			this.farms.put(farmEntity3.farmID, farmEntity3);
-			this.farms.put(farmEntity4.farmID, farmEntity4);
-
-		} else if (numberOfPlayers == 2) {
-			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, spriteManager, itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 800), this.pickables, spriteManager, itemStore);
-
-			this.farms.put(farmEntity1.farmID, farmEntity1);
-			this.farms.put(farmEntity2.farmID, farmEntity2);
-		}
-
+		// Market
 		this.marketEntity = (MarketEntity) worldPack.get("marketEntity");
 		this.marketUpdater = new MarketPriceUpdater(this.marketEntity.getMarket(), true);
-
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
-
-		Point2D marketTopLeftCorner = this.marketEntity.corners[0];
-		Point2D marketBottomRightCorner = this.marketEntity.corners[3];
-		double marketWidth = marketBottomRightCorner.getX() - marketTopLeftCorner.getX();
-		double marketHeight = marketBottomRightCorner.getY() - marketTopLeftCorner.getY();
-		Rectangle marketRect = new Rectangle(marketTopLeftCorner, marketWidth, marketHeight);
-		List<Rectangle> navMarketRectangle = List.of(marketRect);
 
         this.navMesh = NavigationMesh.generateMesh(
         		Point2D.ZERO,
 				new Point2D(width - this.myCurrentPlayer.size.getX(), height - this.myCurrentPlayer.size.getY()),
-				navMarketRectangle);
+				this.getNavMeshAvoidRectangles()
+		);
 
-		this.myAnimal = new AnimalEntity(this.scene, new Point2D(10, 10), this.navMesh, spriteManager, new ArrayList<>(farms.values()));
-		TextRenderable tag= new TextRenderable("Remy", 20);
-		GameEntity nameTag = this.scene.createEntity();
-		nameTag.addComponent(new RenderComponent(tag));
-		RenderComponent ratRender = this.myAnimal.getComponent(RenderComponent.class);
-		nameTag.addComponent(new Transform(ratRender.getWidth()/2f -tag.getWidth()/1f, -tag.getHeight()*1f, 10));
-		nameTag.setParent(this.myAnimal);
+		this.myAnimal = this.createAnimalAt(new Point2D(10.0, 10.0));
 
 		this.setFarmFor(this.myCurrentPlayer, true, this.farms.get(1));
 
 		this.clockSupplier = null;
+		this.clientSupplier = null;
 
 		this.createAIPlayers();
 	}
 
 	public Market getMarket() {
 		return this.marketEntity.getMarket();
-	}
-
-	public void addPotion(PotionEntity potionEntity) {
-		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
-		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
-		this.potions.put(potionEntity.getPotionID(), pointPoints);
-		this.sendStateUpdate();
 	}
 
 	public NavigationMesh getNavMesh() {
@@ -248,6 +190,37 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
+	public void addPotion(PotionEntity potionEntity) {
+		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
+		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
+		this.potions.put(potionEntity.getPotionID(), pointPoints);
+		this.sendStateUpdate();
+	}
+
+	public void setupFarmPickingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
+			this.myCurrentPlayer.getMyFarm().onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	public void setupFarmDestroyingKey(KeyCode code) {
+		this.inputHandler.onKeyRelease(code, () -> {
+			this.myCurrentPlayer.getMyFarm().onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
+		});
+	}
+
+	public ArrayList<Player> getPlayers() {
+		return this.players;
+	}
+
+	public Supplier<ClockSystem> getClockSupplier() {
+		return this.clockSupplier;
+	}
+
+	public void setClockSupplier(Supplier<ClockSystem> clock) {
+		this.clockSupplier = clock;
+	}
+
 	protected Point2D[] setPositionForPlayer(Player player, FarmEntity farm) {
 		Point2D marketCorner = this.marketEntity.corners[farm.farmID - 1].subtract(player.size.getX() / 2, player.size.getY() / 2);
 
@@ -280,16 +253,62 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		return new Point2D[]{marketCorner, farmCorner};
 	}
 
-	public void setupFarmPickingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+	private void createEndOfTheWorld(int width, int height) {
+		GameEntity worldBoundaries = this.scene.createEntity();
+		worldBoundaries.addComponent(new Transform(0,0));
+		Rectangle[] hitboxes = {
+				new Rectangle(-5,-5,5,height+10),
+				new Rectangle(-5,-5,width+10,5),
+				new Rectangle(-5,height,width+10,5),
+				new Rectangle(width,-5,5,height+10)
+		};
+		this.addComponent(new HitboxComponent(hitboxes));
+		this.addComponent(new CollisionResolutionComponent(false, null));
+
+		try {
+			new ForestEntity(this.scene, new Point2D(-50,-100), new Point2D(1461,0), this.spriteManager);
+			new ForestEntity(this.scene, new Point2D(-100,-100), new Point2D(0,1411), this.spriteManager);
+			new ForestEntity(this.scene, new Point2D(0,1184), new Point2D(1461,0), this.spriteManager);
+			new ForestEntity(this.scene, new Point2D(1461,-100), new Point2D(0,1411), this.spriteManager);
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void setupFarmDestroyingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+	private void createFarmsFor(int numberOfPlayers) {
+		if (numberOfPlayers == 4) {
+			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 240), this.pickables, this.spriteManager, this.itemStore);
+			FarmEntity farmEntity3 = new FarmEntity(this.scene, 3, new Point2D(220, 800), this.pickables, this.spriteManager, this.itemStore);
+			FarmEntity farmEntity4 = new FarmEntity(this.scene, 4, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
+
+			this.farms.put(farmEntity1.farmID, farmEntity1);
+			this.farms.put(farmEntity2.farmID, farmEntity2);
+			this.farms.put(farmEntity3.farmID, farmEntity3);
+			this.farms.put(farmEntity4.farmID, farmEntity4);
+
+		} else if (numberOfPlayers == 2) {
+			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
+			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
+
+			this.farms.put(farmEntity1.farmID, farmEntity1);
+			this.farms.put(farmEntity2.farmID, farmEntity2);
+		}
+	}
+
+	private AnimalEntity createAnimalAt(Point2D startPoint) {
+		AnimalEntity animal = new AnimalEntity(this.scene, startPoint, this.navMesh, this.spriteManager, List.copyOf(this.farms.values()));
+
+		TextRenderable tag = new TextRenderable("Remy", 20);
+		GameEntity nameTag = this.scene.createEntity();
+		nameTag.addComponent(new RenderComponent(tag));
+
+		RenderComponent ratRender = animal.getComponent(RenderComponent.class);
+		nameTag.addComponent(new Transform(ratRender.getWidth()/2f - tag.getWidth(), -tag.getHeight()*1f, 10));
+		nameTag.setParent(this.myAnimal);
+
+		return animal;
 	}
 
 	private void createAIPlayers() {
@@ -303,16 +322,15 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	public ArrayList<Player> getPlayers() {
-		return this.players;
-	}
+	private List<Rectangle> getNavMeshAvoidRectangles() {
+		Point2D marketTopLeftCorner = this.marketEntity.corners[0];
+		Point2D marketBottomRightCorner = this.marketEntity.corners[3];
 
-	public Supplier<ClockSystem> getClockSupplier() {
-		return this.clockSupplier;
-	}
+		double marketWidth = marketBottomRightCorner.getX() - marketTopLeftCorner.getX();
+		double marketHeight = marketBottomRightCorner.getY() - marketTopLeftCorner.getY();
 
-	public void setClockSupplier(Supplier<ClockSystem> clock) {
-		this.clockSupplier = clock;
+		Rectangle marketRect = new Rectangle(marketTopLeftCorner, marketWidth, marketHeight);
+		return List.of(marketRect);
 	}
 
 	/**

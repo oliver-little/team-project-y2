@@ -4,6 +4,7 @@ import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
+import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
@@ -23,22 +24,21 @@ import java.util.*;
 
 public class CurrentPlayer extends Player implements StateUpdatable<PlayerState> {
 
-    public static final int MAX_TASK_SIZE = 10; //no. of task slots
+    //no. of task slots
+    public static final int MAX_TASK_SIZE = 10;
 
-    public int selectedSlot;
-
-    public ArrayList<Task> tasks;
-    public LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
-
+    //private TextRenderable nameText;
     private FarmEntity myFarm;
+
+    private int selectedSlot;
     private InventoryUI inventoryUI;
 
     private TaskUI taskUI;
+    private ArrayList<Task> tasks;
+    private final LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
 
     private final LinkedHashMap<Integer, Integer> soldItems = new LinkedHashMap<>();
-
     private final SignatureEntityCollector pickableCollector;
-
     private final AudioComponent audio;
 
     /**
@@ -69,9 +69,26 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         return this.myFarm;
     }
 
+    /*
+    public void setName(String name) {
+        this.playerName = name;
+        this.getCurrentState().setPlayerName(playerName);
+        this.sendPlayerStateUpdate();
+        this.nameText.setText(this.playerName);
+    }
+    */
+
     public void setInventoryUI(InventoryUI inventoryUI) {
         this.inventoryUI = inventoryUI;
         this.selectSlot(0);
+    }
+
+    public ArrayList<Task> getTasks() {
+        return this.tasks;
+    }
+
+    public LinkedHashMap<Integer, Integer> getCurrentAvailableTasks() {
+        return this.currentAvailableTasks;
     }
 
     public void setTaskUI(TaskUI taskUI) {

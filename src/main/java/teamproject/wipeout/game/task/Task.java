@@ -19,11 +19,17 @@ public class Task {
 
     /**
      * Creates a new task
-     * @param description - description text of the task
+     * @param descriptionWithoutMoney - description text of the task
      * @param reward - how much money does the player get when they complete the task
      * @param condition - the condition under which the task is considered completed by the player
      */
-    public Task(Integer id, String descriptionWithoutMoney, Integer reward, Function<CurrentPlayer, Boolean> condition, Item relatedItem) {
+    public Task(
+            Integer id,
+            String descriptionWithoutMoney,
+            Integer reward,
+            Function<CurrentPlayer, Boolean> condition,
+            Item relatedItem
+    ) {
         this.id = id;
         this.descriptionWithoutMoney = descriptionWithoutMoney;
         this.description = descriptionWithoutMoney + " ($" + reward.toString() + ")";

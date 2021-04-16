@@ -22,6 +22,7 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.entity.gameclock.ClockUI;
+import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.EventSystem;
 import teamproject.wipeout.engine.system.PlayerAnimatorSystem;
@@ -48,6 +49,7 @@ import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.inventory.*;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -173,7 +175,20 @@ public class Gameplay implements Controller {
             this.networker.setWorldEntity(this.worldEntity);
         }
 
-        // Game audio
+        //Clock System
+        List<Player> players = List.of();
+
+        if (this.networker != null) {
+            GameClient client = this.networker.getClient();
+            if (client != null) {
+                players = List.copyOf(this.networker.getClient().players.values());
+            }
+        }
+        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, players);
+        this.systemUpdater.addSystem(clockSystem);
+        this.worldEntity.setClockSupplier(() -> clockSystem);
+
+        // Game Audio
         GameAudio gameAudio = new GameAudio("backingTrack2.wav", true);
 
         // Inventory UI
@@ -184,11 +199,6 @@ public class Gameplay implements Controller {
         MoneyUI moneyUI = new MoneyUI(currentPlayer);
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
-        // Time UI
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime);
-        this.systemUpdater.addSystem(clockSystem);
-        this.worldEntity.setClockSupplier(() -> clockSystem);
-
         // Task UI
         TaskUI taskUI = new TaskUI(currentPlayer);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
@@ -197,9 +207,16 @@ public class Gameplay implements Controller {
         // Settings UI
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
 
-        // UI Overlay
+        // UI Overlay (Clock and Settings)
         VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI);
+
+        // GameOver UI
+        GameOverUI gameOverUI = clockSystem.gameOverUI;
+        gameOverUI.setVisible(false);
+        gameOverUI.networker = this.networker;
+        gameOverUI.root = this.root;
+        StackPane.setAlignment(gameOverUI, Pos.CENTER);
 
         // Input bindings
         this.setupKeyInput(currentPlayer, inventoryUI);
