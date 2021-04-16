@@ -82,7 +82,7 @@ public class App implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    Double TIME_FOR_GAME = 100.0;
+    Double TIME_FOR_GAME = 10.0;
 
     // Temporarily placed variables
     ItemStore itemStore;
@@ -245,6 +245,8 @@ public class App implements Controller {
         // Game over UI
         GameOverUI gameOverUI = clockSystem.gameOverUI;
         gameOverUI.setVisible(false);
+        gameOverUI.networker = this.networker;
+        gameOverUI.gameScene = this.gameScene;
         StackPane.setAlignment(gameOverUI, Pos.CENTER);
 
         // Top right UI - Clock + Settings

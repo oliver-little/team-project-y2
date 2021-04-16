@@ -1,19 +1,31 @@
 package teamproject.wipeout.engine.entity.gameover;
 
+import javafx.application.Platform;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import teamproject.wipeout.StartMenu;
+import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceType;
 
+import java.io.IOException;
 import java.util.*;
 
 public class GameOverUI extends VBox {
 
     HashMap<Integer, Player> players;
+    private Button closeButton;
+
     private ListView<String> list;
+
+    public Networker networker;
+    public GameScene gameScene;
 
     class Sortbymoney implements Comparator<Player> {
         // Used for sorting in descending order of
@@ -35,7 +47,16 @@ public class GameOverUI extends VBox {
         list.setFocusTraversable( false );
         list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
-        this.getChildren().addAll(list);
+        this.setSpacing(2);
+
+        this.getStylesheets().add(ResourceType.STYLESHEET.path + "task-ui.css");
+
+        closeButton = new Button("Finish game");
+        closeButton.setOnAction(e -> {
+            this.endGame();
+        });
+
+        this.getChildren().addAll(list, closeButton);
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
     }
 
@@ -48,5 +69,18 @@ public class GameOverUI extends VBox {
             list.getItems().add(player.playerName + " " + "$" + player.getMoney());
             i += 1;
         }
+    }
+
+    public void endGame() {
+        GameClient client = this.networker.getClient();
+        if (client != null) {
+            System.out.println("Connection closed");
+            client.closeConnection(true);
+            if (!client.getIsActive()) {
+                System.out.println("It's not active");
+            }
+        }
+
+        this.networker.stopServer();
     }
 }
