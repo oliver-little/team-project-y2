@@ -61,14 +61,16 @@ public class GameAudio {
     }
     
     public void play() {
-    	
+    	if (muted) {
+    		return;
+		}
+
     	audioClip.start();
     	if(toLoop) {
     		audioClip.loop(Clip.LOOP_CONTINUOUSLY);
     	}
     	playing = true;
     	setVolume(volume);
-    	
     	
     }
     
@@ -79,7 +81,7 @@ public class GameAudio {
 	    if(playing) {	
 	    	stop();
 	    	playing = false;
-	    }else {
+	    } else if (!muted) {
 	    	play();
 	    	playing = true;
 	    }

@@ -357,11 +357,8 @@ public class Gameplay implements Controller {
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
-            Task currentTask =  new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
-                    (CurrentPlayer inputPlayer) ->
-                    {
-                        return inputPlayer.getSoldItems().containsKey(itemId);
-                    },
+            Task currentTask = new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
+                    (CurrentPlayer inputPlayer) -> inputPlayer.getSoldItems().containsKey(itemId),
                     itemStore.getItem(itemId)
             );
             tasks.add(currentTask);
