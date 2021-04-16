@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
@@ -76,10 +77,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore) {
+    public Player(GameScene scene, Pair<Integer, String> playerInfo, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
-        this.playerID = playerID;
-        this.playerName = playerName;
+        this.playerID = playerInfo.getKey();
+        this.playerName = playerInfo.getValue();
         this.spriteSheetName = "player-red";
 
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);

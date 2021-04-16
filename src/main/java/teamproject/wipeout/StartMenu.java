@@ -35,23 +35,30 @@ import java.util.*;
  * It implements the Controller Interface.
  */
 public class StartMenu implements Controller {
-    
-    private Pane root;
-    private VBox menuBox;
-    private VBox buttonBox;
+
+    private static final List<String> DROPDOWN_ITEMS = List.of("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT");
+
     private Text title;
+    private VBox buttonBox;
+    private final Pane root;
+    private final VBox menuBox;
 
-    Networker networker;
+    private final LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
+    private final ArrayList<ComboBox<String>> dropDowns;
 
-    private LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
-    private ArrayList<String> dropDownItems = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT"));
-    private ArrayList<ComboBox<String>> dropDowns = new ArrayList<>();
+    private String chosenName;
+    private final Networker networker;
 
     public StartMenu() {
         this.root = new StackPane();
         this.menuBox = new VBox(30);
+
+        this.dropDowns = new ArrayList<ComboBox<String>>();
+        this.keyBindings = new LinkedHashMap<String, KeyCode>();
+        this.createDefaultBindings();
+
+        this.chosenName = null;
         this.networker = new Networker();
-        createDefaultBindings();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             GameClient client = this.networker.getClient();
@@ -66,7 +73,6 @@ public class StartMenu implements Controller {
      * Creates default key bindings to be passed into game
      */
     private void createDefaultBindings(){
-        keyBindings = new LinkedHashMap<String, KeyCode>();
         keyBindings.put("Move left", KeyCode.LEFT);
         keyBindings.put("Move right", KeyCode.RIGHT);
         keyBindings.put("Move up", KeyCode.UP);
@@ -104,7 +110,6 @@ public class StartMenu implements Controller {
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
-        //hostPane.getStyleClass().add("vbox");
         hostPane.setMaxWidth(400);
 
         HBox nameBox = new HBox();
@@ -126,9 +131,7 @@ public class StartMenu implements Controller {
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> createServer(serverNameTF.getText(), nameTF.getText())));
 
-
         hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
-
 
         menuBox.getChildren().addAll(hostPane);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
@@ -149,39 +152,36 @@ public class StartMenu implements Controller {
         return true;
     }
 
-    private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress, boolean isHost) {
+    private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        //addTitle("Lobby");
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
 
         ListView<String> playerList = new ListView<>();
         playerList.setMaxWidth(180);
         playerList.setMaxHeight(120);
-        //list.setMouseTransparent( true );
         playerList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
-        //serverList.getItems().add(new Server("test", null));
 
         menuBox.getChildren().addAll(playerList);
 
         Pair<String, Runnable> backButton = new Pair<String, Runnable>("Back", () -> {
             if (isHost) {
-                networker.stopServer();
+                this.networker.stopServer();
             } else {
-                networker.getClient().closeConnection(true);
+                this.networker.getClient().closeConnection(true);
             }
             createMainMenu();
         });
 
         List<Pair<String, Runnable>> menuData;
         if (isHost) {
-            menuData =Arrays.asList(
+            menuData = Arrays.asList(
                     new Pair<String, Runnable>("Start Game", () -> startServerGame()),
                     backButton
             );
         } else {
-            menuData =Arrays.asList(backButton);
+            menuData = Arrays.asList(backButton);
         }
 
         buttonBox = UIUtil.createMenu(menuData);
@@ -189,7 +189,8 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        networker.connectClient(serverAddress, serverHost, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
+        chosenName = userName;
+        networker.connectClient(serverAddress, userName, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
 
         ObservableMap<Integer, String> observablePlayers = networker.getClient().connectedClients.get();
 
@@ -356,7 +357,7 @@ public class StartMenu implements Controller {
 
             ComboBox<String> dropDown = new ComboBox<String>();
 
-            dropDown.getItems().addAll(dropDownItems); //adds all possible key bindings
+            dropDown.getItems().addAll(DROPDOWN_ITEMS); //adds all possible key bindings
             dropDown.setValue(code.getName().toUpperCase()); //sets default value
 
             dropDowns.add(dropDown);
@@ -445,7 +446,7 @@ public class StartMenu implements Controller {
     }
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.keyBindings);
+        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.chosenName, this.keyBindings);
 
         Window window = this.root.getScene().getWindow();
         Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
@@ -481,7 +482,6 @@ public class StartMenu implements Controller {
         full.setInterpolator(Interpolator.EASE_BOTH);
         full.play();
     }
-
 	
     /**
      * Creates the content of the menu and then gets the root node of this class.

@@ -14,6 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
@@ -44,11 +45,12 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.CameraEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.inventory.InventoryItem;
+import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
-import teamproject.wipeout.game.inventory.*;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
@@ -79,6 +81,9 @@ public class Gameplay implements Controller {
     private double gameTime = 500.0;
     private final long gameStartTime;
 
+    private final Integer playerID;
+    private final String playerName;
+
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
 
@@ -96,19 +101,18 @@ public class Gameplay implements Controller {
     private MovementAudioSystem movementAudio;
     private List<EventSystem> eventSystems;
 
-    private final LinkedHashMap<String, KeyCode> keyBindings;
+    private final Map<String, KeyCode> keyBindings;
 
     private final Networker networker;
 
-    public Gameplay(Networker networker, Long givenGameStartTime, LinkedHashMap<String, KeyCode> bindings) {
-        this.networker = networker;
-        this.keyBindings = bindings;
+    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings) {
+        this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
-        if (givenGameStartTime == null) {
-            this.gameStartTime = System.currentTimeMillis();
-        } else {
-            this.gameStartTime = givenGameStartTime;
-        }
+        this.playerID = new Random().nextInt(1024);
+        this.playerName = playerName == null ? "Me" : playerName;
+
+        this.keyBindings = bindings;
+        this.networker = networker;
     }
 
     public Parent getParentWith(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
@@ -150,8 +154,8 @@ public class Gameplay implements Controller {
         this.eventSystems = List.of(mouseClick, playerAnimator, sabotage);
 
         // Player
-        int playerID = new Random().nextInt(1024);
-    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, playerID, "Farmer", this.spriteManager, this.itemStore);
+        Pair<Integer, String> playerInfo = new Pair<Integer, String>(this.playerID, this.playerName);
+    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, playerInfo, this.spriteManager, this.itemStore);
 
         // Camera
         CameraEntity cameraEntity = new CameraEntity(this.gameScene);
@@ -177,13 +181,13 @@ public class Gameplay implements Controller {
 
         //Clock System
         List<Player> players = List.of();
-
         if (this.networker != null) {
             GameClient client = this.networker.getClient();
             if (client != null) {
                 players = List.copyOf(this.networker.getClient().players.values());
             }
         }
+
         ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, players);
         this.systemUpdater.addSystem(clockSystem);
         this.worldEntity.setClockSupplier(() -> clockSystem);
@@ -498,6 +502,7 @@ public class Gameplay implements Controller {
         worldPack.put("players", this.numberOfSingleplayers);
         worldPack.put("currentPlayer", currentPlayer);
         worldPack.put("marketEntity", marketEntity);
+        worldPack.put("singleplayer", this.networker == null);
         return worldPack;
     }
 

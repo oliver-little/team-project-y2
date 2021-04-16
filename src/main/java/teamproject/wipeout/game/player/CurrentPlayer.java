@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.player;
 
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
@@ -27,7 +28,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     //no. of task slots
     public static final int MAX_TASK_SIZE = 10;
 
-    //private TextRenderable nameText;
     private FarmEntity myFarm;
 
     private int selectedSlot;
@@ -46,8 +46,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      *
      * @param scene The GameScene this entity is part of
      */
-    public CurrentPlayer(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore) {
-        super(scene, playerID, playerName, spriteManager, itemStore);
+    public CurrentPlayer(GameScene scene, Pair<Integer, String> playerInfo, SpriteManager spriteManager, ItemStore itemStore) {
+        super(scene, playerInfo, spriteManager, itemStore);
 
         this.addComponent(new MovementAudioComponent(this.physics, "steps.wav"));
 
@@ -68,15 +68,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     public FarmEntity getMyFarm() {
         return this.myFarm;
     }
-
-    /*
-    public void setName(String name) {
-        this.playerName = name;
-        this.getCurrentState().setPlayerName(playerName);
-        this.sendPlayerStateUpdate();
-        this.nameText.setText(this.playerName);
-    }
-    */
 
     public void setInventoryUI(InventoryUI inventoryUI) {
         this.inventoryUI = inventoryUI;

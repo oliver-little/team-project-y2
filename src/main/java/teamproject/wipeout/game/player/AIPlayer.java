@@ -58,8 +58,8 @@ public class AIPlayer extends Player {
     /**
      * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
      */
-    public AIPlayer(GameScene scene, int playerID, String playerName, WorldEntity worldEntity) {
-        super(scene, playerID, playerName, worldEntity.spriteManager, worldEntity.itemStore);
+    public AIPlayer(GameScene scene, Pair<Integer, String> playerInfo, WorldEntity worldEntity) {
+        super(scene, playerInfo, worldEntity.spriteManager, worldEntity.itemStore);
 
         this.aiFarm = null;
         this.currentFarmExpansionPrice = FarmExpansionUI.FARM_EXPANSION_START_PRICE;

@@ -1,5 +1,6 @@
 package teamproject.wipeout.util;
 
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.shape.Rectangle;
@@ -85,7 +86,8 @@ public class Networker {
                 return null;
             }
 
-            Player newCurrentPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), spriteManager, itemStore);
+            Pair<Integer, String> playerInfo = new Pair<Integer, String>(newPlayerState.getPlayerID(), newPlayerState.getPlayerName());
+            Player newCurrentPlayer = new Player(gameScene, playerInfo, spriteManager, itemStore);
             newCurrentPlayer.setWorldPosition(newPlayerState.getPosition());
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());

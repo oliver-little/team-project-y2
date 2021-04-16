@@ -3,6 +3,7 @@ package teamproject.wipeout.game.entity;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
@@ -122,7 +123,10 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.clockSupplier = null;
 		this.clientSupplier = null;
 
-		this.createAIPlayers();
+		Boolean singleplayer = (Boolean) worldPack.get("singleplayer");
+		if (singleplayer) {
+			this.createAIPlayers();
+		}
 	}
 
 	public Market getMarket() {
@@ -313,7 +317,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	private void createAIPlayers() {
 		for (int i = 2; i < 5; i++) {
-			AIPlayer aiPlayer = new AIPlayer(this.scene, i, AI_NAMES[i - 2], this);
+			Pair<Integer, String> playerInfo = new Pair<Integer, String>(i, AI_NAMES[i - 2]);
+			AIPlayer aiPlayer = new AIPlayer(this.scene, playerInfo, this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
 			this.setFarmFor(aiPlayer, this.farms.get(i));

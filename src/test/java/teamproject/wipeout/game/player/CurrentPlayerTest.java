@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,8 @@ public class CurrentPlayerTest {
 
 		int playerID = new Random().nextInt(1024);
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-		currentPlayer = new CurrentPlayer(scene, playerID, "testPlayer", spriteManager, itemStore);
+		Pair<Integer, String> playerInfo = new Pair<Integer, String>(playerID, "testPlayer");
+		currentPlayer = new CurrentPlayer(scene, playerInfo, spriteManager, itemStore);
 		currentPlayer.setInventoryUI(invUI);
 		MAX_SIZE = currentPlayer.MAX_SIZE;
 	}
