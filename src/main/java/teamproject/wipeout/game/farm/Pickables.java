@@ -131,17 +131,15 @@ public class Pickables {
         this.onUpdate = onUpdate;
     }
 
-    public InputKeyAction picked(Set<Pickable> pickedItems) {
-        return () -> {
-            for (Pickable pickable : pickedItems) {
-                pickable.entity.destroy();
-            }
-            this.items.removeAll(pickedItems);
+    public void picked(Set<Pickable> pickedItems) {
+        for (Pickable pickable : pickedItems) {
+            pickable.entity.destroy();
+        }
+        this.items.removeAll(pickedItems);
 
-            if (this.onUpdate != null) {
-                this.onUpdate.run();
-            }
-        };
+        if (this.onUpdate != null) {
+            this.onUpdate.run();
+        }
     }
 
     /**

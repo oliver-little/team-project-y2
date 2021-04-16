@@ -69,20 +69,16 @@ public class GameOverUI extends VBox {
     }
 
     public void endGame() {
-        GameClient client = this.networker.getClient();
-        if (client != null) {
-            System.out.println("Connection closed");
-            client.closeConnection(true);
-            if (!client.getIsActive()) {
-                System.out.println("It's not active");
+        if (this.networker != null) {
+            GameClient client = this.networker.getClient();
+            if (client != null) {
+                client.closeConnection(true);
             }
+
+            this.networker.stopServer();
         }
 
-        this.networker.stopServer();
-
         StartMenu startMenu = new StartMenu();
-        Window window = root.getScene().getWindow();
-        Parent content = startMenu.getContent();
-        root.getScene().setRoot(content);
+        this.root.getScene().setRoot(startMenu.getContent());
     }
 }

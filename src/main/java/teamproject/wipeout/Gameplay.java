@@ -78,7 +78,7 @@ public class Gameplay implements Controller {
     private StackPane interfaceOverlay;
 
     private int numberOfSingleplayers = 4;
-    private double gameTime = 500.0;
+    private double gameTime = 30.0;
     private final long gameStartTime;
 
     private final Integer playerID;
@@ -180,15 +180,7 @@ public class Gameplay implements Controller {
         }
 
         //Clock System
-        List<Player> players = List.of();
-        if (this.networker != null) {
-            GameClient client = this.networker.getClient();
-            if (client != null) {
-                players = List.copyOf(this.networker.getClient().players.values());
-            }
-        }
-
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, players);
+        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.worldEntity.getPlayers());
         this.systemUpdater.addSystem(clockSystem);
         this.worldEntity.setClockSupplier(() -> clockSystem);
 
@@ -211,16 +203,16 @@ public class Gameplay implements Controller {
         // Settings UI
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
 
-        // UI Overlay (Clock and Settings)
-        VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
-        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI);
-
         // GameOver UI
         GameOverUI gameOverUI = clockSystem.gameOverUI;
         gameOverUI.setVisible(false);
         gameOverUI.networker = this.networker;
         gameOverUI.root = this.root;
         StackPane.setAlignment(gameOverUI, Pos.CENTER);
+
+        // UI Overlay
+        VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
+        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI, gameOverUI);
 
         // Input bindings
         this.setupKeyInput(currentPlayer, inventoryUI);
@@ -441,7 +433,7 @@ public class Gameplay implements Controller {
         );
         this.inputHandler.onKeyRelease(
                 this.keyBindings.get("Pick-up"),
-                this.worldEntity.pickables.picked(currentPlayer.pickup())
+                () -> this.worldEntity.pickables.picked(currentPlayer.pickup())
         );
     }
 
@@ -463,7 +455,7 @@ public class Gameplay implements Controller {
         Market myMarket = this.worldEntity.getMarket();
 
         GameClient currentClient = this.networker.getClient();
-        currentClient.players.put(myCurrentPlayer.playerID, myCurrentPlayer);
+        currentClient.addCurrentPlayer(myCurrentPlayer);
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;

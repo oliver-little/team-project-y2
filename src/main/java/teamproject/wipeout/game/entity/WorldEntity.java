@@ -101,15 +101,17 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.players = new ArrayList<Player>();
 		this.players.add(this.myCurrentPlayer);
 
-		// Farms
-		Integer numberOfPlayers = (Integer) worldPack.get("players");
-		this.createFarmsFor(numberOfPlayers);
-
 		// Market
 		this.marketEntity = (MarketEntity) worldPack.get("marketEntity");
 		this.marketUpdater = new MarketPriceUpdater(this.marketEntity.getMarket(), true);
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
 
+		// Farms
+		Integer numberOfPlayers = (Integer) worldPack.get("players");
+		this.createFarmsFor(numberOfPlayers);
+		this.setFarmFor(this.myCurrentPlayer, true, this.farms.get(1));
+
+		// AI
         this.navMesh = NavigationMesh.generateMesh(
         		Point2D.ZERO,
 				new Point2D(width - this.myCurrentPlayer.size.getX(), height - this.myCurrentPlayer.size.getY()),
@@ -117,8 +119,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		);
 
 		this.myAnimal = this.createAnimalAt(new Point2D(10.0, 10.0));
-
-		this.setFarmFor(this.myCurrentPlayer, true, this.farms.get(1));
 
 		this.clockSupplier = null;
 		this.clientSupplier = null;
@@ -215,6 +215,14 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public ArrayList<Player> getPlayers() {
 		return this.players;
+	}
+
+	public void addPlayer(Player newPlayer) {
+		this.players.add(newPlayer);
+	}
+
+	public void removePlayer(Player newPlayer) {
+		this.players.remove(newPlayer);
 	}
 
 	public Supplier<ClockSystem> getClockSupplier() {
