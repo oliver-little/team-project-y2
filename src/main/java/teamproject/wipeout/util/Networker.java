@@ -1,27 +1,18 @@
 package teamproject.wipeout.util;
 
-import javafx.geometry.Point2D;
 import javafx.util.Pair;
-import teamproject.wipeout.engine.component.PlayerAnimatorComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.shape.Rectangle;
-import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameScene;
-import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
-import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
-import teamproject.wipeout.networking.client.NewServerDiscovery;
 import teamproject.wipeout.networking.client.ServerDiscovery;
-import teamproject.wipeout.networking.data.GameUpdate;
-import teamproject.wipeout.networking.data.GameUpdateType;
-import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.networking.server.GameServerRunner;
 import teamproject.wipeout.networking.server.ServerRunningException;
 
@@ -36,10 +27,10 @@ public class Networker {
 
     public final GameServerRunner serverRunner;
 
+    public WorldEntity worldEntity;
+
     protected ServerDiscovery serverDiscovery;
     protected GameClient client;
-
-    private WorldEntity worldEntity;
 
     public Networker() {
         this.serverRunner = new GameServerRunner();
@@ -89,36 +80,22 @@ public class Networker {
         }
     }
 
-    public NewPlayerAction onPlayerConnection(GameScene gameScene, SpriteManager spriteManager) {
+    public NewPlayerAction onPlayerConnection(GameScene gameScene, ItemStore itemStore, SpriteManager spriteManager) {
         return (newPlayerState) -> {
-            if (newPlayerState.getPlayerID().equals(this.worldEntity.myPlayer.playerID)) {
+            if (newPlayerState.getPlayerID().equals(this.worldEntity.myCurrentPlayer.playerID)) {
                 return null;
             }
 
-            Player newPlayer = new Player(gameScene, newPlayerState.getPlayerID(), newPlayerState.getPlayerName(), newPlayerState.getPosition(), null, spriteManager);
-
-            newPlayer.addComponent(new HitboxComponent(new Rectangle(5, 0, 24, 33)));
-            newPlayer.addComponent(new CollisionResolutionComponent());
-
-            try {
-                newPlayer.addComponent(new RenderComponent(new Point2D(0, -3)));
-                newPlayer.addComponent(new PlayerAnimatorComponent(
-                        spriteManager.getSpriteSet("player-red", "walk-up"),
-                        spriteManager.getSpriteSet("player-red", "walk-right"),
-                        spriteManager.getSpriteSet("player-red", "walk-down"),
-                        spriteManager.getSpriteSet("player-red", "walk-left"),
-                        spriteManager.getSpriteSet("player-red", "idle")));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Pair<Integer, String> playerInfo = new Pair<Integer, String>(newPlayerState.getPlayerID(), newPlayerState.getPlayerName());
+            Player newCurrentPlayer = new Player(gameScene, playerInfo, spriteManager, itemStore);
+            newCurrentPlayer.setWorldPosition(newPlayerState.getPosition());
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
             if (myFarm != null) {
-                myFarm.assignPlayer(newPlayer.playerID, false, () -> this.client);
+                myFarm.assignPlayer(newCurrentPlayer.playerID, false, () -> this.client);
             }
 
-            return newPlayer;
+            return newCurrentPlayer;
         };
     }
 

@@ -1,12 +1,10 @@
 package teamproject.wipeout.networking.client;
 
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.collections.FXCollections;
-import teamproject.wipeout.game.entity.AnimalEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
@@ -18,7 +16,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,31 +33,31 @@ public class GameClient {
 
     public final String clientName;
 
+    public final SimpleMapProperty<Integer, String> connectedClients;
+    public final HashSet<PlayerState> tempPlayerStates;
+
+    public Integer myFarmID;
+    public Map<Integer, FarmEntity> farmEntities;
+    public Consumer<Long> clockCalibration;
+
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
-    public final SimpleMapProperty<Integer, String> connectedClients;
-    public final HashSet<PlayerState> tempPlayerStates;
-    public final HashMap<Integer, Player> players;
+    private Integer clientID;
+
     private WorldEntity worldEntity;
-
-    public Consumer<Long> clockCalibration;
-    public Integer myFarmID;
-
-    public Map<Integer, FarmEntity> farmEntities;
-
     private NewPlayerAction newPlayerAction;
 
-    private Integer id;
+    private final HashMap<Integer, Player> players;
 
     /**
      * Default initializer for {@code GameClient}
      */
     protected GameClient(String clientName) {
-        this.id = null;
+        this.clientID = null;
         this.clientName = clientName;
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
@@ -71,7 +68,7 @@ public class GameClient {
     }
 
     public Integer getID() {
-        return this.id;
+        return this.clientID;
     }
 
     /**
@@ -81,6 +78,10 @@ public class GameClient {
      */
     public boolean getIsActive() {
         return this.isActive.get();
+    }
+
+    public void addCurrentPlayer(CurrentPlayer currentPlayer) {
+        this.players.put(currentPlayer.playerID, currentPlayer);
     }
 
     public void setNewPlayerAction(NewPlayerAction newPlayerAction) {
@@ -119,11 +120,11 @@ public class GameClient {
             return null;
         }
 
-        client.id = (Integer) receivedUpdate.content;
+        client.clientID = (Integer) receivedUpdate.content;
         client.isActive.set(true);
 
         // Send my ID and my latest playerState
-        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.id, client.clientName));
+        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.clientID, client.clientName));
 
         client.startReceivingUpdates();
 
@@ -179,7 +180,7 @@ public class GameClient {
 
         try {
             if (clientSide) {
-                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.id));
+                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.clientID));
                 this.out.reset();
             }
 
@@ -220,7 +221,7 @@ public class GameClient {
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
                         case ANIMAL_STATE:
-                            if (!receivedUpdate.originClientID.equals(this.id)) {
+                            if (!receivedUpdate.originClientID.equals(this.clientID)) {
                                 this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
@@ -233,7 +234,7 @@ public class GameClient {
                             break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
-                            this.worldEntity.market.getMarket().updateFromState(mState);
+                            this.worldEntity.getMarket().updateFromState(mState);
                             break;
                         case WORLD_STATE:
                             WorldState wState = (WorldState) receivedUpdate.content;
@@ -244,7 +245,7 @@ public class GameClient {
                             break;
                         case RESPONSE:
                             MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.worldEntity.market.getMarket().responseArrived(response);
+                            this.worldEntity.getMarket().responseArrived(response);
                             break;
                         case DISCONNECT:
                             this.handleDisconnectPlayer(receivedUpdate.originClientID);
@@ -291,9 +292,8 @@ public class GameClient {
     private void createPlayerFromState(PlayerState state) {
         Player newPlayer = this.newPlayerAction.createWith(state);
         if (newPlayer != null) {
-//            newPlayer.setName(this.clientName);
             this.players.put(newPlayer.playerID, newPlayer);
-            System.out.println("Added new player");
+            this.worldEntity.addPlayer(newPlayer);
         }
     }
 
@@ -305,11 +305,12 @@ public class GameClient {
     }
 
     private void handleDisconnectPlayer(Integer disconnectedClientID) {
-        if (disconnectedClientID.equals(this.id)) {
+        if (disconnectedClientID.equals(this.clientID)) {
             this.closeConnection(false);
         } else {
             this.connectedClients.remove(disconnectedClientID);
-            this.players.remove(disconnectedClientID);
+            Player removedPlayer = this.players.remove(disconnectedClientID);
+            this.worldEntity.removePlayer(removedPlayer);
         }
     }
 

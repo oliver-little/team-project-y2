@@ -19,7 +19,7 @@ public class GameEntity {
     private GameEntity parent;
     private List<GameEntity> children;
 
-    private String uuid;
+    private final String uuid;
 
     protected GameScene scene;
 

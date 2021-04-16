@@ -1,12 +1,9 @@
 package teamproject.wipeout.engine.component.render;
 
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-
-import java.awt.*;
 
 //TODO: add multiple contructors for different fonts, sizes and colors etc
 public class TextRenderable implements Renderable {
@@ -28,25 +25,19 @@ public class TextRenderable implements Renderable {
 	}
 	
 	public void setText(String text) {
-		this.text = new Text(text);;
+		this.text = new Text(text);
 	}
 	
 	public String getText() {
 		return this.text.getText();
 	}
 	
-	public double getWidth()
-	{
-		double width = text.getLayoutBounds().getWidth()*font.getSize()/17.5f;
-		//System.out.println("textWidth "+ width);
-		return width;
+	public double getWidth() {
+		return text.getLayoutBounds().getWidth()*font.getSize()/17.5f;
 	}
 
-	public double getHeight()
-	{
-		double height = text.getLayoutBounds().getHeight()*font.getSize()/17.5f;
-		//System.out.println("textHeight "+ height);
-		return height;
+	public double getHeight() {
+		return text.getLayoutBounds().getHeight()*font.getSize()/17.5f;
 	}
 
 	public void setFont(Font font){
@@ -54,8 +45,7 @@ public class TextRenderable implements Renderable {
 	}
 
 	@Override
-	public void render(GraphicsContext gc, double x, double y, double scale)
-	{
+	public void render(GraphicsContext gc, double x, double y, double scale) {
 		gc.setFill(Color.WHITE);
 		gc.setFont(font);
 		gc.fillText(text.getText(), scale * x, scale * y);

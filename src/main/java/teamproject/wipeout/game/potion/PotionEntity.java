@@ -32,6 +32,7 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.util.SupplierGenerator;
 
 public class PotionEntity extends GameEntity {
@@ -51,10 +52,12 @@ public class PotionEntity extends GameEntity {
     private ParticleComponent trail;
     private ParticleComponent explosion;
 
+    private CurrentPlayer currentPlayer;
+    private boolean thrownByActivePlayer;
     private AudioComponent audio;
     private Runnable potionRemover;
 
-    public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, Point2D startPosition, Point2D endPosition) {
+    public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, CurrentPlayer activePlayer, boolean thrownByActivePlayer, Point2D startPosition, Point2D endPosition) {
         super(scene);
 
         this.potion = potion;
@@ -67,7 +70,9 @@ public class PotionEntity extends GameEntity {
 
         this.addComponent(new ScriptComponent(onStep));
 
-        audio = new AudioComponent();
+        this.currentPlayer = activePlayer;
+        this.thrownByActivePlayer = thrownByActivePlayer;
+        this.audio = new AudioComponent();
         this.addComponent(audio);
 
         Image potionSprite = null;
@@ -165,6 +170,8 @@ public class PotionEntity extends GameEntity {
             Point2D hitPosition = this.getComponent(Transform.class).getWorldPosition();
             Circle potionArea = new Circle(hitPosition.getX(), hitPosition.getY(), POTION_EFFECT_RADIUS);
 
+            boolean currentPlayerHit = false;
+
             for (GameEntity entity : possibleEffectEntities) {
                 if (entity.hasComponent(Transform.class)) {
                     Transform transform = entity.getComponent(Transform.class);
@@ -175,6 +182,9 @@ public class PotionEntity extends GameEntity {
                         Rectangle r = new Rectangle(transform.getWorldPosition().getX(), transform.getWorldPosition().getY(), rc.getWidth(), rc.getHeight());
                         if (GeometryUtil.intersects(potionArea, r)) {
                             entity.addComponent(potion.getComponent(SabotageComponent.class));
+                            if (entity == this.currentPlayer) {
+                                currentPlayerHit = true;
+                            }
                         }
                     }
                 }
@@ -193,7 +203,9 @@ public class PotionEntity extends GameEntity {
                     }
                 });
 
-                audio.play("glassSmashing2.wav");
+                if (this.thrownByActivePlayer || currentPlayerHit) {
+                    this.audio.play("glassSmashing2.wav");
+                }
                 explosion.play();
 
             } else {

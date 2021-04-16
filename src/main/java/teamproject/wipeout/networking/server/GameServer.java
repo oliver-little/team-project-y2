@@ -35,14 +35,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GameServer {
 
     // Constants important for the whole ...networking. package
-//<<<<<<< HEAD
-//    public static final int HANDSHAKE_PORT = 9919;
-//    public static final String HANDSHAKE_GROUP = "229.1.2.3";
-//    public static final int GAME_PORT = 8780;
-//=======
     public static final int HANDSHAKE_PORT = 1025;
     public static final String HANDSHAKE_GROUP = "229.22.29.51";
-//>>>>>>> develop
     public static final int MAX_CONNECTIONS = 4;
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
 

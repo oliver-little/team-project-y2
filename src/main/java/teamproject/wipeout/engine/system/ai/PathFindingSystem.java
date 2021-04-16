@@ -1,15 +1,11 @@
 package teamproject.wipeout.engine.system.ai;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
-
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.ai.NavigationEdge;
 import teamproject.wipeout.engine.component.ai.NavigationMesh;
 import teamproject.wipeout.engine.component.ai.NavigationSquare;
+
+import java.util.*;
 
 
 /**

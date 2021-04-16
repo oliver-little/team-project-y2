@@ -1,15 +1,5 @@
 package teamproject.wipeout.game.entity;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
@@ -20,12 +10,12 @@ import teamproject.wipeout.engine.component.ai.NavigationSquare;
 import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
 import teamproject.wipeout.engine.component.render.particle.property.EaseCurve;
 import teamproject.wipeout.engine.component.render.particle.property.OvalParticle;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
@@ -37,6 +27,16 @@ import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.state.AnimalState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalState> {
 
@@ -237,7 +237,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         int y = (int) fullyGrownItems.get(rand).getY();
 
         Runnable onComplete = () ->  {
-            randFarm.pickItemAt(x, y, false);
+            randFarm.pickItemAt(x, y, false, false);
             Platform.runLater(aiDecisionAlgorithm);
         };
 

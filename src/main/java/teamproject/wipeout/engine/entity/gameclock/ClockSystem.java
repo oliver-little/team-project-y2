@@ -2,20 +2,19 @@ package teamproject.wipeout.engine.entity.gameclock;
 
 import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.system.GameSystem;
-import teamproject.wipeout.game.player.Player;
-
-import java.util.HashMap;
 
 public class ClockSystem implements GameSystem {
 
     public final ClockUI clockUI;
-    public final GameOverUI gameOverUI;
     public final Long gameStartTime;
 
-    public ClockSystem(double duration, long startTime, HashMap<Integer, Player> players) {
-        this.gameOverUI = new GameOverUI(players);
+    public ClockSystem(double duration, long startTime, GameOverUI gameOverUI) {
         this.clockUI = new ClockUI(duration, gameOverUI);
         this.gameStartTime = startTime;
+    }
+
+    public double getTime() {
+        return this.clockUI.getTime();
     }
 
     public void cleanup() {

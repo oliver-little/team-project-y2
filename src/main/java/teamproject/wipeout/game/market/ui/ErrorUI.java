@@ -24,23 +24,30 @@ public class ErrorUI {
         TASK_COMPLETED
     }
 
-    private Label errorMessageLabel;
-
     public ErrorUI(StackPane errorPane, ERROR_TYPE errorType) {
-        if (errorType == ERROR_TYPE.MONEY) {
-            this.errorMessageLabel = new Label("Cannot Purchase: Insufficient Funds!");
-        } else if (errorType == ERROR_TYPE.TASKS_FULL) {
-            this.errorMessageLabel = new Label("Cannot Purchase: Task List Full!"); 
-        } else if (errorType == ERROR_TYPE.TASK_EXISTS) {
-            this.errorMessageLabel = new Label("Cannot Purchase: Task Already Owned!"); 
-        } else if (errorType == ERROR_TYPE.INVENTORY_FULL) {
-            this.errorMessageLabel = new Label("Cannot Obtain Item(s): Inventory Full!"); 
-        } else if (errorType == ERROR_TYPE.INVENTORY_EMPTY) {
-            this.errorMessageLabel = new Label("Cannot Sell: Item(s) Not Owned!"); 
-        } else if (errorType == ERROR_TYPE.TASK_COMPLETED) {
-            this.errorMessageLabel = new Label("Task Completed!"); 
-        } else {
-            throw new IllegalArgumentException("Invalid error type passed to ErrorUI.");
+        Label errorMessageLabel;
+
+        switch (errorType) {
+            case MONEY:
+                errorMessageLabel = new Label("Cannot Purchase: Insufficient Funds!");
+                break;
+            case TASKS_FULL:
+                errorMessageLabel = new Label("Cannot Purchase: Task List Full!");
+                break;
+            case TASK_EXISTS:
+                errorMessageLabel = new Label("Cannot Purchase: Task Already Owned!");
+                break;
+            case INVENTORY_FULL:
+                errorMessageLabel = new Label("Cannot Obtain Item(s): Inventory Full!");
+                break;
+            case INVENTORY_EMPTY:
+                errorMessageLabel = new Label("Cannot Sell: Item(s) Not Owned!");
+                break;
+            case TASK_COMPLETED:
+                errorMessageLabel = new Label("Task Completed!");
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid error type passed to ErrorUI.");
         }
 
         if (errorType == ERROR_TYPE.TASK_COMPLETED) {
@@ -75,4 +82,5 @@ public class ErrorUI {
         });               
         sequentialTransition.play();
     }
+
 }

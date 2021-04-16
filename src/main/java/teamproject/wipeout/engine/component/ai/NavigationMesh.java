@@ -64,7 +64,7 @@ public class NavigationMesh {
                 NavigationSquare square = meshSquares.get(i);
 
                 if (square.containsExclBoundaries(shape)) {
-                    Point2D shapeTopLeft = new Point2D(shape.getX(), shape.getY());
+                    Point2D shapeTopLeft = new Point2D(shape.getX() , shape.getY());
                     Point2D shapeBottomRight = new Point2D(shape.getX() + shape.getWidth(), shape.getY() + shape.getHeight());
 
                     // Add square to left side only if shape starts after the left edge of the square

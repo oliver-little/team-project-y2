@@ -9,7 +9,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -24,7 +24,7 @@ public class TaskUI extends VBox {
 
     private boolean opened = true;
 
-    public TaskUI(Player player) {
+    public TaskUI(CurrentPlayer currentPlayer) {
         super();
 
         this.setSpacing(2);
@@ -48,7 +48,7 @@ public class TaskUI extends VBox {
         this.getChildren().addAll(openCloseButton, list);
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
-        showTasks(player.tasks);
+        showTasks(currentPlayer.getTasks());
     }
 
     public void showTasks(ArrayList<Task> tasks) {

@@ -7,13 +7,13 @@ import java.io.InputStream;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 public class MoneyUI extends Label {
 
-    public MoneyUI(Player player) {
+    public MoneyUI(CurrentPlayer currentPlayer) {
         super();
 
         try {
@@ -28,7 +28,7 @@ public class MoneyUI extends Label {
         this.setId("money");
 
         this.textProperty().bind(Bindings.concat("Money: $").concat(Bindings.createStringBinding(() -> {
-            return String.format("%.2f",  player.moneyProperty().getValue());
-        }, player.moneyProperty())));
+            return String.format("%.2f",  currentPlayer.moneyProperty().getValue());
+        }, currentPlayer.moneyProperty())));
     }
 }

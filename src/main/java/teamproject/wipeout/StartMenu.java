@@ -1,57 +1,63 @@
 package teamproject.wipeout;
 
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
-import javafx.geometry.Pos;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
  * It implements the Controller Interface.
  */
 public class StartMenu implements Controller {
-    
-    private Pane root;
-    private VBox menuBox;
-    private VBox buttonBox;
+
+    private static final List<String> DROPDOWN_ITEMS = List.of("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT");
+
     private Text title;
+    private VBox buttonBox;
+    private final Pane root;
+    private final VBox menuBox;
 
-    Networker networker;
+    private final LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
+    private final ArrayList<ComboBox<String>> dropDowns;
 
-    private LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
-    private ArrayList<String> dropDownItems = new ArrayList<String>(Arrays.asList("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT"));
-    private ArrayList<ComboBox<String>> dropDowns = new ArrayList<>();
+    private String chosenName;
+    private final Networker networker;
 
     public StartMenu() {
         this.root = new StackPane();
         this.menuBox = new VBox(30);
+
+        this.dropDowns = new ArrayList<ComboBox<String>>();
+        this.keyBindings = new LinkedHashMap<String, KeyCode>();
+        this.createDefaultBindings();
+
+        this.chosenName = null;
         this.networker = new Networker();
-        createDefaultBindings();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             GameClient client = this.networker.getClient();
@@ -66,7 +72,6 @@ public class StartMenu implements Controller {
      * Creates default key bindings to be passed into game
      */
     private void createDefaultBindings(){
-        keyBindings = new LinkedHashMap<String, KeyCode>();
         keyBindings.put("Move left", KeyCode.LEFT);
         keyBindings.put("Move right", KeyCode.RIGHT);
         keyBindings.put("Move up", KeyCode.UP);
@@ -78,8 +83,7 @@ public class StartMenu implements Controller {
     }
 
 
-    public void cleanup() {
-    }
+    public void cleanup() {}
 
     private void createMultiplayerMenu(){
         root.getChildren().remove(menuBox);
@@ -105,7 +109,6 @@ public class StartMenu implements Controller {
 
         VBox hostPane = new VBox();
         hostPane.setAlignment(Pos.CENTER);
-        //hostPane.getStyleClass().add("vbox");
         hostPane.setMaxWidth(400);
 
         HBox nameBox = new HBox();
@@ -127,9 +130,7 @@ public class StartMenu implements Controller {
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> createServer(serverNameTF.getText(), nameTF.getText())));
 
-
         hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
-
 
         menuBox.getChildren().addAll(hostPane);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
@@ -150,39 +151,36 @@ public class StartMenu implements Controller {
         return true;
     }
 
-    private void createLobbyMenu(String serverName, String serverHost, InetSocketAddress serverAddress, boolean isHost) {
+    private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        //addTitle("Lobby");
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
-        
+
         ListView<String> playerList = new ListView<>();
         playerList.setMaxWidth(180);
         playerList.setMaxHeight(120);
-        //list.setMouseTransparent( true );
         playerList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
-        //serverList.getItems().add(new Server("test", null));
 
         menuBox.getChildren().addAll(playerList);
 
         Pair<String, Runnable> backButton = new Pair<String, Runnable>("Back", () -> {
             if (isHost) {
-                networker.stopServer();
+                this.networker.stopServer();
             } else {
-                networker.getClient().closeConnection(true);
+                this.networker.getClient().closeConnection(true);
             }
             createMainMenu();
         });
 
         List<Pair<String, Runnable>> menuData;
         if (isHost) {
-            menuData =Arrays.asList(
+            menuData = Arrays.asList(
                     new Pair<String, Runnable>("Start Game", () -> startServerGame()),
                     backButton
             );
         } else {
-            menuData =Arrays.asList(backButton);
+            menuData = Arrays.asList(backButton);
         }
 
         buttonBox = UIUtil.createMenu(menuData);
@@ -190,7 +188,8 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        networker.connectClient(serverAddress, serverHost, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
+        chosenName = userName;
+        networker.connectClient(serverAddress, userName, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
 
         ObservableMap<Integer, String> observablePlayers = networker.getClient().connectedClients.get();
 
@@ -233,7 +232,7 @@ public class StartMenu implements Controller {
         serverBox.getStyleClass().add("pane");
         serverBox.setAlignment(Pos.CENTER);
 
-        
+
         ListView<Server> serverList = new ListView<>();
         serverList.setMaxWidth(180);
         serverList.setMaxHeight(120);
@@ -302,7 +301,7 @@ public class StartMenu implements Controller {
         ArrayList<String> result = new ArrayList<>();
         for(Map.Entry<String, KeyCode> entry2 : keyBindings.entrySet()){
             result.add(entry2.getValue().getName().toUpperCase());
-        } 
+        }
 
         return result;
     }
@@ -323,7 +322,7 @@ public class StartMenu implements Controller {
                         setText(item.toString());
                         setDisable(takenBindings.contains(item.toString()));
                     }
-                    
+
                 }
             });
         }
@@ -354,14 +353,14 @@ public class StartMenu implements Controller {
             box.setPrefWidth(200);
 
             Label label = new Label(action + ":  ");
-            
+
             ComboBox<String> dropDown = new ComboBox<String>();
 
-            dropDown.getItems().addAll(dropDownItems); //adds all possible key bindings
+            dropDown.getItems().addAll(DROPDOWN_ITEMS); //adds all possible key bindings
             dropDown.setValue(code.getName().toUpperCase()); //sets default value
 
-            dropDowns.add(dropDown); 
-            
+            dropDowns.add(dropDown);
+
             dropDown.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
             {
                 public void changed(ObservableValue<? extends String> ov, final String oldvalue, final String newvalue){
@@ -379,7 +378,7 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
-        
+
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
@@ -416,7 +415,7 @@ public class StartMenu implements Controller {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        
+
 
         menuBox.setAlignment(Pos.CENTER);
         StackPane.setAlignment(menuBox, Pos.CENTER);
@@ -425,7 +424,7 @@ public class StartMenu implements Controller {
         startAnimation();
     }
 
-    private List<Pair<String, Runnable>> getMainMenuData(){
+    private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),
@@ -438,7 +437,7 @@ public class StartMenu implements Controller {
 
     private void startServerGame() {
         try {
-            networker.serverRunner.startGame();
+            this.networker.serverRunner.startGame();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -446,13 +445,12 @@ public class StartMenu implements Controller {
     }
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        App game = new App(givenNetworker, gameStartTime, keyBindings);
-        Window window = root.getScene().getWindow();
-        Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
-        root.getScene().setRoot(content);
+        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.chosenName, this.keyBindings);
+        Parent content = game.getParentWith(this.root.getScene().getWindow());
+
+        this.root.getScene().setRoot(content);
         game.createContent();
     }
-
 
     /**
      * A method to animate the menu items.
@@ -481,16 +479,14 @@ public class StartMenu implements Controller {
         full.setInterpolator(Interpolator.EASE_BOTH);
         full.play();
     }
-
 	
     /**
      * Creates the content of the menu and then gets the root node of this class.
      * @return StackPane (root) which contains all the menu components in the scene graph.
      */
 	@Override
-	public Parent getContent()
-	{
-		createContent();
-		return root;
+	public Parent getContent() {
+		this.createContent();
+		return this.root;
 	}
 }

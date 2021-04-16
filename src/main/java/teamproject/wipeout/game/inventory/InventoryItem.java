@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.player;
+package teamproject.wipeout.game.inventory;
 
 /**
  * Structure to hold an itemID and its respective quantity for the inventory ArrayList.

@@ -43,7 +43,7 @@ public class SteeringSystem implements GameSystem{
             MovementComponent m = entity.getComponent(MovementComponent.class);
             Transform t = entity.getComponent(Transform.class);
             SteeringComponent s = entity.getComponent(SteeringComponent.class);
-            if (s == null) {
+            if (s == null || s.paused) {
                 continue;
             }
 
@@ -59,7 +59,7 @@ public class SteeringSystem implements GameSystem{
                     toRemove.add(entity);
                     continue;
                 }
-                s.currentPoint ++;
+                s.currentPoint++;
             }
 
             m.acceleration = vector.normalize().multiply(s.accelerationMultiplier);

@@ -3,9 +3,6 @@ package teamproject.wipeout;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
@@ -50,7 +47,6 @@ public class UIUtil {
 
     public static VBox createMenu(List<Pair<String, Runnable>> menuData) {
         VBox buttonBox = new VBox(10);
-        //menuBox = new VBox(30);
         buttonBox.setAlignment(Pos.CENTER);
 
         menuData.forEach(data -> {
@@ -80,6 +76,5 @@ public class UIUtil {
         return imageView;
 
     }
-
 
 }

@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;

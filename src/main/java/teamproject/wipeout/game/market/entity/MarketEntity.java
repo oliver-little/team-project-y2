@@ -1,10 +1,12 @@
 package teamproject.wipeout.game.market.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.ScriptComponent;
@@ -27,15 +29,18 @@ import teamproject.wipeout.game.assetmanagement.spritesheet.SpriteSetDescriptor;
 import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpritesheetDescriptor;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
-import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 
 public class MarketEntity extends GameEntity {
 
     public static final double PLAYER_INTERACTION_DISTANCE = 250;
+
+    public final Point2D[] corners;
 
     protected MarketUI marketUI;
     protected Market market;
@@ -45,33 +50,29 @@ public class MarketEntity extends GameEntity {
     protected Runnable onUIOpen;
 
     // Hover and click variables
-    protected Transform playerTransform;
+    protected Supplier<Point2D> playerWorldPosition;
     protected Point2D clickableTopLeft;
     protected Point2D clickableBottomRight;
     protected Point2D clickableCentre;
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(
-            GameScene scene,
-            double x,
-            double y,
-            ItemStore items,
-            Player player,
-            SpriteManager spriteManager,
-            StackPane uiContainer,
-            WorldEntity world,
-            ArrayList<Task> purchasableTasks
-    ) {
-        super(scene);
+    public MarketEntity(Map<String, Object> marketPack) {
+        super((GameScene) marketPack.get("gameScene"));
 
-        this.uiContainer = uiContainer;
-        this.playerTransform = player.getComponent(Transform.class);
+        ItemStore itemStore = (ItemStore) marketPack.get("itemStore");
+        SpriteManager spriteManager = (SpriteManager) marketPack.get("spriteManager");
+        CurrentPlayer currentPlayer = (CurrentPlayer) marketPack.get("currentPlayer");
 
+        this.uiContainer = (StackPane) marketPack.get("uiContainer");
+        this.playerWorldPosition = () -> currentPlayer.getWorldPosition();
+
+        double x = WorldEntity.MARKET_START.getX();
+        double y = WorldEntity.MARKET_START.getY();
         this.addComponent(new Transform(x, y, 1));
 
         // Create child component for hoverable so it displays behind everything
-        GameEntity hoverEntity = new GameEntity(scene);
+        GameEntity hoverEntity = this.scene.createEntity();
         hoverEntity.setParent(this);
         Transform childTransform = new Transform(0, 0);
         hoverEntity.addComponent(childTransform);
@@ -79,10 +80,18 @@ public class MarketEntity extends GameEntity {
         hoverEntity.addComponent(new Clickable(this.onClick));
         hoverEntity.addComponent(new ScriptComponent(this.onStep));
 
+        int width = 306;
+        int height = 203;
+        this.addComponent(new RenderComponent(new RectRenderable(Color.TRANSPARENT, width, height)));
+        this.corners = new Point2D[]{
+                new Point2D(x, y),
+                new Point2D(x + width, y),
+                new Point2D(x, y + height),
+                new Point2D(x + width, y + height),
+        };
+
         try {
             spriteManager.loadSpriteSheet("gameworld/market-descriptor.json", "gameworld/market.png");
-
-            this.addComponent(new RenderComponent(new RectRenderable(Color.TRANSPARENT, 306, 203)));
 
             RenderComponent marketRenderComponent = this.getComponent(RenderComponent.class);
             this.hoverRect = new RectRenderable(Color.DARKGRAY, marketRenderComponent.getWidth(), marketRenderComponent.getHeight());
@@ -132,12 +141,14 @@ public class MarketEntity extends GameEntity {
                 new Rectangle(246, 118, 37, 34)
         };
         this.addComponent(new HitboxComponent(hitboxes));
-        this.addComponent(new CollisionResolutionComponent(false));
+        this.addComponent(new CollisionResolutionComponent(false, null));
 
         // Create logic market
-        market = new Market(items, false);
+        this.market = new Market(itemStore, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, player, spriteManager, world, purchasableTasks);
+        ArrayList<Task> purchasableTasks = (ArrayList<Task>) marketPack.get("tasks");
+        Collection<Item> items = itemStore.getData().values();
+        this.marketUI = new MarketUI(items, this.market, currentPlayer, spriteManager, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 
@@ -153,7 +164,7 @@ public class MarketEntity extends GameEntity {
         this.marketUI.onUIClose = onClose;
     }
 
-    private EntityClickAction onClick = (x, y, button) -> {
+    private final EntityClickAction onClick = (x, y, button) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
             if (this.onUIOpen != null) {
                 this.onUIOpen.run();
@@ -162,7 +173,7 @@ public class MarketEntity extends GameEntity {
         }
     };
 
-    private InputHoverableAction onHover = (x, y) -> {
+    private final InputHoverableAction onHover = (x, y) -> {
         if (clickableTopLeft.getX() < x && clickableTopLeft.getY() < y && clickableBottomRight.getX() > x && clickableBottomRight.getY() > y) {
             this.mouseIn = true;
         }
@@ -171,7 +182,7 @@ public class MarketEntity extends GameEntity {
         }
     };
 
-    private Consumer<Double> onStep = (step) -> {
+    private final Consumer<Double> onStep = (step) -> {
         if (this.mouseIn && this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE) {
             this.hoverRect.alpha = 0.2;
         }
@@ -181,6 +192,6 @@ public class MarketEntity extends GameEntity {
     };
 
     private double getPlayerDistance() {
-        return clickableCentre.distance(playerTransform.getPosition());
+        return clickableCentre.distance(playerWorldPosition.get());
     }
 }
