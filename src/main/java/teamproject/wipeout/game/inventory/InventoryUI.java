@@ -1,4 +1,4 @@
-package teamproject.wipeout.game.player;
+package teamproject.wipeout.game.inventory;
 
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -35,6 +35,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent.SabotageType;
 import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.potion.PotionThrowEntity;
 import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;

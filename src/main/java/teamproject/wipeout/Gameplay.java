@@ -47,8 +47,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
-import teamproject.wipeout.game.player.InventoryItem;
-import teamproject.wipeout.game.player.InventoryUI;
+import teamproject.wipeout.game.inventory.*;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -402,20 +401,20 @@ public class Gameplay implements Controller {
         this.worldEntity.setupFarmDestroyingKey(this.keyBindings.get("Destroy"));
 
         this.inputHandler.addKeyAction(this.keyBindings.get("Move left"), //moving left
-                currentPlayer.addAcceleration(-500f, 0f),
-                currentPlayer.addAcceleration(500f, 0f)
+                currentPlayer.addAcceleration(-1, 0),
+                currentPlayer.addAcceleration(1, 0)
         );
         this.inputHandler.addKeyAction(this.keyBindings.get("Move right"), //moving right
-                currentPlayer.addAcceleration(500f, 0f),
-                currentPlayer.addAcceleration(-500f, 0f)
+                currentPlayer.addAcceleration(1, 0),
+                currentPlayer.addAcceleration(-1, 0)
         );
         this.inputHandler.addKeyAction(this.keyBindings.get("Move up"), //moving up
-                currentPlayer.addAcceleration(0f, -500f),
-                currentPlayer.addAcceleration(0f, 500f)
+                currentPlayer.addAcceleration(0, -1),
+                currentPlayer.addAcceleration(0, 1)
         );
         this.inputHandler.addKeyAction(this.keyBindings.get("Move down"), //moving down
-                currentPlayer.addAcceleration(0f, 500f),
-                currentPlayer.addAcceleration(0f, -500f)
+                currentPlayer.addAcceleration(0, 1),
+                currentPlayer.addAcceleration(0, -1)
         );
 
         this.inputHandler.onKeyRelease(

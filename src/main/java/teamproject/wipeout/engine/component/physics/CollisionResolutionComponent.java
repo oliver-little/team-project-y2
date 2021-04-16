@@ -6,6 +6,7 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.game.player.AIPlayer;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -98,7 +99,7 @@ public class CollisionResolutionComponent implements GameComponent {
 			c.deactivateOnCollision = true;
 			Consumer<Pair<Integer, Runnable>> task = c.onCollision.apply(resolutionVector);
 
-			long delay = 250L * c.timeMultiplier;
+			long delay = AIPlayer.COLLISION_RESOLUTION_TIME * c.timeMultiplier;
 			c.timeMultiplier += 1;
 
 			Runnable blockingTask = () -> {

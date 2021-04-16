@@ -10,6 +10,7 @@ import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.inventory.*;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
@@ -149,7 +150,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (this.addToInventory(itemID, quantity) < 0) {
-            inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
+            this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
             return false;
         }
         return true;

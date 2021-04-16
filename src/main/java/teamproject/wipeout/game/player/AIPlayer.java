@@ -14,6 +14,7 @@ import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.game.item.components.SabotageComponent;
@@ -28,14 +29,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class AIPlayer extends Player  {
+public class AIPlayer extends Player {
+
+    public static final double COLLISION_RESOLUTION_SPEED = 250.0;
+    public static final long COLLISION_RESOLUTION_TIME = 300;
 
     public static final int[] GOOD_POTIONS = {52, 53, 54, 55, 58, 59};
     public static final int[] MEAN_POTIONS = {51, 56, 57, 60, 61};
 
-    public static final int IDLE_TIME_SCALING_FACTOR = 3;
+    public static final int IDLE_TIME_SCALING_FACTOR = 4;
+    public static final int IDLE_TIME_MINIMUM = 1;
 
-    public static final int IDLE_TIME_MINIMUM = 2;
+    private static final double NOMINAL_SPEED = 300.0;
 
     private Point2D designatedMarketPoint;
 
@@ -67,7 +72,7 @@ public class AIPlayer extends Player  {
 
         this.removeComponent(CollisionResolutionComponent.class);
 
-        this.collisionResolution = new CollisionResolutionComponent(true, (resolutionVector) -> { // TODO gets stuck here == aiDecision isn't called
+        this.collisionResolution = new CollisionResolutionComponent(true, (resolutionVector) -> {
             SteeringComponent steeringComponent = this.getComponent(SteeringComponent.class);
             if (steeringComponent == null) {
                 return (pair) -> {
@@ -78,21 +83,22 @@ public class AIPlayer extends Player  {
 
             if (resolutionVector.getX() == 0) {
                 if (resolutionVector.getY() < 0) {
-                    this.physics.acceleration = new Point2D(250, 50);
+                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED, COLLISION_RESOLUTION_SPEED / 5.0);
                 } else {
-                    this.physics.acceleration = new Point2D(-250, -50);
+                    this.physics.acceleration = new Point2D(-COLLISION_RESOLUTION_SPEED, -(COLLISION_RESOLUTION_SPEED/ 5.0));
                 }
             } else {
                 if (resolutionVector.getX() < 0) {
-                    this.physics.acceleration = new Point2D(50, -250);
+                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED / 5.0, -COLLISION_RESOLUTION_SPEED);
                 } else {
-                    this.physics.acceleration = new Point2D(-50, 250);
+                    this.physics.acceleration = new Point2D(-(COLLISION_RESOLUTION_SPEED/ 5.0), COLLISION_RESOLUTION_SPEED);
                 }
             }
 
             return (pair) -> {
                 this.physics.acceleration = new Point2D(0, 0);
                 if (pair.getKey() > 4) {
+                    steeringComponent.paused = false;
                     steeringComponent.currentPoint = steeringComponent.path.size() - 1;
                     pair.getValue().run();
                     this.aiDecisionAlgorithm();
@@ -140,7 +146,7 @@ public class AIPlayer extends Player  {
 
         this.collisionResolution.resetControlVariables();
         if (!this.hasComponent(SteeringComponent.class)) {
-            this.addComponent(new SteeringComponent(path, callback, 300));
+            this.addComponent(new SteeringComponent(path, callback, AIPlayer.NOMINAL_SPEED));
         } else {
             this.aiDecisionAlgorithm();
         }

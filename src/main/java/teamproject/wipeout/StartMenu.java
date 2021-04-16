@@ -438,7 +438,7 @@ public class StartMenu implements Controller {
 
     private void startServerGame() {
         try {
-            networker.serverRunner.startGame();
+            this.networker.serverRunner.startGame();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -446,13 +446,14 @@ public class StartMenu implements Controller {
     }
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        Gameplay game = new Gameplay(givenNetworker, gameStartTime, keyBindings);
-        Window window = root.getScene().getWindow();
+        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.keyBindings);
+
+        Window window = this.root.getScene().getWindow();
         Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
-        root.getScene().setRoot(content);
+
+        this.root.getScene().setRoot(content);
         game.createContent();
     }
-
 
     /**
      * A method to animate the menu items.
@@ -488,9 +489,8 @@ public class StartMenu implements Controller {
      * @return StackPane (root) which contains all the menu components in the scene graph.
      */
 	@Override
-	public Parent getContent()
-	{
-		createContent();
-		return root;
+	public Parent getContent() {
+		this.createContent();
+		return this.root;
 	}
 }

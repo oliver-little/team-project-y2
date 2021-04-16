@@ -9,9 +9,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.inventory.*;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 
@@ -26,6 +26,7 @@ public class CurrentPlayerTest {
 	static void initialization() throws ReflectiveOperationException, IOException {
 		itemStore = new ItemStore("items.json");
 		spriteManager = new SpriteManager();
+		spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
 		spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
         spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
@@ -89,11 +90,11 @@ public class CurrentPlayerTest {
 			Assertions.assertEquals(i, currentPlayer.countOccupiedSlots());
 		}
 		for(int i = 1; i <= MAX_SIZE; i++) {
-			Assertions.assertEquals(i, currentPlayer.removeItem(i, 1));
+			Assertions.assertEquals(i, currentPlayer.removeItem(i, 1)[0]);
 			Assertions.assertEquals(MAX_SIZE, currentPlayer.countOccupiedSlots());
 		}
 		for(int i = 1; i <= MAX_SIZE; i++) {
-			Assertions.assertEquals(i, currentPlayer.removeItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit - 1));
+			Assertions.assertEquals(i, currentPlayer.removeItem(i, itemStore.getItem(i).getComponent(InventoryComponent.class).stackSizeLimit - 1)[0]);
 			Assertions.assertEquals(MAX_SIZE - i, currentPlayer.countOccupiedSlots());
 		}
 	}
@@ -140,7 +141,7 @@ public class CurrentPlayerTest {
 		Assertions.assertTrue(currentPlayer.acquireItem(2, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		Assertions.assertTrue(currentPlayer.acquireItem(3, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
-		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2)); //will remove from first slot -> next check this moves items from 4th slot into the first
+		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2)[0]); //will remove from first slot -> next check this moves items from 4th slot into the first
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		Assertions.assertNull(inventory.get(3)); //ensures slot merged from is emptied
@@ -155,9 +156,9 @@ public class CurrentPlayerTest {
 		Assertions.assertTrue(currentPlayer.acquireItem(3, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		Assertions.assertTrue(currentPlayer.acquireItem(4, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
-		Assertions.assertEquals(2, currentPlayer.removeItem(2, 2));
+		Assertions.assertEquals(2, currentPlayer.removeItem(2, 2)[0]);
 		Assertions.assertTrue(currentPlayer.acquireItem(1, 2));
-		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2));
+		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2)[0]);
 		
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
@@ -172,9 +173,9 @@ public class CurrentPlayerTest {
 		Assertions.assertTrue(currentPlayer.acquireItem(3, itemStore.getItem(2).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		Assertions.assertTrue(currentPlayer.acquireItem(4, itemStore.getItem(3).getComponent(InventoryComponent.class).stackSizeLimit*3));
 		
-		Assertions.assertEquals(2, currentPlayer.removeItem(2, 2));
+		Assertions.assertEquals(2, currentPlayer.removeItem(2, 2)[0]);
 		Assertions.assertTrue(currentPlayer.acquireItem(1, 2));
-		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2));
+		Assertions.assertEquals(1, currentPlayer.removeItem(1, 2)[0]);
 		
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();

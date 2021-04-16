@@ -10,9 +10,7 @@ import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.engine.component.render.RectRenderable;
 import teamproject.wipeout.engine.component.render.RenderComponent;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters;
 import teamproject.wipeout.engine.component.render.particle.ParticleParameters.ParticleSimulationSpace;
@@ -25,6 +23,7 @@ import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
@@ -46,6 +45,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public static final int MAX_SIZE = 10; //no. of inventory slots
     public static final int INITIAL_MONEY = 25; //initial amount of money
+
+    private static final double NOMINAL_SPEED = 500.0;
 
     public final Integer playerID;
     public final String playerName;
@@ -94,9 +95,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
         parameters.setEmissionRate(20);
         parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(12, 0), new Point2D(52, 40)));
-        parameters.addUpdateFunction((particle, percentage, timeStep) -> {
-            particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage);
-        });
+        parameters.addUpdateFunction((particle, percentage, timeStep) -> particle.opacity = EaseCurve.FADE_IN_OUT.apply(percentage));
 
         this.sabotageEffect = new ParticleEntity(scene, 0, parameters);
         this.sabotageEffect.setParent(this);
@@ -163,7 +162,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         RenderComponent playerRender = this.getComponent(RenderComponent.class);
         nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
         nameTag.setParent(this);
-
     }
 
     public Point2D getWorldPosition() {
@@ -215,12 +213,15 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     /**
      * Adds acceleration to the physics component of the Player.
      *
-     * @param x X axis acceleration
-     * @param y Y axis acceleration
+     * @param xAxis Multiplier of X axis acceleration
+     * @param yAxis Multiplier of Y axis acceleration
      */
-    public InputKeyAction addAcceleration(double x, double y) {
+    public InputKeyAction addAcceleration(int xAxis, int yAxis) {
         return () -> {
-            this.physics.acceleration = this.physics.acceleration.add(x, y);
+            this.physics.acceleration = this.physics.acceleration.add(
+                    xAxis * Player.NOMINAL_SPEED,
+                    yAxis * Player.NOMINAL_SPEED
+            );
             this.playerState.setPosition(this.position.getWorldPosition());
             this.playerState.setAcceleration(this.physics.acceleration);
             this.sendPlayerStateUpdate();
@@ -474,7 +475,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * removes item(s) from the inventory, even if they span multiple slots, starting from the right-most slot
      * @param itemID for item to be removed
      * @param quantity of items to be removed
-     * @return itemID if successfully removed, negative int if unable to remove
+     * @return int[] with itemID - 0, and quantity removed - 1 (if successfully removed, empty int[] if unable to remove)
      */
     public int[] removeItem(int itemID, int quantity) {
         int noOfThisItem = countItems(itemID);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javafx.geometry.Point2D;
 import javafx.scene.layout.StackPane;
@@ -49,7 +50,7 @@ public class MarketEntity extends GameEntity {
     protected Runnable onUIOpen;
 
     // Hover and click variables
-    protected Transform playerTransform;
+    protected Supplier<Point2D> playerWorldPosition;
     protected Point2D clickableTopLeft;
     protected Point2D clickableBottomRight;
     protected Point2D clickableCentre;
@@ -64,7 +65,7 @@ public class MarketEntity extends GameEntity {
         CurrentPlayer currentPlayer = (CurrentPlayer) marketPack.get("currentPlayer");
 
         this.uiContainer = (StackPane) marketPack.get("uiContainer");
-        this.playerTransform = currentPlayer.getComponent(Transform.class);
+        this.playerWorldPosition = () -> currentPlayer.getWorldPosition();
 
         double x = WorldEntity.MARKET_START.getX();
         double y = WorldEntity.MARKET_START.getY();
@@ -163,7 +164,7 @@ public class MarketEntity extends GameEntity {
         this.marketUI.onUIClose = onClose;
     }
 
-    private EntityClickAction onClick = (x, y, button) -> {
+    private final EntityClickAction onClick = (x, y, button) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
             if (this.onUIOpen != null) {
                 this.onUIOpen.run();
@@ -172,7 +173,7 @@ public class MarketEntity extends GameEntity {
         }
     };
 
-    private InputHoverableAction onHover = (x, y) -> {
+    private final InputHoverableAction onHover = (x, y) -> {
         if (clickableTopLeft.getX() < x && clickableTopLeft.getY() < y && clickableBottomRight.getX() > x && clickableBottomRight.getY() > y) {
             this.mouseIn = true;
         }
@@ -181,7 +182,7 @@ public class MarketEntity extends GameEntity {
         }
     };
 
-    private Consumer<Double> onStep = (step) -> {
+    private final Consumer<Double> onStep = (step) -> {
         if (this.mouseIn && this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE) {
             this.hoverRect.alpha = 0.2;
         }
@@ -191,6 +192,6 @@ public class MarketEntity extends GameEntity {
     };
 
     private double getPlayerDistance() {
-        return clickableCentre.distance(playerTransform.getPosition());
+        return clickableCentre.distance(playerWorldPosition.get());
     }
 }
