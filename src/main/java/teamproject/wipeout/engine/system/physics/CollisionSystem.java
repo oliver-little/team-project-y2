@@ -47,7 +47,5 @@ public class CollisionSystem implements GameSystem {
         }
         
     }
-    
-
 
 }
