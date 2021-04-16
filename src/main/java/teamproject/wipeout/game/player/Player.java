@@ -221,14 +221,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     /**
      * Adds acceleration to the physics component of the Player.
      *
-     * @param xAxis Multiplier of X axis acceleration
-     * @param yAxis Multiplier of Y axis acceleration
+     * @param xAxisMultiplier Multiplier of X axis acceleration
+     * @param yAxisMultiplier Multiplier of Y axis acceleration
      */
-    public InputKeyAction addAcceleration(int xAxis, int yAxis) {
+    public InputKeyAction addAcceleration(int xAxisMultiplier, int yAxisMultiplier) {
         return () -> {
             this.physics.acceleration = this.physics.acceleration.add(
-                    xAxis * Player.NOMINAL_SPEED,
-                    yAxis * Player.NOMINAL_SPEED
+                    xAxisMultiplier * Player.NOMINAL_SPEED,
+                    yAxisMultiplier * Player.NOMINAL_SPEED
             );
             this.playerState.setPosition(this.position.getWorldPosition());
             this.playerState.setAcceleration(this.physics.acceleration);
@@ -573,7 +573,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
     }
 
-    private void sendPlayerStateUpdate() {
+    protected void sendPlayerStateUpdate() {
         if (this.clientSupplier == null) {
             return;
         }

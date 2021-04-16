@@ -96,7 +96,7 @@ public class CollisionResolutionComponent implements GameComponent {
 
     private static void processOnCollision(CollisionResolutionComponent c, Point2D resolutionVector) {
 		if (c.onCollision != null && !c.deactivateOnCollision) {
-			c.deactivateOnCollision = true;
+			//c.deactivateOnCollision = true; TODO compare collision vectors to discard same side collisions
 			Consumer<Pair<Integer, Runnable>> task = c.onCollision.apply(resolutionVector);
 
 			long delay = AIPlayer.COLLISION_RESOLUTION_TIME * c.timeMultiplier;

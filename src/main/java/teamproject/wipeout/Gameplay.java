@@ -3,17 +3,17 @@ package teamproject.wipeout;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.stage.Window;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
@@ -55,6 +55,7 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
+import teamproject.wipeout.game.task.TasksHelper;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
@@ -78,7 +79,7 @@ public class Gameplay implements Controller {
     private StackPane interfaceOverlay;
 
     private int numberOfSingleplayers = 4;
-    private double gameTime = 30.0;
+    private double gameTime = 200.0;
     private final long gameStartTime;
 
     private final Integer playerID;
@@ -101,6 +102,8 @@ public class Gameplay implements Controller {
     private MovementAudioSystem movementAudio;
     private List<EventSystem> eventSystems;
 
+    private ChangeListener<? super Boolean> focusListener;
+
     private final Map<String, KeyCode> keyBindings;
 
     private final Networker networker;
@@ -111,13 +114,19 @@ public class Gameplay implements Controller {
         this.playerID = new Random().nextInt(1024);
         this.playerName = playerName == null ? "Me" : playerName;
 
+        this.focusListener = null;
+
         this.keyBindings = bindings;
         this.networker = networker;
     }
 
-    public Parent getParentWith(ReadOnlyDoubleProperty widthProperty, ReadOnlyDoubleProperty heightProperty) {
-        this.widthProperty = widthProperty;
-        this.heightProperty = heightProperty;
+    public Parent getParentWith(Window window) {
+        this.widthProperty = window.widthProperty();
+        this.heightProperty = window.heightProperty();
+
+        this.focusListener = (observableVal, oldVal, newVal) -> this.inputHandler.setDisableInput(oldVal).run();
+        window.focusedProperty().addListener(this.focusListener);
+
         return this.getContent();
     }
 
@@ -162,7 +171,7 @@ public class Gameplay implements Controller {
         this.setupCameraFollowing(cameraEntity, currentPlayer);
 
         // Create tasks
-        ArrayList<Task> purchasableTasks = this.populateTasks(currentPlayer);
+        ArrayList<Task> purchasableTasks = TasksHelper.createTasks(this.itemStore, currentPlayer);
 
         // Market Entity
         MarketEntity marketEntity = new MarketEntity(this.createMarketPack(currentPlayer, purchasableTasks));
@@ -180,7 +189,8 @@ public class Gameplay implements Controller {
         }
 
         //Clock System
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.worldEntity.getPlayers());
+        GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
+        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, gameOverUI);
         this.systemUpdater.addSystem(clockSystem);
         this.worldEntity.setClockSupplier(() -> clockSystem);
 
@@ -204,10 +214,7 @@ public class Gameplay implements Controller {
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
 
         // GameOver UI
-        GameOverUI gameOverUI = clockSystem.gameOverUI;
         gameOverUI.setVisible(false);
-        gameOverUI.networker = this.networker;
-        gameOverUI.root = this.root;
         StackPane.setAlignment(gameOverUI, Pos.CENTER);
 
         // UI Overlay
@@ -283,6 +290,9 @@ public class Gameplay implements Controller {
                 eventSystem.cleanup();
             }
         }
+        if (this.focusListener != null) {
+            this.root.getScene().getWindow().focusedProperty().removeListener(this.focusListener);
+        }
     }
 
     private void loadSpriteSheets() throws IOException {
@@ -332,66 +342,6 @@ public class Gameplay implements Controller {
         ObjectProperty<Point2D> cameraPosition = new SimpleObjectProperty<>();
         cameraPosition.bind(camPosBinding);
         cameraEntity.addComponent(new CameraFollowComponent(currentPlayer, cameraPosition));
-    }
-
-    private ArrayList<Task> createAllTasks(ItemStore itemStore) {
-        ArrayList<Task> tasks = new ArrayList<>();
-        ArrayList<Integer> itemIds  = new ArrayList<>();
-        for(int i = 1; i < 25; i++) {
-            if(itemStore.getItem(i) != null) {
-                itemIds.add(i);
-            }
-        }
-
-        int nrOfTask = 0;
-        // Collect tasks
-        int reward = 5;
-        for(Integer itemId : itemIds) {
-            String name = itemStore.getItem(itemId).name;
-            int quantityCollected = 1;
-            Task currentTask =  new Task(nrOfTask, "Collect " + quantityCollected + " " + name, reward * quantityCollected,
-                    (CurrentPlayer inputPlayer) ->
-                    {
-                        ArrayList<InventoryItem> inventoryList = inputPlayer.getInventory();
-                        int index = inputPlayer.containsItem(itemId);
-                        if(index >= 0 && inventoryList.get(index).quantity >= quantityCollected) {
-                            return true;
-                        }
-                        return false;
-                    },
-                    itemStore.getItem(itemId)
-            );
-            tasks.add(currentTask);
-            nrOfTask += 1;
-        }
-
-        // Sell tasks
-        reward = 2;
-        for(Integer itemId : itemIds) {
-            String name = itemStore.getItem(itemId).name;
-            int quantitySold = 1;
-            Task currentTask = new Task(nrOfTask, "Sell " + quantitySold + " " + name, reward * quantitySold,
-                    (CurrentPlayer inputPlayer) -> inputPlayer.getSoldItems().containsKey(itemId),
-                    itemStore.getItem(itemId)
-            );
-            tasks.add(currentTask);
-            nrOfTask += 1;
-        }
-
-        Collections.shuffle(tasks);
-        return tasks;
-    }
-
-    private ArrayList<Task> populateTasks(CurrentPlayer currentPlayer) {
-        ArrayList<Task> allTasks = createAllTasks(this.itemStore);
-
-        ArrayList<Task> playerTasks = new ArrayList<Task>();
-        for(int t = 0; t < 7; t++) {
-            playerTasks.add(allTasks.get(t));
-        }
-        currentPlayer.setTasks(playerTasks);
-
-        return allTasks;
     }
 
     private VBox createRightUIOverlay(ClockUI clockUI, SettingsUI settingsUI) {

@@ -2,10 +2,9 @@ package teamproject.wipeout;
 
 import java.net.InetSocketAddress;
 
-public class Server
-{
-	private String serverName;
-	private InetSocketAddress address;
+public class Server {
+	private final String serverName;
+	private final InetSocketAddress address;
 
 	public Server(String name, InetSocketAddress address) {
 		this.serverName = name;
@@ -13,14 +12,14 @@ public class Server
 	}
 	
 	public String getServerName() {
-		return serverName;
+		return this.serverName;
 	}
 	
 	public InetSocketAddress getAddress() {
-		return address;
+		return this.address;
 	}
 	
 	public String toString() {
-		return serverName;
+		return this.serverName;
 	}
 }

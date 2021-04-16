@@ -1,12 +1,10 @@
 package teamproject.wipeout.engine.entity.gameover;
 
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Window;
 import teamproject.wipeout.StartMenu;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
@@ -18,25 +16,27 @@ import java.util.List;
 
 public class GameOverUI extends VBox {
 
-    List<Player> players;
+    private final StackPane root;
+    private final Networker networker;
+    private final Runnable onEnd;
 
+    private final List<Player> players;
     private final ListView<String> list;
 
-    public Networker networker;
-
-    public StackPane root;
-
-    class SortByMoney implements Comparator<Player> {
-        // Used for sorting in descending order of
-        // money number
+    static class SortByMoney implements Comparator<Player> {
+        // Used for sorting in descending order of money number
         public int compare(Player a, Player b)
         {
             return (int)(a.getMoney() - b.getMoney());
         }
     }
 
-    public GameOverUI(List<Player> players) {
+    public GameOverUI(StackPane root, Networker networker, List<Player> players, Runnable onEnd) {
         super();
+        this.root = root;
+        this.networker = networker;
+        this.onEnd = onEnd;
+
         this.players = players;
         list = new ListView<>();
 
@@ -77,6 +77,8 @@ public class GameOverUI extends VBox {
 
             this.networker.stopServer();
         }
+
+        this.onEnd.run();
 
         StartMenu startMenu = new StartMenu();
         this.root.getScene().setRoot(startMenu.getContent());

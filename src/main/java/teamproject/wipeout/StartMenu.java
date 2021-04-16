@@ -16,7 +16,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import teamproject.wipeout.networking.client.GameClient;
@@ -447,9 +446,7 @@ public class StartMenu implements Controller {
 
     private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
         Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.chosenName, this.keyBindings);
-
-        Window window = this.root.getScene().getWindow();
-        Parent content = game.getParentWith(window.widthProperty(), window.heightProperty());
+        Parent content = game.getParentWith(this.root.getScene().getWindow());
 
         this.root.getScene().setRoot(content);
         game.createContent();

@@ -5,7 +5,6 @@ import teamproject.wipeout.engine.component.PickableComponent;
 import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.render.TextRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
