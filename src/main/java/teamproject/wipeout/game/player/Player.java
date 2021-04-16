@@ -21,6 +21,7 @@ import teamproject.wipeout.engine.component.render.particle.property.OvalParticl
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.ParticleEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
@@ -220,11 +221,13 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param x X axis acceleration
      * @param y Y axis acceleration
      */
-    public void addAcceleration(double x, double y) {
-        this.physics.acceleration = this.physics.acceleration.add(x, y);
-        this.playerState.setPosition(this.position.getWorldPosition());
-        this.playerState.setAcceleration(this.physics.acceleration);
-        this.sendPlayerStateUpdate();
+    public InputKeyAction addAcceleration(double x, double y) {
+        return () -> {
+            this.physics.acceleration = this.physics.acceleration.add(x, y);
+            this.playerState.setPosition(this.position.getWorldPosition());
+            this.playerState.setAcceleration(this.physics.acceleration);
+            this.sendPlayerStateUpdate();
+        };
     }
 
     public PlayerState getCurrentState() {
@@ -337,7 +340,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private int countFreeItemSpaces(Integer itemID) {
         int counter = 0;
         int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
-        for(InventoryItem pair : inventory) {
+        for (InventoryItem pair : inventory) {
             if((pair != null) && (pair.itemID == itemID)) {
                 counter += stackLimit - pair.quantity;
             }else if(pair == null) {

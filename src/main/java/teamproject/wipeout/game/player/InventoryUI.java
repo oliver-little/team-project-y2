@@ -126,7 +126,7 @@ public class InventoryUI extends StackPane {
 			final int count = i;
 			rectangles[i].addEventFilter(MouseEvent.MOUSE_CLICKED, (event) -> {
 				event.consume();
-				this.useSlot(count, world);
+				this.useSlot(count, world).performKeyAction();
 			});
 		}
 	}
@@ -136,68 +136,65 @@ public class InventoryUI extends StackPane {
 	 * @param slot Index of the slot selected
 	 * @param world
 	 */
-	public void useSlot(int slot, WorldEntity world) {
-		this.selectSlot(slot);
+	public InputKeyAction useSlot(int slot, WorldEntity world) {
+		return () -> {
+			this.selectSlot(slot);
 
-		CurrentPlayer myCurrentPlayer = world.myCurrentPlayer;
-		FarmEntity myFarm = world.myCurrentPlayer.getMyFarm();
+			CurrentPlayer myCurrentPlayer = world.myCurrentPlayer;
+			FarmEntity myFarm = world.myCurrentPlayer.getMyFarm();
 
-		if (state == InventoryState.PLANTING) {
-			if (myFarm.isPlacingItem()) {
-				myFarm.stopPlacingItem(false);
-			}
-		}
-		else if (state == InventoryState.THROWING) {
-			currentPotion.abortThrowing();
-		}
-		
-		int selectedItemID = myCurrentPlayer.selectSlot(currentSelection);
-		if (selectedItemID < 0) {
-			return;
-		}
-
-		try {
-			Item selectedItem = itemStore.getItem(selectedItemID);
-			if (selectedItem.hasComponent(PlantComponent.class)) {
-				myCurrentPlayer.dropItem();
-				state = InventoryState.PLANTING;
-				myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
-					myCurrentPlayer.acquireItem(item.id);
-					state = InventoryState.NONE;
-				});
-			}
-			else if (selectedItem.hasComponent(SabotageComponent.class)) {
-				SabotageComponent sc = selectedItem.getComponent(SabotageComponent.class);
-
-				List<GameEntity> possibleEffectEntities = null;
-
-				if (sc.type == SabotageType.SPEED) {
-					possibleEffectEntities = List.of(world.myCurrentPlayer, world.myAnimal);
+			if (state == InventoryState.PLANTING) {
+				if (myFarm.isPlacingItem()) {
+					myFarm.stopPlacingItem(false);
 				}
-				else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
-					possibleEffectEntities = List.copyOf(world.farms.values());
-				}
-
-				Runnable onComplete = () -> {
-					state = InventoryState.NONE;
-					currentPotion = null;
-				};
-				Runnable onAbort = () -> {
-					state = InventoryState.NONE; 
-					currentPotion = null;
-					myCurrentPlayer.acquireItem(selectedItem.id);
-				};
-
-				state = InventoryState.THROWING;
-				myCurrentPlayer.dropItem();
-				this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myCurrentPlayer, myCurrentPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
+			} else if (state == InventoryState.THROWING) {
+				currentPotion.abortThrowing();
 			}
-			else {
+
+			int selectedItemID = myCurrentPlayer.selectSlot(currentSelection);
+			if (selectedItemID < 0) {
 				return;
 			}
-		} catch (FileNotFoundException exception) {
-			exception.printStackTrace();
-		}
+
+			try {
+				Item selectedItem = itemStore.getItem(selectedItemID);
+				if (selectedItem.hasComponent(PlantComponent.class)) {
+					myCurrentPlayer.dropItem();
+					state = InventoryState.PLANTING;
+					myFarm.startPlacingItem(selectedItem, new Point2D(0, 0), (item) -> {
+						myCurrentPlayer.acquireItem(item.id);
+						state = InventoryState.NONE;
+					});
+				} else if (selectedItem.hasComponent(SabotageComponent.class)) {
+					SabotageComponent sc = selectedItem.getComponent(SabotageComponent.class);
+
+					List<GameEntity> possibleEffectEntities = null;
+
+					if (sc.type == SabotageType.SPEED) {
+						possibleEffectEntities = List.of(world.myCurrentPlayer, world.myAnimal);
+					} else if (sc.type == SabotageType.GROWTHRATE || sc.type == SabotageType.AI) {
+						possibleEffectEntities = List.copyOf(world.farms.values());
+					}
+
+					Runnable onComplete = () -> {
+						state = InventoryState.NONE;
+						currentPotion = null;
+					};
+					Runnable onAbort = () -> {
+						state = InventoryState.NONE;
+						currentPotion = null;
+						myCurrentPlayer.acquireItem(selectedItem.id);
+					};
+
+					state = InventoryState.THROWING;
+					myCurrentPlayer.dropItem();
+					this.currentPotion = new PotionThrowEntity(world.getScene(), spriteManager, myCurrentPlayer, myCurrentPlayer, selectedItem, possibleEffectEntities, onComplete, onAbort);
+				}
+
+			} catch (FileNotFoundException exception) {
+				exception.printStackTrace();
+			}
+		};
 	}
 
 	/**

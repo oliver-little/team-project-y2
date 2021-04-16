@@ -111,32 +111,34 @@ public class InputHandler {
      * {@code disableInput} variable setter
      * @param disabled New value of the {@code disableInput} variable.
      */
-    public void setDisableInput(boolean disabled) {
-        this.disableInput = disabled;
-        if (disabled) {
-            // Simulate all keys releasing
-            for (KeyCode key : this.performingKeyActions) {
-                if (this.keyReleaseBindings.get(key) != null) {
-                    for (InputKeyAction action : this.keyReleaseBindings.get(key)) {
-                        action.performKeyAction();
+    public Runnable setDisableInput(boolean disabled) {
+        return () -> {
+            this.disableInput = disabled;
+            if (disabled) {
+                // Simulate all keys releasing
+                for (KeyCode key : this.performingKeyActions) {
+                    if (this.keyReleaseBindings.get(key) != null) {
+                        for (InputKeyAction action : this.keyReleaseBindings.get(key)) {
+                            action.performKeyAction();
+                        }
                     }
                 }
-            }
 
-            // Clear existing 
-            this.performingKeyActions.clear();
-            this.isDragging = null;
-        }
-        else {
-            // Simulate all keys being pressed
-            for (KeyCode key : this.performingKeyActions) {
-                if (this.keyPressBindings.get(key) != null) {
-                    for (InputKeyAction action : this.keyPressBindings.get(key)) {
-                        action.performKeyAction();
+                // Clear existing
+                this.performingKeyActions.clear();
+                this.isDragging = null;
+
+            } else {
+                // Simulate all keys being pressed
+                for (KeyCode key : this.performingKeyActions) {
+                    if (this.keyPressBindings.get(key) != null) {
+                        for (InputKeyAction action : this.keyPressBindings.get(key)) {
+                            action.performKeyAction();
+                        }
                     }
                 }
             }
-        }
+        };
     }
 
     /**

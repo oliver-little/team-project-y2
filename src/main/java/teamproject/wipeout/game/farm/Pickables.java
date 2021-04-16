@@ -12,6 +12,7 @@ import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
@@ -130,15 +131,17 @@ public class Pickables {
         this.onUpdate = onUpdate;
     }
 
-    public void picked(Set<Pickable> pickedItems) {
-        for (Pickable pickable : pickedItems) {
-            pickable.entity.destroy();
-        }
-        this.items.removeAll(pickedItems);
+    public InputKeyAction picked(Set<Pickable> pickedItems) {
+        return () -> {
+            for (Pickable pickable : pickedItems) {
+                pickable.entity.destroy();
+            }
+            this.items.removeAll(pickedItems);
 
-        if (this.onUpdate != null) {
-            this.onUpdate.run();
-        }
+            if (this.onUpdate != null) {
+                this.onUpdate.run();
+            }
+        };
     }
 
     /**

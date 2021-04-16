@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 
 public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
-	public static final Point2D MARKET_SIZE = new Point2D(576, 544);
+	public static final Point2D MARKET_START = new Point2D(576, 544);
 	public static final String[] AI_NAMES = new String[]{"Siri", "Alexa", "Cortana"};
 
 	public final MarketPriceUpdater marketUpdater;

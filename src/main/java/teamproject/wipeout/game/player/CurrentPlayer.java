@@ -26,12 +26,11 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     public int selectedSlot;
 
-    public InventoryUI invUI;
-
     public ArrayList<Task> tasks;
     public LinkedHashMap<Integer, Integer> currentAvailableTasks = new LinkedHashMap<>();
 
     private FarmEntity myFarm;
+    private InventoryUI inventoryUI;
 
     private TaskUI taskUI;
 
@@ -46,7 +45,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      *
      * @param scene The GameScene this entity is part of
      */
-    public CurrentPlayer(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore, InventoryUI invUI) {
+    public CurrentPlayer(GameScene scene, int playerID, String playerName, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene, playerID, playerName, spriteManager, itemStore);
 
         this.addComponent(new MovementAudioComponent(this.physics, "steps.wav"));
@@ -54,8 +53,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         this.audio = new AudioComponent();
         this.addComponent(this.audio);
 
-        this.invUI = invUI;
-        selectSlot(0);
         this.pickableCollector = new SignatureEntityCollector(scene, Set.of(PickableComponent.class, HitboxComponent.class));
 
         this.myFarm = null;
@@ -69,6 +66,11 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     public FarmEntity getMyFarm() {
         return this.myFarm;
+    }
+
+    public void setInventoryUI(InventoryUI inventoryUI) {
+        this.inventoryUI = inventoryUI;
+        this.selectSlot(0);
     }
 
     public void setTaskUI(TaskUI taskUI) {
@@ -98,13 +100,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public boolean buyTask(Task task) {
         if(currentAvailableTasks.containsKey(task.id)) {
-            invUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
+            inventoryUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
             return false;
         } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
-            invUI.displayMessage(ERROR_TYPE.TASKS_FULL);
+            inventoryUI.displayMessage(ERROR_TYPE.TASKS_FULL);
             return false;
         } else if (!hasEnoughMoney(task.priceToBuy)) {
-            invUI.displayMessage(ERROR_TYPE.MONEY);
+            inventoryUI.displayMessage(ERROR_TYPE.MONEY);
             return false;
         }
         this.addNewTask(task);
@@ -147,7 +149,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (this.addToInventory(itemID, quantity) < 0) {
-            invUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
+            inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
             return false;
         }
         return true;
@@ -162,7 +164,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     protected int addToInventory(int itemID, Integer quantity) {
         int addedToInventoryIndex = super.addToInventory(itemID, quantity);
         if (addedToInventoryIndex >= 0) {
-            this.invUI.updateUI(this.inventory, addedToInventoryIndex);
+            this.inventoryUI.updateUI(this.inventory, addedToInventoryIndex);
         }
     	return addedToInventoryIndex;
     }
@@ -175,8 +177,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     protected int[] rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
     	int[] rearrangedItems = super.rearrangeItems(itemID, quantity, slotWithSpace, stackLimit);
     	if (rearrangedItems.length == 2) {
-            this.invUI.updateUI(this.inventory, rearrangedItems[0]);
-            this.invUI.updateUI(this.inventory, rearrangedItems[1]);
+            this.inventoryUI.updateUI(this.inventory, rearrangedItems[0]);
+            this.inventoryUI.updateUI(this.inventory, rearrangedItems[1]);
         }
     	return rearrangedItems;
     }
@@ -190,9 +192,9 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     public int[] removeItem(int itemID, int quantity) {
         int[] removedItem = super.removeItem(itemID, quantity);
         if (removedItem.length == 2) {
-            this.invUI.updateUI(this.inventory, removedItem[1]);
+            this.inventoryUI.updateUI(this.inventory, removedItem[1]);
         } else {
-            this.invUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
+            this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
         }
         return removedItem;
     }
@@ -207,13 +209,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         if((pair != null) && (pair.quantity - quantity) >= 0) {
             if ((pair.quantity - quantity) == 0) {
                 inventory.set(selectedSlot, null); //free inventory slot
-                invUI.updateUI(inventory, selectedSlot);
+                inventoryUI.updateUI(inventory, selectedSlot);
                 occupiedSlots--; //inventory slot is freed
                 return true;
             } else {
                 pair.quantity -= quantity;
                 inventory.set(selectedSlot, pair);
-                invUI.updateUI(inventory, selectedSlot);
+                inventoryUI.updateUI(inventory, selectedSlot);
                 return true;
             }
         }
@@ -239,8 +241,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * @param slot or index selected
      */
     public int selectSlot(int slot) {
-        selectedSlot = slot;
-        invUI.selectSlot(slot);
+        this.selectedSlot = slot;
+        this.inventoryUI.selectSlot(slot);
 
         InventoryItem selectedItem = this.inventory.get(slot);
         if (selectedItem != null) {
@@ -299,7 +301,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 this.currentAvailableTasks.remove(task.id);
                 this.setMoney(this.getMoney() + task.reward);
                 this.playSound("coinPrize.wav");
-                this.invUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
+                this.inventoryUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
             }
         }
         taskUI.showTasks(tasks);
@@ -346,7 +348,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     public boolean hasEnoughMoney(double price) {
         boolean enoughMoney = super.hasEnoughMoney(price);
         if (!enoughMoney) {
-            this.invUI.displayMessage(ERROR_TYPE.MONEY);
+            this.inventoryUI.displayMessage(ERROR_TYPE.MONEY);
         }
         return enoughMoney;
     }
@@ -361,7 +363,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     public void clearInventory() {
         super.clearInventory();
     	for (int i = 0; i < Player.MAX_SIZE; i++) {
-            this.invUI.updateUI(inventory, i);
+            this.inventoryUI.updateUI(inventory, i);
         }
     }
 

@@ -33,9 +33,11 @@ public class CurrentPlayerTest {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
-		
+
+		int playerID = new Random().nextInt(1024);
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
-		currentPlayer = new CurrentPlayer(scene, new Random().nextInt(1024), "testPlayer", spriteManager, itemStore, invUI);
+		currentPlayer = new CurrentPlayer(scene, playerID, "testPlayer", spriteManager, itemStore);
+		currentPlayer.setInventoryUI(invUI);
 		MAX_SIZE = currentPlayer.MAX_SIZE;
 	}
 	

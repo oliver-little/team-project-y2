@@ -1,6 +1,8 @@
 package teamproject.wipeout.game.market.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javafx.geometry.Point2D;
@@ -25,6 +27,8 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpriteSetDescriptor;
 import teamproject.wipeout.game.assetmanagement.spritesheet.Spritesheet;
 import teamproject.wipeout.game.assetmanagement.spritesheet.SpritesheetDescriptor;
+import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.MarketUI;
@@ -52,16 +56,22 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
-    public MarketEntity(GameScene scene, double x, double y, ItemStore items, CurrentPlayer currentPlayer, SpriteManager spriteManager, StackPane uiContainer, ArrayList<Task> purchasableTasks) {
-        super(scene);
+    public MarketEntity(Map<String, Object> marketPack) {
+        super((GameScene) marketPack.get("gameScene"));
 
-        this.uiContainer = uiContainer;
+        ItemStore itemStore = (ItemStore) marketPack.get("itemStore");
+        SpriteManager spriteManager = (SpriteManager) marketPack.get("spriteManager");
+        CurrentPlayer currentPlayer = (CurrentPlayer) marketPack.get("currentPlayer");
+
+        this.uiContainer = (StackPane) marketPack.get("uiContainer");
         this.playerTransform = currentPlayer.getComponent(Transform.class);
 
+        double x = WorldEntity.MARKET_START.getX();
+        double y = WorldEntity.MARKET_START.getY();
         this.addComponent(new Transform(x, y, 1));
 
         // Create child component for hoverable so it displays behind everything
-        GameEntity hoverEntity = new GameEntity(scene);
+        GameEntity hoverEntity = this.scene.createEntity();
         hoverEntity.setParent(this);
         Transform childTransform = new Transform(0, 0);
         hoverEntity.addComponent(childTransform);
@@ -133,9 +143,11 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new CollisionResolutionComponent(false, null));
 
         // Create logic market
-        market = new Market(items, false);
+        this.market = new Market(itemStore, false);
 
-        this.marketUI = new MarketUI(items.getData().values(), market, currentPlayer, spriteManager, purchasableTasks);
+        ArrayList<Task> purchasableTasks = (ArrayList<Task>) marketPack.get("tasks");
+        Collection<Item> items = itemStore.getData().values();
+        this.marketUI = new MarketUI(items, this.market, currentPlayer, spriteManager, purchasableTasks);
         this.marketUI.setParent(uiContainer);
     }
 
