@@ -1,11 +1,15 @@
 package teamproject.wipeout.engine.entity.gameover;
 
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
+import teamproject.wipeout.App;
 import teamproject.wipeout.StartMenu;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.player.Player;
@@ -25,7 +29,8 @@ public class GameOverUI extends VBox {
     private ListView<String> list;
 
     public Networker networker;
-    public GameScene gameScene;
+
+    public StackPane root;
 
     class Sortbymoney implements Comparator<Player> {
         // Used for sorting in descending order of
@@ -51,7 +56,7 @@ public class GameOverUI extends VBox {
 
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "task-ui.css");
 
-        closeButton = new Button("Finish game");
+        closeButton = new Button("Go back to menu");
         closeButton.setOnAction(e -> {
             this.endGame();
         });
@@ -82,5 +87,10 @@ public class GameOverUI extends VBox {
         }
 
         this.networker.stopServer();
+
+        StartMenu startMenu = new StartMenu();
+        Window window = root.getScene().getWindow();
+        Parent content = startMenu.getContent();
+        root.getScene().setRoot(content);
     }
 }
