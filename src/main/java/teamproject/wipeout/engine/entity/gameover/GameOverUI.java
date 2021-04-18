@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.entity.gameover;
 
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -64,7 +65,7 @@ public class GameOverUI extends VBox {
         this.players.sort(new SortByMoney().reversed());
 
         for (Player player : this.players) {
-            this.list.getItems().add(player.playerName + " " + "$" + player.getMoney());
+            this.list.getItems().add(player.playerName + " " + "$" + String.format("%.2f",  player.moneyProperty().getValue()));
         }
     }
 
