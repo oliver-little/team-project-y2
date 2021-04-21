@@ -356,12 +356,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		GameClient client = this.clientSupplier.get();
 		if (client != null) {
-			try {
-				client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
-
-			} catch (IOException exception) {
-				exception.printStackTrace();
-			}
+			client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
 		}
 	}
 

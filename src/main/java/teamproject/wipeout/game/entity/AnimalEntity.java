@@ -330,12 +330,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            try {
-                client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.getID(), this.animalState));
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
+            client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.getID(), this.animalState));
         }
     }
 

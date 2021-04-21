@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
@@ -60,13 +61,30 @@ public class StartMenu implements Controller {
         this.chosenName = null;
         this.networker = new Networker();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            GameClient client = this.networker.getClient();
-            if (client != null) {
-                client.closeConnection(true);
-            }
-            this.networker.stopServer();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> this.cleanupNetworker()));
+    }
+
+    public void cleanup() {
+        this.chosenName = null;
+        this.cleanupNetworker();
+    }
+
+    public void disconnectError() {
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        StackPane errorBox = new StackPane();
+        new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
+        menuBox.getChildren().add(errorBox);
+        root.getChildren().add(menuBox);
+    }
+
+    private void cleanupNetworker() {
+        GameClient client = this.networker.getClient();
+        if (client != null) {
+            client.closeConnection(true);
+        }
+        this.networker.stopServer();
     }
 
     /**
@@ -82,9 +100,6 @@ public class StartMenu implements Controller {
         keyBindings.put("Destroy", KeyCode.D);
         keyBindings.put("Harvest", KeyCode.H);
     }
-
-
-    public void cleanup() {}
 
     private void createMultiplayerMenu(){
         root.getChildren().remove(menuBox);
@@ -170,7 +185,8 @@ public class StartMenu implements Controller {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        GameClient client = networker.connectClient(serverAddress, userName, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
+        Consumer<Long> startGame = (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime));
+        GameClient client = networker.connectClient(serverAddress, userName, startGame);
         if (client == null) {
             StackPane errorBox = new StackPane();
             new ErrorUI(errorBox, "Error: Game server denied connection", () -> this.createJoinGameMenu());

@@ -100,11 +100,11 @@ public class Networker {
         };
     }
 
-    public GameClient connectClient(InetSocketAddress address, String clientName, Consumer<Long> gameStart) {
+    public GameClient connectClient(InetSocketAddress address, String clientName, Consumer<Long> startGame) {
         try {
             this.client = GameClient.openConnection(address, clientName);
             if (this.client != null) {
-                this.client.clockCalibration = (originalGameStart) -> gameStart.accept(originalGameStart);
+                this.client.clockCalibration = (originalGameStart) -> startGame.accept(originalGameStart);
                 return this.client;
             }
 

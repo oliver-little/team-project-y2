@@ -16,6 +16,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,7 +33,6 @@ import java.util.function.Consumer;
 public class GameClient {
 
     public final String clientName;
-
     public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
 
@@ -42,14 +42,13 @@ public class GameClient {
 
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
-
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
     private Integer clientID;
-
     private WorldEntity worldEntity;
     private NewPlayerAction newPlayerAction;
+    private Runnable onDisconnect;
 
     private final HashMap<Integer, Player> players;
 
@@ -57,14 +56,25 @@ public class GameClient {
      * Default initializer for {@code GameClient}
      */
     protected GameClient(String clientName) {
-        this.clientID = null;
         this.clientName = clientName;
-        this.clientSocket = new Socket();
-        this.isActive = new AtomicBoolean(false);
         this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
         this.tempPlayerStates = new HashSet<PlayerState>();
-        this.players = new HashMap<Integer, Player>();
+
+        this.myFarmID = null;
         this.farmEntities = null;
+        this.clockCalibration = null;
+
+        this.clientSocket = new Socket();
+        this.isActive = new AtomicBoolean(false);
+        this.out = null;
+        this.in = null;
+
+        this.clientID = null;
+        this.worldEntity = null;
+        this.newPlayerAction = null;
+        this.onDisconnect = null;
+
+        this.players = new HashMap<Integer, Player>();
     }
 
     public Integer getID() {
@@ -92,6 +102,10 @@ public class GameClient {
             }
         }
         this.tempPlayerStates.clear();
+    }
+
+    public void setOnDisconnect(Runnable onDisconnect) {
+        this.onDisconnect = onDisconnect;
     }
 
     /**
@@ -142,12 +156,19 @@ public class GameClient {
      * @param update Instance of a {@link GameUpdate} to be sent to the connected server
      * @throws IOException Problem with sending the given {@code GameUpdate} to the connected server.
      */
-    public void send(GameUpdate update) throws IOException {
+    public void send(GameUpdate update) {
         if (!this.isActive.get()) {
             return;
         }
-        this.out.writeObject(update);
-        this.out.reset();
+        try {
+            this.out.writeObject(update);
+            this.out.reset();
+        } catch (SocketException ignore) {
+            this.onDisconnect.run();
+            this.closeConnection(false);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
@@ -155,15 +176,9 @@ public class GameClient {
      * If the client is not connected to a server, nothing happens.
      *
      * @param updatedState Instance of a {@link PlayerState} to be sent to the connected server
-     * @throws IOException Problem with sending the given {@code GameUpdate} to the connected server.
      */
-    public void send(PlayerState updatedState) throws IOException {
-        if (!this.isActive.get()) {
-            return;
-        }
-        this.out.writeObject(new GameUpdate(updatedState));
-        this.out.reset();
-
+    public void send(PlayerState updatedState) {
+        this.send(new GameUpdate(updatedState));
         this.handlePlayerStateUpdate(updatedState);
     }
 
@@ -256,14 +271,17 @@ public class GameClient {
 
                 } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
-                    ignore.printStackTrace();
                 } catch (EOFException ignore) {
+                    this.onDisconnect.run();
+                    this.closeConnection(false);
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (this.isActive.get()) {
                         exception.printStackTrace();
                     } else {
+                        this.onDisconnect.run();
+                        this.closeConnection(false);
                         break;
                     }
                 }

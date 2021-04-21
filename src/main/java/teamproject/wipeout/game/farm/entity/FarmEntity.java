@@ -906,12 +906,7 @@ public class FarmEntity extends GameEntity {
 
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            try {
-                client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.getID(), this.data.getCurrentState()));
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
+            client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.getID(), this.data.getCurrentState()));
         }
     }
 

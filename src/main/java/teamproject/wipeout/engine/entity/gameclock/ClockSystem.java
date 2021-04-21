@@ -1,6 +1,5 @@
 package teamproject.wipeout.engine.entity.gameclock;
 
-import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.system.GameSystem;
 
 public class ClockSystem implements GameSystem {

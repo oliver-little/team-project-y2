@@ -1,5 +1,6 @@
 package teamproject.wipeout;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -112,7 +113,7 @@ public class Gameplay implements Controller {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
         this.playerID = new Random().nextInt(1024);
-        this.playerName = playerName == null ? "Me" : playerName;
+        this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
 
         this.focusListener = null;
 
@@ -188,27 +189,6 @@ public class Gameplay implements Controller {
             this.networker.setWorldEntity(this.worldEntity);
         }
 
-        //Clock System
-        Runnable onEnd = () -> {
-            // Set up onEnd UI
-            GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
-            StackPane.setAlignment(gameOverUI, Pos.CENTER);
-            this.interfaceOverlay.getChildren().clear();
-            this.interfaceOverlay.getChildren().addAll(gameOverUI);
-
-            // Clear borders
-            AnchorPane.setTopAnchor(this.interfaceOverlay, 0.0);
-            AnchorPane.setRightAnchor(this.interfaceOverlay, 0.0);
-            AnchorPane.setBottomAnchor(this.interfaceOverlay, 0.0);
-            AnchorPane.setLeftAnchor(this.interfaceOverlay, 0.0);
-
-            // Disable input
-            this.inputHandler.disableInput(true);
-        };
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, onEnd);
-        this.systemUpdater.addSystem(clockSystem);
-        this.worldEntity.setClockSupplier(() -> clockSystem);
-
         // Game Audio
         GameAudio gameAudio = new GameAudio("backingTrack2.wav", true);
 
@@ -227,6 +207,11 @@ public class Gameplay implements Controller {
 
         // Settings UI
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
+
+        //Clock UI / System
+        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
+        this.systemUpdater.addSystem(clockSystem);
+        this.worldEntity.setClockSupplier(() -> clockSystem);
 
         // UI Overlay
         VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
@@ -416,6 +401,12 @@ public class Gameplay implements Controller {
         Market myMarket = this.worldEntity.getMarket();
 
         GameClient currentClient = this.networker.getClient();
+        currentClient.setOnDisconnect(() -> Platform.runLater(() -> {
+            StartMenu startMenu = new StartMenu();
+            this.root.getScene().setRoot(startMenu.getContent());
+            startMenu.disconnectError();
+        }));
+
         currentClient.addCurrentPlayer(myCurrentPlayer);
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
@@ -427,12 +418,7 @@ public class Gameplay implements Controller {
         FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
         this.worldEntity.setFarmFor(myCurrentPlayer, true, myFarm);
 
-        try {
-            currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
-
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
+        currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
     }
 
     private Map<String, Object> createMarketPack(CurrentPlayer currentPlayer, ArrayList<Task> purchasableTasks) {
@@ -457,6 +443,25 @@ public class Gameplay implements Controller {
         worldPack.put("marketEntity", marketEntity);
         worldPack.put("singleplayer", this.networker == null);
         return worldPack;
+    }
+
+    private Runnable onGameEnd() {
+        return () -> {
+            // Set up onEnd UI
+            GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
+            StackPane.setAlignment(gameOverUI, Pos.CENTER);
+            this.interfaceOverlay.getChildren().clear();
+            this.interfaceOverlay.getChildren().addAll(gameOverUI);
+
+            // Clear borders
+            AnchorPane.setTopAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setRightAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setBottomAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setLeftAnchor(this.interfaceOverlay, 0.0);
+
+            // Disable input TODO Stop AI Players
+            this.inputHandler.disableInput(true);
+        };
     }
 
 }

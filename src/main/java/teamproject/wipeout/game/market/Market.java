@@ -234,12 +234,7 @@ public class Market implements StateUpdatable<MarketState> {
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            try {
-                client.send(new GameUpdate(GameUpdateType.REQUEST, client.getID(), request));
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
+            client.send(new GameUpdate(GameUpdateType.REQUEST, client.getID(), request));
         }
     }
 

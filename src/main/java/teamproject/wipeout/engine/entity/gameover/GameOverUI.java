@@ -24,6 +24,7 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import teamproject.wipeout.StartMenu;
 import teamproject.wipeout.UIUtil;
+import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
@@ -78,9 +79,7 @@ public class GameOverUI extends StackPane {
         list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         Button closeButton = new Button("Go back to menu");
-        closeButton.setOnAction(e -> {
-            this.endGame();
-        });
+        closeButton.setOnAction(e -> this.endGame());
 
         Region titleSpacer = new Region();
         titleSpacer.setPrefHeight(40);
@@ -136,8 +135,9 @@ public class GameOverUI extends StackPane {
         this.list.getItems().clear();
         this.players.sort(new SortByMoney().reversed());
 
-        String winString = this.players.get(0).playerName + " wins!";
-        if (this.players.get(0).playerName == "Me") {
+        String winnerName = this.players.get(0).playerName;
+        String winString = winnerName + " wins!";
+        if (winnerName.equals(this.getCurrentPlayerName())) {
             winString = "You win!";
         }
 
@@ -155,7 +155,6 @@ public class GameOverUI extends StackPane {
             if (client != null) {
                 client.closeConnection(true);
             }
-
             this.networker.stopServer();
         }
 
@@ -163,5 +162,14 @@ public class GameOverUI extends StackPane {
 
         StartMenu startMenu = new StartMenu();
         this.root.getScene().setRoot(startMenu.getContent());
+    }
+
+    private String getCurrentPlayerName() {
+        GameClient client = this.networker.getClient();
+        if (client == null) {
+            return CurrentPlayer.DEFAULT_NAME;
+        } else {
+            return client.clientName;
+        }
     }
 }

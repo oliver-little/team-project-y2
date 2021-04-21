@@ -27,6 +27,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     //no. of task slots
     public static final int MAX_TASK_SIZE = 10;
 
+    public static final String DEFAULT_NAME = "Me";
+
     private FarmEntity myFarm;
 
     private int selectedSlot;

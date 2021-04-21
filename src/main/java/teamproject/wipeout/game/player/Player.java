@@ -579,12 +579,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            try {
-                client.send(this.playerState);
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
+            client.send(this.playerState);
         }
     }
 
