@@ -79,7 +79,7 @@ public class Gameplay implements Controller {
     private StackPane interfaceOverlay;
 
     private int numberOfSingleplayers = 4;
-    private double gameTime = 30.0;
+    private double gameTime = 200.0;
     private final long gameStartTime;
 
     private final Integer playerID;
