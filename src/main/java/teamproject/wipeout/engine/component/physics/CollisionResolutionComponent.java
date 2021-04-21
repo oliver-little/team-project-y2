@@ -27,7 +27,7 @@ public class CollisionResolutionComponent implements GameComponent {
 	 */
 	private final boolean isMoveable;
 
-	private Point2D deactivateOnCollision;
+	private boolean deactivateOnCollision;
 	private int timeMultiplier;
 
 	private final Function<Point2D, Consumer<Pair<Integer, Runnable>>> onCollision;
@@ -36,7 +36,7 @@ public class CollisionResolutionComponent implements GameComponent {
 	public CollisionResolutionComponent() {
 		this.isMoveable = true;
 
-		this.deactivateOnCollision = null;
+		this.deactivateOnCollision = true;
 		this.timeMultiplier = 0;
 
 		this.onCollision = null;
@@ -46,7 +46,7 @@ public class CollisionResolutionComponent implements GameComponent {
 	public CollisionResolutionComponent(boolean isMoveable, Function<Point2D, Consumer<Pair<Integer, Runnable>>> onCollision) {
 		this.isMoveable = isMoveable;
 
-		this.deactivateOnCollision = Point2D.ZERO;
+		this.deactivateOnCollision = false;
 		this.timeMultiplier = 1;
 
 		this.onCollision = onCollision;
@@ -58,7 +58,7 @@ public class CollisionResolutionComponent implements GameComponent {
 	}
 
 	public void resetControlVariables() {
-		this.deactivateOnCollision = Point2D.ZERO;
+		this.deactivateOnCollision = false;
 		this.timeMultiplier = 1;
 	}
 
@@ -99,17 +99,15 @@ public class CollisionResolutionComponent implements GameComponent {
     }
 
     private static void processOnCollision(CollisionResolutionComponent c, Point2D resolutionVector) {
-		Point2D editedVector = editVector(resolutionVector);
-
-		if (c.onCollision != null && !c.deactivateOnCollision.equals(editedVector)) {
-			c.deactivateOnCollision = editedVector;
-			Consumer<Pair<Integer, Runnable>> task = c.onCollision.apply(editedVector);
+		if (c.onCollision != null && !c.deactivateOnCollision) {
+			c.deactivateOnCollision = true;
+			Consumer<Pair<Integer, Runnable>> task = c.onCollision.apply(editVector(resolutionVector));
 
 			long delay = AIPlayer.COLLISION_RESOLUTION_TIME * c.timeMultiplier;
 			c.timeMultiplier += 1;
 
 			Runnable blockingTask = () -> {
-				c.deactivateOnCollision = Point2D.ZERO;
+				c.deactivateOnCollision = false;
 				Runnable resetMultiplier = () -> c.timeMultiplier = 1;
 				task.accept(new Pair<Integer, Runnable>(c.timeMultiplier, resetMultiplier));
 			};
@@ -119,7 +117,21 @@ public class CollisionResolutionComponent implements GameComponent {
 	}
 
 	private static Point2D editVector(Point2D vector) {
-		return new Point2D(vector.getX() == 0.0 ? 0.0 : 1.0, vector.getY() == 0.0 ? 0.0 : 1.0);
+		int vectorX = 0;
+		if (vector.getX() > 0.0) {
+			vectorX = 1;
+		} else if (vector.getX() < 0.0) {
+			vectorX = -1;
+		}
+
+		int vectorY = 0;
+		if (vector.getY() > 0.0) {
+			vectorY = 1;
+		} else if (vector.getY() < 0.0) {
+			vectorY = -1;
+		}
+
+		return new Point2D(vectorX, vectorY);
 	}
 
 }

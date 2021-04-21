@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 public class AIPlayer extends Player {
 
     public static final double COLLISION_RESOLUTION_SPEED = 250.0;
-    public static final long COLLISION_RESOLUTION_TIME = 300;
+    public static final long COLLISION_RESOLUTION_TIME = 500;
 
     public static final int[] GOOD_POTIONS = {52, 53, 54, 55, 58, 59};
     public static final int[] MEAN_POTIONS = {51, 56, 57, 60, 61};
@@ -81,17 +81,35 @@ public class AIPlayer extends Player {
             }
             steeringComponent.paused = true;
 
-            if (resolutionVector.getX() == 0) {
-                if (resolutionVector.getY() < 0) {
-                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED, COLLISION_RESOLUTION_SPEED / 5.0);
+            int vectorX = (int) resolutionVector.getX();
+            int vectorY = (int) resolutionVector.getY();
+
+            if (vectorX < 0) {
+                if (vectorY < 0) {
+                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED, COLLISION_RESOLUTION_SPEED);
+                } else if (vectorY > 0) {
+                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED, -COLLISION_RESOLUTION_SPEED);
                 } else {
-                    this.physics.acceleration = new Point2D(-COLLISION_RESOLUTION_SPEED, -(COLLISION_RESOLUTION_SPEED/ 5.0));
+                    int oneMultiplier = Math.random() > 0.5 ? 1 : -1;
+                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED, oneMultiplier * COLLISION_RESOLUTION_SPEED);
+                }
+            } else if (vectorX > 0) {
+                if (vectorY < 0) {
+                    this.physics.acceleration = new Point2D(-COLLISION_RESOLUTION_SPEED, COLLISION_RESOLUTION_SPEED);
+                } else if (vectorY > 0) {
+                    this.physics.acceleration = new Point2D(-COLLISION_RESOLUTION_SPEED, -COLLISION_RESOLUTION_SPEED);
+                } else {
+                    int oneMultiplier = Math.random() > 0.5 ? 1 : -1;
+                    this.physics.acceleration = new Point2D(-COLLISION_RESOLUTION_SPEED, oneMultiplier * COLLISION_RESOLUTION_SPEED);
                 }
             } else {
-                if (resolutionVector.getX() < 0) {
-                    this.physics.acceleration = new Point2D(COLLISION_RESOLUTION_SPEED / 5.0, -COLLISION_RESOLUTION_SPEED);
+                int oneMultiplier = Math.random() > 0.5 ? 1 : -1;
+                if (vectorY < 0) {
+                    this.physics.acceleration = new Point2D(oneMultiplier * COLLISION_RESOLUTION_SPEED, COLLISION_RESOLUTION_SPEED);
+                } else if (vectorY > 0) {
+                    this.physics.acceleration = new Point2D(oneMultiplier * COLLISION_RESOLUTION_SPEED, -COLLISION_RESOLUTION_SPEED);
                 } else {
-                    this.physics.acceleration = new Point2D(-(COLLISION_RESOLUTION_SPEED/ 5.0), COLLISION_RESOLUTION_SPEED);
+                    this.physics.acceleration = new Point2D(oneMultiplier * COLLISION_RESOLUTION_SPEED, oneMultiplier * COLLISION_RESOLUTION_SPEED);
                 }
             }
 
