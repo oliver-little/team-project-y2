@@ -6,17 +6,16 @@ import teamproject.wipeout.util.resources.ResourceType;
 
 public class ClockUI extends Label {
 
-    private boolean gameEnded;
-    public GameOverUI gameOverUI;
+    public Runnable onEnd;
 
+    private boolean gameEnded;
     private Double time;
     private final Double initialTime;
 
-    public ClockUI(double time, GameOverUI gameOverUI) {
+    public ClockUI(double time, Runnable onEnd) {
         super();
-
+        this.onEnd = onEnd;
         this.gameEnded = false;
-        this.gameOverUI = gameOverUI;
 
         this.time = time;
         this.initialTime = time;
@@ -40,8 +39,7 @@ public class ClockUI extends Label {
 
         this.time = Math.max(0, this.time - timestep);
         if (this.time < 1.0) {
-            this.gameOverUI.setVisible(true);
-            this.gameOverUI.refreshText();
+            this.onEnd.run();
             this.gameEnded = true;
         }
         int min = (int)(this.time / 60);

@@ -99,6 +99,14 @@ public class InputHandler {
     }
 
     /**
+     * Disables/enables the game input depending on the input parameter.
+     * @param disabled New value of the {@code disableInput} variable.
+     */
+    public void disableInput(boolean disabled) {
+        this.setDisableInput(disabled).run();
+    }
+
+    /**
      * {@code disableInput} variable getter.
      *
      * @return boolean value of the {@code disableInput} variable.
@@ -108,8 +116,9 @@ public class InputHandler {
     }
 
     /**
-     * {@code disableInput} variable setter
+     * {@code disableInput} variable setter.
      * @param disabled New value of the {@code disableInput} variable.
+     * @return A runnable to complete the action of disabling/enabling input when run.
      */
     public Runnable setDisableInput(boolean disabled) {
         return () -> {

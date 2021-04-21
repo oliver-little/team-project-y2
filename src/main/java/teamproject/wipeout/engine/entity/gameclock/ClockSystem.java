@@ -8,8 +8,8 @@ public class ClockSystem implements GameSystem {
     public final ClockUI clockUI;
     public final Long gameStartTime;
 
-    public ClockSystem(double duration, long startTime, GameOverUI gameOverUI) {
-        this.clockUI = new ClockUI(duration, gameOverUI);
+    public ClockSystem(double duration, long startTime, Runnable onEnd) {
+        this.clockUI = new ClockUI(duration, onEnd);
         this.gameStartTime = startTime;
     }
 

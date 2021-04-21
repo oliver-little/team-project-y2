@@ -79,7 +79,7 @@ public class Gameplay implements Controller {
     private StackPane interfaceOverlay;
 
     private int numberOfSingleplayers = 4;
-    private double gameTime = 200.0;
+    private double gameTime = 30.0;
     private final long gameStartTime;
 
     private final Integer playerID;
@@ -189,8 +189,23 @@ public class Gameplay implements Controller {
         }
 
         //Clock System
-        GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, gameOverUI);
+        Runnable onEnd = () -> {
+            // Set up onEnd UI
+            GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
+            StackPane.setAlignment(gameOverUI, Pos.CENTER);
+            this.interfaceOverlay.getChildren().clear();
+            this.interfaceOverlay.getChildren().addAll(gameOverUI);
+
+            // Clear borders
+            AnchorPane.setTopAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setRightAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setBottomAnchor(this.interfaceOverlay, 0.0);
+            AnchorPane.setLeftAnchor(this.interfaceOverlay, 0.0);
+
+            // Disable input
+            this.inputHandler.disableInput(true);
+        };
+        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, onEnd);
         this.systemUpdater.addSystem(clockSystem);
         this.worldEntity.setClockSupplier(() -> clockSystem);
 
@@ -213,13 +228,9 @@ public class Gameplay implements Controller {
         // Settings UI
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
 
-        // GameOver UI
-        gameOverUI.setVisible(false);
-        StackPane.setAlignment(gameOverUI, Pos.CENTER);
-
         // UI Overlay
         VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
-        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI, gameOverUI);
+        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI);
 
         // Input bindings
         this.setupKeyInput(currentPlayer, inventoryUI);
