@@ -110,7 +110,7 @@ public class RenderSystem implements GameSystem {
                 height /= zoom;
             }
 
-            if (!cameraPos.equals(lastCameraPos) || Double.compare(zoom, lastZoom) > DOUBLE_COMPARE) {
+            if (!cameraPos.equals(lastCameraPos) || Double.compare(zoom, lastZoom) != 0) {
                 lastZoom = zoom;
                 lastCameraPos = cameraPos;
                 this.staticGC.clearRect(0, 0, width, height);
