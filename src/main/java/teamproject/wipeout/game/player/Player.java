@@ -168,7 +168,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         GameEntity nameTag = new GameEntity(scene);
         nameTag.addComponent(new RenderComponent(tag));
         RenderComponent playerRender = this.getComponent(RenderComponent.class);
-        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*1.7f, 10));
+        nameTag.addComponent(new Transform(playerRender.getWidth()/2f -tag.getWidth()/2f, -tag.getHeight()*0.5f, 10));
         nameTag.setParent(this);
     }
 
