@@ -317,8 +317,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		nameTag.addComponent(new RenderComponent(tag));
 
 		RenderComponent ratRender = animal.getComponent(RenderComponent.class);
-		nameTag.addComponent(new Transform(ratRender.getWidth()/2f - tag.getWidth(), -tag.getHeight()*1f, 10));
-		nameTag.setParent(this.myAnimal);
+		nameTag.addComponent(new Transform(ratRender.getWidth()/2f - tag.getWidth()/2f, -tag.getHeight()*0.5f, 10));
+		nameTag.setParent(animal);
 
 		return animal;
 	}
