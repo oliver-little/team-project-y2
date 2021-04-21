@@ -127,13 +127,27 @@ public class StartMenu implements Controller {
         Label serverNameLabel = new Label("Server Name: ");
         TextField serverNameTF = new TextField();
         serverNameBox.getChildren().addAll(serverNameLabel,serverNameTF);
+        
+        StackPane errorBox = new StackPane();
 
         Button hostButton = new Button("Host Server");
-        hostButton.setOnAction(((event) -> createServer(serverNameTF.getText(), nameTF.getText())));
+        hostButton.setOnAction(((event) -> {
+        	if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
+        		new ErrorUI(errorBox, "Error: No server name entered");
+        	}
+        	else if(nameTF.getText()==null || nameTF.getText().equals("")) {
+        		new ErrorUI(errorBox, "Error: No name entered");
+        	}
+        	else {
+        		createServer(serverNameTF.getText(), nameTF.getText());
+        	}
+        	
+        }));
 
         hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
+        
 
-        menuBox.getChildren().addAll(hostPane);
+        menuBox.getChildren().addAll(hostPane, errorBox);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
@@ -263,7 +277,7 @@ public class StartMenu implements Controller {
                 	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
                 	//System.out.println("selectedItem: "+ selectedItem.getServerName());
                     if(selectedItem != null){
-                    	if(nameTF.getText()==null || nameTF.getText()=="") {
+                    	if(nameTF.getText()==null || nameTF.getText().equals("")) {
                     		new ErrorUI(errorBox, "Error: No name entered");
                     	}
                     	else {
