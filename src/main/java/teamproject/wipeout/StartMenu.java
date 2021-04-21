@@ -133,10 +133,10 @@ public class StartMenu implements Controller {
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
         	if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
-        		new ErrorUI(errorBox, "Error: No server name entered");
+        		new ErrorUI(errorBox, "Error: No server name entered", null);
         	}
         	else if(nameTF.getText()==null || nameTF.getText().equals("")) {
-        		new ErrorUI(errorBox, "Error: No name entered");
+        		new ErrorUI(errorBox, "Error: No name entered", null);
         	}
         	else {
         		createServer(serverNameTF.getText(), nameTF.getText());
@@ -155,7 +155,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().addAll(menuBox);
+        root.getChildren().add(menuBox);
     }
 
     private boolean createServer(String serverName, String hostName){
@@ -169,6 +169,16 @@ public class StartMenu implements Controller {
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
+
+        GameClient client = networker.connectClient(serverAddress, userName, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
+        if (client == null) {
+            StackPane errorBox = new StackPane();
+            new ErrorUI(errorBox, "Error: Game server denied connection", () -> this.createJoinGameMenu());
+            menuBox.getChildren().add(errorBox);
+            root.getChildren().add(menuBox);
+            return;
+        }
+        chosenName = userName;
 
         menuBox.getChildren().addAll(UIUtil.createTitle(serverName));
 
@@ -203,13 +213,13 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        chosenName = userName;
-        networker.connectClient(serverAddress, userName, (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime)));
-
-        ObservableMap<Integer, String> observablePlayers = networker.getClient().connectedClients.get();
+        ObservableMap<Integer, String> observablePlayers = client.connectedClients.get();
+        for (String player : observablePlayers.values()) {
+            playerList.getItems().add(player);
+        }
 
         observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
-            if (!networker.getClient().getIsActive()) {
+            if (!client.getIsActive()) {
                 Platform.runLater(() -> createMainMenu());
                 return;
             }
@@ -275,10 +285,10 @@ public class StartMenu implements Controller {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Join Server", () -> {
                 	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
-                	//System.out.println("selectedItem: "+ selectedItem.getServerName());
-                    if(selectedItem != null){
+
+                    if (selectedItem != null) {
                     	if(nameTF.getText()==null || nameTF.getText().equals("")) {
-                    		new ErrorUI(errorBox, "Error: No name entered");
+                    		new ErrorUI(errorBox, "Error: No name entered", null);
                     	}
                     	else {
                     		joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
@@ -286,7 +296,7 @@ public class StartMenu implements Controller {
                         
                     }
                     else {
-                    	new ErrorUI(errorBox, "Error: No Server Selected");
+                    	new ErrorUI(errorBox, "Error: No Server Selected", null);
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> {

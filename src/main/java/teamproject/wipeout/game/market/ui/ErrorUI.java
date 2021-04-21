@@ -24,11 +24,11 @@ public class ErrorUI {
         TASK_COMPLETED
     }
     
-    public ErrorUI(StackPane errorPane, String errorMessage) {
+    public ErrorUI(StackPane errorPane, String errorMessage, Runnable onFadeOut) {
     	Label errorMessageLabel;
     	errorMessageLabel = new Label(errorMessage);
     	errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
-    	createErrorBox(errorMessageLabel, errorPane);
+    	createErrorBox(errorMessageLabel, errorPane, onFadeOut);
     	
     }
 
@@ -64,10 +64,10 @@ public class ErrorUI {
             errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
         }
 
-        createErrorBox(errorMessageLabel, errorPane);
+        createErrorBox(errorMessageLabel, errorPane, null);
     }
     
-    private void createErrorBox(Label errorMessageLabel, StackPane errorPane) {
+    private void createErrorBox(Label errorMessageLabel, StackPane errorPane, Runnable onFadeOut) {
         HBox errorBackground = new HBox();
 
         StackPane.setAlignment(errorBackground, Pos.BOTTOM_CENTER);
@@ -91,6 +91,9 @@ public class ErrorUI {
         
         sequentialTransition.setOnFinished((finish) -> {
             errorPane.getChildren().remove(errorBackground);
+            if (onFadeOut != null) {
+                onFadeOut.run();
+            }
         });               
         sequentialTransition.play();
     }

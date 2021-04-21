@@ -9,6 +9,7 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
@@ -99,15 +100,18 @@ public class Networker {
         };
     }
 
-    public void connectClient(InetSocketAddress address, String clientName, Consumer<Long> gameStart) {
+    public GameClient connectClient(InetSocketAddress address, String clientName, Consumer<Long> gameStart) {
         try {
             this.client = GameClient.openConnection(address, clientName);
-            // TODO client can be null
-            this.client.clockCalibration = (originalGameStart) -> gameStart.accept(originalGameStart);
+            if (this.client != null) {
+                this.client.clockCalibration = (originalGameStart) -> gameStart.accept(originalGameStart);
+                return this.client;
+            }
 
         } catch (IOException | ClassNotFoundException exception) {
             exception.printStackTrace();
         }
+        return null;
     }
 
 }

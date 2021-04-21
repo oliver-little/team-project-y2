@@ -183,6 +183,7 @@ public class GameServer {
             this.stopGame();
         }
         this.isActive = true;
+        this.stopClientSearch();
         this.calibrateClocks();
     }
 
