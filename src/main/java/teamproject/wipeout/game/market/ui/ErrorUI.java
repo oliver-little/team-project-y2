@@ -23,6 +23,14 @@ public class ErrorUI {
         INVENTORY_EMPTY,
         TASK_COMPLETED
     }
+    
+    public ErrorUI(StackPane errorPane, String errorMessage) {
+    	Label errorMessageLabel;
+    	errorMessageLabel = new Label(errorMessage);
+    	errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
+    	createErrorBox(errorMessageLabel, errorPane);
+    	
+    }
 
     public ErrorUI(StackPane errorPane, ERROR_TYPE errorType) {
         Label errorMessageLabel;
@@ -56,6 +64,10 @@ public class ErrorUI {
             errorMessageLabel.setStyle("-fx-font-family: 'Kalam'; -fx-font-size: 20pt; -fx-text-fill: rgba(255, 0, 0, 1); -fx-font-weight: bold;");
         }
 
+        createErrorBox(errorMessageLabel, errorPane);
+    }
+    
+    private void createErrorBox(Label errorMessageLabel, StackPane errorPane) {
         HBox errorBackground = new HBox();
 
         StackPane.setAlignment(errorBackground, Pos.BOTTOM_CENTER);

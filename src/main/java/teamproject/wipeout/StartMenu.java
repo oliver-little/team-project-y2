@@ -18,6 +18,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
@@ -241,7 +242,10 @@ public class StartMenu implements Controller {
         //serverList.getItems().add(new Server("test", null));
         serverBox.getChildren().add(serverList);
 
-        menuBox.getChildren().addAll(playerInfoBox, serverBox);
+        
+        StackPane errorBox = new StackPane();
+        
+        menuBox.getChildren().addAll(playerInfoBox, serverBox, errorBox);
 
         // TODO use list view instead of toggle group
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
@@ -259,7 +263,16 @@ public class StartMenu implements Controller {
                 	Server selectedItem = serverList.getSelectionModel().getSelectedItem();
                 	//System.out.println("selectedItem: "+ selectedItem.getServerName());
                     if(selectedItem != null){
-                        joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
+                    	if(nameTF.getText()==null || nameTF.getText()=="") {
+                    		new ErrorUI(errorBox, "Error: No name entered");
+                    	}
+                    	else {
+                    		joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
+                    	}
+                        
+                    }
+                    else {
+                    	new ErrorUI(errorBox, "Error: No Server Selected");
                     }
                 }),
                 new Pair<String, Runnable>("Back", () -> {
