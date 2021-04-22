@@ -150,12 +150,11 @@ public class GameOverUI extends StackPane {
     }
 
     public void endGame() {
-        if (this.networker != null) {
+        if (this.networker != null && !this.networker.stopServer()) {
             GameClient client = this.networker.getClient();
             if (client != null) {
                 client.closeConnection(true);
             }
-            this.networker.stopServer();
         }
 
         this.onClose.run();

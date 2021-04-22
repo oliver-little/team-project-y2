@@ -193,6 +193,7 @@ public class GameServer {
     public void stopGame() {
         this.playerStates.set(new HashMap<Integer, PlayerState>());
         this.farmStates.set(new HashMap<Integer, FarmState>());
+        this.generatedIDs.clear();
         this.availableFarms.set(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
         this.gameStartTime = -1;
         this.isActive = false;
@@ -226,6 +227,7 @@ public class GameServer {
         for (GameClientHandler client : clientHandlers) {
             if (client.clientID.equals(deleteClientID)) {
                 client.closeConnection(serverSide);
+                this.addAvailableFarm(client.farmID);
             }
         }
         clientHandlers.removeIf((client) -> client.clientID.equals(deleteClientID));
@@ -241,16 +243,19 @@ public class GameServer {
      *
      * @throws IOException Problem with closing connections
      */
-    public void disconnectClients() throws IOException {
+    public void serverStopping() {
         ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
+        GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
         for (GameClientHandler client : clientHandlers) {
-            client.closeConnection(true);
+            try {
+                client.updateWith(stopServer);
+            } catch (IOException ignore) {
+                // Stopping server so it's not important
+            }
         }
-        this.stopGame();
 
         this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
-        this.generatedIDs.clear();
     }
 
     /**
@@ -263,11 +268,8 @@ public class GameServer {
             this.stopClientSearch();
         }
 
-        if (this.isActive) {
-            this.stopGame();
-        }
-
-        this.disconnectClients();
+        this.stopGame();
+        this.serverStopping();
         this.serverSocket.close();
     }
 
@@ -350,9 +352,6 @@ public class GameServer {
             case FARM_STATE:
                 this.handleFarmStateUpdate(update.originClientID, (FarmState) update.content);
                 break;
-            case FARM_ID:
-                this.handleFarmRequest(update.originClientID);
-                return;
             case REQUEST:
                 this.handleRequest((MarketOperationRequest) update.content, update.originClientID);
                 return;
@@ -449,14 +448,25 @@ public class GameServer {
     /**
      *
      */
-    private Integer handleFarmRequest(Integer clientID) throws IOException {
+    private Integer handleFarmRequest() throws IOException {
         Integer farmID = -1;
         try {
-            ArrayList<Integer> farms = this.availableFarms.getAcquire();
-            farmID = farms.remove(0);
-            this.availableFarms.setRelease(farms);
+            farmID = this.removeAvailableFarm();
         } catch (IndexOutOfBoundsException | UnsupportedOperationException ignore) {}
 
+        return farmID;
+    }
+
+    private void addAvailableFarm(Integer farmID) {
+        ArrayList<Integer> farms = this.availableFarms.getAcquire();
+        farms.add(0, farmID);
+        this.availableFarms.setRelease(farms);
+    }
+
+    private Integer removeAvailableFarm() throws IndexOutOfBoundsException, UnsupportedOperationException {
+        ArrayList<Integer> farms = this.availableFarms.getAcquire();
+        Integer farmID = farms.remove(0);
+        this.availableFarms.setRelease(farms);
         return farmID;
     }
 
@@ -477,9 +487,11 @@ public class GameServer {
 
                     // (1.) Game session is not active and the number of clients is under the limit
                     if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
-                        GameClientHandler client = GameClientHandler.allowConnection(this.id, this.generateClientID(), clientSocket, this::clientUpdateArrived);
+                        Integer clientID = this.generateClientID();
+                        Integer farmID = this.handleFarmRequest();
+                        GameClientHandler client = GameClientHandler.allowConnection(this.id, clientID, farmID, clientSocket, this::clientUpdateArrived);
 
-                        client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, this.handleFarmRequest(client.clientID)));
+                        client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, farmID));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
                             this.sendFirstUpdatesToClient(client, clientHandlers);

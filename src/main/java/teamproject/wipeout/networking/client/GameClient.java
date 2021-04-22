@@ -16,7 +16,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -163,11 +162,9 @@ public class GameClient {
         try {
             this.out.writeObject(update);
             this.out.reset();
-        } catch (SocketException ignore) {
-            this.onDisconnect.run();
+        } catch (IOException ignore) {
+            this.runOnDisconnect();
             this.closeConnection(false);
-        } catch (IOException exception) {
-            exception.printStackTrace();
         }
     }
 
@@ -193,23 +190,26 @@ public class GameClient {
         }
         this.isActive.set(false);
 
-        try {
-            if (clientSide) {
+        if (clientSide) {
+            try {
                 this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.clientID));
                 this.out.reset();
+            } catch (IOException ignore) {
+                // Disconnecting, we don't care about exceptions at this point
             }
+        }
 
-            if (!this.clientSocket.isClosed()) {
+        if (!this.clientSocket.isClosed()) {
+            try {
+
                 this.out.close();
                 this.in.close();
                 this.clientSocket.close();
+            } catch (IOException ignore) {
+                // Disconnecting, we don't care about exceptions at this point
             }
-
-            this.connectedClients.clear();
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        this.connectedClients.clear();
     }
 
     /**
@@ -265,25 +265,23 @@ public class GameClient {
                         case DISCONNECT:
                             this.handleDisconnectPlayer(receivedUpdate.originClientID);
                             break;
+                        case SERVER_STOP:
+                            if (!this.worldEntity.isGameplayActive()) {
+                                this.runOnDisconnect();
+                            }
+                            this.closeConnection(false);
+                            break;
                         default:
                             break;
                     }
 
                 } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
                     // Do NOT let one corrupted packet cause the game to crash
-                } catch (EOFException ignore) {
-                    this.onDisconnect.run();
-                    this.closeConnection(false);
+                } catch (IOException | ClassNotFoundException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)
+                    this.runOnDisconnect();
+                    this.closeConnection(false);
                     break;
-                } catch (IOException | ClassNotFoundException exception) {
-                    if (this.isActive.get()) {
-                        exception.printStackTrace();
-                    } else {
-                        this.onDisconnect.run();
-                        this.closeConnection(false);
-                        break;
-                    }
                 }
             }
         }).start();
@@ -324,11 +322,20 @@ public class GameClient {
 
     private void handleDisconnectPlayer(Integer disconnectedClientID) {
         if (disconnectedClientID.equals(this.clientID)) {
+            this.runOnDisconnect();
             this.closeConnection(false);
         } else {
             this.connectedClients.remove(disconnectedClientID);
             Player removedPlayer = this.players.remove(disconnectedClientID);
-            this.worldEntity.removePlayer(removedPlayer);
+            if (this.worldEntity != null) {
+                this.worldEntity.removePlayer(removedPlayer);
+            }
+        }
+    }
+
+    private void runOnDisconnect() {
+        if (this.onDisconnect != null) {
+            this.onDisconnect.run();
         }
     }
 

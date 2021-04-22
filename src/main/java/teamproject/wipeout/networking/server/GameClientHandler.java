@@ -27,6 +27,8 @@ public class GameClientHandler {
     public final Integer clientID;
     public final String clientName;
 
+    public final Integer farmID;
+
     protected final Socket clientSocket;
     protected final ObjectInputStream in;
     protected final ObjectOutputStream out;
@@ -40,10 +42,12 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     written to(= send updates) or when the client declines to connect.
      */
-    protected GameClientHandler(Integer serverID, Integer clientID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
+    protected GameClientHandler(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
         this.clientID = clientID;
         this.clientSocket = socket;
         this.updater = updater;
+
+        this.farmID = farmID;
 
         // At first, output stream must be created!
         this.out = new ObjectOutputStream(this.clientSocket.getOutputStream());
@@ -73,10 +77,10 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     *                     written to(= send updates) or when the client declines to connect.
      */
-    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Socket socket, GameUpdatable updater)
+    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdatable updater)
             throws IOException, ClassNotFoundException {
 
-        GameClientHandler newInstance = new GameClientHandler(serverID, clientID, socket, updater);
+        GameClientHandler newInstance = new GameClientHandler(serverID, clientID, farmID, socket, updater);
 
         newInstance.startReceivingUpdates();
 

@@ -194,6 +194,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
+	public boolean isGameplayActive() {
+		if (this.clockSupplier == null) {
+			return false;
+		}
+		return this.clockSupplier.get().clockUI.getGameEnded();
+	}
+
 	public void addPotion(PotionEntity potionEntity) {
 		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
 		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
@@ -221,8 +228,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.players.add(newPlayer);
 	}
 
-	public void removePlayer(Player newPlayer) {
-		this.players.remove(newPlayer);
+	public void removePlayer(Player player) {
+		this.players.remove(player);
+		int farmToClear = player.getCurrentState().getFarmID();
+		this.farms.get(farmToClear).removePlayer();
+		player.destroy();
 	}
 
 	public Supplier<ClockSystem> getClockSupplier() {

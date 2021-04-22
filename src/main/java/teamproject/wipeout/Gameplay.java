@@ -10,6 +10,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
@@ -80,8 +81,7 @@ public class Gameplay implements Controller {
     private double gameTime = 200.0;
     private final long gameStartTime;
 
-    private final Integer playerID;
-    private final String playerName;
+    private final Pair<Integer, String> playerInfo;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
@@ -107,11 +107,14 @@ public class Gameplay implements Controller {
 
     private final Networker networker;
 
-    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings) {
+    public Gameplay(Networker networker, Long givenGameStartTime, Pair<Integer, String> playerInfo, Map<String, KeyCode> bindings) {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
-        this.playerID = new Random().nextInt(1024);
-        this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
+        if (playerInfo == null) {
+            this.playerInfo = new Pair<Integer, String>(new Random().nextInt(1024), CurrentPlayer.DEFAULT_NAME);
+        } else {
+            this.playerInfo = playerInfo;
+        }
 
         this.focusListener = null;
 
@@ -162,8 +165,7 @@ public class Gameplay implements Controller {
         this.eventSystems = List.of(mouseClick, playerAnimator, sabotage);
 
         // Player
-        Pair<Integer, String> playerInfo = new Pair<Integer, String>(this.playerID, this.playerName);
-    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, playerInfo, this.spriteManager, this.itemStore);
+    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, this.playerInfo, this.spriteManager, this.itemStore);
 
         // Camera
         CameraEntity cameraEntity = new CameraEntity(this.gameScene);
@@ -205,12 +207,11 @@ public class Gameplay implements Controller {
 
         // Settings UI
         Runnable returnToMenu = () -> {
-            if (this.networker != null) {
+            if (this.networker != null && !this.networker.stopServer()) {
                 GameClient client = this.networker.getClient();
                 if (client != null) {
                     client.closeConnection(true);
                 }
-                this.networker.stopServer();
             }
     
             this.cleanup();
@@ -418,9 +419,12 @@ public class Gameplay implements Controller {
 
         GameClient currentClient = this.networker.getClient();
         currentClient.setOnDisconnect(() -> Platform.runLater(() -> {
-            StartMenu startMenu = new StartMenu();
-            this.root.getScene().setRoot(startMenu.getContent());
-            startMenu.disconnectError();
+            Scene scene = this.root.getScene();
+            if (scene != null) {
+                StartMenu startMenu = new StartMenu();
+                scene.setRoot(startMenu.getContent());
+                startMenu.disconnectError();
+            }
         }));
 
         currentClient.addCurrentPlayer(myCurrentPlayer);

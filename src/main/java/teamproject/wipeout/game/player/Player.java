@@ -34,7 +34,6 @@ import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;

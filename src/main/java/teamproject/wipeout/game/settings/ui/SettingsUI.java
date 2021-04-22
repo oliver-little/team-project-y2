@@ -159,18 +159,18 @@ public class SettingsUI extends VBox {
         effectsSlider.addEventFilter(KeyEvent.ANY, KeyEvent::consume);
         backingSlider.addEventFilter(KeyEvent.ANY, KeyEvent::consume);
         
-        /** 
-        Button closeButton = new Button("Return to Menu"); // Uncomment once working
+
+        Button closeButton = new Button("Return to Menu");
         closeButton.setId("close");
         closeButton.setOnAction((e) -> doReturnToMenu.run());
         HBox closeButtonContainer = new HBox();
         closeButtonContainer.getChildren().addAll(closeButton);
         closeButtonContainer.setAlignment(Pos.CENTER);
-        */
-        
+
+
         Label title1 = new Label("Music Volume");
         Label title2 = new Label("Effects Volume");
-        box.getChildren().addAll(title1, backingBox, title2, effectsBox);
+        box.getChildren().addAll(title1, backingBox, title2, effectsBox, closeButtonContainer);
         box.setPadding(new Insets(0, 5, 5, 5));
 
         scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);

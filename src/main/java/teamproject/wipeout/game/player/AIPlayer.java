@@ -203,7 +203,6 @@ public class AIPlayer extends Player {
         Runnable onComplete = () ->  {
             double randDestroy = Math.random();
             if (this.getMoney() > 100.0 && (randDestroy < 0.05 || (randDestroy < 0.1 && this.aiFarm.itemAt(x, y).get().getComponent(PlantComponent.class).isTree))) {
-                System.out.println("Destroy " + this.playerID);
                 this.aiFarm.pickItemAt(x, y, false, true);
             } else {
                 Integer[] picked = this.aiFarm.pickItemAt(x, y, false, false);
@@ -253,9 +252,6 @@ public class AIPlayer extends Player {
     private void aiDecisionAlgorithm() {
         Supplier<ClockSystem> clockSupplier = this.worldEntity.getClockSupplier();
         if (clockSupplier != null && clockSupplier.get().getTime() <= 0.0) {
-            System.out.println("STOP " + this.playerID);
-            System.out.println("AI: " + this.getMoney());
-            System.out.println("AI: " + this.inventory.toString());
             return;
         }
 
@@ -350,7 +346,6 @@ public class AIPlayer extends Player {
 
     private void buyAndApplyFarmExpansion(Consumer<Boolean> completion) {
         if (this.hasEnoughMoney(this.currentFarmExpansionPrice + 30)) {
-            System.out.println("Expand " + this.playerID);
             this.setMoney(this.getMoney() - this.currentFarmExpansionPrice);
             this.aiFarm.expandFarmBy(1);
             this.currentFarmExpansionPrice *= FarmExpansionUI.PRICE_MULTIPLIER;
@@ -441,9 +436,6 @@ public class AIPlayer extends Player {
         }
 
         Runnable onComplete = () -> this.aiDecisionAlgorithm();
-
-        System.out.println("Potion from " + this.playerID);
-        System.out.println("used on " + useOnPlayer.playerID);
 
         PotionThrowEntity potionThrow = new PotionThrowEntity(this.getScene(), this.worldEntity.spriteManager, this, this.worldEntity.myCurrentPlayer, currentPotion, possibleEffectEntities, onComplete, onComplete);
 

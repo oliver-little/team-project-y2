@@ -214,13 +214,11 @@ public class FarmEntity extends GameEntity {
         if (activePlayer) {
             this.audio = new AudioComponent();
             this.addComponent(this.audio);
-            //this.farmUI = new FarmUI(this.data, spriteManager);
-            //this.farmUI.setParent(uiContainer);
             this.addComponent(this.makeClickable());
         }
     }
 
-    private void removePlayer() {
+    public void removePlayer() {
         this.data = new FarmData(-13, null, this.expandFarmBy(), this.itemStore);
 
         int row = 0;
