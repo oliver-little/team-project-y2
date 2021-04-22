@@ -8,6 +8,10 @@
     -fx-border-color: rgb(0, 0, 0);
     -fx-border-radius: 5px;  
 }
+
+.small-button{
+	-fx-pref-width: 50px;
+}
     
 .button:hover {
     -fx-background-color:rgba(216, 216, 216, 0.8);

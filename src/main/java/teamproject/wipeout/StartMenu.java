@@ -7,6 +7,7 @@ import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Pos;
@@ -145,6 +146,44 @@ public class StartMenu implements Controller {
         
         StackPane errorBox = new StackPane();
 
+        ComboBox gamemodeBox = new ComboBox(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
+        gamemodeBox.getSelectionModel().selectFirst();
+        
+        Label valueDesc = new Label("Minutes: ");
+        
+        HBox valueBox = new HBox();
+        valueBox.getStyleClass().add("hbox");
+        valueBox.setSpacing(3);
+        valueBox.setAlignment(Pos.CENTER);
+        Label valueLabel = new Label("10");
+        final int interval = 5;
+        int min = 5;
+        int max = 30;
+        Button decrementButton = new Button("-");
+        decrementButton.getStyleClass().add("small-button");
+        decrementButton.setPrefSize(50, 50);
+        decrementButton.setOnAction((event) ->{
+        	int value = Integer.parseInt(valueLabel.getText());
+        	if (value-interval>=min) {
+        		valueLabel.setText(Integer.toString(value-interval));
+        	}
+        	
+        });
+        
+        Button incrementButton = new Button("+");
+        incrementButton.getStyleClass().add("small-button");
+        incrementButton.setPrefSize(50, 50);
+        
+        incrementButton.setOnAction((event) ->{
+        	int value = Integer.parseInt(valueLabel.getText());
+        	if (value+interval<=max) {
+        		valueLabel.setText(Integer.toString(value+interval));
+        	}
+        	
+        });
+        
+        valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
+        
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
         	if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
@@ -159,7 +198,7 @@ public class StartMenu implements Controller {
         	
         }));
 
-        hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
+        hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, valueDesc, valueBox, hostButton);
         
 
         menuBox.getChildren().addAll(hostPane, errorBox);
