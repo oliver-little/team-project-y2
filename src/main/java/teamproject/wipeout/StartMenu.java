@@ -80,11 +80,12 @@ public class StartMenu implements Controller {
     }
 
     private void cleanupNetworker() {
-        GameClient client = this.networker.getClient();
-        if (client != null) {
-            client.closeConnection(true);
+        if (!this.networker.stopServer()) {
+            GameClient client = this.networker.getClient();
+            if (client != null) {
+                client.closeConnection(true);
+            }
         }
-        this.networker.stopServer();
     }
 
     /**
