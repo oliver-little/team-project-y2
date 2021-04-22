@@ -21,7 +21,6 @@
 .vbox {
     -fx-background-color: transparent;
     -fx-background-radius: 5px;
-    -fx-padding: 10 5 20 5;
 }
 
 .slider {
@@ -43,4 +42,29 @@
 
     -fx-background-radius: 2px;
     -fx-background-insets: 1 1 1 1;
+}
+
+.button:hover {
+    -fx-background-color: rgba(206, 165, 90, 0.8);
+}
+
+.button:pressed {
+    -fx-background-color: rgba(196, 157, 85, 0.8);
+}
+
+#close {
+    -fx-background-color: rgba(255, 255, 255);
+    -fx-background-radius: 5px;
+    -fx-background-insets: 1 1 1 1;
+
+    -fx-border-color: rgb(0, 0, 0);
+    -fx-border-radius: 5px;  
+}
+    
+#close:hover {
+    -fx-background-color:rgba(216, 216, 216);
+}
+
+#close:pressed {
+    -fx-background-color:rgba(172, 172, 172);
 }

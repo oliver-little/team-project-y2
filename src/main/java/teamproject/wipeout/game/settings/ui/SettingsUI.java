@@ -10,6 +10,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -20,7 +21,6 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -30,10 +30,11 @@ import javafx.util.Duration;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.system.audio.AudioSystem;
 import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
+import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
-public class SettingsUI extends VBox{
+public class SettingsUI extends VBox {
     
     private MovementAudioSystem mas;
     private AudioSystem as;
@@ -49,13 +50,12 @@ public class SettingsUI extends VBox{
      * @param mas - movement-audio system for volume changes
      * @param backingTrack - GameAudio object for backing track volume
      */
-    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, GameAudio backingTrack){
+    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, GameAudio backingTrack, Runnable doReturnToMenu){
         super();
 
         this.mas = mas;
         this.as = audioSys;
         this.backingTrack = backingTrack;
-        scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "settings-ui.css");
         try {
             InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
@@ -63,7 +63,7 @@ public class SettingsUI extends VBox{
         } catch (FileNotFoundException e){
             e.printStackTrace();
         }
-        this.setMaxSize(250, 350);
+
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         
         VBox box = new VBox();
@@ -75,6 +75,7 @@ public class SettingsUI extends VBox{
             InputStream s = new FileInputStream(ResourceLoader.get(ResourceType.UI, "cog.png"));
             Image img = new Image(s);
             cog = new ImageView(img);
+            cog.setSmooth(false);
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -158,10 +159,22 @@ public class SettingsUI extends VBox{
         effectsSlider.addEventFilter(KeyEvent.ANY, KeyEvent::consume);
         backingSlider.addEventFilter(KeyEvent.ANY, KeyEvent::consume);
         
+        /** 
+        Button closeButton = new Button("Return to Menu"); // Uncomment once working
+        closeButton.setId("close");
+        closeButton.setOnAction((e) -> doReturnToMenu.run());
+        HBox closeButtonContainer = new HBox();
+        closeButtonContainer.getChildren().addAll(closeButton);
+        closeButtonContainer.setAlignment(Pos.CENTER);
+        */
         
         Label title1 = new Label("Music Volume");
         Label title2 = new Label("Effects Volume");
         box.getChildren().addAll(title1, backingBox, title2, effectsBox);
+        box.setPadding(new Insets(0, 5, 5, 5));
+
+        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollPane.setContent(box);
         this.getChildren().add(scrollPane);
         setMenuVisible(false); //hides menu by default on game start-up

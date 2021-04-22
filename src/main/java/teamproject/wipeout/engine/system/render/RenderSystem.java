@@ -35,8 +35,6 @@ public class RenderSystem implements GameSystem {
     private Point2D lastCameraPos;
     private double lastZoom;
 
-    private static final double DOUBLE_COMPARE = 0.00001f;
-
     /** 
      * Creates a new instance of RenderSystem
      * 

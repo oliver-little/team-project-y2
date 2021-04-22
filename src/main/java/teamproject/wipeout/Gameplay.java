@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -46,13 +45,11 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.CameraEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
-import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -92,6 +89,7 @@ public class Gameplay implements Controller {
     private SpriteManager spriteManager;
     private ItemStore itemStore;
 
+    private GameLoop gameLoop;
     private GameScene gameScene;
     private WorldEntity worldEntity;
 
@@ -148,7 +146,7 @@ public class Gameplay implements Controller {
         this.gameScene = new GameScene();
         this.renderer = new RenderSystem(this.gameScene, this.dynamicCanvas, this.staticCanvas);
         this.initializeSystemUpdater();
-        GameLoop gameLoop = new GameLoop(this.systemUpdater, this.renderer);
+        gameLoop = new GameLoop(this.systemUpdater, this.renderer);
 
         // Input
         this.inputHandler = new InputHandler(this.root.getScene());
@@ -206,7 +204,22 @@ public class Gameplay implements Controller {
         currentPlayer.setTaskUI(taskUI);
 
         // Settings UI
-        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
+        Runnable returnToMenu = () -> {
+            if (this.networker != null) {
+                GameClient client = this.networker.getClient();
+                if (client != null) {
+                    client.closeConnection(true);
+                }
+                this.networker.stopServer();
+            }
+    
+            this.cleanup();
+    
+            StartMenu startMenu = new StartMenu();
+            this.root.getScene().setRoot(startMenu.getContent());
+            
+        };
+        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio, returnToMenu);
 
         //Clock UI / System
         ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
@@ -275,6 +288,9 @@ public class Gameplay implements Controller {
 	}
 
     public void cleanup() {
+        if (this.gameLoop != null) {
+            this.gameLoop.stop();
+        }
         if (this.renderer != null) {
             this.renderer.cleanup();
         }
@@ -341,7 +357,7 @@ public class Gameplay implements Controller {
     }
 
     private VBox createRightUIOverlay(ClockUI clockUI, SettingsUI settingsUI) {
-        VBox topRight = new VBox();
+        VBox topRight = new VBox(2);
         topRight.setAlignment(Pos.TOP_RIGHT);
         topRight.setPickOnBounds(false);
         topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
