@@ -415,7 +415,6 @@ public class Gameplay implements Controller {
 
     private void setupNetworking() {
         CurrentPlayer myCurrentPlayer = this.worldEntity.myCurrentPlayer;
-        Market myMarket = this.worldEntity.getMarket();
 
         GameClient currentClient = this.networker.getClient();
         currentClient.setOnDisconnect(() -> Platform.runLater(() -> {
@@ -432,9 +431,6 @@ public class Gameplay implements Controller {
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
 
-        myMarket.setIsLocal(false);
-        this.worldEntity.marketUpdater.stop();
-
         FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
         this.worldEntity.setFarmFor(myCurrentPlayer, true, myFarm);
 
@@ -447,6 +443,7 @@ public class Gameplay implements Controller {
         marketPack.put("spriteManager", this.spriteManager);
         marketPack.put("gameScene", this.gameScene);
         marketPack.put("uiContainer", this.interfaceOverlay);
+        marketPack.put("networked", this.networker != null);
         marketPack.put("currentPlayer", currentPlayer);
         marketPack.put("tasks", purchasableTasks);
         return marketPack;

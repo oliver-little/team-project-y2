@@ -32,6 +32,7 @@ import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
+import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.ui.MarketUI;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
@@ -144,7 +145,11 @@ public class MarketEntity extends GameEntity {
         this.addComponent(new CollisionResolutionComponent(false, null));
 
         // Create logic market
-        this.market = new Market(itemStore, false);
+        boolean isNetworked = (boolean) marketPack.get("networked");
+        this.market = new Market(itemStore, isNetworked);
+        if (!isNetworked) {
+            new MarketPriceUpdater(this.market, true);
+        }
 
         ArrayList<Task> purchasableTasks = (ArrayList<Task>) marketPack.get("tasks");
         Collection<Item> items = itemStore.getData().values();

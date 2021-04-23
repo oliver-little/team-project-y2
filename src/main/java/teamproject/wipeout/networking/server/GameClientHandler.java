@@ -1,6 +1,5 @@
 package teamproject.wipeout.networking.server;
 
-import teamproject.wipeout.networking.data.GameUpdatable;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.state.PlayerState;
@@ -19,7 +18,7 @@ import java.util.Collection;
  * and to send updates to the client.
  *
  * @see GameServer
- * @see GameUpdatable
+ * @see GameUpdateHandler
  * @see teamproject.wipeout.networking.client.GameClient
  */
 public class GameClientHandler {
@@ -33,7 +32,7 @@ public class GameClientHandler {
     protected final ObjectInputStream in;
     protected final ObjectOutputStream out;
 
-    protected final GameUpdatable updater;
+    protected final GameUpdateHandler updater;
 
     /**
      * Default initializer for {@code GameClientHandler}
@@ -42,7 +41,7 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     written to(= send updates) or when the client declines to connect.
      */
-    protected GameClientHandler(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdatable updater) throws IOException, ClassNotFoundException {
+    protected GameClientHandler(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdateHandler updater) throws IOException, ClassNotFoundException {
         this.clientID = clientID;
         this.clientSocket = socket;
         this.updater = updater;
@@ -77,7 +76,7 @@ public class GameClientHandler {
      * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
      *                     *                     written to(= send updates) or when the client declines to connect.
      */
-    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdatable updater)
+    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdateHandler updater)
             throws IOException, ClassNotFoundException {
 
         GameClientHandler newInstance = new GameClientHandler(serverID, clientID, farmID, socket, updater);

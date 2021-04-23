@@ -7,7 +7,6 @@ import teamproject.wipeout.game.item.Item;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,9 +15,9 @@ import java.util.stream.Collectors;
  * {@code FarmState} class represents objects which contain game-critical
  * information about a certain farm.
  * <br>
- * {@code FarmState} implements {@link Serializable}.
+ * {@code FarmState} extends {@link GameEntityState}.
  */
-public class FarmState implements Serializable {
+public class FarmState  extends GameEntityState {
 
     private Integer farmID;
 
@@ -131,8 +130,8 @@ public class FarmState implements Serializable {
         this.timestamp = in.readLong();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("FarmState is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("FarmState is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented

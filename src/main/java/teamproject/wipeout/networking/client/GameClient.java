@@ -258,15 +258,14 @@ public class GameClient {
                         case CLOCK_CALIB:
                             this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
-                        case RESPONSE:
-                            MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.worldEntity.getMarket().responseArrived(response);
-                            break;
                         case DISCONNECT:
+                            System.out.println("Discon");
                             this.handleDisconnectPlayer(receivedUpdate.originClientID);
                             break;
                         case SERVER_STOP:
+                            System.out.println("Stop");
                             if (!this.worldEntity.isGameplayActive()) {
+                                System.out.println("Stop2");
                                 this.runOnDisconnect();
                             }
                             this.closeConnection(false);

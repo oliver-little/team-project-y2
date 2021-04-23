@@ -49,8 +49,8 @@ public class MarketOperationRequest implements Serializable {
         this.buy = in.readBoolean();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("MarketOperationRequest is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("MarketOperationRequest is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented

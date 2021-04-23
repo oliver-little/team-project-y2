@@ -206,7 +206,7 @@ public class GameServer {
      * @param update Instance of a {@link GameUpdate} to be sent.
      * @throws IOException The {@code GameUpdate} cannot be sent.
      */
-    public void updateClients(GameUpdate update) throws IOException {
+    protected void updateClients(GameUpdate update) throws IOException {
         for (GameClientHandler client : this.connectedClients.get()) {
             if (!client.clientID.equals(update.originClientID)) {
                 client.updateWith(update);
@@ -353,7 +353,7 @@ public class GameServer {
                 this.handleFarmStateUpdate(update.originClientID, (FarmState) update.content);
                 break;
             case REQUEST:
-                this.handleRequest((MarketOperationRequest) update.content, update.originClientID);
+                this.handleRequest((MarketOperationRequest) update.content);
                 return;
             case DISCONNECT:
                 this.disconnectClient(update.originClientID, false);
@@ -428,20 +428,12 @@ public class GameServer {
     /**
      *
      */
-    private void handleRequest(MarketOperationRequest request, Integer clientID) throws IOException {
+    private void handleRequest(MarketOperationRequest request) {
         if (request.buy) {
             this.serverMarket.buyItem(request.itemID, request.quantity);
 
         } else {
             this.serverMarket.sellItem(request.itemID, request.quantity);
-        }
-
-        for (GameClientHandler clientHandler : this.connectedClients.get()) {
-            if (clientHandler.clientID.equals(clientID)) {
-                MarketOperationResponse response = new MarketOperationResponse(request, true);
-                clientHandler.updateWith(new GameUpdate(GameUpdateType.RESPONSE, this.id, response));
-                return;
-            }
         }
     }
 

@@ -17,14 +17,23 @@ public class MarketPriceUpdater {
     public static final long TIMEFREQUENCY = 1;
 
     public static final double QUANTITYDEVIATIONSTEP = 0.1;
+    public static final double NEG_QUANTITYDEVIATIONSTEP = -0.1;
     
-    public Market market;
-    
-    private double negQuantityDeviationStep = -QUANTITYDEVIATIONSTEP;
-
-    private ScheduledExecutorService executor;
+    public final Market market;
 
     private boolean isLocal;
+    private final ScheduledExecutorService executor;
+
+    /**
+     * Platform.runLater wrapper for updatePrices to prevent JavaFX error
+     */
+    private final Runnable runUpdatePrices = () -> {
+        if (this.isLocal) {
+            Platform.runLater(this.priceUpdater());
+        } else {
+            this.priceUpdater().run();
+        }
+    };
 
     public MarketPriceUpdater(Market market, boolean local) {
         this.market = market;
@@ -43,50 +52,41 @@ public class MarketPriceUpdater {
     }
 
     /**
-     * Platform.runLater wrapper for updatePrices to prevent JavaFX error
-     */
-    private Runnable runUpdatePrices = () -> {
-        if (this.isLocal) {
-            Platform.runLater(this.updatePrices);
-        } else {
-            this.updatePrices.run();
-        }
-    };
-
-    /**
      * This function runs once the program launches and is run every set time interval, this function updates the market quantity deviations, resulting in the prices eventually returning to equlibirum.
      */
-    private Runnable updatePrices = () -> {
-        boolean stateChanged = false;
+    private Runnable priceUpdater() {
+        return () -> {
+            boolean stateChanged = false;
 
-        for (MarketItem item : this.market.stockDatabase.values()) {
-            double quantityDeviation = item.getQuantityDeviation();
+            for (MarketItem item : this.market.stockDatabase.values()) {
+                double quantityDeviation = item.getQuantityDeviation();
 
-            if (Double.compare(quantityDeviation, 0) == 0) {
-                continue;
+                if (Double.compare(quantityDeviation, 0) == 0) {
+                    continue;
 
-            } else if (quantityDeviation < 0) {
-                if (quantityDeviation > negQuantityDeviationStep) {
-                    item.setQuantityDeviation(0);
+                } else if (quantityDeviation < 0) {
+                    if (quantityDeviation > NEG_QUANTITYDEVIATIONSTEP) {
+                        item.setQuantityDeviation(0);
 
-                } else {
-                    item.incrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
-                }
-
-            } else {
-                if (quantityDeviation < QUANTITYDEVIATIONSTEP) {
-                    item.setQuantityDeviation(0);
+                    } else {
+                        item.incrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
+                    }
 
                 } else {
-                    item.decrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
+                    if (quantityDeviation < QUANTITYDEVIATIONSTEP) {
+                        item.setQuantityDeviation(0);
+
+                    } else {
+                        item.decrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
+                    }
                 }
+                stateChanged = true;
             }
-            stateChanged = true;
-        }
 
-        if (stateChanged) {
-            this.market.sendMarketUpdate();
-        }
-    };
+            if (stateChanged) {
+                this.market.sendMarketUpdate();
+            }
+        };
+    }
 
 }

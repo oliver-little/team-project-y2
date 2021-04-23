@@ -7,9 +7,9 @@ import java.io.ObjectStreamException;
  *
  * @see ObjectStreamException
  */
-public class StateException extends ObjectStreamException {
+public class GameEntityStateException extends ObjectStreamException {
 
-    public StateException(String message) {
+    public GameEntityStateException(String message) {
         super(message);
     }
 

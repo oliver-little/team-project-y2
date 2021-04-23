@@ -1,4 +1,6 @@
-package teamproject.wipeout.networking.data;
+package teamproject.wipeout.networking.server;
+
+import teamproject.wipeout.networking.data.GameUpdate;
 
 import java.io.IOException;
 
@@ -8,7 +10,7 @@ import java.io.IOException;
  * Utilised by {@link teamproject.wipeout.networking.server.GameClientHandler}.
  */
 @FunctionalInterface
-public interface GameUpdatable {
+public interface GameUpdateHandler {
     /**
      * Method representing the action that will be called when a {@link GameUpdate} is received.
      *

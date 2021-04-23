@@ -5,16 +5,15 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
 /**
  * {@code PlayerState} class represents objects which contain game-critical
  * information about individual players (= their states).
  * <br>
- * {@code PlayerState} implements {@link Serializable}.
+ * {@code PlayerState} extends {@link GameEntityState}.
  * <br>
  */
-public class PlayerState implements Serializable {
+public class PlayerState extends GameEntityState {
 
     private Integer playerID;
     private String playerName;
@@ -218,8 +217,8 @@ public class PlayerState implements Serializable {
         this.timestamp = in.readLong();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("PlayerState is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("PlayerState is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented

@@ -5,7 +5,6 @@ import teamproject.wipeout.game.market.MarketItem;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,9 +12,9 @@ import java.util.Map;
  * {@code MarketState} class represents objects which contain game-critical
  * information about the market.
  * <br>
- * {@code MarketState} implements {@link Serializable}.
+ * {@code MarketState} extends {@link GameEntityState}.
  */
-public class MarketState implements Serializable {
+public class MarketState extends GameEntityState {
 
     public Map<Integer, Double> items;
 
@@ -42,8 +41,21 @@ public class MarketState implements Serializable {
         this.items = (Map<Integer, Double>) in.readObject();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("MarketState is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("MarketState is corrupted");
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        MarketState that = (MarketState) o;
+        return this.items.equals(that.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.items.hashCode();
+    }
 }

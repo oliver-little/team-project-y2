@@ -52,7 +52,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public final CurrentPlayer myCurrentPlayer;
 	public final AnimalEntity myAnimal;
-	public final MarketPriceUpdater marketUpdater;
 	public final Map<Integer, FarmEntity> farms;
 	public final Pickables pickables;
 
@@ -103,7 +102,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		// Market
 		this.marketEntity = (MarketEntity) worldPack.get("marketEntity");
-		this.marketUpdater = new MarketPriceUpdater(this.marketEntity.getMarket(), true);
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
 
 		// Farms

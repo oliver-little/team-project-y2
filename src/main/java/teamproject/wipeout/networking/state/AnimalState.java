@@ -5,17 +5,16 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.*;
 
 /**
  * {@code AnimalState} class represents objects which contain game-critical
  * information about individual players (= their states).
  * <br>
- * {@code AnimalState} implements {@link Serializable}.
+ * {@code AnimalState} extends {@link GameEntityState}.
  * <br>
  */
-public class AnimalState implements Serializable {
+public class AnimalState extends GameEntityState {
 
     private Point2D position;
 
@@ -61,15 +60,6 @@ public class AnimalState implements Serializable {
 
     public Double getSpeedMultiplier() {
         return this.speedMultiplier;
-    }
-
-    /**
-     * {@code timestamp} variable getter
-     *
-     * @return Timestamp of the {@code AnimalState}
-     */
-    public long getTimestamp() {
-        return this.timestamp;
     }
 
     /**
@@ -151,8 +141,8 @@ public class AnimalState implements Serializable {
         this.timestamp = in.readLong();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("AnimalState is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("AnimalState is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented

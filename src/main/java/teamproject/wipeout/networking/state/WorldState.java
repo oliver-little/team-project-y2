@@ -1,26 +1,23 @@
 package teamproject.wipeout.networking.state;
 
 import javafx.geometry.Point2D;
-import javafx.util.Pair;
 import teamproject.wipeout.game.farm.Pickables;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * {@code WorldState} class represents objects which contain game-critical
  * information about the game world.
  * <br>
- * {@code WorldState} implements {@link Serializable}.
+ * {@code WorldState} extends {@link GameEntityState}.
  */
-public class WorldState implements Serializable {
+public class WorldState extends GameEntityState {
 
     private Set<Pickables.Pickable> pickables;
     private HashMap<Integer, Point2D[]> potions;
@@ -97,8 +94,8 @@ public class WorldState implements Serializable {
         this.timestamp = in.readLong();
     }
 
-    private void readObjectNoData() throws StateException {
-        throw new StateException("WorldState is corrupted");
+    private void readObjectNoData() throws GameEntityStateException {
+        throw new GameEntityStateException("WorldState is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented

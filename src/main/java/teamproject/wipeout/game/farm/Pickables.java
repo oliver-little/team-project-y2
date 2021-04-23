@@ -12,19 +12,17 @@ import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.networking.state.StateException;
+import teamproject.wipeout.networking.state.GameEntityStateException;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class Pickables {
 
@@ -62,8 +60,8 @@ public class Pickables {
             this.velocity = new Point2D(in.readDouble(), in.readDouble());
         }
 
-        private void readObjectNoData() throws StateException {
-            throw new StateException("WorldState is corrupted");
+        private void readObjectNoData() throws GameEntityStateException {
+            throw new GameEntityStateException("WorldState is corrupted");
         }
 
         @Override
