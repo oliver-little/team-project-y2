@@ -10,7 +10,8 @@
 }
 
 .small-button{
-	-fx-pref-width: 50px;
+	-fx-pref-width: 30px;
+	-fx-pref-height: 30px;
 }
     
 .button:hover {

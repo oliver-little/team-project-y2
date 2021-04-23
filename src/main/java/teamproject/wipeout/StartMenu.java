@@ -10,6 +10,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -146,43 +148,53 @@ public class StartMenu implements Controller {
         
         StackPane errorBox = new StackPane();
 
-        ComboBox gamemodeBox = new ComboBox(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
-        gamemodeBox.getSelectionModel().selectFirst();
         
-        Label valueDesc = new Label("Minutes: ");
+        Label valueDesc = new Label();
         
         HBox valueBox = new HBox();
         valueBox.getStyleClass().add("hbox");
         valueBox.setSpacing(3);
         valueBox.setAlignment(Pos.CENTER);
-        Label valueLabel = new Label("10");
+        
+        Label valueLabel = new Label();
+        
+        ComboBox<String> gamemodeBox = new ComboBox<String>(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
+        gamemodeBox.setOnAction((event) -> {
+        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        	valueLabel.setText(Integer.toString((int) gamemodeData.get("default")));
+        	valueDesc.setText((String) gamemodeData.get("desc")+ ":");
+        });
+        gamemodeBox.getSelectionModel().selectFirst();
+        // trigger event to set value label
+        Event.fireEvent(gamemodeBox, new ActionEvent());
+        
+        
         final int interval = 5;
-        int min = 5;
-        int max = 30;
+        
         Button decrementButton = new Button("-");
         decrementButton.getStyleClass().add("small-button");
-        decrementButton.setPrefSize(50, 50);
         decrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	if (value-interval>=min) {
+        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        	if (value-interval>=((int)gamemodeData.get("min"))) {
         		valueLabel.setText(Integer.toString(value-interval));
         	}
         	
         });
         
         Button incrementButton = new Button("+");
-        incrementButton.getStyleClass().add("small-button");
-        incrementButton.setPrefSize(50, 50);
-        
+        incrementButton.getStyleClass().add("small-button");        
         incrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	if (value+interval<=max) {
+        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        	if (value+interval<=((int) gamemodeData.get("max"))) {
         		valueLabel.setText(Integer.toString(value+interval));
         	}
         	
         });
         
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
+        
         
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
@@ -210,8 +222,31 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+        
     }
 
+    public static Map<String, Object> getGamemodeData(String gamemode) {
+    	Map<String, Object> data = new HashMap();
+    	if (gamemode.equals("Time Mode")) {
+    		data.put("desc", "Minutes");
+    		data.put("min", 5);
+    		data.put("max", 30);
+    		data.put("default", 10);
+    	}
+    	else if(gamemode.equals("Wealth Mode")) {
+    		data.put("desc", "Money Target");
+    		data.put("min", 50);
+    		data.put("max", 1000);
+    		data.put("default", 100);
+    	}
+    	else {
+    		System.out.println(gamemode + " gamemode does not exist");
+    		return null;
+    	}
+    	
+    	return data;
+    }
+    
     private boolean createServer(String serverName, String hostName){
         InetSocketAddress serverAddress = networker.startServer(serverName);
 
