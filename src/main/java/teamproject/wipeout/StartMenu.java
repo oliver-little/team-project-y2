@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -396,6 +397,10 @@ public class StartMenu implements Controller {
         tilePane.setAlignment(Pos.TOP_CENTER);
         tilePane.setVgap(20);
         tilePane.setHgap(20);
+        tilePane.setMaxSize(600, 300);
+
+        menuBox.getChildren().add(tilePane);
+        tilePane.getStyleClass().add("tile-pane");
 
         //create a HBox for each drop down menu (key-binding)
         for(Map.Entry<String, KeyCode> entry : keyBindings.entrySet()) {
@@ -403,6 +408,7 @@ public class StartMenu implements Controller {
             KeyCode code = entry.getValue();
 
             HBox box = new HBox();
+            box.setMaxSize(180, 50);
             box.setAlignment(Pos.CENTER_RIGHT);
             box.setPrefWidth(200);
 
@@ -424,10 +430,9 @@ public class StartMenu implements Controller {
             });
             box.getChildren().addAll(label, dropDown);
             tilePane.getChildren().add(box);
+            box.getStyleClass().add("my-hbox");
         }
         updateDisabledItems();
-
-        menuBox.getChildren().add(tilePane);
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
