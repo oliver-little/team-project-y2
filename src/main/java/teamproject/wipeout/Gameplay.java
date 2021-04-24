@@ -190,7 +190,7 @@ public class Gameplay implements Controller {
         }
 
         // Game Audio
-        GameAudio gameAudio = new GameAudio("backingTrack2.wav", true);
+        
 
         // Inventory UI
         InventoryUI inventoryUI = new InventoryUI(this.spriteManager, this.itemStore);
@@ -220,7 +220,7 @@ public class Gameplay implements Controller {
             this.root.getScene().setRoot(startMenu.getContent());
             
         };
-        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio, returnToMenu);
+        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu);
 
         //Clock UI / System
         ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
@@ -246,7 +246,6 @@ public class Gameplay implements Controller {
         //currentPlayer.acquireItem( 43, 2);
 
         gameLoop.start();
-        gameAudio.play();
     }
 
     /**
@@ -336,7 +335,7 @@ public class Gameplay implements Controller {
         this.systemUpdater.addSystem(new SteeringSystem(this.gameScene));
         this.systemUpdater.addSystem(new ScriptSystem(this.gameScene));
 
-        this.audioSystem = new AudioSystem(this.gameScene, 0.1f);
+        this.audioSystem = new AudioSystem(this.gameScene, 0.05f);
         this.movementAudio = new MovementAudioSystem(this.gameScene, 0.05f);
         this.systemUpdater.addSystem(this.audioSystem);
         this.systemUpdater.addSystem(this.movementAudio);

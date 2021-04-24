@@ -50,12 +50,12 @@ public class SettingsUI extends VBox {
      * @param mas - movement-audio system for volume changes
      * @param backingTrack - GameAudio object for backing track volume
      */
-    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, GameAudio backingTrack, Runnable doReturnToMenu){
+    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, Runnable doReturnToMenu){
         super();
 
         this.mas = mas;
         this.as = audioSys;
-        this.backingTrack = backingTrack;
+        this.backingTrack = new GameAudio("backingTrack2.wav", true);
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "settings-ui.css");
         try {
             InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
@@ -95,7 +95,7 @@ public class SettingsUI extends VBox {
 
         HBox backingBox = new HBox();
         Slider backingSlider = new Slider(); //slider for music volume
-        backingSlider.setValue(5);
+        backingSlider.setValue(5); //default set to volume 5
         backingSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(
@@ -119,7 +119,6 @@ public class SettingsUI extends VBox {
 
         /// MUSIC IS SET TO MUTE BY DEFAULT HERE
         muteMusic.setSelected(true);
-        backingTrack.mute();
         backingSlider.setDisable(true);
         ///
 
