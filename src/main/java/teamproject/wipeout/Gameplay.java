@@ -109,12 +109,13 @@ public class Gameplay implements Controller {
 
     private final Networker networker;
 
-    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings) {
+    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings, double gameTime) {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
         this.playerID = new Random().nextInt(1024);
         this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
-
+        this.gameTime = gameTime;
+        
         this.focusListener = null;
 
         this.keyBindings = bindings;
