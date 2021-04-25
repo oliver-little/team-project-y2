@@ -6,7 +6,10 @@ import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
-import teamproject.wipeout.networking.state.*;
+import teamproject.wipeout.networking.state.AnimalState;
+import teamproject.wipeout.networking.state.FarmState;
+import teamproject.wipeout.networking.state.MarketOperationRequest;
+import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.threads.BackgroundThread;
 import teamproject.wipeout.util.threads.ServerThread;
 import teamproject.wipeout.util.threads.UtilityThread;
@@ -16,10 +19,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,55 +34,51 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class GameServer {
 
-    // Constants important for the whole ...networking. package
+    // Constants important for the whole networking package
     public static final int HANDSHAKE_PORT = 1025;
     public static final String HANDSHAKE_GROUP = "229.22.29.51";
-    public static final int MAX_CONNECTIONS = 4;
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
 
-    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4}; // TODO where to put private static final?
+    // Constants important only for the game server
+    private static final int MAX_CONNECTIONS = 4;
+    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
 
-    public final String name;
     public final Integer id;
+    public final String name;
     public final short serverPort;
+
+    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
+    protected final AtomicReference<ArrayList<Integer>> availableFarms;
+    protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
+    protected final AtomicReference<HashMap<Integer, FarmState>> farmStates;
+    protected final AtomicReference<Pair<Integer, AnimalState>> animalState;
+    // Atomic variables above are used because of multithreading.
+    protected final Market serverMarket;
 
     protected DatagramSocket searchSocket;
     protected boolean isSearching;
 
-    protected final ServerSocket serverSocket;
-    protected ServerThread newConnectionsThread;
-
-    protected boolean isActive;
     protected long gameStartTime;
+    protected boolean isActive;
 
-    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
-
-    protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
-
-    protected final AtomicReference<Pair<Integer, AnimalState>> animalBoss;
-
-    protected final AtomicReference<HashMap<Integer, FarmState>> farmStates;
-    protected final AtomicReference<ArrayList<Integer>> availableFarms;
-
-    protected final Market serverMarket;
-
+    private final ServerSocket serverSocket;
     private final HashSet<Integer> generatedIDs;
 
-    // Atomic variables above used because of multi-threading
+    private ServerThread newConnectionsThread;
 
     /**
      * Default initializer for {@code GameServer}.
-     * The server is created and starts accepting new connections.
+     * The server is created, starts accepting new connections and serving them.
      *
      * @param name Name we want to give to the {@code GameServer}.
-     * @throws IOException Network problem
+     * @throws IOException                  Network problem / No available ports
+     * @throws ReflectiveOperationException Problem with "items.json" file of the server market
      */
     public GameServer(String name) throws IOException, ReflectiveOperationException {
-        this.name = name;
         this.id = name.hashCode();
+        this.name = name;
 
-        this.isSearching = false;
-
+        // Look for available port
         ServerSocket interimServerSocket = null;
         short interimServerPort = -1;
         for (short port = 1026; port < 10000; port++) {
@@ -97,21 +93,14 @@ public class GameServer {
         if (interimServerSocket == null || interimServerPort < 1026) {
             throw new IOException("Address already in use. There are no available ports left.");
         }
-
         this.serverPort = interimServerPort;
         this.serverSocket = interimServerSocket;
 
-        this.isActive = false;
-        this.gameStartTime = -1;
-
         this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
-
-        this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
-
-        this.animalBoss = new AtomicReference<Pair<Integer, AnimalState>>(null);
-
-        this.farmStates = new AtomicReference<HashMap<Integer, FarmState>>(new HashMap<Integer, FarmState>());
         this.availableFarms = new AtomicReference<ArrayList<Integer>>(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
+        this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
+        this.farmStates = new AtomicReference<HashMap<Integer, FarmState>>(new HashMap<Integer, FarmState>());
+        this.animalState = new AtomicReference<Pair<Integer, AnimalState>>(null);
 
         this.serverMarket = new Market(new ItemStore("items.json"), false);
         this.serverMarket.serverIDGetter = () -> this.id;
@@ -125,13 +114,21 @@ public class GameServer {
         };
         new MarketPriceUpdater(this.serverMarket, false);
 
+        this.searchSocket = null;
+        this.isSearching = false;
+
+        this.gameStartTime = -1;
+        this.isActive = false;
+
         this.generatedIDs = new HashSet<Integer>();
+
+        this.newConnectionsThread = null;
 
         this.handleNewConnections();
     }
 
     /**
-     * Executed when the child process supposed to run a {@code GameServer} is started.
+     * Executed when the child process that is supposed to run the {@code GameServer} is started.
      *
      * @param args {@code String[]} containing only the GameServer's name
      */
@@ -145,7 +142,7 @@ public class GameServer {
             server.startClientSearch();
 
             // Listen to the child process' input(= ProcessMessages send by the parent process)
-            GameServer.listenToProcessMessages(server);
+            server.listenToProcessMessages();
 
         } catch (IOException | ReflectiveOperationException exception) {
             exception.printStackTrace();
@@ -178,9 +175,9 @@ public class GameServer {
     /**
      * Starts a game session and rejects all new connection attempts.
      */
-    public void startNewGame() {
+    public void startGame() {
         if (this.isActive) {
-            this.stopGame();
+            return;
         }
         this.isActive = true;
         this.stopClientSearch();
@@ -188,45 +185,46 @@ public class GameServer {
     }
 
     /**
-     * Stops a running game session and starts accepting new connection attempts.
+     * Stops the server and disconnects its clients.
+     *
+     * @throws IOException Problem with closing connections
      */
-    public void stopGame() {
-        this.playerStates.set(new HashMap<Integer, PlayerState>());
-        this.farmStates.set(new HashMap<Integer, FarmState>());
-        this.generatedIDs.clear();
-        this.availableFarms.set(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
-        this.gameStartTime = -1;
-        this.isActive = false;
+    public void stopServer() throws IOException {
+        if (this.isSearching) {
+            this.stopClientSearch();
+        }
+
+        this.serverStopping();
+        this.serverSocket.close();
     }
 
     /**
      * Sends a given {@code GameUpdate} instance to all the connected clients
      * except the client who created the {@code GameUpdate} instance.
      *
-     * @param update Instance of a {@link GameUpdate} to be sent.
-     * @throws IOException The {@code GameUpdate} cannot be sent.
+     * @param update Instance of a {@link GameUpdate} to be sent
+     * @throws IOException The {@code GameUpdate} cannot be sent
      */
     protected void updateClients(GameUpdate update) throws IOException {
         for (GameClientHandler client : this.connectedClients.get()) {
-            if (!client.clientID.equals(update.originClientID)) {
+            if (!client.clientID.equals(update.originID)) {
                 client.updateWith(update);
             }
         }
     }
 
     /**
-     * Disconnects a client with the given ID.
+     * Disconnects a client with a given ID.
      *
      * @param deleteClientID ID of the client who will be disconnected
-     * @param serverSide     Is the disconnect command coming from the server?
      * @throws IOException Problem with closing the connection
      */
-    public void disconnectClient(Integer deleteClientID, boolean serverSide) throws IOException {
+    protected void disconnectClient(Integer deleteClientID) throws IOException {
         ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         for (GameClientHandler client : clientHandlers) {
             if (client.clientID.equals(deleteClientID)) {
-                client.closeConnection(serverSide);
+                client.closeConnection(false);
                 this.addAvailableFarm(client.farmID);
             }
         }
@@ -239,11 +237,51 @@ public class GameServer {
     }
 
     /**
-     * Disconnects all connected clients (even the owner of the server!).
-     *
-     * @throws IOException Problem with closing connections
+     * Listens to the child process' input(= {@link ProcessMessage}s from the parent process)
+     * and responds to it. Creates a separate {@link BackgroundThread} for the listener.
      */
-    public void serverStopping() {
+    private void listenToProcessMessages() {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
+        new BackgroundThread(() -> {
+            try {
+                writer.write(Short.toString(this.serverPort) + '\n');
+                writer.flush();
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    ProcessMessage message = ProcessMessage.fromRawValue(line);
+                    if (message == null) {
+                        continue;
+                    }
+                    switch (message) {
+                        case CONFIRMATION:
+                            writer.write(ProcessMessage.CONFIRMATION.rawValue + '\n');
+                            writer.flush();
+                            break;
+                        case START_GAME:
+                            this.startGame();
+                            writer.write(message.rawValue + ProcessMessage.CONFIRMATION.rawValue + '\n');
+                            writer.flush();
+                            break;
+                        case STOP_SERVER:
+                            this.stopServer();
+                            System.exit(0);
+                            break;
+                    }
+                }
+
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
+     * Sends the {@link ProcessMessage}{@code .SERVER_STOP} message to all connected clients.
+     * (Even to the host of the server!)
+     */
+    private void serverStopping() {
         ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
         GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
@@ -259,70 +297,7 @@ public class GameServer {
     }
 
     /**
-     * Stops the server and disconnects its clients.
-     *
-     * @throws IOException Problem with closing connections
-     */
-    public void stopServer() throws IOException {
-        if (this.isSearching) {
-            this.stopClientSearch();
-        }
-
-        this.stopGame();
-        this.serverStopping();
-        this.serverSocket.close();
-    }
-
-    /**
-     * Listens to the child process' input(= {@link ProcessMessage}s from the parent process)
-     * and responds to it. Creates a separate {@link BackgroundThread} for the listener.
-     *
-     * @param server {@link GameServer} running in the current child process.
-     */
-    private static void listenToProcessMessages(GameServer server) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
-        new BackgroundThread(() -> {
-            try {
-                writer.write(Short.toString(server.serverPort) + '\n');
-                writer.flush();
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    ProcessMessage message = ProcessMessage.fromRawValue(line);
-                    if (message == null) {
-                        continue;
-                    }
-                    switch (message) {
-                        case CONFIRMATION:
-                            writer.write(ProcessMessage.CONFIRMATION.rawValue + '\n');
-                            writer.flush();
-                            break;
-                        case START_GAME:
-                            server.startNewGame();
-                            writer.write(message.rawValue + ProcessMessage.CONFIRMATION.rawValue + '\n');
-                            writer.flush();
-                            break;
-                        case STOP_GAME:
-                            server.stopGame();
-                            writer.write(message.rawValue + ProcessMessage.CONFIRMATION.rawValue + '\n');
-                            writer.flush();
-                            break;
-                        case STOP_SERVER:
-                            server.stopServer();
-                            System.exit(0);
-                            break;
-                    }
-                }
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }).start();
-    }
-
-    /**
-     * Synchronizes client game clocks
+     * Synchronize gameplay clocks across clients.
      */
     private void calibrateClocks() {
         try {
@@ -337,9 +312,10 @@ public class GameServer {
     }
 
     /**
-     * Processes the received {@code GameUpdate}
+     * Processes received {@code GameUpdate}.
      *
      * @param update Received {@link GameUpdate}
+     * @throws IOException Thrown when the {@code GameUpdate} isn't redistributed to the rest of our clients.
      */
     private void clientUpdateArrived(GameUpdate update) throws IOException {
         switch (update.type) {
@@ -347,16 +323,16 @@ public class GameServer {
                 this.handlePlayerStateUpdate((PlayerState) update.content);
                 break;
             case ANIMAL_STATE:
-                this.handleAnimalStateUpdate(update.originClientID, (AnimalState) update.content);
+                this.handleAnimalStateUpdate(update.originID, (AnimalState) update.content);
                 break;
             case FARM_STATE:
-                this.handleFarmStateUpdate(update.originClientID, (FarmState) update.content);
+                this.handleFarmStateUpdate(update.originID, (FarmState) update.content);
                 break;
             case REQUEST:
                 this.handleRequest((MarketOperationRequest) update.content);
                 return;
             case DISCONNECT:
-                this.disconnectClient(update.originClientID, false);
+                this.disconnectClient(update.originID);
                 break;
             default:
                 break;
@@ -367,7 +343,7 @@ public class GameServer {
     /**
      * Handles a given {@code PlayerState} update.
      *
-     * @param state {@link PlayerState} to be processed.
+     * @param state {@link PlayerState} to be processed
      */
     private void handlePlayerStateUpdate(PlayerState state) {
         HashMap<Integer, PlayerState> currentPlayerStates = this.playerStates.getAcquire();
@@ -378,7 +354,7 @@ public class GameServer {
     /**
      * Delete a {@code PlayerState} with the given ID.
      *
-     * @param clientID ID of the {@link PlayerState} to be deleted.
+     * @param clientID ID of the {@link PlayerState} to be deleted
      */
     private void handlePlayerStateDelete(Integer clientID) {
         HashMap<Integer, PlayerState> currentPlayerStates = this.playerStates.getAcquire();
@@ -387,20 +363,37 @@ public class GameServer {
     }
 
     /**
-     * Handles a given {@code AnimalState} update.
-     *
-     * @param state {@link AnimalState} to be processed.
+     * @return Farm ID that has not been used yet. If there is no farm ID left, it returns {@code -1}.
      */
-    private void handleAnimalStateUpdate(Integer clientID, AnimalState state) {
-        Pair<Integer, AnimalState> currentAnimal = this.animalBoss.getAcquire();
-        if (currentAnimal == null) {
-            this.animalBoss.setRelease(new Pair<Integer, AnimalState>(clientID, state));
-            return;
-        } else if (!currentAnimal.getKey().equals(clientID)) {
-            return;
+    private int handleFarmRequest() throws IOException {
+        try {
+            return this.removeAvailableFarm();
+        } catch (IndexOutOfBoundsException | UnsupportedOperationException ignore) {
+            return -1;
         }
-        currentAnimal.getValue().updateStateFrom(state);
-        this.animalBoss.setRelease(currentAnimal);
+    }
+
+    /**
+     * Add a given farm ID to the list of available farm IDs.
+     *
+     * @param farmID Farm ID to be added
+     */
+    private void addAvailableFarm(Integer farmID) {
+        ArrayList<Integer> farms = this.availableFarms.getAcquire();
+        farms.add(0, farmID);
+        this.availableFarms.setRelease(farms);
+    }
+
+    /**
+     * Remove a farm ID from the list of available farm IDs.
+     *
+     * @return Available farm ID
+     */
+    private int removeAvailableFarm() throws IndexOutOfBoundsException, UnsupportedOperationException {
+        ArrayList<Integer> farms = this.availableFarms.getAcquire();
+        int farmID = farms.remove(0);
+        this.availableFarms.setRelease(farms);
+        return farmID;
     }
 
     /**
@@ -426,45 +419,39 @@ public class GameServer {
     }
 
     /**
+     * Handles a given {@code AnimalState} update.
      *
+     * @param state {@link AnimalState} to be processed
+     */
+    private void handleAnimalStateUpdate(Integer clientID, AnimalState state) {
+        Pair<Integer, AnimalState> currentAnimal = this.animalState.getAcquire();
+        if (currentAnimal == null) {
+            this.animalState.setRelease(new Pair<Integer, AnimalState>(clientID, state));
+            return;
+        } else if (!currentAnimal.getKey().equals(clientID)) {
+            return;
+        }
+        currentAnimal.getValue().updateStateFrom(state);
+        this.animalState.setRelease(currentAnimal);
+    }
+
+    /**
+     * Handles a given {@code MarketOperationRequest}.
+     *
+     * @param request {@link MarketOperationRequest} to be processed
      */
     private void handleRequest(MarketOperationRequest request) {
-        if (request.buy) {
-            this.serverMarket.buyItem(request.itemID, request.quantity);
+        if (request.getIsBuying()) {
+            this.serverMarket.buyItem(request.getItemID(), request.getQuantity());
 
         } else {
-            this.serverMarket.sellItem(request.itemID, request.quantity);
+            this.serverMarket.sellItem(request.getItemID(), request.getQuantity());
         }
     }
 
     /**
-     *
-     */
-    private Integer handleFarmRequest() throws IOException {
-        Integer farmID = -1;
-        try {
-            farmID = this.removeAvailableFarm();
-        } catch (IndexOutOfBoundsException | UnsupportedOperationException ignore) {}
-
-        return farmID;
-    }
-
-    private void addAvailableFarm(Integer farmID) {
-        ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        farms.add(0, farmID);
-        this.availableFarms.setRelease(farms);
-    }
-
-    private Integer removeAvailableFarm() throws IndexOutOfBoundsException, UnsupportedOperationException {
-        ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        Integer farmID = farms.remove(0);
-        this.availableFarms.setRelease(farms);
-        return farmID;
-    }
-
-    /**
-     * Starts accepting (or rejecting) attempted connections to the server
-     * in a separate {@link ServerThread}. Only one attempted connections handler can be running.
+     * Starts accepting (or rejecting) server connection attempts on a separate {@link ServerThread}.
+     * Only one attempted connections handler will be running.
      */
     private void handleNewConnections() {
         if (this.newConnectionsThread != null) {
@@ -481,12 +468,12 @@ public class GameServer {
                     if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
                         Integer clientID = this.generateClientID();
                         Integer farmID = this.handleFarmRequest();
-                        GameClientHandler client = GameClientHandler.allowConnection(this.id, clientID, farmID, clientSocket, this::clientUpdateArrived);
+                        GameClientHandler client = GameClientHandler.allowConnection(clientSocket, this.id, clientID, farmID, this::clientUpdateArrived);
 
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, farmID));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
-                            this.sendFirstUpdatesToClient(client, clientHandlers);
+                            this.sendFirstUpdateToClient(client, clientHandlers);
                         }
 
                         HashMap<Integer, String> newClientMap = new HashMap<Integer, String>();
@@ -498,7 +485,9 @@ public class GameServer {
                     }
 
                     this.connectedClients.setRelease(clientHandlers);
-
+                } catch (ClientConnectionException ignore) {
+                    // Client denied the connection or changed its client ID illegally
+                    continue;
                 } catch (IOException | ClassNotFoundException exception) {
                     if (!this.serverSocket.isClosed()) {
                         exception.printStackTrace();
@@ -512,6 +501,9 @@ public class GameServer {
         this.newConnectionsThread.start();
     }
 
+    /**
+     * @return Unique client ID in range [0, 127]
+     */
     private int generateClientID() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int randID = random.nextInt(128);
@@ -521,7 +513,14 @@ public class GameServer {
         return randID;
     }
 
-    private void sendFirstUpdatesToClient(GameClientHandler client, ArrayList<GameClientHandler> clientHandlers) throws IOException {
+    /**
+     * Sends currently available states from other clients to the given client.
+     *
+     * @param client         Client that will receive information
+     * @param clientHandlers {@code List} with the rest of the clients
+     * @throws IOException When the update fails to be sent.
+     */
+    private void sendFirstUpdateToClient(GameClientHandler client, List<GameClientHandler> clientHandlers) throws IOException {
         HashMap<Integer, String> connectedClients = new HashMap<Integer, String>();
         for (GameClientHandler clientHandler : clientHandlers) {
             connectedClients.put(clientHandler.clientID, clientHandler.clientName);
@@ -537,7 +536,7 @@ public class GameServer {
     }
 
     /**
-     * Multicasts a packet via {@code this.searchSocket} on a separate {@link UtilityThread} thread.
+     * Multicast a packet via the {@code searchSocket} on a separate {@link UtilityThread} thread.
      */
     private void startMulticasting() {
         new UtilityThread(() -> {

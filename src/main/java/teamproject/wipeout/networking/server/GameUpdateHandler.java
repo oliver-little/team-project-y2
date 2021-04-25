@@ -5,18 +5,21 @@ import teamproject.wipeout.networking.data.GameUpdate;
 import java.io.IOException;
 
 /**
- * {@code GameUpdatable} is a functional interface representing an action that
- * will be called when a {@link GameUpdate} is received.
+ * {@code GameUpdateHandler} is a functional interface representing an action that
+ * will be executed when a {@link GameUpdate} object is received.
+ * <p>
  * Utilised by {@link teamproject.wipeout.networking.server.GameClientHandler}.
  */
 @FunctionalInterface
 public interface GameUpdateHandler {
+
     /**
-     * Method representing the action that will be called when a {@link GameUpdate} is received.
+     * Method representing the action that will be executed when a {@link GameUpdate} object is received.
      *
      * @param update The received {@link GameUpdate}
      * @throws IOException Network problem
      */
-    void updateWith(GameUpdate update) throws IOException;
+    public void updateWith(GameUpdate update) throws IOException;
+
 }
 

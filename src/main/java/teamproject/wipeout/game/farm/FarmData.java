@@ -97,7 +97,7 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     public void updateFromState(FarmState farmState) {
         this.growthMultiplier = farmState.getGrowthMultiplier();
-        this.AIMultiplier = farmState.getAIMultiplier();
+        this.AIMultiplier = farmState.getAiMultiplier();
 
         int expandBy = farmState.getExpansions() - this.expansionLevel;
         if (expandBy > 0) {

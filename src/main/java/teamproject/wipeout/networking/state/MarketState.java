@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class MarketState extends GameEntityState {
 
-    public Map<Integer, Double> items;
+    private Map<Integer, Double> itemDeviations;
 
     /**
      * Default initializer for a {@link MarketState}.
@@ -24,21 +24,31 @@ public class MarketState extends GameEntityState {
      * @param stocks Items on the market
      */
     public MarketState(Map<Integer, MarketItem> stocks) {
-        this.items = new HashMap<Integer, Double>();
+        this.itemDeviations = new HashMap<Integer, Double>();
         stocks.forEach((itemID, marketItem) -> {
-            this.items.put(itemID, marketItem.getQuantityDeviation());
+            this.itemDeviations.put(itemID, marketItem.getQuantityDeviation());
         });
+    }
+
+    /**
+     * {@code items} getter
+     *
+     * @return {@code Map<Integer, Double>} of market item quantity deviations. <br>
+     * (Integer = market item ID, Double = market item quantity deviation)
+     */
+    public Map<Integer, Double> getItemDeviations() {
+        return this.itemDeviations;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
     // to make PlayerState serializable despite it containing non-serializable properties (Point2D)
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeObject(this.items);
+        out.writeObject(this.itemDeviations);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.items = (Map<Integer, Double>) in.readObject();
+        this.itemDeviations = (Map<Integer, Double>) in.readObject();
     }
 
     private void readObjectNoData() throws GameEntityStateException {
@@ -51,11 +61,11 @@ public class MarketState extends GameEntityState {
             return false;
         }
         MarketState that = (MarketState) o;
-        return this.items.equals(that.items);
+        return this.itemDeviations.equals(that.itemDeviations);
     }
 
     @Override
     public int hashCode() {
-        return this.items.hashCode();
+        return this.itemDeviations.hashCode();
     }
 }

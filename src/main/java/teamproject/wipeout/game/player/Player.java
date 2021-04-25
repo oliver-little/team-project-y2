@@ -267,7 +267,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public void assignFarm(FarmEntity farm) {
-        this.playerState.assignFarm(farm.farmID);
+        this.playerState.setFarmID(farm.farmID);
     }
 
     /**

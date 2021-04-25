@@ -9,14 +9,13 @@ import java.io.Serializable;
  * @see GameServerRunner
  */
 public enum ProcessMessage implements Serializable {
-    STOP_SERVER("stop_server"),
     START_GAME("start_game"),
-    STOP_GAME("stop_game"),
+    STOP_SERVER("stop_server"),
     CONFIRMATION("_confirmed");
 
     public final String rawValue;
 
-    private ProcessMessage(String message) {
+    ProcessMessage(String message) {
         this.rawValue = message;
     }
 

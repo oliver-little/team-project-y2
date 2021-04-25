@@ -9,16 +9,16 @@ import java.util.List;
 
 /**
  * {@code GameServerRunner} is a utility which deals with
- * a {@link GameServer} in a child process, which is created by this utility.
+ * a {@link GameServer} in a child process that is created by this utility.
  */
 public class GameServerRunner {
 
-    protected String serverName;
-    protected boolean gameRunning;
+    private String serverName;
+    private boolean gameRunning;
 
-    protected Process serverProcess;
-    protected BufferedWriter processWriter;
-    protected BufferedReader processReader;
+    private Process serverProcess;
+    private BufferedWriter processWriter;
+    private BufferedReader processReader;
 
     /**
      * Creates a new child process and starts a {@link GameServer} with the given name.
@@ -27,7 +27,7 @@ public class GameServerRunner {
      * @param serverName Name for the {@code GameServer}
      * @throws IOException Thrown when the child process cannot be started.
      */
-    // Running a child process: https://www.programmersought.com/article/95206092506/ (template)
+    // Running a child process: https://www.programmersought.com/article/95206092506/ (template that was used)
     public short startServer(String serverName) throws ServerRunningException, IOException {
         // Only one game server can be running
         if (this.serverProcess != null) {
@@ -36,14 +36,17 @@ public class GameServerRunner {
 
         String javaHome = System.getProperty("java.home").replace("%20", " ");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
-        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
-        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
-        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " ");
-        String classpath =  ownClasspath + this.getClasspathSeparator() +
-                            javafxGraphicsClasspath + this.getClasspathSeparator() +
-                            javafxBeansClasspath + this.getClasspathSeparator() +
-                            gsonClasspath;
+
+        String ownClasspath = GameServer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String javafxGraphicsClasspath = Point2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String javafxBeansClasspath = DoubleProperty.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String gsonClasspath = Gson.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+        String classpath = ownClasspath + this.getClasspathSeparator() +
+                javafxGraphicsClasspath + this.getClasspathSeparator() +
+                javafxBeansClasspath + this.getClasspathSeparator() +
+                gsonClasspath;
+        classpath = classpath.replace("%20", " ");
 
         String className = GameServer.class.getName();
 
@@ -51,25 +54,22 @@ public class GameServerRunner {
 
         ProcessBuilder sProcessBuilder = new ProcessBuilder(theCommand);
         sProcessBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
-        //sProcessBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-
-        Process newProcess = sProcessBuilder.start();
 
         this.serverName = serverName;
         this.gameRunning = false;
 
-        this.serverProcess = newProcess;
-        this.processWriter = new BufferedWriter(new OutputStreamWriter(newProcess.getOutputStream()));
-        this.processReader = new BufferedReader(new InputStreamReader(newProcess.getInputStream()));
+        this.serverProcess = sProcessBuilder.start();
+        this.processWriter = new BufferedWriter(new OutputStreamWriter(this.serverProcess.getOutputStream()));
+        this.processReader = new BufferedReader(new InputStreamReader(this.serverProcess.getInputStream()));
 
-        return Short.parseShort(this.processReader.readLine());
+        String serverPort = this.processReader.readLine();
+        return Short.parseShort(serverPort);
     }
 
     /**
      * {@code serverName} variable getter
      *
-     * @return name of the active {@link GameServer}.<br>
-     * Can be {@code null} if no {@code GameServer} is active.
+     * @return Name of the {@link GameServer}. Can be {@code null} if no {@code GameServer} is active.
      */
     public String getServerName() {
         return this.serverName;
@@ -85,9 +85,7 @@ public class GameServerRunner {
     }
 
     /**
-     * {@code isActive}  WRONG REWRITE DOCS
-     *
-     * @return {@code true} if the {@link GameServer} is active. <br> Otherwise {@code false}.
+     * @return {@code true} if the {@link GameServer} is up and running. <br> Otherwise {@code false}.
      */
     public boolean isServerActive() {
         if (this.processWriter == null) {
@@ -126,22 +124,6 @@ public class GameServerRunner {
     }
 
     /**
-     * Sends a {@link ProcessMessage} to the {@link GameServer} to stop the game
-     * and waits for confirmation.
-     *
-     * @throws IOException Thrown when the {@code ProcessMessage} cannot be sent.
-     */
-    public void stopGame() throws IOException {
-        this.processWriter.write(ProcessMessage.STOP_GAME.rawValue + '\n');
-        this.processWriter.flush();
-
-        String confirmation = this.processReader.readLine();
-        if (confirmation.equals(ProcessMessage.STOP_GAME.rawValue + ProcessMessage.CONFIRMATION.rawValue)) {
-            this.gameRunning = false;
-        }
-    }
-
-    /**
      * Sends a {@link ProcessMessage} to the {@link GameServer} to stop the server.
      * Subsequently, the child process containing the {@code GameServer} is killed.
      *
@@ -171,7 +153,7 @@ public class GameServerRunner {
 
 
     /**
-     * Method which distinguishes which OS is the app running on (Win or UNIX-based)
+     * Method which distinguishes which OS is the app running on (Windows or UNIX-based)
      * and returns suitable classpath separator for the particular OS.
      *
      * @return {@code char} classpath separator suitable for the current OS

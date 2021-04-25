@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Pickables {
 
-    public static class Pickable implements Serializable {
+    public static class Pickable implements Serializable { // TODO where to put it?
         private Integer id;
         private Point2D startPosition;
         private Point2D velocity;

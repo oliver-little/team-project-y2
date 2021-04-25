@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,26 +21,40 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ServerDiscovery {
 
-    protected InetSocketAddress searchGroup;
-    protected MulticastSocket multicastSocket;
-    protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
+    private static final int REFRESH_DELAY = GameServer.MULTICAST_DELAY + 5;
 
     protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
     protected final HashMap<String, Long> lastHeardServers;
+    protected final InetSocketAddress searchGroup;
+    protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
+
+    protected MulticastSocket multicastSocket;
 
     private ScheduledExecutorService executorService;
 
     /**
      * Default initializer for {@code ServerDiscovery}
      *
-     * @throws UnknownHostException {@code ServerDiscovery} instance cannot be initialized properly.
+     * @throws UnknownHostException When {@code ServerDiscovery} instance cannot be initialized properly.
      */
     public ServerDiscovery() throws UnknownHostException {
         this.availableServers = new SimpleMapProperty<String, InetSocketAddress>(FXCollections.observableHashMap());
         this.lastHeardServers = new HashMap<String, Long>();
-
         this.searchGroup = new InetSocketAddress(InetAddress.getByName(GameServer.HANDSHAKE_GROUP), GameServer.HANDSHAKE_PORT);
         this.isActive = new AtomicBoolean(false);
+
+        this.multicastSocket = null;
+
+        this.executorService  =null;
+    }
+
+    /**
+     * {@code availableServers} variable getter
+     *
+     * @return {@code ObservableMap<String, InetAddress>} of server names and addresses
+     */
+    public ObservableMap<String, InetSocketAddress> getAvailableServers() {
+        return this.availableServers.get();
     }
 
     /**
@@ -56,15 +67,49 @@ public class ServerDiscovery {
     }
 
     /**
-     * {@code availableServers} variable getter
+     * Starts looking for available game servers. {@link UtilityThread} is utilised for this action.
      *
-     * @return {@code ObservableMap<String, InetAddress>} of a particular server name and its address
+     * @throws IOException Network problem
      */
-    public ObservableMap<String, InetSocketAddress> getAvailableServers() {
-        return this.availableServers.get();
+    public void startLookingForServers() throws IOException {
+        if (this.isActive.get()) {
+            return;
+        }
+        this.isActive.set(true);
+        this.availableServers.clear();
+        this.lastHeardServers.clear();
+
+        this.multicastSocket = new MulticastSocket(GameServer.HANDSHAKE_PORT);
+
+        // Start receiving multicasts for all suitable interfaces
+        for (NetworkInterface networkInterface : this.getNetworkInterfaces()) {
+            this.multicastSocket.joinGroup(this.searchGroup, networkInterface);
+        }
+        this.receiveMulticasts();
+
+        this.executorService = Executors.newSingleThreadScheduledExecutor();
+        this.executorService.scheduleWithFixedDelay(() -> {
+            long currentTime = System.currentTimeMillis();
+            String removeServerNamed = null;
+            for (Map.Entry<String, Long> entry : this.lastHeardServers.entrySet()) {
+                if (currentTime - entry.getValue() > 505) {
+                    removeServerNamed = entry.getKey();
+                    break;
+                }
+            }
+            this.lastHeardServers.remove(removeServerNamed);
+            this.availableServers.remove(removeServerNamed);
+
+        }, REFRESH_DELAY, REFRESH_DELAY, TimeUnit.MILLISECONDS);
     }
 
-    public static ArrayList<NetworkInterface> getNetworkInterfaces() throws SocketException {
+    /**
+     * Obtains suitable network interfaces for listening to incoming server "discovery" packets.
+     *
+     * @return {@code List} of the suitable {@code NetworkInterfaces}.
+     * @throws SocketException Network problem / No configured network interfaces.
+     */
+    private List<NetworkInterface> getNetworkInterfaces() throws SocketException {
         ArrayList<NetworkInterface> multicastInterfaces = new ArrayList<NetworkInterface>();
 
         // Gather all suitable interfaces for multicasting the game server address
@@ -82,49 +127,14 @@ public class ServerDiscovery {
     }
 
     /**
-     * Starts looking for available game servers using suitable network interfaces.
-     * It utilises {@link UtilityThread} for this.
-     *
-     * @throws IOException Network problem
+     * Starts receiving packets that are multicasted by available game servers.
+     * {@link UtilityThread} is utilised for this action.
      */
-    public void startLookingForServers() throws IOException {
-        if (this.isActive.get()) {
-            return;
-        }
-        this.isActive.set(true);
-        this.availableServers.clear();
-
-        ArrayList<NetworkInterface> multicastInterfaces = ServerDiscovery.getNetworkInterfaces();
-
-        this.multicastSocket = new MulticastSocket(GameServer.HANDSHAKE_PORT);
-
-        // Start receiving multicasts for all suitable interfaces
-        for (NetworkInterface networkInterface : multicastInterfaces) {
-            this.multicastSocket.joinGroup(this.searchGroup, networkInterface);
-        }
-
-        this.receiveMulticasts();
-
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
-        this.executorService.scheduleWithFixedDelay(() -> {
-            long currentTime = System.currentTimeMillis();
-            String removeServerNamed = null;
-            for (Map.Entry<String, Long> entry : this.lastHeardServers.entrySet()) {
-                if (currentTime - entry.getValue() > 505) {
-                    removeServerNamed = entry.getKey();
-                    break;
-                }
-            }
-            this.lastHeardServers.remove(removeServerNamed);
-            this.availableServers.remove(removeServerNamed);
-
-        }, 505, 505, TimeUnit.MILLISECONDS);
-    }
-
     private void receiveMulticasts() {
         new UtilityThread(() -> {
-            // Construct packet which will be used to receive multicast packets (packet contains server name and address)
-            byte[] packetBytes = new byte[128]; // TODO: Server name limited in length?
+            // Construct the packet which will be used to receive multicast packets
+            // (packet contains a server name and an address)
+            byte[] packetBytes = new byte[128];
             DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length);
 
             try {
@@ -158,13 +168,15 @@ public class ServerDiscovery {
     }
 
     /**
-     * Stops looking for available game servers.
+     * Stop looking for available game servers and clear available servers.
      */
     public void stopLookingForServers() {
         this.isActive.set(false);
         this.executorService.shutdown();
         this.multicastSocket.close();
         this.multicastSocket = null;
+        this.availableServers.clear();
+        this.lastHeardServers.clear();
     }
 
 }

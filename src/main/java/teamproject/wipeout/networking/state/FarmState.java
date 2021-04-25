@@ -17,24 +17,25 @@ import java.util.stream.Collectors;
  * <br>
  * {@code FarmState} extends {@link GameEntityState}.
  */
-public class FarmState  extends GameEntityState {
+public class FarmState extends GameEntityState {
 
     private Integer farmID;
-
     private Integer expansions;
     private List<List<Pair<Integer, Double>>> items;
-    private double growthMultiplier;
-    private double AIMultiplier;
 
-    private long timestamp;
+    private double growthMultiplier;
+    private double aiMultiplier;
 
     /**
      * Default initializer for a {@link FarmState}.
      *
-     * @param farmID Farm ID
-     * @param items  Items at the farm
+     * @param farmID           Farm ID
+     * @param expansions       Number of farm expansions(= expansion level)
+     * @param items            Items planted on the farm
+     * @param growthMultiplier Farm's current growth multiplier
+     * @param aiMultiplier     Farm's current AI multiplier
      */
-    public FarmState(Integer farmID, Integer expansions, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double AIMultiplier) {
+    public FarmState(Integer farmID, Integer expansions, ArrayList<ArrayList<FarmItem>> items, double growthMultiplier, double aiMultiplier) {
         this.farmID = farmID;
         this.expansions = expansions;
         this.items = items.stream().map((row) -> {
@@ -48,13 +49,12 @@ public class FarmState  extends GameEntityState {
         }).collect(Collectors.toList());
 
         this.growthMultiplier = growthMultiplier;
-        this.AIMultiplier = AIMultiplier;
-
-        this.timestamp = System.currentTimeMillis();
+        this.aiMultiplier = aiMultiplier;
     }
 
     /**
-     * Farm ID getter
+     * {@code farmID} getter
+     *
      * @return Farm ID
      */
     public Integer getFarmID() {
@@ -62,43 +62,39 @@ public class FarmState  extends GameEntityState {
     }
 
     /**
-     * Expansions getter
-     * @return Number of expansions
+     * {@code expansions} getter
+     *
+     * @return Number of farm expansions(= expansion level)
      */
     public Integer getExpansions() {
         return this.expansions;
     }
 
     /**
-     * Items getter
-     * @return {@code List<List<Pair<Integer, Double>>>} of items
+     * {@code items} getter
+     *
+     * @return {@code List<List<Pair<Integer, Double>>>} of items currently planted on the farm
      */
     public List<List<Pair<Integer, Double>>> getItems() {
         return this.items;
     }
 
     /**
-     * Growth multiplier getter
-     * @return Growth multiplier
+     * {@code growthMultiplier} getter
+     *
+     * @return Farm's current growth multiplier
      */
     public double getGrowthMultiplier() {
         return this.growthMultiplier;
     }
 
     /**
-     * AI multiplier getter
-     * @return AI multiplier
+     * {@code aiMultiplier} getter
+     *
+     * @return Farm's current AI multiplier
      */
-    public double getAIMultiplier() {
-        return this.AIMultiplier;
-    }
-
-    /**
-     * Timestamp getter
-     * @return Timestamp of the {@code FarmState}
-     */
-    public long getTimestamp() {
-        return this.timestamp;
+    public double getAiMultiplier() {
+        return this.aiMultiplier;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -112,9 +108,7 @@ public class FarmState  extends GameEntityState {
         out.writeObject(this.items);
 
         out.writeDouble(this.growthMultiplier);
-        out.writeDouble(this.AIMultiplier);
-
-        out.writeLong(this.timestamp);
+        out.writeDouble(this.aiMultiplier);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -125,9 +119,7 @@ public class FarmState  extends GameEntityState {
         this.items = (List<List<Pair<Integer, Double>>>) in.readObject();
 
         this.growthMultiplier = in.readDouble();
-        this.AIMultiplier = in.readDouble();
-
-        this.timestamp = in.readLong();
+        this.aiMultiplier = in.readDouble();
     }
 
     private void readObjectNoData() throws GameEntityStateException {
@@ -142,7 +134,9 @@ public class FarmState  extends GameEntityState {
             return false;
         }
         FarmState that = (FarmState) o;
-        return this.farmID.equals(that.farmID);
+        boolean equalMultipliers = this.growthMultiplier == that.growthMultiplier && this.aiMultiplier == that.aiMultiplier;
+        return this.farmID.equals(that.farmID) && this.expansions.equals(that.expansions) &&
+                this.items.equals(that.items) && equalMultipliers;
     }
 
     @Override

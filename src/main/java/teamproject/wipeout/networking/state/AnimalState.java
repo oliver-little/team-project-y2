@@ -5,30 +5,26 @@ import javafx.geometry.Point2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@code AnimalState} class represents objects which contain game-critical
- * information about individual players (= their states).
+ * information about an animal entity (= its state).
  * <br>
  * {@code AnimalState} extends {@link GameEntityState}.
- * <br>
  */
 public class AnimalState extends GameEntityState {
 
     private Point2D position;
-
     private Point2D[] path;
-
     private Double speedMultiplier;
-
-    private long timestamp;
 
     /**
      * Default initializer for a {@link AnimalState}
      *
      * @param position Animal's position represented by {@link Point2D}
-     * @param path Animal's traverse path
+     * @param path     Animal's traverse path
      */
     public AnimalState(Point2D position, List<Point2D> path) {
         this.position = position;
@@ -37,7 +33,6 @@ public class AnimalState extends GameEntityState {
         this.path = path == null ? pointArray : path.toArray(pointArray);
 
         this.speedMultiplier = 1.0;
-        this.timestamp = System.currentTimeMillis();
     }
 
     /**
@@ -50,64 +45,64 @@ public class AnimalState extends GameEntityState {
     }
 
     /**
+     * {@code position} setter
+     *
+     * @param newPosition New {@link Point2D} value of the animal's {@code position}
+     */
+    public void setPosition(Point2D newPosition) {
+        this.position = newPosition;
+    }
+
+    /**
      * {@code path} getter
      *
-     * @return {@code List<Point2D>} path
+     * @return {@code List<Point2D>} path for the animal
      */
     public List<Point2D> getPath() {
         return Arrays.asList(this.path);
     }
 
-    public Double getSpeedMultiplier() {
-        return this.speedMultiplier;
-    }
-
-    /**
-     * {@code position} setter
-     *
-     * @param newPosition New {@link Point2D} value of the {@code position}
-     */
-    public void setPosition(Point2D newPosition) {
-        this.timestamp = System.currentTimeMillis();
-        this.position = newPosition;
-    }
-
     /**
      * {@code path} setter
      *
-     * @param newPath New {@code List<Point2D>} path value
+     * @param newPath New {@code List<Point2D>} path for the animal
      */
     public void setPath(List<Point2D> newPath) {
-        this.timestamp = System.currentTimeMillis();
-
         Point2D[] pointArray = new Point2D[0];
         this.path = newPath == null ? pointArray : newPath.toArray(pointArray);
     }
 
     /**
+     * {@code speedMultiplier} getter
+     *
+     * @return Speed multiplier of the animal
+     */
+    public Double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
+    /**
      * {@code speedMultiplier} setter
      *
-     * @param speedMultiplier New {@code Double} value
+     * @param speedMultiplier New speed multiplier of the animal
      */
     public void setSpeedMultiplier(Double speedMultiplier) {
-        this.timestamp = System.currentTimeMillis();
         this.speedMultiplier = speedMultiplier;
     }
 
     /**
-     * Updates this {@code AnimalState} based on another {@code AnimalState}.
+     * Updates the {@code AnimalState} instance based on the given {@code AnimalState} instance.
      *
-     * @param state {@link AnimalState} used for the update
+     * @param updatedState {@link AnimalState} used for the state update
      */
-    public void updateStateFrom(AnimalState state) {
-        this.position = state.position;
-        this.path = state.path;
-        this.speedMultiplier = state.speedMultiplier;
-        this.timestamp = state.timestamp;
+    public void updateStateFrom(AnimalState updatedState) {
+        this.position = updatedState.position;
+        this.path = updatedState.path;
+        this.speedMultiplier = updatedState.speedMultiplier;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
-    // to make AnimalState serializable despite it containing non-serializable properties (Point2D)
+    // to make AnimalState serializable despite it containing non-serializable properties (e.g., Point2D)
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeDouble(this.position.getX());
@@ -122,8 +117,6 @@ public class AnimalState extends GameEntityState {
         out.writeObject(deconstructedPath);
 
         out.writeDouble(this.speedMultiplier);
-
-        out.writeLong(this.timestamp);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -133,12 +126,10 @@ public class AnimalState extends GameEntityState {
         this.path = new Point2D[deconstructedPath.length / 2];
         int pathIndex = 0;
         for (int i = 0; i < deconstructedPath.length; i += 2) {
-            this.path[pathIndex++] = new Point2D(deconstructedPath[i], deconstructedPath[i+1]);
+            this.path[pathIndex++] = new Point2D(deconstructedPath[i], deconstructedPath[i + 1]);
         }
 
         this.speedMultiplier = in.readDouble();
-
-        this.timestamp = in.readLong();
     }
 
     private void readObjectNoData() throws GameEntityStateException {
@@ -153,12 +144,12 @@ public class AnimalState extends GameEntityState {
             return false;
         }
         AnimalState that = (AnimalState) o;
-        return this.position.equals(that.position);
+        return this.position.equals(that.position) && Arrays.equals(this.path, that.path);
     }
 
     @Override
     public int hashCode() {
-        return this.position.hashCode();
+        return Arrays.hashCode(this.path);
     }
 
 }

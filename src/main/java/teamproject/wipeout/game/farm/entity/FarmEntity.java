@@ -35,7 +35,6 @@ import teamproject.wipeout.networking.state.FarmState;
 import teamproject.wipeout.util.SupplierGenerator;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -242,14 +241,14 @@ public class FarmEntity extends GameEntity {
     public void updateFromState(FarmState farmState) {
         this.data.updateFromState(farmState);
 
-        if (farmState.getAIMultiplier() != 1 || farmState.getGrowthMultiplier() != 1) {
+        if (farmState.getAiMultiplier() != 1 || farmState.getGrowthMultiplier() != 1) {
             if (farmState.getGrowthMultiplier() > 1) {
                 sabotageEffect.getParameters().setEmissionType(FAST_CROP_PARTICLE);
             }
             else if (farmState.getGrowthMultiplier() < 1) {
                 sabotageEffect.getParameters().setEmissionType(SLOW_CROP_PARTICLE);
             }
-            else if (farmState.getAIMultiplier() > 1) {
+            else if (farmState.getAiMultiplier() > 1) {
                 sabotageEffect.getParameters().setEmissionType(AI_ATTRACT_PARTICLE);
             }
             else {

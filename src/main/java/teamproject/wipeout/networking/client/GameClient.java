@@ -52,31 +52,6 @@ public class GameClient {
     private Runnable onDisconnect;
 
     /**
-     * Default initializer for {@code GameClient}
-     */
-    protected GameClient(String clientName) {
-        this.clientName = clientName;
-        this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
-        this.tempPlayerStates = new HashSet<PlayerState>();
-
-        this.myFarmID = null;
-        this.farmEntities = null;
-        this.clockCalibration = null;
-
-        this.clientSocket = new Socket();
-        this.isActive = new AtomicBoolean(false);
-        this.out = null;
-        this.in = null;
-
-        this.clientID = null;
-        this.worldEntity = null;
-        this.newPlayerAction = null;
-        this.onDisconnect = null;
-
-        this.players = new HashMap<Integer, Player>();
-    }
-
-    /**
      * Connects to a specified game server and starts
      * listening for incoming updates({@link GameUpdate}) from the game server.
      * It does not allow the client to connect to multiple game servers simultaneously.
@@ -112,6 +87,31 @@ public class GameClient {
         client.startReceivingUpdates();
 
         return client;
+    }
+
+    /**
+     * Default initializer for {@code GameClient}
+     */
+    protected GameClient(String clientName) {
+        this.clientName = clientName;
+        this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
+        this.tempPlayerStates = new HashSet<PlayerState>();
+
+        this.myFarmID = null;
+        this.farmEntities = null;
+        this.clockCalibration = null;
+
+        this.clientSocket = new Socket();
+        this.isActive = new AtomicBoolean(false);
+        this.out = null;
+        this.in = null;
+
+        this.clientID = null;
+        this.worldEntity = null;
+        this.newPlayerAction = null;
+        this.onDisconnect = null;
+
+        this.players = new HashMap<Integer, Player>();
     }
 
     /**
@@ -230,7 +230,7 @@ public class GameClient {
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
                         case ANIMAL_STATE:
-                            if (!receivedUpdate.originClientID.equals(this.clientID)) {
+                            if (!receivedUpdate.originID.equals(this.clientID)) {
                                 this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
@@ -253,7 +253,7 @@ public class GameClient {
                             this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
                         case DISCONNECT:
-                            this.handlePlayerDisconnect(receivedUpdate.originClientID);
+                            this.handlePlayerDisconnect(receivedUpdate.originID);
                             break;
                         case SERVER_STOP:
                             if (!this.worldEntity.isGameplayActive()) {

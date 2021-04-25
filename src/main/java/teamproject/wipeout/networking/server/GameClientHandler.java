@@ -15,7 +15,7 @@ import java.util.Collection;
 /**
  * Handler dealing with a client connection on the server.
  * It provides facilities to listen to the updates from the client,
- * and to send updates to the client.
+ * and to send updates back to the client.
  *
  * @see GameServer
  * @see GameUpdateHandler
@@ -25,28 +25,30 @@ public class GameClientHandler {
 
     public final Integer clientID;
     public final String clientName;
-
     public final Integer farmID;
 
     protected final Socket clientSocket;
     protected final ObjectInputStream in;
     protected final ObjectOutputStream out;
 
-    protected final GameUpdateHandler updater;
+    private final GameUpdateHandler updater;
 
     /**
      * Default initializer for {@code GameClientHandler}
      *
-     * @param socket {@link Socket} representing the connection with the client.
-     * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
-     *                     written to(= send updates) or when the client declines to connect.
+     * @param socket   {@link Socket} representing the connection with the client
+     * @param serverID ID of the server
+     * @param clientID ID of the client
+     * @param farmID   ID of client's farm
+     * @param updater  {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @throws IOException               Thrown when the {@code Socket} cannot be read from(= get updates) or written to(= send updates).
+     * @throws ClassNotFoundException    Problem with reading data received from the client.
+     * @throws ClientConnectionException Problem with connecting the client.
      */
-    protected GameClientHandler(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdateHandler updater) throws IOException, ClassNotFoundException {
-        this.clientID = clientID;
-        this.clientSocket = socket;
-        this.updater = updater;
+    protected GameClientHandler(Socket socket, Integer serverID, Integer clientID, Integer farmID, GameUpdateHandler updater)
+            throws IOException, ClassNotFoundException, ClientConnectionException {
 
-        this.farmID = farmID;
+        this.clientSocket = socket;
 
         // At first, output stream must be created!
         this.out = new ObjectOutputStream(this.clientSocket.getOutputStream());
@@ -60,26 +62,35 @@ public class GameClientHandler {
         // Client ID is sent by the client -> sitting in the input stream
         GameUpdate handshake = (GameUpdate) this.in.readObject();
         if (handshake.type != GameUpdateType.ACCEPT) {
-            throw new IOException("Client did not accepted connection");
+            throw new ClientConnectionException("Client did not accept connection");
         }
-        if (!this.clientID.equals(handshake.originClientID)) {
-            throw new IOException("Client connection has been altered");
+        if (!clientID.equals(handshake.originID)) {
+            throw new ClientConnectionException("Client connection has been altered");
         }
+
+        this.clientID = clientID;
         this.clientName = (String) handshake.content;
+        this.farmID = farmID;
+
+        this.updater = updater;
     }
 
     /**
-     * Static method which initializes {@code GameClientHandler}
-     * and handles the initial {@link PlayerState} of the connected client.
+     * Initializes {@link GameClientHandler} and processes the initial {@link PlayerState} of the newly connected client.
      *
-     * @param socket {@link Socket} representing the connection with the client.
-     * @throws IOException Thrown when the {@code Socket} cannot be read from(= get updates),
-     *                     *                     written to(= send updates) or when the client declines to connect.
+     * @param socket   {@link Socket} representing the connection with the client
+     * @param serverID ID of the server
+     * @param clientID ID of the client
+     * @param farmID   ID of client's farm
+     * @param updater  {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @throws IOException            Thrown when the {@code Socket} cannot be read from(= get updates)
+     *                                or written to(= send updates).
+     * @throws ClassNotFoundException Problem with reading data received from the client.
      */
-    static public GameClientHandler allowConnection(Integer serverID, Integer clientID, Integer farmID, Socket socket, GameUpdateHandler updater)
-            throws IOException, ClassNotFoundException {
+    static public GameClientHandler allowConnection(Socket socket, Integer serverID, Integer clientID, Integer farmID, GameUpdateHandler updater)
+            throws IOException, ClassNotFoundException, ClientConnectionException {
 
-        GameClientHandler newInstance = new GameClientHandler(serverID, clientID, farmID, socket, updater);
+        GameClientHandler newInstance = new GameClientHandler(socket, serverID, clientID, farmID, updater);
 
         newInstance.startReceivingUpdates();
 
@@ -87,73 +98,39 @@ public class GameClientHandler {
     }
 
     /**
-     * Static method which declines connection with a {@code GameClient}.
+     * Declines connection with a {@code GameClient} through a given socket of the client.
      *
-     * @param socket {@link Socket} representing the connection with the client.
+     * @param socket   {@link Socket} representing the connection with the client
+     * @param serverID ID of the server
      * @throws IOException Network problem
      */
     static public void denyConnection(Socket socket, Integer serverID) throws IOException {
         ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-        GameUpdate decline = new GameUpdate(GameUpdateType.DECLINE, serverID, null);
-        outputStream.writeObject(decline);
+        GameUpdate declineUpdate = new GameUpdate(GameUpdateType.DECLINE, serverID);
+        outputStream.writeObject(declineUpdate);
         outputStream.reset();
     }
 
     /**
-     * Starts listening to updates coming from the particular client.
-     * The listener is created on a separate {@link BackgroundThread}.
-     */
-    private void startReceivingUpdates() {
-        new BackgroundThread(() -> {
-            while (!this.clientSocket.isClosed()) {
-                try {
-                    GameUpdate receivedUpdate = null;
-                    Object object = this.in.readObject();
-                    if (object instanceof GameUpdate) {
-                        receivedUpdate = (GameUpdate) object;
-                    } else {
-                        continue;
-                    }
-                    this.updater.updateWith(receivedUpdate);
-
-                    if (receivedUpdate.type == GameUpdateType.DISCONNECT) {
-                        break;
-                    }
-
-                } catch (EOFException theEnd) {
-                    // The client had a "hard disconnect" (= did not send a disconnect signal)
-                    break;
-                } catch (IOException | ClassNotFoundException exception) {
-                    if (!this.clientSocket.isClosed()) {
-                        exception.printStackTrace();
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }).start();
-    }
-
-    /**
-     * Sends a {@code GameUpdate} to the particular connected client.
+     * Sends a {@code GameUpdate} to the particular client.
      *
-     * @param update {@link GameUpdate} to be sent to the client.
+     * @param update {@link GameUpdate} to be sent to the client
      * @throws IOException Thrown when the {@code GameUpdate} cannot be sent.
      */
     public void updateWith(GameUpdate update) throws IOException {
         this.out.writeObject(update);
-        this.out.reset();
+        this.out.reset(); // TODO Handle stream reset exception
     }
 
     /**
-     * Sends an {@code ArrayList<PlayerState>} in the form of a {@link GameUpdate}
-     * to the particular connected client.
+     * Sends an {@code Collection<PlayerState>} in the form of
+     * a multiple {@link GameUpdate}s to the particular client.
      *
-     * @param playerStates {@code ArrayList<PlayerState>} to be sent to the client.
-     * @throws IOException Thrown when the {@code ArrayList<PlayerState>} cannot be sent.
+     * @param playerStates {@code Collection<PlayerState>} to be sent to the client
+     * @throws IOException Thrown when the {@code GameUpdate} cannot be sent.
      */
     public void updateWith(Collection<PlayerState> playerStates) throws IOException {
-        for (PlayerState playerState : playerStates.toArray(new PlayerState[0])) {
+        for (PlayerState playerState : playerStates.toArray((size) -> new PlayerState[size])) {
             this.out.writeObject(new GameUpdate(playerState));
         }
         this.out.reset();
@@ -162,9 +139,8 @@ public class GameClientHandler {
     /**
      * Disconnects the server from the particular client.
      *
-     * @param serverSide Specifies whether the disconnect command comes from the server's side.
-     * @throws IOException Thrown when there is a problem with closing the connection(= sending
-     *                     the disconnect message).
+     * @param serverSide Specifies whether the disconnect command came from the server.
+     * @throws IOException Thrown when there is a problem with closing the connection.
      */
     public void closeConnection(boolean serverSide) throws IOException {
         if (serverSide) {
@@ -194,6 +170,41 @@ public class GameClientHandler {
     @Override
     public int hashCode() {
         return this.clientID.hashCode();
+    }
+
+    /**
+     * Starts listening to updates coming from the particular client.
+     * The listener is created on a separate {@link BackgroundThread}.
+     */
+    private void startReceivingUpdates() {
+        new BackgroundThread(() -> {
+            while (!this.clientSocket.isClosed()) {
+                try {
+                    GameUpdate receivedUpdate = null;
+                    Object object = this.in.readObject();
+                    if (object instanceof GameUpdate) {
+                        receivedUpdate = (GameUpdate) object;
+                    } else {
+                        continue;
+                    }
+                    this.updater.updateWith(receivedUpdate);
+
+                    if (receivedUpdate.type == GameUpdateType.DISCONNECT) {
+                        break;
+                    }
+
+                } catch (EOFException ignore) {
+                    // The client had a "hard disconnect" (= did not send a disconnect signal)
+                    break;
+                } catch (IOException | ClassNotFoundException exception) {
+                    if (!this.clientSocket.isClosed()) {
+                        exception.printStackTrace();
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }).start();
     }
 
 }

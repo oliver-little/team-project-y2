@@ -148,7 +148,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 			player.assignFarm(farm);
 			farm.assignPlayer(player.playerID, activePlayer, this.clientSupplier);
 		} else {
-			player.getCurrentState().assignFarm(null);
+			player.getCurrentState().setFarmID(null);
 		}
 	}
 
@@ -161,7 +161,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 			aiPlayer.start();
 		} else {
-			aiPlayer.getCurrentState().assignFarm(null);
+			aiPlayer.getCurrentState().setFarmID(null);
 		}
 	}
 

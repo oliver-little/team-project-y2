@@ -6,30 +6,54 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
- * {@code MarketOperationRequest} class represents a client request.
+ * {@code MarketOperationRequest} class represents a client market request.
  * <br>
  * {@code MarketOperationRequest} implements {@link Serializable}.
  */
 public class MarketOperationRequest implements Serializable {
 
-    public int itemID;
-    public double price;
-    public int quantity;
-    public boolean buy;
+    private int itemID;
+    private int quantity;
+    private boolean buy;
 
     /**
      * Default initializer for a {@link MarketOperationRequest}.
      *
-     * @param itemID Item ID
-     * @param price Item price
+     * @param itemID   Item ID
      * @param quantity Item quantity
-     * @param buy Buying or selling the item?
+     * @param buy      Buying or selling the item?
      */
-    public MarketOperationRequest(int itemID, double price, int quantity, boolean buy) {
+    public MarketOperationRequest(int itemID, int quantity, boolean buy) {
         this.itemID = itemID;
-        this.price = price;
         this.quantity = quantity;
         this.buy = buy;
+    }
+
+    /**
+     * {@code itemID} getter
+     *
+     * @return Item ID
+     */
+    public int getItemID() {
+        return this.itemID;
+    }
+
+    /**
+     * {@code quantity} getter
+     *
+     * @return Item's quantity
+     */
+    public int getQuantity() {
+        return this.quantity;
+    }
+
+    /**
+     * {@code buy} getter
+     *
+     * @return Is the item being bought or sold?
+     */
+    public boolean getIsBuying() {
+        return this.buy;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -37,14 +61,12 @@ public class MarketOperationRequest implements Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.itemID);
-        out.writeDouble(this.price);
         out.writeInt(this.quantity);
         out.writeBoolean(this.buy);
     }
 
     private void readObject(ObjectInputStream in) throws IOException {
         this.itemID = in.readInt();
-        this.price = in.readDouble();
         this.quantity = in.readInt();
         this.buy = in.readBoolean();
     }
@@ -63,13 +85,12 @@ public class MarketOperationRequest implements Serializable {
         MarketOperationRequest that = (MarketOperationRequest) o;
         return this.itemID == that.itemID &&
                 this.buy == that.buy &&
-                this.quantity == that.quantity &&
-                this.price == that.price;
+                this.quantity == that.quantity;
     }
 
     @Override
     public int hashCode() {
-        return Double.valueOf((this.itemID + this.price) / this.quantity + (this.buy ? 1 : -1)).hashCode();
+        return Integer.valueOf(this.itemID / this.quantity + (this.buy ? 1 : -1)).hashCode();
     }
 
 }

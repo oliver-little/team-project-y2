@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,26 +19,23 @@ import java.util.Set;
 public class WorldState extends GameEntityState {
 
     private Set<Pickables.Pickable> pickables;
-    private HashMap<Integer, Point2D[]> potions;
-
-    private long timestamp;
+    private Map<Integer, Point2D[]> potions;
 
     /**
      * Default initializer for a {@link WorldState}.
      *
      * @param pickables Set of pickable items
-     * @param potions Map of potions
+     * @param potions   Map of potions
      */
-    public WorldState(HashSet<Pickables.Pickable> pickables, HashMap<Integer, Point2D[]> potions) {
+    public WorldState(Set<Pickables.Pickable> pickables, Map<Integer, Point2D[]> potions) {
         this.pickables = pickables;
         this.potions = potions;
-        this.timestamp = System.currentTimeMillis();
     }
 
     /**
      * {@code pickables} getter
      *
-     * @return Set of pickables
+     * @return {@code Set} of pickables
      */
     public Set<Pickables.Pickable> getPickables() {
         return this.pickables;
@@ -48,19 +44,10 @@ public class WorldState extends GameEntityState {
     /**
      * {@code potions} getter
      *
-     * @return Map of potions
+     * @return {@code Map} with potions
      */
-    public HashMap<Integer, Point2D[]> getPotions() {
+    public Map<Integer, Point2D[]> getPotions() {
         return this.potions;
-    }
-
-    /**
-     * {@code timestamp} variable getter
-     *
-     * @return Timestamp of the {@code FarmState}
-     */
-    public long getTimestamp() {
-        return this.timestamp;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
@@ -76,8 +63,6 @@ public class WorldState extends GameEntityState {
             deconstructedPotions.put(entry.getKey(), doubleValues);
         }
         out.writeObject(deconstructedPotions);
-
-        out.writeLong(this.timestamp);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -90,8 +75,6 @@ public class WorldState extends GameEntityState {
             Point2D[] pointValue = new Point2D[]{new Point2D(values[0], values[1]), new Point2D(values[2], values[3])};
             this.potions.put(entry.getKey(), pointValue);
         }
-
-        this.timestamp = in.readLong();
     }
 
     private void readObjectNoData() throws GameEntityStateException {
@@ -106,12 +89,12 @@ public class WorldState extends GameEntityState {
             return false;
         }
         WorldState that = (WorldState) o;
-        return this.pickables.equals(that.pickables);
+        return this.pickables.equals(that.pickables) && this.potions.equals(that.potions);
     }
 
     @Override
     public int hashCode() {
-        return this.pickables.hashCode();
+        return this.pickables.hashCode() / this.potions.hashCode();
     }
 
 }

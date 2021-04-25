@@ -69,7 +69,7 @@ public class Market implements StateUpdatable<MarketState> {
      */
     public void updateFromState(MarketState newState) {
         Platform.runLater(() -> {
-            for (Map.Entry<Integer, Double> updatedStock : newState.items.entrySet()) {
+            for (Map.Entry<Integer, Double> updatedStock : newState.getItemDeviations().entrySet()) {
                 MarketItem currentStock = this.stockDatabase.get(updatedStock.getKey());
                 currentStock.setQuantityDeviation(updatedStock.getValue());
             }
@@ -99,7 +99,7 @@ public class Market implements StateUpdatable<MarketState> {
         }
 
         if (isLocal) {
-            this.sendRequest(new MarketOperationRequest(id, totalCost, quantity, true));
+            this.sendRequest(new MarketOperationRequest(id, quantity, true));
 
         } else {
             item.incrementQuantityDeviation(quantity);
@@ -132,7 +132,7 @@ public class Market implements StateUpdatable<MarketState> {
         double totalCost = calculateTotalCost(id, quantity, false);
 
         if (isLocal) {
-            sendRequest(new MarketOperationRequest(id, totalCost, quantity, false));
+            sendRequest(new MarketOperationRequest(id, quantity, false));
 
         } else {
             item.decrementQuantityDeviation(quantity);
