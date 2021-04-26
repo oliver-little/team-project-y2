@@ -10,10 +10,10 @@ import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ServerDiscoveryTest {
+
+    private static final int GENERAL_DELAY = 50;
 
     private ServerDiscovery serverDiscovery;
     private AtomicReference<String> serverName;
@@ -27,46 +27,51 @@ class ServerDiscoveryTest {
         try {
             this.serverDiscovery = new ServerDiscovery();
             this.serverDiscovery.availableServers.addListener((MapChangeListener.Change<? extends String, ? extends InetSocketAddress> change) -> {
-                this.serverName.set(change.getKey());
-                this.serverAddress.set(change.getValueAdded());
+                if (change.wasAdded()) {
+                    this.serverName.set(change.getKey());
+                    this.serverAddress.set(change.getValueAdded());
+                } else {
+                    this.serverName.set(null);
+                    this.serverAddress.set(null);
+                }
             });
 
         } catch (UnknownHostException e) {
-            fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
     }
 
     @BeforeEach
-    void setUp() throws IOException, ClassNotFoundException {
-        this.serverName = new AtomicReference<String>(null);
-        this.serverAddress = new AtomicReference<InetSocketAddress>(null);
+    void setUp() {
+        this.serverName.set(null);
+        this.serverAddress.set(null);
     }
 
     @AfterEach
-    void tearDown() throws IOException {
+    void tearDown() {
         if (this.serverDiscovery.isActive.get()) {
             this.serverDiscovery.stopLookingForServers();
         }
         this.serverDiscovery.availableServers.clear();
+        this.serverDiscovery.lastHeardServers.clear();
     }
 
     @RepeatedTest(5)
     @Timeout(value = 3, unit = TimeUnit.SECONDS) // Longer because of running the server each time
-    void testFindingGameServer() throws IOException {
+    void testFindingGameServer() {
         String testServerName = "TestServer#123";
-        GameServer gameServer = null;
         try {
-            gameServer = new GameServer(testServerName);
+            GameServer gameServer = new GameServer(testServerName);
             gameServer.startClientSearch();
 
             this.serverDiscovery.startLookingForServers();
-            Thread.sleep(505);
+            Thread.sleep(ServerDiscovery.REFRESH_DELAY);
 
             gameServer.stopServer();
 
-            Thread.sleep(50);
+            Thread.sleep(GENERAL_DELAY);
 
-        } catch (IOException | InterruptedException | ReflectiveOperationException exception) {
+        } catch (IOException | ReflectiveOperationException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
 
@@ -80,14 +85,51 @@ class ServerDiscoveryTest {
     }
 
     @RepeatedTest(5)
-    @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
+    @Timeout(value = 6, unit = TimeUnit.SECONDS) // Longer because of running the server each time
+    void testLoosingGameServer() {
+        String testServerName = "TestServer#456";
+        try {
+            GameServer gameServer = new GameServer(testServerName);
+            gameServer.startClientSearch();
+
+            this.serverDiscovery.startLookingForServers();
+            Thread.sleep(ServerDiscovery.REFRESH_DELAY);
+
+            gameServer.stopClientSearch();
+
+            Thread.sleep(ServerDiscovery.REFRESH_DELAY * 2);
+
+            gameServer.stopServer();
+
+            Thread.sleep(GENERAL_DELAY);
+
+        } catch (IOException | ReflectiveOperationException | InterruptedException exception) {
+            Assertions.fail(exception.getMessage());
+        }
+
+        Assertions.assertNull(this.serverName.get());
+        Assertions.assertNull(this.serverAddress.get());
+
+        Assertions.assertTrue(this.serverDiscovery.availableServers.isEmpty());
+        Assertions.assertTrue(this.serverDiscovery.getAvailableServers().isEmpty());
+    }
+
+    @RepeatedTest(5)
+    @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testStartLookingForServers() {
         Assertions.assertFalse(this.serverDiscovery.getIsActive(),
                 "ServerDiscovery is active despite the fact that it has not started searching.");
         try {
             this.serverDiscovery.startLookingForServers();
 
-            Thread.sleep(50);
+            Thread.sleep(GENERAL_DELAY);
+
+            Assertions.assertTrue(this.serverDiscovery.getIsActive(),
+                    "ServerDiscovery is not active despite the fact that it started searching.");
+
+            this.serverDiscovery.startLookingForServers();
+
+            Thread.sleep(GENERAL_DELAY);
 
             Assertions.assertTrue(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is not active despite the fact that it started searching.");

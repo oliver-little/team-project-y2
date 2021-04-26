@@ -67,7 +67,8 @@ class GameServerRunnerTest {
     }
 
     @RepeatedTest(5)
-    void testStoppingAndStartingNewServer() throws ServerRunningException, IOException, InterruptedException {
+    void testStoppingAndStartingNewServer() {
+        try {
             this.runner.startServer(SERVER_NAME);
             Thread.sleep(CATCHUP_TIME); // so that server has time to start up in the child process
             Assertions.assertTrue(this.runner.isServerActive());
@@ -77,5 +78,9 @@ class GameServerRunnerTest {
 
             this.runner.startServer(OTHER_SERVER_NAME);
             Assertions.assertEquals(OTHER_SERVER_NAME, this.runner.getServerName());
+
+        } catch (IOException | ServerRunningException | InterruptedException exception) {
+            Assertions.fail(exception.getMessage());
+        }
     }
 }

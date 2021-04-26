@@ -2,7 +2,7 @@ package teamproject.wipeout.networking.data;
 
 import teamproject.wipeout.networking.state.PlayerState;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * {@code GameUpdate} is a wrapper class for messages(= objects)
@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class GameUpdate implements Serializable {
 
     public final GameUpdateType type;
-    public final Integer originID;
+    public final int originID;
     public final Serializable content;
 
     /**
@@ -25,7 +25,7 @@ public class GameUpdate implements Serializable {
      * @param originID ID of the client or server
      * @param content  Content(= object, which implements {@link Serializable}) to be sent
      */
-    public GameUpdate(GameUpdateType type, Integer originID, Serializable content) {
+    public GameUpdate(GameUpdateType type, int originID, Serializable content) {
         this.type = type;
         this.originID = originID;
         this.content = content;
@@ -38,7 +38,7 @@ public class GameUpdate implements Serializable {
      * @param type     {@link GameUpdateType} of the content(= object)
      * @param originID ID of the client or server
      */
-    public GameUpdate(GameUpdateType type, Integer originID) {
+    public GameUpdate(GameUpdateType type, int originID) {
         this.type = type;
         this.originID = originID;
         this.content = null;
@@ -53,6 +53,22 @@ public class GameUpdate implements Serializable {
         this.type = GameUpdateType.PLAYER_STATE;
         this.originID = playerState.getPlayerID();
         this.content = playerState;
+    }
+
+    public GameUpdate deepClone() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(this);
+
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+
+            return (GameUpdate) objectInputStream.readObject();
+
+        } catch (IOException | ClassNotFoundException exception) {
+            return null;
+        }
     }
 
 }

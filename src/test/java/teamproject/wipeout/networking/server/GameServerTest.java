@@ -1,16 +1,39 @@
 package teamproject.wipeout.networking.server;
 
-import org.junit.jupiter.api.TestInstance;
+import javafx.collections.MapChangeListener;
+import javafx.geometry.Point2D;
+import javafx.util.Pair;
+import org.junit.jupiter.api.*;
+import teamproject.wipeout.engine.core.GameScene;
+import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.player.Player;
+import teamproject.wipeout.networking.client.GameClient;
+import teamproject.wipeout.networking.client.ServerDiscovery;
+import teamproject.wipeout.networking.data.GameUpdate;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static teamproject.wipeout.networking.server.GameServer.MAX_CONNECTIONS;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GameServerTest {
-/*
-    private static final Integer[] CLIENT_IDs = {0, 1, 2, 3, 4, 5, 6};
+    private static final Integer[] CLIENT_IDs = {0, 1, 2, 3, 4, 5};
     private static final String SERVER_NAME = "TestServer#99";
     private static final int CATCHUP_TIME = 80;
-    private static final int MAX_CONNECTIONS = 6;
 
-    private SpriteManager spriteManager;
+    private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
+        this.playerWaitingForFarmID.getCurrentState().setFarmID(farmPair.getValue());
+        try {
+            this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
+            Thread.sleep(CATCHUP_TIME);
+
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+        }
+    };
 
     private GameClient[] gameClients;
     private Player[] clientPlayers;
@@ -21,48 +44,35 @@ class GameServerTest {
 
     private Player playerWaitingForFarmID;
     private GameClient clientWaitingForFarmID;
-    private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
-        this.playerWaitingForFarmID.getCurrentState().assignFarm(farmPair.getValue());
-        try {
-            this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
-            Thread.sleep(CATCHUP_TIME);
-        } catch (IOException | InterruptedException exception) {
-            exception.printStackTrace();
-        }
-    };
-
-    private HashSet<PlayerState> newPlayers;
-    private final NewPlayerAction newPlayerAction = (newPlayer) -> {
-        newPlayers.add(newPlayer);
-        for (Player player : this.clientPlayers) {
-            if (player.playerID.equals(newPlayer.getPlayerID())) {
-                return player;
-            }
-        }
-        return new Player(new GameScene(), newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID(), newPlayer.getPosition(), this.spriteManager, null, null);
-    };
 
     @BeforeAll
     void initializeGameServer() {
         try {
-            this.spriteManager = new SpriteManager();
-            this.newPlayers = new HashSet<PlayerState>();
-            this.gameServer = new GameServer(SERVER_NAME);
-            this.gameServer.startClientSearch();
+            SpriteManager spriteManager = new SpriteManager();
+            spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
 
-            ServerDiscovery serverDiscovery = new ServerDiscovery((name, address) -> {
-                this.serverAddress = address;
+            GameScene gameScene = new GameScene();
+
+            ServerDiscovery serverDiscovery = new ServerDiscovery();
+            serverDiscovery.getAvailableServers().addListener((MapChangeListener.Change<? extends String, ? extends InetSocketAddress> change) -> {
+                this.serverAddress = change.getValueAdded();
             });
 
-            serverDiscovery.startLookingForServers();
-            Thread.sleep(505);
-            serverDiscovery.stopLookingForServers();
+            this.gameServer = new GameServer(SERVER_NAME);
 
-            this.gameServer.stopClientSearch();
+            this.gameServer.startClientSearch();
+            serverDiscovery.startLookingForServers();
+
+            Thread.sleep(ServerDiscovery.REFRESH_DELAY * 2);
+
+            serverDiscovery.stopLookingForServers();
 
             this.clientPlayers = new Player[CLIENT_IDs.length];
             for (int i = 0; i < CLIENT_IDs.length; i++) {
-                this.clientPlayers[i] = new Player(new GameScene(), CLIENT_IDs[i], "id"+i, new Point2D(i, i), this.spriteManager, null, null);
+                Pair<Integer, String> playerInfo = new Pair<Integer, String>(CLIENT_IDs[i], "id_"+i);
+                Player player = new Player(gameScene, playerInfo, spriteManager, null);
+                player.setWorldPosition(new Point2D(i, i));
+                this.clientPlayers[i] = player;
             }
 
         } catch (IOException | InterruptedException | ReflectiveOperationException exception) {
@@ -83,36 +93,39 @@ class GameServerTest {
     void setUp() throws IOException, ClassNotFoundException, InterruptedException {
         this.gameClients = new GameClient[CLIENT_IDs.length];
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
-            this.gameClients[i] = GameClient.openConnection(this.serverAddress, this.clientPlayers[i], new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
+            GameClient client = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName);
+            client.clockCalibration = (time) -> {};
+
             this.playerWaitingForFarmID = this.clientPlayers[i];
-            this.clientWaitingForFarmID = this.gameClients[i];
+            this.clientWaitingForFarmID = client;
+            this.gameClients[i] = client;
+
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
         }
-        this.gameServer.startNewGame();
+        this.gameServer.startGame();
     }
 
     @AfterEach
-    void tearDown() throws IOException, InterruptedException {
-        this.gameServer.stopGame();
-        this.gameServer.disconnectClients();
+    void tearDown() throws InterruptedException {
+        this.gameServer.serverStopping();
         Thread.sleep(CATCHUP_TIME); // time for the clients to disconnect
     }
 
     @RepeatedTest(5)
     void testClientSearchWithinLimit() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
+        Assertions.assertFalse(this.gameServer.isSearching);
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
 
         try {
             this.gameServer.startClientSearch();
-            Assertions.assertTrue(this.gameServer.isSearching.get());
+            Assertions.assertTrue(this.gameServer.isSearching);
 
             for (int i = 0; i < MAX_CONNECTIONS; i++) {
                 Assertions.assertNotNull(this.gameClients[i]);
             }
 
             this.gameServer.stopClientSearch();
-            Assertions.assertFalse(this.gameServer.isSearching.get());
+            Assertions.assertFalse(this.gameServer.isSearching);
 
         } catch (IOException exception) {
             Assertions.fail(exception.getMessage());
@@ -126,15 +139,12 @@ class GameServerTest {
         Assertions.assertTrue(CLIENT_IDs.length > MAX_CONNECTIONS,
                 "If this condition is not met, this test is pointless");
 
-        Assertions.assertFalse(this.gameServer.isSearching.get());
+        Assertions.assertFalse(this.gameServer.isSearching);
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
 
         try {
-            this.gameServer.stopGame();
-            Assertions.assertFalse(this.gameServer.isActive.get());
-
             for (int i = 5; i < CLIENT_IDs.length; ++i) {
-                GameClient newClient = GameClient.openConnection(this.serverAddress, this.clientPlayers[i], new HashMap<>(), this.farmIDReceived, this.newPlayerAction);
+                GameClient newClient = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName);
                 Assertions.assertNull(newClient);
             }
 
@@ -146,80 +156,28 @@ class GameServerTest {
     }
 
     @RepeatedTest(5)
-    void testStartingAndStoppingGame() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
+    void testStartingGame() {
+        Assertions.assertTrue(this.gameServer.isActive);
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
-
-        Assertions.assertTrue(this.gameServer.isActive.get());
-        this.gameServer.stopGame();
-        Assertions.assertFalse(this.gameServer.isActive.get());
         Assertions.assertEquals(0, this.gameServer.playerStates.get().size());
 
-        this.gameServer.startNewGame();
-        Assertions.assertTrue(this.gameServer.isActive.get());
+        this.gameServer.startGame();
 
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
-    }
-
-    @RepeatedTest(5)
-    void testFirstStates() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
-        Assertions.assertTrue(this.gameServer.isActive.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
-
-        Collection<PlayerState> playerStates = this.gameServer.playerStates.get().values();
-        for (int i = 0; i < MAX_CONNECTIONS; i++) {
-            Player expectedState = this.clientPlayers[i];
-            Assertions.assertTrue(playerStates.contains(expectedState.getCurrentState()));
-        }
-
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
-    }
-
-    @RepeatedTest(5)
-    void testUpdatedStates() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
-        Assertions.assertTrue(this.gameServer.isActive.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
-
-        try {
-            HashMap<Integer, Point2D> updatedPositions = new HashMap<Integer, Point2D>();
-
-            for (int i = 0; i < MAX_CONNECTIONS; i++) {
-                GameClient chosenClient = this.gameClients[i];
-                PlayerState updatedState = this.clientPlayers[i].getCurrentState();
-                updatedState.setPosition(updatedState.getPosition().add(i, i));
-                updatedPositions.put(chosenClient.id, updatedState.getPosition());
-                chosenClient.send(new GameUpdate(updatedState));
-
-                Thread.sleep(CATCHUP_TIME);
-            }
-
-            Collection<PlayerState> playerStates = this.gameServer.playerStates.get().values();
-
-            for (int i = 0; i < MAX_CONNECTIONS; i++) {
-                PlayerState originalState = this.clientPlayers[i].getCurrentState();
-                Assertions.assertTrue(playerStates.contains(originalState));
-            }
-
-        } catch (IOException | InterruptedException exception) {
-            Assertions.fail(exception.getMessage());
-        }
-
+        Assertions.assertTrue(this.gameServer.isActive);
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
     }
 
     @RepeatedTest(5)
     void testDisconnectingAllClients() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
+        Assertions.assertFalse(this.gameServer.isSearching);
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
 
         try {
-            this.gameServer.disconnectClients();
+            this.gameServer.serverStopping();
 
             Thread.sleep(CATCHUP_TIME); // so that the server has time to disconnect clients
 
-        } catch (IOException | InterruptedException exception) {
+        } catch (InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
 
@@ -228,20 +186,21 @@ class GameServerTest {
 
     @RepeatedTest(5)
     void testDisconnectingHalfClients() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.connectedClients.get().size());
+        Assertions.assertFalse(this.gameServer.isSearching);
+
+        List<GameClientHandler> clients = this.gameServer.connectedClients.get();
+        Assertions.assertEquals(MAX_CONNECTIONS, clients.size());
 
         try {
-            this.gameServer.disconnectClient(CLIENT_IDs[0], true);
+            this.gameServer.disconnectClient(clients.get(0).clientID);
             Assertions.assertEquals(MAX_CONNECTIONS - 1, this.gameServer.connectedClients.get().size());
 
-            this.gameServer.disconnectClient(CLIENT_IDs[1], true);
-            Assertions.assertEquals(MAX_CONNECTIONS - 2, this.gameServer.connectedClients.get().size());
-
-            this.gameServer.disconnectClient(CLIENT_IDs[2], true);
-            Assertions.assertEquals(MAX_CONNECTIONS - 3, this.gameServer.connectedClients.get().size());
-
             Thread.sleep(CATCHUP_TIME); // so that the server has time to disconnect clients
+
+            this.gameServer.disconnectClient((clients.get(2).clientID));
+            Thread.sleep(CATCHUP_TIME); // so that the server has time to disconnect clients
+
+            Assertions.assertEquals(MAX_CONNECTIONS - 2, this.gameServer.connectedClients.get().size());
 
         } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
@@ -254,10 +213,10 @@ class GameServerTest {
     void testStoppingServer_ZZZ() {
         try {
             this.gameServer.startClientSearch();
-            Assertions.assertTrue(this.gameServer.isSearching.get());
+            Assertions.assertTrue(this.gameServer.isSearching);
 
-            this.gameServer.startNewGame();
-            Assertions.assertTrue(this.gameServer.isActive.get());
+            this.gameServer.startGame();
+            Assertions.assertTrue(this.gameServer.isActive);
 
             for (int i = 0; i < MAX_CONNECTIONS; i++) {
                 Assertions.assertNotNull(this.gameClients[i]);
@@ -267,13 +226,12 @@ class GameServerTest {
 
             Thread.sleep(CATCHUP_TIME); // so that the server has time to stop
 
-            Assertions.assertFalse(this.gameServer.isSearching.get());
-            Assertions.assertFalse(this.gameServer.isActive.get());
+            Assertions.assertFalse(this.gameServer.isSearching);
+            Assertions.assertFalse(this.gameServer.isActive);
             Assertions.assertEquals(0, this.gameServer.connectedClients.get().size());
-            Assertions.assertTrue(this.gameServer.serverSocket.isClosed());
 
         } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
-    }*/
+    }
 }

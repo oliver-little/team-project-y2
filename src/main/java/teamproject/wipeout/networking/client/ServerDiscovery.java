@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ServerDiscovery {
 
-    private static final int REFRESH_DELAY = GameServer.MULTICAST_DELAY + 5;
+    public static final int REFRESH_DELAY = GameServer.MULTICAST_DELAY + 5;
 
     protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
     protected final HashMap<String, Long> lastHeardServers;
@@ -175,8 +175,6 @@ public class ServerDiscovery {
         this.executorService.shutdown();
         this.multicastSocket.close();
         this.multicastSocket = null;
-        this.availableServers.clear();
-        this.lastHeardServers.clear();
     }
 
 }

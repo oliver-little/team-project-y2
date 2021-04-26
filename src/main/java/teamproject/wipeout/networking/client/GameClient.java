@@ -83,6 +83,7 @@ public class GameClient {
 
         // Send my ID and my latest playerState
         client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.clientID, client.clientName));
+        client.out.flush();
 
         client.startReceivingUpdates();
 
@@ -186,8 +187,8 @@ public class GameClient {
         }
 
         try {
-            this.out.writeObject(update);
-            this.out.reset();
+            this.out.writeObject(update.deepClone());
+            this.out.flush();
         } catch (IOException ignore) {
             this.runOnDisconnect();
             this.closeConnection(false);
@@ -230,7 +231,7 @@ public class GameClient {
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
                         case ANIMAL_STATE:
-                            if (!receivedUpdate.originID.equals(this.clientID)) {
+                            if (!(receivedUpdate.originID == this.clientID)) {
                                 this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
@@ -256,7 +257,7 @@ public class GameClient {
                             this.handlePlayerDisconnect(receivedUpdate.originID);
                             break;
                         case SERVER_STOP:
-                            if (!this.worldEntity.isGameplayActive()) {
+                            if (this.worldEntity != null && !this.worldEntity.isGameplayActive()) {
                                 this.runOnDisconnect();
                             }
                             this.closeConnection(false);
@@ -292,7 +293,7 @@ public class GameClient {
         if (clientSide) {
             try {
                 this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.clientID));
-                this.out.reset();
+                this.out.flush();
             } catch (IOException ignore) {
                 // Disconnecting, we don't care about exceptions at this point
             }

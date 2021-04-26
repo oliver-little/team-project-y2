@@ -38,9 +38,9 @@ public class GameServer {
     public static final int HANDSHAKE_PORT = 1025;
     public static final String HANDSHAKE_GROUP = "229.22.29.51";
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
+    public static final int MAX_CONNECTIONS = 4;
 
     // Constants important only for the game server
-    private static final int MAX_CONNECTIONS = 4;
     private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
 
     public final Integer id;
@@ -168,8 +168,10 @@ public class GameServer {
      */
     public void stopClientSearch() {
         this.isSearching = false;
-        this.searchSocket.close();
-        this.searchSocket = null;
+        if (this.searchSocket != null) {
+            this.searchSocket.close();
+            this.searchSocket = null;
+        }
     }
 
     /**
@@ -237,6 +239,26 @@ public class GameServer {
     }
 
     /**
+     * Sends the {@link ProcessMessage}{@code .SERVER_STOP} message to all connected clients.
+     * (Even to the host of the server!)
+     */
+    protected void serverStopping() {
+        this.isActive = false;
+        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+
+        GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
+        for (GameClientHandler client : clientHandlers) {
+            try {
+                client.updateWith(stopServer);
+            } catch (IOException ignore) {
+                // Stopping server so it's not important
+            }
+        }
+
+        this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
+    }
+
+    /**
      * Listens to the child process' input(= {@link ProcessMessage}s from the parent process)
      * and responds to it. Creates a separate {@link BackgroundThread} for the listener.
      */
@@ -275,25 +297,6 @@ public class GameServer {
                 exception.printStackTrace();
             }
         }).start();
-    }
-
-    /**
-     * Sends the {@link ProcessMessage}{@code .SERVER_STOP} message to all connected clients.
-     * (Even to the host of the server!)
-     */
-    private void serverStopping() {
-        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
-
-        GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
-        for (GameClientHandler client : clientHandlers) {
-            try {
-                client.updateWith(stopServer);
-            } catch (IOException ignore) {
-                // Stopping server so it's not important
-            }
-        }
-
-        this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
     }
 
     /**
