@@ -331,11 +331,11 @@ public class FarmData implements StateUpdatable<FarmState> {
      * @return Picked(= removed) {@link FarmItem} or {@code null} if nothing can be picked.
      */
     public Item pickItemAt(int row, int column) {
-        Pair<FarmItem, Boolean> farmItem = this.canBePicked(row, column);
-        if (farmItem == null || farmItem.getValue() == false) {
+        Pair<FarmItem, Boolean> farmPair = this.canBePicked(row, column);
+        if (farmPair == null || farmPair.getValue() == false) {
             return null;
         }
-        Item pickedItem = farmItem.getKey().get();
+        Item pickedItem = farmPair.getKey().get();
 
         PlantComponent plant = pickedItem.getComponent(PlantComponent.class);
 
@@ -346,19 +346,11 @@ public class FarmData implements StateUpdatable<FarmState> {
             if (plantWidth > 1 || plantHeight > 1) {
                 double maxGrowth = plant.maxGrowthStage * plant.growthRate;
                 double newGrowth = TREE_GROWTH_HARVEST_PERCENTAGE * maxGrowth;
-                FarmItem newFarmTree = new FarmItem(pickedItem, newGrowth);
-                int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
-                if (actualPosition == null) {
-                    this.fillSquares(newFarmTree, row, column, plantWidth, plantHeight);
-                } else {
-                    this.fillSquares(newFarmTree, actualPosition[0], actualPosition[1], plantWidth, plantHeight);
-                }
+                farmPair.getKey().growth.set(newGrowth);
             } else {
                 throw new NoSuchElementException("Harvesting failed: A tree was attempted to be harvested, but had incorrect height and width parameters.");
             }
-        }
-        else {
-            // Handles oversized items
+        } else {
             this.destroyItemAt(row, column);
         }
 
@@ -408,14 +400,19 @@ public class FarmData implements StateUpdatable<FarmState> {
                 break;
         }
 
-        ArrayList<FarmItem> newRow = new ArrayList<>(Collections.nCopies(this.farmColumns, null));
         switch (this.farmID) {
             case 1:
             case 2:
-                this.items.add(0, newRow);
+                for (int i = 0; i < expandBy; i++) {
+                    ArrayList<FarmItem> newRow = new ArrayList<FarmItem>(Collections.nCopies(this.farmColumns, null));
+                    this.items.add(0, newRow);
+                }
                 break;
             default:
-                this.items.add(newRow);
+                for (int i = 0; i < expandBy; i++) {
+                    ArrayList<FarmItem> newRow = new ArrayList<FarmItem>(Collections.nCopies(this.farmColumns, null));
+                    this.items.add(newRow);
+                }
                 break;
         }
 
