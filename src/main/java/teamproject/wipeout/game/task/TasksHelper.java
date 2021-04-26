@@ -32,7 +32,7 @@ public class TasksHelper {
 
         int nrOfTask = 0;
         // Collect tasks
-        int reward = 5;
+        int reward = 7;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantityCollected = 1;
@@ -53,7 +53,7 @@ public class TasksHelper {
         }
 
         // Sell tasks
-        reward = 2;
+        reward = 4;
         for(Integer itemId : itemIds) {
             String name = itemStore.getItem(itemId).name;
             int quantitySold = 1;
