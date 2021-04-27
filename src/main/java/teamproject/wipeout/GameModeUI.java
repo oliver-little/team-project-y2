@@ -17,7 +17,7 @@ public class GameModeUI extends VBox
 {
 	
 	private Label valueLabel;
-	private ComboBox<String> gamemodeBox;
+	private ComboBox<String> gamemodeSelector;
 	
 	public GameModeUI() {
 		this.setAlignment(Pos.CENTER);
@@ -31,15 +31,15 @@ public class GameModeUI extends VBox
         
         valueLabel = new Label();
         
-        gamemodeBox = new ComboBox<String>(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
-        gamemodeBox.setOnAction((event) -> {
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        gamemodeSelector = new ComboBox<String>(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
+        gamemodeSelector.setOnAction((event) -> {
+        	Map<String, Object> gamemodeData = getGamemodeData(this.getGamemode());
         	valueLabel.setText(Integer.toString((int) gamemodeData.get("default")));
         	valueDesc.setText((String) gamemodeData.get("desc")+ ":");
         });
-        gamemodeBox.getSelectionModel().selectFirst();
+        gamemodeSelector.getSelectionModel().selectFirst();
         // trigger event to set value label
-        Event.fireEvent(gamemodeBox, new ActionEvent());
+        Event.fireEvent(gamemodeSelector, new ActionEvent());
         
         
         final int interval = 5;
@@ -48,7 +48,7 @@ public class GameModeUI extends VBox
         decrementButton.getStyleClass().add("small-button");
         decrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        	Map<String, Object> gamemodeData = getGamemodeData(this.getGamemode());
         	if (value-interval>=((int)gamemodeData.get("min"))) {
         		valueLabel.setText(Integer.toString(value-interval));
         	}
@@ -59,7 +59,7 @@ public class GameModeUI extends VBox
         incrementButton.getStyleClass().add("small-button");        
         incrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
+        	Map<String, Object> gamemodeData = getGamemodeData(this.getGamemode());
         	if (value+interval<=((int) gamemodeData.get("max"))) {
         		valueLabel.setText(Integer.toString(value+interval));
         	}
@@ -67,18 +67,18 @@ public class GameModeUI extends VBox
         });
         
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
-        this.getChildren().addAll(valueDesc, gamemodeBox, valueBox);
+        this.getChildren().addAll(valueDesc, gamemodeSelector, valueBox);
 	}
 	
-    public static Map<String, Object> getGamemodeData(String gamemode) {
+    public static Map<String, Object> getGamemodeData(Gamemode gamemode) {
     	Map<String, Object> data = new HashMap();
-    	if (gamemode.equals("Time Mode")) {
+    	if (gamemode==Gamemode.TIME_MODE) {
     		data.put("desc", "Minutes");
     		data.put("min", 5);
     		data.put("max", 30);
     		data.put("default", 10);
     	}
-    	else if(gamemode.equals("Wealth Mode")) {
+    	else if(gamemode==Gamemode.WEALTH_MODE) {
     		data.put("desc", "Money Target");
     		data.put("min", 50);
     		data.put("max", 1000);
@@ -92,12 +92,27 @@ public class GameModeUI extends VBox
     	return data;
     }
     
-    public int getValue() {
-    	return Integer.parseInt(valueLabel.getText());
+    public double getValue() {
+    	double val = Integer.parseInt(valueLabel.getText());
+    	final int SECONDS_PER_MIN = 60;
+    	if (this.getGamemode()==Gamemode.TIME_MODE){
+    		return val*SECONDS_PER_MIN;
+    	}
+    	else {
+    		return val;
+    	}
     }
     
-    public String getGamemode() {
-    	return gamemodeBox.getValue();
+    public Gamemode getGamemode() {
+    	if(gamemodeSelector.getValue().equals(Gamemode.TIME_MODE.toString())) {
+    		return Gamemode.TIME_MODE;
+    	}
+    	else if(gamemodeSelector.getValue().equals(Gamemode.WEALTH_MODE.toString())) {
+    		return Gamemode.WEALTH_MODE;
+    	}
+    	else {
+    		return null;
+    	}
     }
 
 }

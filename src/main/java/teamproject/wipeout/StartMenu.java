@@ -108,12 +108,13 @@ public class StartMenu implements Controller {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
+        menuBox.getChildren().addAll(UIUtil.createTitle("Singleplayer"));
     	
-    	VBox gamemodeBox = new GameModeUI();
+        GameModeUI gamemodeBox = new GameModeUI();
     	
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", () -> startLocalGame(null, null))
+                new Pair<String, Runnable>("Start Game", () -> startLocalGame(null, null, gamemodeBox.getValue(), gamemodeBox.getGamemode())),
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
         
         buttonBox = UIUtil.createMenu(menuData);
@@ -168,7 +169,7 @@ public class StartMenu implements Controller {
         StackPane errorBox = new StackPane();
 
 
-        
+        GameModeUI gamemodeBox = new GameModeUI(); 
         
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
@@ -179,12 +180,12 @@ public class StartMenu implements Controller {
         		new ErrorUI(errorBox, "Error: No name entered", null);
         	}
         	else {
-        		createServer(serverNameTF.getText(), nameTF.getText());
+        		createServer(serverNameTF.getText(), nameTF.getText(), gamemodeBox.getValue(), gamemodeBox.getGamemode());
         	}
         	
         }));
         
-        VBox gamemodeBox = new GameModeUI(); 
+        
         hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, hostButton);
         //hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, valueDesc, valueBox, hostButton);
         
@@ -202,19 +203,19 @@ public class StartMenu implements Controller {
     }
 
     
-    private boolean createServer(String serverName, String hostName){
+    private boolean createServer(String serverName, String hostName, double gameTime, Gamemode gamemode){
         InetSocketAddress serverAddress = networker.startServer(serverName);
 
-        createLobbyMenu(serverName, hostName, serverAddress, true);
+        createLobbyMenu(serverName, hostName, serverAddress, true, gameTime, gamemode);
 
         return true;
     }
 
-    private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
+    private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost, double gameTime, Gamemode gamemode) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        Consumer<Long> startGame = (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime));
+        Consumer<Long> startGame = (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime, gameTime, gamemode));
         GameClient client = networker.connectClient(serverAddress, userName, startGame);
         if (client == null) {
             StackPane errorBox = new StackPane();
@@ -370,7 +371,8 @@ public class StartMenu implements Controller {
     private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress) {
         this.networker.getServerDiscovery().stopLookingForServers();
 
-        createLobbyMenu(serverName, username, serverAddress, false);
+        // TODO change last params for gamemode and gametime 
+        createLobbyMenu(serverName, username, serverAddress, false, 10, Gamemode.TIME_MODE);
 
         return true;
     }
@@ -527,8 +529,8 @@ public class StartMenu implements Controller {
         }
     }
 
-    private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.chosenName, this.keyBindings, 240);
+    private void startLocalGame(Networker givenNetworker, Long gameStartTime, double gameTime, Gamemode gamemode) {
+        Gameplay game = new Gameplay(givenNetworker, gameStartTime, this.chosenName, this.keyBindings, gamemode, gameTime);
         Parent content = game.getParentWith(this.root.getScene().getWindow());
 
         this.root.getScene().setRoot(content);

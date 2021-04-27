@@ -109,18 +109,27 @@ public class Gameplay implements Controller {
 
     private final Networker networker;
 
-    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings, double gameTime) {
+    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings, Gamemode gamemode, double gamemodeValue) {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
         this.playerID = new Random().nextInt(1024);
         this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
-        this.gameTime = gameTime;
+        
+        if(gamemode==Gamemode.TIME_MODE) {
+        	this.gameTime = gamemodeValue;
+        }
+        else if(gamemode==Gamemode.WEALTH_MODE) {
+        	this.gameTime=Double.MAX_VALUE;
+        	// TODO WEALTH TARGET
+        }
+        
         
         this.focusListener = null;
 
         this.keyBindings = bindings;
         this.networker = networker;
     }
+    
 
     public Parent getParentWith(Window window) {
         this.widthProperty = window.widthProperty();
