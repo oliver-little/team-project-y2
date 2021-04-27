@@ -18,19 +18,21 @@ import java.io.FileNotFoundException;
 
 /**
  * Represents a seed prepared to be planted.
+ *
+ * @see GameEntity
  */
 public class SeedEntity extends GameEntity {
 
-    protected RenderComponent renderComponent;
-    protected RectRenderable seedArea;
+    private final RenderComponent renderComponent;
+    private final RectRenderable seedArea;
 
     /**
      * Creates a new instance of {@code SeedEntity}.
      *
-     * @param scene The GameScene this entity is part of
-     * @param item Item to be displayed as a seed
+     * @param scene         The {@link GameScene} this entity is part of
+     * @param item          {@link Item} to be displayed as a seed
      * @param spriteManager {@link SpriteManager} used for getting the seed sprite
-     * @throws FileNotFoundException Thrown when {@link SpriteManager} cannot find a sprite for the item's seeds.
+     * @throws FileNotFoundException {@link SpriteManager} cannot find a sprite for the item's seeds.
      */
     public SeedEntity(GameScene scene, Item item, SpriteManager spriteManager) throws FileNotFoundException {
         super(scene);
@@ -66,7 +68,7 @@ public class SeedEntity extends GameEntity {
     }
 
     /**
-     * Shows green overlay behind seeds.
+     * Shows green overlay behind the seed.
      */
     public void showAreaOverlay() {
         if (!this.renderComponent.hasRenderable(seedArea)) {
@@ -75,7 +77,7 @@ public class SeedEntity extends GameEntity {
     }
 
     /**
-     * Hides green overlay behind seeds.
+     * Hides green overlay behind the seed.
      */
     public void hideAreaOverlay() {
         this.renderComponent.removeRenderable(seedArea);

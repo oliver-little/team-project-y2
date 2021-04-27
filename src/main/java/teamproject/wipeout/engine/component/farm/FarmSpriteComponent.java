@@ -12,14 +12,16 @@ public class FarmSpriteComponent implements GameComponent {
 
     private final int index;
 
-    private double lastYOffset;
-    private int lastGrowthStage;
     private List<FarmItem> farmRow;
+    private int lastGrowthStage;
+    private double lastYOffset;
 
     public FarmSpriteComponent(SpriteRenderable spriteRenderer, List<FarmItem> farmRow, int index) {
         this.spriteRenderer = spriteRenderer;
-        this.farmRow = farmRow;
+
         this.index = index;
+
+        this.farmRow = farmRow;
         this.lastGrowthStage = -1;
         this.lastYOffset = 0;
     }
@@ -28,16 +30,8 @@ public class FarmSpriteComponent implements GameComponent {
         return this.farmRow.get(index);
     }
 
-    public List<FarmItem> getFarmRow() {
-        return this.farmRow;
-    }
-
     public void setFarmRow(List<FarmItem> farmRow) {
         this.farmRow = farmRow;
-    }
-
-    public int getIndex() {
-        return this.index;
     }
 
     public int getLastGrowthStage() {

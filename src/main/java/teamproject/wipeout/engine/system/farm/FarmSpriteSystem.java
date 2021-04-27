@@ -39,7 +39,7 @@ public class FarmSpriteSystem implements GameSystem {
 
         for (GameEntity entity : entities) {
             FarmSpriteComponent fs = entity.getComponent(FarmSpriteComponent.class);
-            FarmItem farmItem = fs.getFarmRow().get(fs.getIndex());
+            FarmItem farmItem = fs.getItem();
 
             if (farmItem == null) {
                 fs.spriteRenderer.sprite = null;

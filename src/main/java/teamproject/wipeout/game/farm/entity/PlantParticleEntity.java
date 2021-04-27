@@ -1,7 +1,5 @@
 package teamproject.wipeout.game.farm.entity;
 
-import java.util.List;
-
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import teamproject.wipeout.engine.component.Transform;
@@ -15,19 +13,33 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.util.SupplierGenerator;
 
+import java.util.List;
+
+/**
+ * Represents an effect that simulates a plant being planted(= dust particles in the air).
+ *
+ * @see GameEntity
+ */
 public class PlantParticleEntity extends GameEntity {
-    
+
+    /**
+     * Creates a new instance of {@code PlantParticleEntity}.
+     *
+     * @param scene The {@link GameScene} this entity is part of
+     * @param x     {@code double} X coordinate for placement
+     * @param y     {@code double} Y coordinate for placement
+     */
     public PlantParticleEntity(GameScene scene, double x, double y) {
         super(scene);
 
-        ParticleParameters plantEffect = new ParticleParameters(3, false, 
-            new OvalParticle(new Color(0.2078, 0.1216, 0.0902, 1.0)), 
-            ParticleSimulationSpace.LOCAL, 
-            SupplierGenerator.rangeSupplier(0.1, 0.5), 
-            SupplierGenerator.rangeSupplier(1.0, 3.0), 
-            SupplierGenerator.rangeSupplier(1.0, 3.0), 
-            SupplierGenerator.staticSupplier(1.0),
-            SupplierGenerator.rangeSupplier(new Point2D(-70, -60), new Point2D(70, -2)));
+        ParticleParameters plantEffect = new ParticleParameters(3, false,
+                new OvalParticle(new Color(0.2078, 0.1216, 0.0902, 1.0)),
+                ParticleSimulationSpace.LOCAL,
+                SupplierGenerator.rangeSupplier(0.1, 0.5),
+                SupplierGenerator.rangeSupplier(1.0, 3.0),
+                SupplierGenerator.rangeSupplier(1.0, 3.0),
+                SupplierGenerator.staticSupplier(1.0),
+                SupplierGenerator.rangeSupplier(new Point2D(-70, -60), new Point2D(70, -2)));
 
         plantEffect.setBursts(List.of(new ParticleBurst(0.0, SupplierGenerator.rangeSupplier(50, 100))));
         plantEffect.addUpdateFunction((particle, percentage, timeStep) -> {

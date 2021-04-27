@@ -43,6 +43,8 @@ import java.util.function.Supplier;
 
 /**
  * Defines a farm in the game.
+ *
+ * @see GameEntity
  */
 public class FarmEntity extends GameEntity {
 
@@ -335,7 +337,7 @@ public class FarmEntity extends GameEntity {
      */
     public void startPickingItem(Point2D mousePosition) {
         // Create destroyer entity for the "tool" used to pick items and display it at the mouse coordinates
-        this.destroyerEntity = new DestroyerEntity(this.scene);
+        this.destroyerEntity = new DestroyerEntity(this.scene, false);
         Transform destroyerTransform = new Transform(mousePosition.getX(), mousePosition.getY(), 0.0, 0);
         this.destroyerEntity.addComponent(destroyerTransform);
 
@@ -418,23 +420,21 @@ public class FarmEntity extends GameEntity {
             if (point == null) {
                 // Is NOT within the farm
                 dTransform.setPosition(new Point2D(x, y));
-                this.destroyerEntity.adaptToDestroyFarmItem(null);
+                this.destroyerEntity.adaptToFarmItem(null);
             } else {
                 // Is within the farm. But is there any item at that coordinates?...
                 Pair<FarmItem, Boolean> pickingItem = this.canBePicked(x, y);
                 if (pickingItem == null) {
                     //...NO :( there is no item
                     dTransform.setPosition(point);
-                    this.destroyerEntity.adaptToDestroyFarmItem(null);
-                    this.destroyerEntity.setColorForPickable(false);
+                    this.destroyerEntity.adaptToFarmItem(null);
                 } else {
                     //...YES :) there is an item
                     FarmItem onFarmItem = pickingItem.getKey();
                     
                     int[] itemFarmPosition = this.data.positionForItem(onFarmItem);
                     dTransform.setPosition(this.coordinatesForItemAt(itemFarmPosition[0], itemFarmPosition[1]));
-                    this.destroyerEntity.adaptToDestroyFarmItem(pickingItem);
-                    this.destroyerEntity.setColorForPickable(true);
+                    this.destroyerEntity.adaptToFarmItem(pickingItem);
                 }
             }
         };
