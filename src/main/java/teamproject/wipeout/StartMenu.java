@@ -103,6 +103,25 @@ public class StartMenu implements Controller {
         keyBindings.put("Destroy", KeyCode.D);
         keyBindings.put("Harvest", KeyCode.H);
     }
+    
+    private void createSingleplayerMenu() {
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
+    	
+    	VBox gamemodeBox = new GameModeUI();
+    	
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Start Game", () -> startLocalGame(null, null))
+        );
+        
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().addAll(gamemodeBox, buttonBox);
+        root.getChildren().add(menuBox);
+    	
+
+    }
 
     private void createMultiplayerMenu(){
         root.getChildren().remove(menuBox);
@@ -148,52 +167,7 @@ public class StartMenu implements Controller {
         
         StackPane errorBox = new StackPane();
 
-        
-        Label valueDesc = new Label();
-        
-        HBox valueBox = new HBox();
-        valueBox.getStyleClass().add("hbox");
-        valueBox.setSpacing(3);
-        valueBox.setAlignment(Pos.CENTER);
-        
-        Label valueLabel = new Label();
-        
-        ComboBox<String> gamemodeBox = new ComboBox<String>(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
-        gamemodeBox.setOnAction((event) -> {
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
-        	valueLabel.setText(Integer.toString((int) gamemodeData.get("default")));
-        	valueDesc.setText((String) gamemodeData.get("desc")+ ":");
-        });
-        gamemodeBox.getSelectionModel().selectFirst();
-        // trigger event to set value label
-        Event.fireEvent(gamemodeBox, new ActionEvent());
-        
-        
-        final int interval = 5;
-        
-        Button decrementButton = new Button("-");
-        decrementButton.getStyleClass().add("small-button");
-        decrementButton.setOnAction((event) ->{
-        	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
-        	if (value-interval>=((int)gamemodeData.get("min"))) {
-        		valueLabel.setText(Integer.toString(value-interval));
-        	}
-        	
-        });
-        
-        Button incrementButton = new Button("+");
-        incrementButton.getStyleClass().add("small-button");        
-        incrementButton.setOnAction((event) ->{
-        	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData((String) gamemodeBox.getValue());
-        	if (value+interval<=((int) gamemodeData.get("max"))) {
-        		valueLabel.setText(Integer.toString(value+interval));
-        	}
-        	
-        });
-        
-        valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
+
         
         
         Button hostButton = new Button("Host Server");
@@ -209,8 +183,10 @@ public class StartMenu implements Controller {
         	}
         	
         }));
-
-        hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, valueDesc, valueBox, hostButton);
+        
+        VBox gamemodeBox = new GameModeUI(); 
+        hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, hostButton);
+        //hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, valueDesc, valueBox, hostButton);
         
 
         menuBox.getChildren().addAll(hostPane, errorBox);
@@ -225,27 +201,6 @@ public class StartMenu implements Controller {
         
     }
 
-    public static Map<String, Object> getGamemodeData(String gamemode) {
-    	Map<String, Object> data = new HashMap();
-    	if (gamemode.equals("Time Mode")) {
-    		data.put("desc", "Minutes");
-    		data.put("min", 5);
-    		data.put("max", 30);
-    		data.put("default", 10);
-    	}
-    	else if(gamemode.equals("Wealth Mode")) {
-    		data.put("desc", "Money Target");
-    		data.put("min", 50);
-    		data.put("max", 1000);
-    		data.put("default", 100);
-    	}
-    	else {
-    		System.out.println(gamemode + " gamemode does not exist");
-    		return null;
-    	}
-    	
-    	return data;
-    }
     
     private boolean createServer(String serverName, String hostName){
         InetSocketAddress serverAddress = networker.startServer(serverName);
@@ -554,13 +509,14 @@ public class StartMenu implements Controller {
     private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),
+                new Pair<String, Runnable>("Singleplayer", () -> createSingleplayerMenu()),
                 new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
                 new Pair<String, Runnable>("Settings", () -> createSettingsMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
     }
+    
 
     private void startServerGame() {
         try {
