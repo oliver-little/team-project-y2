@@ -231,13 +231,12 @@ public class Gameplay implements Controller {
         VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
         this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI);
 
-        // Input bindings
-        this.setupKeyInput(currentPlayer, inventoryUI);
-        this.setupKeyHotkeys(inventoryUI);
-
         // Setup networking if possible
         if (this.networker != null) {
             this.setupNetworking();
+
+        } else { // else setup a default farm for the current player
+            this.worldEntity.setFarmFor(currentPlayer, null);
         }
 
         //currentPlayer.acquireItem(6, 98); //for checking stack/inventory limits
@@ -245,7 +244,11 @@ public class Gameplay implements Controller {
         //currentPlayer.acquireItem(28, 98);
         //currentPlayer.acquireItem( 43, 2);
 
-        gameLoop.start();
+        // Input bindings
+        this.setupKeyInput(currentPlayer, inventoryUI);
+        this.setupKeyHotkeys(inventoryUI);
+
+        this.gameLoop.start();
     }
 
     /**
@@ -431,7 +434,7 @@ public class Gameplay implements Controller {
         Integer newFarmID = currentClient.myFarmID;
 
         FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
-        this.worldEntity.setFarmFor(myCurrentPlayer, true, myFarm);
+        this.worldEntity.setFarmFor(myCurrentPlayer, myFarm);
 
         currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
     }

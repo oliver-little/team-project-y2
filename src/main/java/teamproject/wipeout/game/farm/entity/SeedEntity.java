@@ -30,12 +30,12 @@ public class SeedEntity extends GameEntity {
      * Calculates scale factor for resizing {@code FarmItem}'s sprite
      * so that its size will fit given width.
      *
-     * @param squareScale Current {@code int} value of squareScale
-     * @param w           Max {@code double} width
+     * @param squareWidth Plant's square width value of type {@code int}
+     * @param width       {@code double} value of width to be rescaled
      * @return Calculated new {@code double} scale factor value
      */
-    public static double scaleFactorToFitWidth(int squareScale, double w) {
-        return squareScale * FarmEntity.SQUARE_SIZE / w;
+    public static double scaleFactorToFitWidth(int squareWidth, double width) {
+        return squareWidth * FarmEntity.SQUARE_SIZE / width;
     }
 
     /**
