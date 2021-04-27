@@ -1,9 +1,6 @@
 package teamproject.wipeout.game.farm;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -15,11 +12,12 @@ import java.util.ArrayList;
 // FARM_ROWS = 3, and
 // FARM_COLUMNS = 5,
 // for these tests to function properly
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FarmDataTest {
     private static final double GROWTH = 0.5;
 
-    private static Item item;
-    private static Item finishedItem;
+    private Item item;
+    private Item finishedItem;
 
     private FarmItem farmItem;
     private FarmItem finishedFarmItem;
@@ -28,7 +26,7 @@ class FarmDataTest {
     private FarmData farmData;
 
     @BeforeAll
-    static void initialization() throws FileNotFoundException, ReflectiveOperationException {
+    void initialization() throws FileNotFoundException, ReflectiveOperationException {
         ItemStore itemStore = new ItemStore("items.json");
         item = itemStore.getItem(28);
         finishedItem = itemStore.getItem(43);
@@ -39,7 +37,7 @@ class FarmDataTest {
         farmItem = new FarmItem(item, GROWTH * item.getComponent(PlantComponent.class).maxGrowthStage);
 
         finishedFarmItem = new FarmItem(finishedItem);
-        finishedFarmItem.growth.set(finishedFarmItem.getGrowthRate() * finishedFarmItem.getMaxGrowthStage());
+        finishedFarmItem.growth.set(finishedFarmItem.getGrowthRate() * getMaxGrowthStageFor(finishedFarmItem));
         dummyFarmItem = new FarmItem(null, 0.1);
 
         farmData = new FarmData(1, 1, (value) -> {}, null);
@@ -253,7 +251,7 @@ class FarmDataTest {
         Assertions.assertEquals(finishedItem.name, pickedItem3.name);
 
         // Grow the 1st item so that it can be picked...
-        farmItem.growth.set(1 + farmItem.getGrowthRate() * farmItem.getMaxGrowthStage());
+        farmItem.growth.set(1 + farmItem.getGrowthRate() * getMaxGrowthStageFor(farmItem));
         pickedItem1 = farmData.pickItemAt(0, 0);
 
         Assertions.assertEquals(item, pickedItem1);
@@ -280,7 +278,7 @@ class FarmDataTest {
         Assertions.assertEquals(finishedItem.name, pickedItem.name);
 
         // Grow the 1st item so that it can be picked...
-        farmItem.growth.set(farmItem.getGrowthRate() * farmItem.getMaxGrowthStage());
+        farmItem.growth.set(farmItem.getGrowthRate() * getMaxGrowthStageFor(farmItem));
         Assertions.assertNotNull(farmData.pickItemAt(0, 0));
 
         int[] treePosition = farmData.positionForItem(finishedFarmItem);
@@ -351,6 +349,15 @@ class FarmDataTest {
         Assertions.assertNotEquals(oldRows, newRows);
         Assertions.assertEquals(newRows, oldRows + expandBy);
         Assertions.assertEquals(farmData.farmRows, oldRows + expandBy);
+    }
+
+    /**
+     * Gets the max growth stage of the {@link FarmItem} from the {@link PlantComponent}.
+     *
+     * @return Max growth stage in the form of an {@code int}.
+     */
+    private int getMaxGrowthStageFor(FarmItem farmItem) {
+        return farmItem.get().getComponent(PlantComponent.class).maxGrowthStage;
     }
 
 }

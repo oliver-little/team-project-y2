@@ -33,7 +33,7 @@ public class RowGrowthComponent implements GameComponent {
             return;
         }
 
-        if (farmItem.getCurrentGrowthStage() == farmItem.getMaxGrowthStage()) {
+        if (farmItem.isFullyGrown()) {
             return;
         }
 

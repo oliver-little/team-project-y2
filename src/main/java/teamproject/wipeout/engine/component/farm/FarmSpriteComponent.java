@@ -10,10 +10,11 @@ public class FarmSpriteComponent implements GameComponent {
 
     public final SpriteRenderable spriteRenderer;
 
+    private final int index;
+
     private double lastYOffset;
     private int lastGrowthStage;
     private List<FarmItem> farmRow;
-    private int index;
 
     public FarmSpriteComponent(SpriteRenderable spriteRenderer, List<FarmItem> farmRow, int index) {
         this.spriteRenderer = spriteRenderer;

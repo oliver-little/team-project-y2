@@ -7,7 +7,9 @@ import teamproject.wipeout.game.item.components.PlantComponent;
 import teamproject.wipeout.networking.state.FarmState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -26,7 +28,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     public final double TREE_GROWTH_HARVEST_PERCENTAGE = 0.75;
 
     private double growthMultiplier;
-    private double AIMultiplier;
+    private double aiMultiplier;
 
     protected final ArrayList<ArrayList<FarmItem>> items;
 
@@ -36,9 +38,12 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     /**
      * Creates a data container for an empty farm.
-     * Data are tied to a player via playerID.
+     * Data are tied to a player via player's ID.
      *
-     * @param playerID Player's ID
+     * @param farmID         Farm ID
+     * @param playerID       Player's ID
+     * @param entityExpander Action executed on farm expansion
+     * @param itemStore      Currently used {@link ItemStore}
      */
     public FarmData(Integer farmID, Integer playerID, Consumer<Integer> entityExpander, ItemStore itemStore) {
         this.farmID = farmID;
@@ -49,7 +54,7 @@ public class FarmData implements StateUpdatable<FarmState> {
         this.expansionLevel = 0;
 
         this.growthMultiplier = 1.0;
-        this.AIMultiplier = 1.0;
+        this.aiMultiplier = 1.0;
 
         this.items = new ArrayList<ArrayList<FarmItem>>(this.farmRows);
         for (int i = 0; i < this.farmRows; i++) {
@@ -62,32 +67,58 @@ public class FarmData implements StateUpdatable<FarmState> {
         this.entityExpander = entityExpander;
     }
 
+    /**
+     * {@code expansionLevel} getter
+     *
+     * @return Current number of expansions of type {@code int}
+     */
     public int getExpansionLevel() {
         return this.expansionLevel;
     }
 
+    /**
+     * {@code growthMultiplier} getter
+     *
+     * @return Current growth multiplier of type {@code double}
+     */
     public double getGrowthMultiplier() {
         return this.growthMultiplier;
     }
 
-    public double getAIMultiplier() {
-        return this.AIMultiplier;
-    }
-
+    /**
+     * {@code growthMultiplier} setter
+     *
+     * @param growthMultiplier New {@code double} value of growth multiplier
+     */
     public void setGrowthMultiplier(double growthMultiplier) {
         this.growthMultiplier = growthMultiplier;
     }
 
-    public void setAIMultiplier(double AIMultiplier) {
-        this.AIMultiplier = AIMultiplier;
+    /**
+     * {@code aiMultiplier} getter
+     *
+     * @return Current AI multiplier of type {@code double}
+     */
+    public double getAiMultiplier() {
+        return this.aiMultiplier;
+    }
+
+    /**
+     * {@code aiMultiplier} setter
+     *
+     * @param aiMultiplier New {@code double} value of AI multiplier
+     */
+    public void setAiMultiplier(double aiMultiplier) {
+        this.aiMultiplier = aiMultiplier;
     }
 
     /**
      * Gets the current state of the farm.
+     *
      * @return Current {@link FarmState}
      */
     public FarmState getCurrentState() {
-        return new FarmState(this.farmID, this.expansionLevel, this.items, this.growthMultiplier, this.AIMultiplier);
+        return new FarmState(this.farmID, this.expansionLevel, this.items, this.growthMultiplier, this.aiMultiplier);
     }
 
     /**
@@ -97,7 +128,7 @@ public class FarmData implements StateUpdatable<FarmState> {
      */
     public void updateFromState(FarmState farmState) {
         this.growthMultiplier = farmState.getGrowthMultiplier();
-        this.AIMultiplier = farmState.getAiMultiplier();
+        this.aiMultiplier = farmState.getAiMultiplier();
 
         int expandBy = farmState.getExpansions() - this.expansionLevel;
         if (expandBy > 0) {
@@ -130,7 +161,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     }
 
     /**
-     * @return {@code int} number of rows of the farm.
+     * @return {@code int} number of farm rows
      */
     public int getNumberOfRows() {
         return this.items.size();
@@ -138,6 +169,7 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     /**
      * Retrieves 2D {@code ArrayList} of all {@code FarmItem}s at the farm.
+     *
      * @return 2D {@code ArrayList} of all {@code FarmItem}s
      */
     public ArrayList<ArrayList<FarmItem>> getItems() {
@@ -157,7 +189,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Retrieves the {@code FarmItem} from a given row and column.
      *
-     * @param row Row of the {@code FarmItem}
+     * @param row    Row of the {@code FarmItem}
      * @param column Column of the {@code FarmItem}
      * @return {@link FarmItem} in the given row and column
      */
@@ -200,10 +232,10 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Checks if a given position at the farm is empty / an item can be placed on it.
      *
-     * @param row Farm row
+     * @param row    Farm row
      * @param column Farm column
-     * @param w Item width
-     * @param h Item height
+     * @param w      Item width
+     * @param h      Item height
      * @return {@code true} if the position is empty, <br> otherwise {@code false}.
      */
     public boolean canBePlaced(int row, int column, int w, int h) {
@@ -227,7 +259,8 @@ public class FarmData implements StateUpdatable<FarmState> {
     }
 
     /**
-     * Checks if a given position at the farm is empty / an item can be placed on it.
+     * Looks for a position on the farm that is unoccupied
+     * and can fit an item with the given width and height.
      *
      * @param w Item width
      * @param h Item height
@@ -249,9 +282,9 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Places a given {@code Item} into a given position.
      *
-     * @param item {@link Item} to be placed
+     * @param item   {@link Item} to be placed
      * @param growth Current growth of the item
-     * @param row Farm row
+     * @param row    Farm row
      * @param column Farm column
      * @return {@code true} if the {@code Item} was placed, <br> otherwise {@code false}.
      */
@@ -278,7 +311,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Destroys item at a given farm row and column.
      *
-     * @param row Farm row
+     * @param row    Farm row
      * @param column Farm column
      */
     public void destroyItemAt(int row, int column) {
@@ -293,7 +326,7 @@ public class FarmData implements StateUpdatable<FarmState> {
 
         // Handles oversized items
         int plantWidth = plant.width;
-        int plantHeight= plant.height;
+        int plantHeight = plant.height;
         if (plantWidth > 1 || plantHeight > 1) {
             int[] actualPosition = this.getFarmPosition(this.items.get(row).get(column));
             if (actualPosition == null) {
@@ -309,7 +342,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     /**
      * Checks if a {@link FarmItem} at a given position can be picked.
      *
-     * @param row Row of the {@code FarmItem}
+     * @param row    Row of the {@code FarmItem}
      * @param column Column of the {@code FarmItem}
      * @return {@link Pair} of {@link FarmItem} and {@code Boolean} -
      * ({@code true} if fully grown, otherwise {@code false}).
@@ -324,11 +357,11 @@ public class FarmData implements StateUpdatable<FarmState> {
     }
 
     /**
-     * Picks(= removes) a {@code FarmItem} from a given position.
+     * Picks(= harvests) a {@code Item} from the given position.
      *
-     * @param row Row of the {@code FarmItem}
-     * @param column Column of the {@code FarmItem}
-     * @return Picked(= removed) {@link FarmItem} or {@code null} if nothing can be picked.
+     * @param row    Row of the {@code Item}
+     * @param column Column of the {@code Item}
+     * @return Picked(= harvested) {@link Item} or {@code null} if nothing can be picked.
      */
     public Item pickItemAt(int row, int column) {
         Pair<FarmItem, Boolean> farmPair = this.canBePicked(row, column);
@@ -341,15 +374,9 @@ public class FarmData implements StateUpdatable<FarmState> {
 
         if (plant.isTree) {
             // Handles trees being harvested
-            int plantWidth = plant.width;
-            int plantHeight= plant.height;
-            if (plantWidth > 1 || plantHeight > 1) {
-                double maxGrowth = plant.maxGrowthStage * plant.growthRate;
-                double newGrowth = TREE_GROWTH_HARVEST_PERCENTAGE * maxGrowth;
-                farmPair.getKey().growth.set(newGrowth);
-            } else {
-                throw new NoSuchElementException("Harvesting failed: A tree was attempted to be harvested, but had incorrect height and width parameters.");
-            }
+            double maxGrowth = plant.maxGrowthStage * plant.growthRate;
+            double newGrowth = TREE_GROWTH_HARVEST_PERCENTAGE * maxGrowth;
+            farmPair.getKey().growth.set(newGrowth);
         } else {
             this.destroyItemAt(row, column);
         }
@@ -358,7 +385,7 @@ public class FarmData implements StateUpdatable<FarmState> {
     }
 
     /**
-     * Picks(= removes) a given {@code FarmItem}.
+     * Picks(= harvests) a given {@code FarmItem}.
      *
      * @param pickItem {@link FarmItem} to be picked
      * @return Picked(= removed) {@link Item} or {@code null} if nothing can be picked.
@@ -381,11 +408,19 @@ public class FarmData implements StateUpdatable<FarmState> {
         return null;
     }
 
+    /**
+     * Expands farm's grid(= 2D array) by the given amount.
+     *
+     * @param expandBy Amount to expand the farm by
+     */
     public void expandFarm(int expandBy) {
         this.farmRows += expandBy;
         this.farmColumns += expandBy;
         this.expansionLevel += expandBy;
 
+        // Farms expand diagonally outward, thus each farm's grid needs to be expanded differently
+
+        // Expands existing rows accordingly
         switch (this.farmID) {
             case 1:
             case 3:
@@ -400,6 +435,7 @@ public class FarmData implements StateUpdatable<FarmState> {
                 break;
         }
 
+        // Adds new row/rows accordingly
         switch (this.farmID) {
             case 1:
             case 2:
@@ -416,13 +452,14 @@ public class FarmData implements StateUpdatable<FarmState> {
                 break;
         }
 
+        // Callback after the expansion of the data container is finished
         this.entityExpander.accept(expandBy);
     }
 
     /**
      * Validates whether a given coordinates are within the farm's range.
      *
-     * @param row Row to be validated
+     * @param row    Row to be validated
      * @param column Column To be validated
      * @return {@code true} if the coordinates are valid, <br> otherwise {@code false}.
      */
@@ -438,16 +475,16 @@ public class FarmData implements StateUpdatable<FarmState> {
      * You can give {@code FarmItem null} argument to clear positions from an oversized {@code FarmItem}.
      *
      * @param fillItem Oversized {@link FarmItem} to be placed. Or {@code null} to clear positions.
-     * @param row Start row of the oversized {@code FarmItem}
-     * @param column Start column of the oversized {@code FarmItem}
-     * @param w Oversized {@code FarmItem}'s width
-     * @param h Oversized {@code FarmItem}'s height
+     * @param row      Start row of the oversized {@code FarmItem}
+     * @param column   Start column of the oversized {@code FarmItem}
+     * @param w        Oversized {@code FarmItem}'s width
+     * @param h        Oversized {@code FarmItem}'s height
      */
     private void fillSquares(FarmItem fillItem, int row, int column, int w, int h) {
         FarmItem dummyItem = null;
         if (fillItem != null) {
             // Encodes the oversized FarmItem coordinates as a double value ("x.y")
-            // which is then stored as a growth value.
+            // which is then stored as the growth value.
             String doubleCoordinates = row + "." + column;
             dummyItem = new FarmItem(null, Double.valueOf(doubleCoordinates));
         }
@@ -465,11 +502,10 @@ public class FarmData implements StateUpdatable<FarmState> {
 
     /**
      * Gets the true position for an oversized {@code FarmItem} from a given dummy value.
-     * If the given (dummy) {@code FarmItem} does not point to the (true) oversized {@code FarmItem},
-     * {@code null} is returned.
      *
-     * @param item (dummy) {@link FarmItem}
-     * @return The oversized {@code FarmItem} or {@code null}.
+     * @param item Dummy {@link FarmItem}
+     * @return {@code int[]} with the oversized {@code FarmItem}'s position (x at int[0], y at int[1]).
+     * If the {@code FarmItem} is not a dummy value for the oversized {@code FarmItem}, {@code null} is returned.
      */
     private int[] getFarmPosition(FarmItem item) {
         if (item != null && item.get() == null) {

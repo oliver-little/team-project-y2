@@ -945,7 +945,7 @@ public class FarmEntity extends GameEntity {
      * @return The AI multiplier
      */
     public double getAIMultiplier() {
-        return this.data.getAIMultiplier();
+        return this.data.getAiMultiplier();
     }
 
     /**
@@ -953,7 +953,7 @@ public class FarmEntity extends GameEntity {
      * @param AIMultiplier The new AI multiplier for a farm.
      */
     public void setAIMultiplier(double AIMultiplier) {
-        this.data.setAIMultiplier(AIMultiplier);
+        this.data.setAiMultiplier(AIMultiplier);
         this.sendStateUpdate();
 
         if (AIMultiplier != 1) {
