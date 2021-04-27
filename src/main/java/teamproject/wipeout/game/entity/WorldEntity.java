@@ -74,7 +74,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.itemStore = (ItemStore) worldPack.get("itemStore");
 
 		this.farms = new HashMap<Integer, FarmEntity>();
-		this.pickables = new Pickables(this.scene, this.itemStore, this.spriteManager);
+		this.pickables = new Pickables(this.scene, this.spriteManager, this.itemStore);
 		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
 
 		this.potions = new HashMap<Integer, Point2D[]>();
@@ -207,15 +207,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	public void setupFarmPickingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+		this.inputHandler.onKeyRelease(code, this.myCurrentPlayer.getMyFarm().onKeyAction(this.inputHandler.mouseHoverSystem, false));
 	}
 
 	public void setupFarmDestroyingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+		this.inputHandler.onKeyRelease(code, this.myCurrentPlayer.getMyFarm().onKeyAction(this.inputHandler.mouseHoverSystem, true));
 	}
 
 	public ArrayList<Player> getPlayers() {

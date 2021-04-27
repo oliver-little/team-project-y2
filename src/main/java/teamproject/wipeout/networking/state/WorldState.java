@@ -1,7 +1,7 @@
 package teamproject.wipeout.networking.state;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.farm.Pickable;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class WorldState extends GameEntityState {
 
-    private Set<Pickables.Pickable> pickables;
+    private Set<Pickable> pickables;
     private Map<Integer, Point2D[]> potions;
 
     /**
@@ -27,7 +27,7 @@ public class WorldState extends GameEntityState {
      * @param pickables Set of pickable items
      * @param potions   Map of potions
      */
-    public WorldState(Set<Pickables.Pickable> pickables, Map<Integer, Point2D[]> potions) {
+    public WorldState(Set<Pickable> pickables, Map<Integer, Point2D[]> potions) {
         this.pickables = pickables;
         this.potions = potions;
     }
@@ -37,7 +37,7 @@ public class WorldState extends GameEntityState {
      *
      * @return {@code Set} of pickables
      */
-    public Set<Pickables.Pickable> getPickables() {
+    public Set<Pickable> getPickables() {
         return this.pickables;
     }
 
@@ -66,7 +66,7 @@ public class WorldState extends GameEntityState {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.pickables = (Set<Pickables.Pickable>) in.readObject();
+        this.pickables = (Set<Pickable>) in.readObject();
 
         this.potions = new HashMap<Integer, Point2D[]>();
         HashMap<Integer, Double[]> deconstructedPotions = (HashMap<Integer, Double[]>) in.readObject();

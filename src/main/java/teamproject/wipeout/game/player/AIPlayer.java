@@ -323,7 +323,7 @@ public class AIPlayer extends Player {
             boolean boughtSomething = false;
             boolean allowTrees = true;
             while (emptySpaces > 0) {
-                boolean canBeTree = Math.random() > 0.6 && allowTrees && this.aiFarm.canPlaceTree();
+                boolean canBeTree = Math.random() > 0.6 && allowTrees && this.aiFarm.canFitTree();
                 Pair<Integer[], Double> buyPair = this.chooseItemToBuy(currentBalance, canBeTree);
                 if (buyPair == null) {
                     break;
@@ -347,7 +347,7 @@ public class AIPlayer extends Player {
     private void buyAndApplyFarmExpansion(Consumer<Boolean> completion) {
         if (this.hasEnoughMoney(this.currentFarmExpansionPrice + 30)) {
             this.setMoney(this.getMoney() - this.currentFarmExpansionPrice);
-            this.aiFarm.expandFarmBy(1);
+            this.aiFarm.expandFarmByN(1);
             this.currentFarmExpansionPrice *= FarmExpansionUI.PRICE_MULTIPLIER;
             completion.accept(true);
         } else {

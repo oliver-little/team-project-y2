@@ -262,16 +262,16 @@ public class FarmData implements StateUpdatable<FarmState> {
      * Looks for a position on the farm that is unoccupied
      * and can fit an item with the given width and height.
      *
-     * @param w Item width
-     * @param h Item height
+     * @param width Item width
+     * @param height Item height
      * @return {@code true} if the position is empty, <br> otherwise {@code false}.
      */
-    public int[] firstFreeSquareFor(int w, int h) {
-        for (int r = 0; r < this.farmRows; r++) {
-            for (int c = 0; c < this.farmColumns; c++) {
-                if (this.items.get(r).get(c) == null) {
-                    if (this.canBePlaced(r, c, w, h)) {
-                        return new int[]{r, c};
+    public int[] firstFreeSquareFor(int width, int height) {
+        for (int row = 0; row < this.farmRows; row++) {
+            for (int column = 0; column < this.farmColumns; column++) {
+                if (this.items.get(row).get(column) == null) {
+                    if (this.canBePlaced(row, column, width, height)) {
+                        return new int[]{row, column};
                     }
                 }
             }

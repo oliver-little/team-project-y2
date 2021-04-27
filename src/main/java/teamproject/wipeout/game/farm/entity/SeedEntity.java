@@ -27,6 +27,18 @@ public class SeedEntity extends GameEntity {
     private final RectRenderable seedArea;
 
     /**
+     * Calculates scale factor for resizing {@code FarmItem}'s sprite
+     * so that its size will fit given width.
+     *
+     * @param squareScale Current {@code int} value of squareScale
+     * @param w           Max {@code double} width
+     * @return Calculated new {@code double} scale factor value
+     */
+    public static double scaleFactorToFitWidth(int squareScale, double w) {
+        return squareScale * FarmEntity.SQUARE_SIZE / w;
+    }
+
+    /**
      * Creates a new instance of {@code SeedEntity}.
      *
      * @param scene         The {@link GameScene} this entity is part of
@@ -56,7 +68,7 @@ public class SeedEntity extends GameEntity {
         seedRenderEntity.addComponent(new Transform(0, 0, 2));
 
         SpriteRenderable seedRenderable = new SpriteRenderable(seedImage);
-        double scaleFactor = FarmEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth(), seedImage.getHeight());
+        double scaleFactor = SeedEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth());
         seedRenderable.spriteScale = new Point2D(scaleFactor, scaleFactor);
         RenderComponent seedRenderComponent = new RenderComponent(seedRenderable);
         seedRenderEntity.addComponent(seedRenderComponent);

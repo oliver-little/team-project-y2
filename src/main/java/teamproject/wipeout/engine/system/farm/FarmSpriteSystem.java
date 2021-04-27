@@ -15,6 +15,7 @@ import teamproject.wipeout.engine.system.GameSystem;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.farm.entity.SeedEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
@@ -87,7 +88,7 @@ public class FarmSpriteSystem implements GameSystem {
     
 
     private Point2D rescaleToFitWidth(int squareScale, double w, double h) {
-        double scaleFactor = FarmEntity.scaleFactorToFitWidth(squareScale, w, h);
+        double scaleFactor = SeedEntity.scaleFactorToFitWidth(squareScale, w);
         return new Point2D(w * scaleFactor, h * scaleFactor);
     }
 }
