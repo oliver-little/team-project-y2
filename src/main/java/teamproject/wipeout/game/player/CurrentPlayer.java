@@ -47,6 +47,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * Creates a new instance of GameEntity
      *
      * @param scene The GameScene this entity is part of
+     * @param playerInfo Player ID and name
      */
     public CurrentPlayer(GameScene scene, Pair<Integer, String> playerInfo, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene, playerInfo, spriteManager, itemStore);
