@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Window;
 import javafx.util.Pair;
 import teamproject.wipeout.engine.audio.GameAudio;
@@ -254,12 +256,24 @@ public class Gameplay implements Controller {
         	// TODO FIX settings UI for wealth mode
             // UI Overlay
             //VBox rightUI = this.createRightUIOverlay(null, settingsUI);
-            //this.interfaceOverlay.getChildren().addAll(rightUI);
+        	VBox leaderboardBox = new VBox();
+            Text title = UIUtil.createTitle("Leaderboard:");
+            title.setFont(Font.font("Kalam", 30));
+            
+            Text target = UIUtil.createTitle("Target: $"+wealthTarget);
+            target.setFont(Font.font("Kalam", 20));
+            
+        	Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
+        	leaderboard.setAlignment(Pos.CENTER_RIGHT);
+        	leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
+        	leaderboardBox.getChildren().addAll(title, target, leaderboard);
+            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
         	
         	for (Player p : worldEntity.getPlayers()) {
         		p.moneyProperty().addListener((event) -> {
+        			leaderboard.update(worldEntity.getPlayers());
             		if(p.moneyProperty().get()>=wealthTarget) {
-            			System.out.println(p.playerName+" has reached $"+wealthTarget);
+            			//System.out.println(p.playerName+" has reached $"+wealthTarget);
             			this.onGameEnd().run();
             			//Stops game end being called multiple times 
             			wealthTarget=Double.MAX_VALUE;
