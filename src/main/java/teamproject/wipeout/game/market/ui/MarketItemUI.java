@@ -68,7 +68,7 @@ public class MarketItemUI extends VBox {
 
         HBox buySellLayout = new HBox();
         buySellLayout.setAlignment(Pos.CENTER);
-        buySellLayout.setSpacing(20);
+        buySellLayout.setSpacing(10);
 
         Spinner<Integer> quantity = new Spinner<Integer>(1, item.getComponent(InventoryComponent.class).stackSizeLimit, 1, 1);
 
@@ -86,7 +86,7 @@ public class MarketItemUI extends VBox {
         MarketItem marketItem = market.stockDatabase.get(item.id);
 
         Button buy = new Button();
-        buy.setPrefWidth(85);
+        buy.setPrefWidth(95);
 
         // Set button text to update with quantity and buy price changes
         buy.textProperty().bind(Bindings.concat("Buy: ").concat(Bindings.createStringBinding(() -> {
@@ -100,7 +100,7 @@ public class MarketItemUI extends VBox {
 
 
         Button sell = new Button();
-        sell.setPrefWidth(85);
+        sell.setPrefWidth(95);
 
         //Check if the item is sellable.
         if (Math.abs(marketItem.getDefaultSellPrice() - (-1)) < doubleCompare) {
