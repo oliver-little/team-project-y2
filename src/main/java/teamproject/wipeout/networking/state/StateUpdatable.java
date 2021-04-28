@@ -4,7 +4,7 @@ package teamproject.wipeout.networking.state;
  * {@code StateUpdatable} is an interface that represents actions which are needed
  * for interactive updates of the game entities.
  */
-public interface StateUpdatable<T> {
+public interface StateUpdatable<T extends GameEntityState> {
 
     /**
      * @return Current state of the entity
