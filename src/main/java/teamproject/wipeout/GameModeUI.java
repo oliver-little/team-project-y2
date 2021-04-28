@@ -13,6 +13,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+/**
+ * Class that constructs the gamemode selection UI 
+ *
+ */
 public class GameModeUI extends VBox
 {
 	
@@ -31,7 +35,13 @@ public class GameModeUI extends VBox
         
         valueLabel = new Label();
         
-        gamemodeSelector = new ComboBox<String>(FXCollections.observableArrayList("Time Mode","Wealth Mode"));
+        Gamemode[] gamemodes = Gamemode.values();
+        String[] gamemodeStrings = new String[gamemodes.length];
+        for (int i=0; i<gamemodes.length;i++) {
+        	gamemodeStrings[i] = gamemodes[i].toString();
+        }
+        
+        gamemodeSelector = new ComboBox<String>(FXCollections.observableArrayList(gamemodeStrings));
         gamemodeSelector.setOnAction((event) -> {
         	Map<String, Object> gamemodeData = getGamemodeData(this.getGamemode());
         	valueLabel.setText(Integer.toString((int) gamemodeData.get("default")));

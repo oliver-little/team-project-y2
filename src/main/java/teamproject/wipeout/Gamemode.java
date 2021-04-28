@@ -1,5 +1,8 @@
 package teamproject.wipeout;
 
+/**
+ * An enum for each gamemode implemented in the game
+ */
 public enum Gamemode
 {
 	TIME_MODE("Time Mode"), 
