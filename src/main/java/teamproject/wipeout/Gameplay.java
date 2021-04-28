@@ -51,6 +51,7 @@ import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
+import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -250,7 +251,21 @@ public class Gameplay implements Controller {
             this.interfaceOverlay.getChildren().addAll(rightUI);
         }
         else if(gamemode==Gamemode.WEALTH_MODE) {
-
+        	// TODO FIX settings UI for wealth mode
+            // UI Overlay
+            //VBox rightUI = this.createRightUIOverlay(null, settingsUI);
+            //this.interfaceOverlay.getChildren().addAll(rightUI);
+        	
+        	for (Player p : worldEntity.getPlayers()) {
+        		p.moneyProperty().addListener((event) -> {
+            		if(p.moneyProperty().get()>=wealthTarget) {
+            			System.out.println(p.playerName+" has reached $"+wealthTarget);
+            			this.onGameEnd().run();
+            			//Stops game end being called multiple times 
+            			wealthTarget=Double.MAX_VALUE;
+            		}
+            	});
+        	}
         }
 
 
@@ -273,6 +288,7 @@ public class Gameplay implements Controller {
 
         this.gameLoop.start();
     }
+
 
     /**
      * Gets the root node of this class.

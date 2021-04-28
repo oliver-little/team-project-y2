@@ -188,6 +188,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     public DoubleProperty moneyProperty() {
         return this.money;
     }
+    
 
     public void setClientSupplier(Supplier<GameClient> supplier) {
         this.clientSupplier = supplier;
