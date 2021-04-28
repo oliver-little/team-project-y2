@@ -80,7 +80,9 @@ public class Gameplay implements Controller {
     private StackPane interfaceOverlay;
 
     private int numberOfSingleplayers = 4;
+    private Gamemode gamemode;
     private double gameTime = 200.0;
+    private double wealthTarget = 100;
     private final long gameStartTime;
 
     private final Integer playerID;
@@ -115,12 +117,14 @@ public class Gameplay implements Controller {
         this.playerID = new Random().nextInt(1024);
         this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
         
+        this.gamemode = gamemode;
         if(gamemode==Gamemode.TIME_MODE) {
         	this.gameTime = gamemodeValue;
         }
         else if(gamemode==Gamemode.WEALTH_MODE) {
-        	this.gameTime=Double.MAX_VALUE;
-        	// TODO WEALTH TARGET
+        	//this.gameTime=Double.MAX_VALUE;
+        	this.wealthTarget=gamemodeValue;
+        	
         }
         
         
@@ -218,14 +222,23 @@ public class Gameplay implements Controller {
         // Settings UI
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
 
+        
+        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI);
+        
         //Clock UI / System
-        ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
-        this.systemUpdater.addSystem(clockSystem);
-        this.worldEntity.setClockSupplier(() -> clockSystem);
+        if(this.gamemode==Gamemode.TIME_MODE) {
+            ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
+            this.systemUpdater.addSystem(clockSystem);
+            this.worldEntity.setClockSupplier(() -> clockSystem);
 
-        // UI Overlay
-        VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
-        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI, rightUI);
+            // UI Overlay
+            VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
+            this.interfaceOverlay.getChildren().addAll(rightUI);
+        }
+        else if(gamemode==Gamemode.WEALTH_MODE) {
+
+        }
+
 
         // Input bindings
         this.setupKeyInput(currentPlayer, inventoryUI);
