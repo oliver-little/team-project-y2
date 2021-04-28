@@ -12,102 +12,67 @@ import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.input.InputKeyAction;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
-import teamproject.wipeout.networking.state.StateException;
 
-import java.io.*;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
+/**
+ * Creates a container for all {@link Pickable} instances in a game.
+ */
 public class Pickables {
 
-    public static class Pickable implements Serializable {
-        private Integer id;
-        private Point2D startPosition;
-        private Point2D velocity;
-
-        private GameEntity entity;
-
-        public Pickable(Integer id, Point2D startPosition, Point2D velocity) {
-            this.id = id;
-            this.startPosition = startPosition;
-            this.velocity = velocity;
-        }
-
-        public Integer getID() {
-            return this.id;
-        }
-
-        // Methods writeObject(), readObject() and readObjectNoData() are implemented
-        // to make PlayerState serializable despite it containing non-serializable properties (Point2D)
-
-        private void writeObject(ObjectOutputStream out) throws IOException {
-            out.writeInt(this.id);
-            out.writeDouble(this.startPosition.getX());
-            out.writeDouble(this.startPosition.getY());
-            out.writeDouble(this.velocity.getX());
-            out.writeDouble(this.velocity.getY());
-        }
-
-        private void readObject(ObjectInputStream in) throws IOException {
-            this.id = in.readInt();
-            this.startPosition = new Point2D(in.readDouble(), in.readDouble());
-            this.velocity = new Point2D(in.readDouble(), in.readDouble());
-        }
-
-        private void readObjectNoData() throws StateException {
-            throw new StateException("WorldState is corrupted");
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            Pickable that = (Pickable) o;
-            return this.id.equals(that.id) && this.startPosition.equals(that.startPosition) && this.velocity.equals(that.velocity);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = id.hashCode();
-            result += startPosition.hashCode();
-            result += velocity.hashCode();
-            return result;
-        }
-    }
-
-    private HashSet<Pickable> items;
+    private final HashSet<Pickable> items;
 
     private final GameScene gameScene;
-    private final ItemStore itemStore;
     private final SpriteManager spriteManager;
+    private final ItemStore itemStore;
 
     private Runnable onUpdate;
 
-    public Pickables(GameScene gameScene, ItemStore itemStore, SpriteManager spriteManager) {
+    /**
+     * Creates a new instance of {@code Pickables}
+     *
+     * @param scene         The {@link GameScene} this entity is part of
+     * @param spriteManager Current {@link SpriteManager}
+     * @param itemStore     Current {@link ItemStore}
+     */
+    public Pickables(GameScene scene, SpriteManager spriteManager, ItemStore itemStore) {
         this.items = new HashSet<Pickable>();
-        this.gameScene = gameScene;
-        this.itemStore = itemStore;
+        this.gameScene = scene;
         this.spriteManager = spriteManager;
+        this.itemStore = itemStore;
     }
 
+    /**
+     * @return {@code HashSet} of all available {@link Pickable} objects
+     */
     public HashSet<Pickable> get() {
         return this.items;
     }
 
+    /**
+     * {@code onUpdate} setter
+     *
+     * @param onUpdate {@code Runnable} action executed after {@code Pickables} entity has been updated
+     */
+    public void setOnUpdate(Runnable onUpdate) {
+        this.onUpdate = onUpdate;
+    }
+
+    /**
+     * Update self(= {@code this}) based on the data in the given {@code Set<Pickable>}.
+     *
+     * @param updatedItems {@code Set} of {@link Pickable}s used for self-update
+     */
     public void updateFrom(Set<Pickable> updatedItems) {
-        HashSet<Pickables.Pickable> removePickables = new HashSet<Pickables.Pickable>();
+        HashSet<Pickable> removePickables = new HashSet<Pickable>();
 
         for (Pickable pickable : this.items) {
             if (updatedItems.contains(pickable)) {
@@ -127,10 +92,11 @@ public class Pickables {
         }
     }
 
-    public void setOnUpdate(Runnable onUpdate) {
-        this.onUpdate = onUpdate;
-    }
-
+    /**
+     * Removes given {@code Set} of {@code Pickable}s from available objects
+     *
+     * @param pickedItems {@code Set} of {@link Pickable}s to be removed
+     */
     public void picked(Set<Pickable> pickedItems) {
         for (Pickable pickable : pickedItems) {
             pickable.entity.destroy();
@@ -146,9 +112,9 @@ public class Pickables {
      * Creates pickable entity(/entities) for a given item after it was harvested.
      * The entity(/entities) are rendered around a given X, Y scene coordinates.
      *
-     * @param item Harvested {@link Item}
-     * @param x X scene coordinate
-     * @param y Y scene coordinate
+     * @param item              Harvested {@link Item}
+     * @param x                 X scene coordinate
+     * @param y                 Y scene coordinate
      * @param numberOfPickables The number of pickables to generate
      */
     public void createPickablesFor(Item item, double x, double y, int numberOfPickables) {
@@ -164,7 +130,7 @@ public class Pickables {
 
         Point2D centrePos = new Point2D(x, y);
 
-        for(int i = 0; i < numberOfPickables; i++) {
+        for (int i = 0; i < numberOfPickables; i++) {
             Point2D velocityVector = this.giveRandomPositionAround(x, y).subtract(centrePos).normalize().multiply(ThreadLocalRandom.current().nextDouble(40.0, 175.0));
             Pickable pickable = new Pickable(item.id, centrePos, velocityVector);
             pickable.entity = this.createPickableEntity(pickable, sprite);
@@ -183,7 +149,7 @@ public class Pickables {
      * @param pickable {@link Pickable} to be spawned
      */
     private void createPickable(Pickable pickable) {
-        Item item = this.itemStore.getItem(pickable.id);
+        Item item = this.itemStore.getItem(pickable.getID());
         Image sprite;
         try {
             InventoryComponent invComponent = item.getComponent(InventoryComponent.class);
@@ -198,24 +164,33 @@ public class Pickables {
         this.items.add(pickable);
     }
 
+    /**
+     * Creates a single {@code Pickable} game entity
+     *
+     * @param pickable {@link Pickable} for which the {@link GameEntity} is being created
+     * @param sprite   {@code Image} for the given {@code Pickble}
+     * @return Created {@code Pickable} {@code GameEntity}
+     */
     private GameEntity createPickableEntity(Pickable pickable, Image sprite) {
         GameEntity entity = this.gameScene.createEntity();
         SpriteRenderable spriteRenderable = new SpriteRenderable(sprite, 0.01);
+
         entity.addComponent(new RenderComponent(spriteRenderable));
-        entity.addComponent(new Transform(pickable.startPosition, 0.0, 1));
+        entity.addComponent(new Transform(pickable.getStartPosition(), 0.0, 1));
         entity.addComponent(new HitboxComponent(new Rectangle(0, 0, sprite.getWidth() * 0.75, sprite.getHeight() * 0.75)));
-        entity.addComponent(new MovementComponent(pickable.velocity, Point2D.ZERO));
+        entity.addComponent(new MovementComponent(pickable.getVelocity(), Point2D.ZERO));
         entity.addComponent(new PickableComponent(pickable));
+
         // Growing animation
         entity.addComponent(new ScriptComponent((timeStep) -> {
             if (spriteRenderable.spriteScale.getX() < 0.75) {
                 double step = timeStep * 10;
                 spriteRenderable.spriteScale = spriteRenderable.spriteScale.add(step, step);
-            }
-            else {
+            } else {
                 entity.getComponent(ScriptComponent.class).requestDeletion = true;
             }
         }));
+
         return entity;
     }
 
@@ -231,13 +206,16 @@ public class Pickables {
 
         double randX;
         double randY;
+
         if (randomizer.nextBoolean()) {
-            randX = randomizer.nextDouble(x - (2 * FarmEntity.SQUARE_SIZE), x);
-            randY = randomizer.nextDouble(y - (2 * FarmEntity.SQUARE_SIZE), y);
+            randX = randomizer.nextDouble(x - (2.0 * FarmEntity.SQUARE_SIZE), x);
+            randY = randomizer.nextDouble(y - (2.0 * FarmEntity.SQUARE_SIZE), y);
+
         } else {
             randX = randomizer.nextDouble(x, x + (FarmEntity.SQUARE_SIZE / 4.0));
             randY = randomizer.nextDouble(y, y + (FarmEntity.SQUARE_SIZE / 4.0));
         }
+
         return new Point2D(randX, randY);
     }
 

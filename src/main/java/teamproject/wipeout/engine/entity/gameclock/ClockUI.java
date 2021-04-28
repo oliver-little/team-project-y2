@@ -32,6 +32,10 @@ public class ClockUI extends Label {
         return this.time;
     }
 
+    public boolean getGameEnded() {
+        return this.gameEnded;
+    }
+
     public void showTime(Double timestep) {
         if (gameEnded) {
             return;

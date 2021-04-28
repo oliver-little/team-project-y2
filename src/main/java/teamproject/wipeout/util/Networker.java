@@ -70,15 +70,17 @@ public class Networker {
         return null;
     }
 
-    public void stopServer() {
+    public boolean stopServer() {
         if (this.serverRunner.isServerActive()) {
             try {
                 this.serverRunner.stopServer();
+                return true;
 
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
         }
+        return false;
     }
 
     public NewPlayerAction onPlayerConnection(GameScene gameScene, ItemStore itemStore, SpriteManager spriteManager) {

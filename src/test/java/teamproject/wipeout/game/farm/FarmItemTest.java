@@ -65,15 +65,4 @@ class FarmItemTest {
         Assertions.assertEquals(expectedStage2, finishedFarmItem.getCurrentGrowthStage());
     }
 
-    @Test
-    void testCurrentGrowthPercentage() {
-        PlantComponent plant = item.getComponent(PlantComponent.class);
-        double maxGrowth = plant.maxGrowthStage * plant.growthRate;
-        int expectedPercentage = (int) ((GROWTH / maxGrowth) * 100);
-
-        Assertions.assertEquals(expectedPercentage, farmItem.getCurrentGrowthPercentage());
-
-        Assertions.assertEquals(100, finishedFarmItem.getCurrentGrowthPercentage());
-    }
-
 }

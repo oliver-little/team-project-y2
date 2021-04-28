@@ -52,7 +52,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public final CurrentPlayer myCurrentPlayer;
 	public final AnimalEntity myAnimal;
-	public final MarketPriceUpdater marketUpdater;
 	public final Map<Integer, FarmEntity> farms;
 	public final Pickables pickables;
 
@@ -75,7 +74,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.itemStore = (ItemStore) worldPack.get("itemStore");
 
 		this.farms = new HashMap<Integer, FarmEntity>();
-		this.pickables = new Pickables(this.scene, this.itemStore, this.spriteManager);
+		this.pickables = new Pickables(this.scene, this.spriteManager, this.itemStore);
 		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
 
 		this.potions = new HashMap<Integer, Point2D[]>();
@@ -103,13 +102,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		// Market
 		this.marketEntity = (MarketEntity) worldPack.get("marketEntity");
-		this.marketUpdater = new MarketPriceUpdater(this.marketEntity.getMarket(), true);
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
 
 		// Farms
 		Integer numberOfPlayers = (Integer) worldPack.get("players");
 		this.createFarmsFor(numberOfPlayers);
-		this.setFarmFor(this.myCurrentPlayer, true, this.farms.get(1));
 
 		// AI
         this.navMesh = NavigationMesh.generateMesh(
@@ -144,27 +141,22 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.myAnimal.setClientSupplier(supplier);
 	}
 
-	public void setFarmFor(Player player, boolean activePlayer, FarmEntity farm) {
-		if (farm != null) {
-			this.setPositionForPlayer(player, farm);
-			player.assignFarm(farm);
-			farm.assignPlayer(player.playerID, activePlayer, this.clientSupplier);
-		} else {
-			player.getCurrentState().assignFarm(null);
-		}
+	public void setFarmFor(Player player, FarmEntity farm) {
+		FarmEntity playerFarm = farm == null ? this.farms.get(1) : farm;
+
+		this.setPositionForPlayer(player, playerFarm);
+
+		player.assignFarm(playerFarm);
+		playerFarm.assignPlayer(player.playerID, true, this.clientSupplier);
 	}
 
 	public void setFarmFor(AIPlayer aiPlayer, FarmEntity farm) {
-		if (farm != null) {
-			Point2D[] corners = this.setPositionForPlayer(aiPlayer, farm);
-			aiPlayer.setDesignatedMarketPoint(corners[0]);
-			aiPlayer.assignFarm(farm, corners[1]);
-			farm.assignPlayer(aiPlayer.playerID, false, this.clientSupplier);
+		Point2D[] corners = this.setPositionForPlayer(aiPlayer, farm);
+		aiPlayer.setDesignatedMarketPoint(corners[0]);
+		aiPlayer.assignFarm(farm, corners[1]);
+		farm.assignPlayer(aiPlayer.playerID, false, this.clientSupplier);
 
-			aiPlayer.start();
-		} else {
-			aiPlayer.getCurrentState().assignFarm(null);
-		}
+		aiPlayer.start();
 	}
 
 	public WorldState getCurrentState() {
@@ -194,6 +186,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
+	public boolean isGameplayActive() {
+		if (this.clockSupplier == null) {
+			return false;
+		}
+		return this.clockSupplier.get().clockUI.getGameEnded();
+	}
+
 	public void addPotion(PotionEntity potionEntity) {
 		Point2D[] pointPoints = new Point2D[]{potionEntity.getStartPosition(), potionEntity.getEndPosition()};
 		potionEntity.setPotionRemover(() -> this.potions.remove(potionEntity.getPotionID(), pointPoints));
@@ -202,15 +201,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	public void setupFarmPickingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickAction(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+		this.inputHandler.onKeyRelease(code, this.myCurrentPlayer.getMyFarm().onKeyAction(this.inputHandler.mouseHoverSystem, false));
 	}
 
 	public void setupFarmDestroyingKey(KeyCode code) {
-		this.inputHandler.onKeyRelease(code, () -> {
-			this.myCurrentPlayer.getMyFarm().onKeyPickActionDestroy(this.inputHandler.mouseHoverSystem).performKeyAction();
-		});
+		this.inputHandler.onKeyRelease(code, this.myCurrentPlayer.getMyFarm().onKeyAction(this.inputHandler.mouseHoverSystem, true));
 	}
 
 	public ArrayList<Player> getPlayers() {
@@ -221,8 +216,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.players.add(newPlayer);
 	}
 
-	public void removePlayer(Player newPlayer) {
-		this.players.remove(newPlayer);
+	public void removePlayer(Player player) {
+		this.players.remove(player);
+		int farmToClear = player.getCurrentState().getFarmID();
+		this.farms.get(farmToClear).removePlayer();
+		player.destroy();
 	}
 
 	public Supplier<ClockSystem> getClockSupplier() {
@@ -289,23 +287,28 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createFarmsFor(int numberOfPlayers) {
-		if (numberOfPlayers == 4) {
-			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 240), this.pickables, this.spriteManager, this.itemStore);
-			FarmEntity farmEntity3 = new FarmEntity(this.scene, 3, new Point2D(220, 800), this.pickables, this.spriteManager, this.itemStore);
-			FarmEntity farmEntity4 = new FarmEntity(this.scene, 4, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
+		try {
+			if (numberOfPlayers == 4) {
+				FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
+				FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 240), this.pickables, this.spriteManager, this.itemStore);
+				FarmEntity farmEntity3 = new FarmEntity(this.scene, 3, new Point2D(220, 800), this.pickables, this.spriteManager, this.itemStore);
+				FarmEntity farmEntity4 = new FarmEntity(this.scene, 4, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
 
-			this.farms.put(farmEntity1.farmID, farmEntity1);
-			this.farms.put(farmEntity2.farmID, farmEntity2);
-			this.farms.put(farmEntity3.farmID, farmEntity3);
-			this.farms.put(farmEntity4.farmID, farmEntity4);
+				this.farms.put(farmEntity1.farmID, farmEntity1);
+				this.farms.put(farmEntity2.farmID, farmEntity2);
+				this.farms.put(farmEntity3.farmID, farmEntity3);
+				this.farms.put(farmEntity4.farmID, farmEntity4);
 
-		} else if (numberOfPlayers == 2) {
-			FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
-			FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
+			} else if (numberOfPlayers == 2) {
+				FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
+				FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
 
-			this.farms.put(farmEntity1.farmID, farmEntity1);
-			this.farms.put(farmEntity2.farmID, farmEntity2);
+				this.farms.put(farmEntity1.farmID, farmEntity1);
+				this.farms.put(farmEntity2.farmID, farmEntity2);
+			}
+
+		} catch (IOException exception) {
+			exception.printStackTrace();
 		}
 	}
 

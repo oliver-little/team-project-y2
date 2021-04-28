@@ -129,8 +129,8 @@ public class GameAudio {
 	}
 
 	public void unmute(){
-		this.play();
 		muted = false;
+		this.play();
 	}
     
     public void muteUnmute() {

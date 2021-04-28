@@ -18,19 +18,33 @@ import java.io.FileNotFoundException;
 
 /**
  * Represents a seed prepared to be planted.
+ *
+ * @see GameEntity
  */
 public class SeedEntity extends GameEntity {
 
-    protected RenderComponent renderComponent;
-    protected RectRenderable seedArea;
+    private final RenderComponent renderComponent;
+    private final RectRenderable seedArea;
+
+    /**
+     * Calculates scale factor for resizing {@code FarmItem}'s sprite
+     * so that its size will fit given width.
+     *
+     * @param squareWidth Plant's square width value of type {@code int}
+     * @param width       {@code double} value of width to be rescaled
+     * @return Calculated new {@code double} scale factor value
+     */
+    public static double scaleFactorToFitWidth(int squareWidth, double width) {
+        return squareWidth * FarmEntity.SQUARE_SIZE / width;
+    }
 
     /**
      * Creates a new instance of {@code SeedEntity}.
      *
-     * @param scene The GameScene this entity is part of
-     * @param item Item to be displayed as a seed
+     * @param scene         The {@link GameScene} this entity is part of
+     * @param item          {@link Item} to be displayed as a seed
      * @param spriteManager {@link SpriteManager} used for getting the seed sprite
-     * @throws FileNotFoundException Thrown when {@link SpriteManager} cannot find a sprite for the item's seeds.
+     * @throws FileNotFoundException {@link SpriteManager} cannot find a sprite for the item's seeds.
      */
     public SeedEntity(GameScene scene, Item item, SpriteManager spriteManager) throws FileNotFoundException {
         super(scene);
@@ -54,7 +68,7 @@ public class SeedEntity extends GameEntity {
         seedRenderEntity.addComponent(new Transform(0, 0, 2));
 
         SpriteRenderable seedRenderable = new SpriteRenderable(seedImage);
-        double scaleFactor = FarmEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth(), seedImage.getHeight());
+        double scaleFactor = SeedEntity.scaleFactorToFitWidth(plant.width, seedImage.getWidth());
         seedRenderable.spriteScale = new Point2D(scaleFactor, scaleFactor);
         RenderComponent seedRenderComponent = new RenderComponent(seedRenderable);
         seedRenderEntity.addComponent(seedRenderComponent);
@@ -66,7 +80,7 @@ public class SeedEntity extends GameEntity {
     }
 
     /**
-     * Shows green overlay behind seeds.
+     * Shows green overlay behind the seed.
      */
     public void showAreaOverlay() {
         if (!this.renderComponent.hasRenderable(seedArea)) {
@@ -75,7 +89,7 @@ public class SeedEntity extends GameEntity {
     }
 
     /**
-     * Hides green overlay behind seeds.
+     * Hides green overlay behind the seed.
      */
     public void hideAreaOverlay() {
         this.renderComponent.removeRenderable(seedArea);

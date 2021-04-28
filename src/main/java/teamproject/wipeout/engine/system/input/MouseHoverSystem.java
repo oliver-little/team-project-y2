@@ -45,7 +45,7 @@ public class MouseHoverSystem implements GameSystem {
     }
 
     public Point2D getCurrentMousePosition() {
-        return new Point2D(this.currentMouseX, this.currentMouseY);
+        return new Point2D(this.lastFrameWorldX, this.lastFrameWorldY);
     }
 
     public void cleanup() {

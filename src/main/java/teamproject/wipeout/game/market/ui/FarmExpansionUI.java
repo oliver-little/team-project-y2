@@ -11,8 +11,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.entity.WorldEntity;
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.player.CurrentPlayer;
 
 /**
@@ -72,7 +70,7 @@ public class FarmExpansionUI extends VBox {
         expandButton.setOnAction((e) -> {
             if ((currentPlayer.hasEnoughMoney(expansionPrice)) && currentPlayer.getMyFarm() != null) {
                 currentPlayer.setMoney(currentPlayer.getMoney() - expansionPrice);
-                currentPlayer.getMyFarm().expandFarmBy(1);
+                currentPlayer.getMyFarm().expandFarmByN(1);
 
                 //Update price.
                 expansionPrice *= PRICE_MULTIPLIER;

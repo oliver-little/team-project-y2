@@ -10,24 +10,37 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * System that increments growth property for all crops in the {@link RowGrowthComponent}.
+ * System that increments growth property for all plants in the {@link RowGrowthComponent}.
+ *
+ * @see GameSystem
  */
 public class GrowthSystem implements GameSystem {
 
-    protected SignatureEntityCollector cropsCollector;
+    private final SignatureEntityCollector plantCollector;
 
+    /**
+     * Creates an instance of a {@code GrowthSystem}.
+     *
+     * @param scene The {@link GameScene} this system is part of
+     */
     public GrowthSystem(GameScene scene) {
-        this.cropsCollector = new SignatureEntityCollector(scene, Set.of(RowGrowthComponent.class));
+        this.plantCollector = new SignatureEntityCollector(scene, Set.of(RowGrowthComponent.class));
     }
 
-    @Override
+    /**
+     * Cleans up the plant collector instance of type {@link SignatureEntityCollector}.
+     */
     public void cleanup() {
-        this.cropsCollector.cleanup();
+        this.plantCollector.cleanup();
     }
 
-    @Override
+    /**
+     * Receives the change in time in the form of the given {@code timeStep} of type {@code Double}.
+     *
+     * @param timeStep {@code Double} value of delta time
+     */
     public void accept(Double timeStep) {
-        List<GameEntity> entities = this.cropsCollector.getEntities();
+        List<GameEntity> entities = this.plantCollector.getEntities();
 
         for (GameEntity entity : entities) {
             RowGrowthComponent growthComponent = entity.getComponent(RowGrowthComponent.class);

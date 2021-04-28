@@ -4,13 +4,13 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
@@ -46,13 +46,11 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.CameraEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
-import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -85,8 +83,7 @@ public class Gameplay implements Controller {
     private double wealthTarget = 100;
     private final long gameStartTime;
 
-    private final Integer playerID;
-    private final String playerName;
+    private final Pair<Integer, String> playerInfo;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
@@ -94,6 +91,7 @@ public class Gameplay implements Controller {
     private SpriteManager spriteManager;
     private ItemStore itemStore;
 
+    private GameLoop gameLoop;
     private GameScene gameScene;
     private WorldEntity worldEntity;
 
@@ -111,11 +109,15 @@ public class Gameplay implements Controller {
 
     private final Networker networker;
 
-    public Gameplay(Networker networker, Long givenGameStartTime, String playerName, Map<String, KeyCode> bindings, Gamemode gamemode, double gamemodeValue) {
+
+    public Gameplay(Networker networker, Long givenGameStartTime, Pair<Integer, String> playerInfo, Map<String, KeyCode> bindings, Gamemode gamemode, double gamemodeValue) {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
-        this.playerID = new Random().nextInt(1024);
-        this.playerName = playerName == null ? CurrentPlayer.DEFAULT_NAME : playerName;
+        if (playerInfo == null) {
+            this.playerInfo = new Pair<Integer, String>(new Random().nextInt(1024), CurrentPlayer.DEFAULT_NAME);
+        } else {
+            this.playerInfo = playerInfo;
+        }
         
         this.gamemode = gamemode;
         if(gamemode==Gamemode.TIME_MODE) {
@@ -126,8 +128,7 @@ public class Gameplay implements Controller {
         	this.wealthTarget=gamemodeValue;
         	
         }
-        
-        
+
         this.focusListener = null;
 
         this.keyBindings = bindings;
@@ -162,7 +163,7 @@ public class Gameplay implements Controller {
         this.gameScene = new GameScene();
         this.renderer = new RenderSystem(this.gameScene, this.dynamicCanvas, this.staticCanvas);
         this.initializeSystemUpdater();
-        GameLoop gameLoop = new GameLoop(this.systemUpdater, this.renderer);
+        gameLoop = new GameLoop(this.systemUpdater, this.renderer);
 
         // Input
         this.inputHandler = new InputHandler(this.root.getScene());
@@ -178,8 +179,7 @@ public class Gameplay implements Controller {
         this.eventSystems = List.of(mouseClick, playerAnimator, sabotage);
 
         // Player
-        Pair<Integer, String> playerInfo = new Pair<Integer, String>(this.playerID, this.playerName);
-    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, playerInfo, this.spriteManager, this.itemStore);
+    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, this.playerInfo, this.spriteManager, this.itemStore);
 
         // Camera
         CameraEntity cameraEntity = new CameraEntity(this.gameScene);
@@ -204,7 +204,7 @@ public class Gameplay implements Controller {
         }
 
         // Game Audio
-        GameAudio gameAudio = new GameAudio("backingTrack2.wav", true);
+        
 
         // Inventory UI
         InventoryUI inventoryUI = new InventoryUI(this.spriteManager, this.itemStore);
@@ -220,7 +220,21 @@ public class Gameplay implements Controller {
         currentPlayer.setTaskUI(taskUI);
 
         // Settings UI
-        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, gameAudio);
+        Runnable returnToMenu = () -> {
+            if (this.networker != null && !this.networker.stopServer()) {
+                GameClient client = this.networker.getClient();
+                if (client != null) {
+                    client.closeConnection(true);
+                }
+            }
+    
+            this.cleanup();
+    
+            StartMenu startMenu = new StartMenu();
+            this.root.getScene().setRoot(startMenu.getContent());
+            
+        };
+        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu);
 
         
         this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI);
@@ -240,13 +254,12 @@ public class Gameplay implements Controller {
         }
 
 
-        // Input bindings
-        this.setupKeyInput(currentPlayer, inventoryUI);
-        this.setupKeyHotkeys(inventoryUI);
-
         // Setup networking if possible
         if (this.networker != null) {
             this.setupNetworking();
+
+        } else { // else setup a default farm for the current player
+            this.worldEntity.setFarmFor(currentPlayer, null);
         }
 
         //currentPlayer.acquireItem(6, 98); //for checking stack/inventory limits
@@ -254,8 +267,11 @@ public class Gameplay implements Controller {
         //currentPlayer.acquireItem(28, 98);
         //currentPlayer.acquireItem( 43, 2);
 
-        gameLoop.start();
-        gameAudio.play();
+        // Input bindings
+        this.setupKeyInput(currentPlayer, inventoryUI);
+        this.setupKeyHotkeys(inventoryUI);
+
+        this.gameLoop.start();
     }
 
     /**
@@ -298,6 +314,9 @@ public class Gameplay implements Controller {
 	}
 
     public void cleanup() {
+        if (this.gameLoop != null) {
+            this.gameLoop.stop();
+        }
         if (this.renderer != null) {
             this.renderer.cleanup();
         }
@@ -342,7 +361,7 @@ public class Gameplay implements Controller {
         this.systemUpdater.addSystem(new SteeringSystem(this.gameScene));
         this.systemUpdater.addSystem(new ScriptSystem(this.gameScene));
 
-        this.audioSystem = new AudioSystem(this.gameScene, 0.1f);
+        this.audioSystem = new AudioSystem(this.gameScene, 0.05f);
         this.movementAudio = new MovementAudioSystem(this.gameScene, 0.05f);
         this.systemUpdater.addSystem(this.audioSystem);
         this.systemUpdater.addSystem(this.movementAudio);
@@ -364,7 +383,7 @@ public class Gameplay implements Controller {
     }
 
     private VBox createRightUIOverlay(ClockUI clockUI, SettingsUI settingsUI) {
-        VBox topRight = new VBox();
+        VBox topRight = new VBox(2);
         topRight.setAlignment(Pos.TOP_RIGHT);
         topRight.setPickOnBounds(false);
         topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
@@ -421,13 +440,15 @@ public class Gameplay implements Controller {
 
     private void setupNetworking() {
         CurrentPlayer myCurrentPlayer = this.worldEntity.myCurrentPlayer;
-        Market myMarket = this.worldEntity.getMarket();
 
         GameClient currentClient = this.networker.getClient();
         currentClient.setOnDisconnect(() -> Platform.runLater(() -> {
-            StartMenu startMenu = new StartMenu();
-            this.root.getScene().setRoot(startMenu.getContent());
-            startMenu.disconnectError();
+            Scene scene = this.root.getScene();
+            if (scene != null) {
+                StartMenu startMenu = new StartMenu();
+                scene.setRoot(startMenu.getContent());
+                startMenu.disconnectError();
+            }
         }));
 
         currentClient.addCurrentPlayer(myCurrentPlayer);
@@ -435,11 +456,8 @@ public class Gameplay implements Controller {
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
         Integer newFarmID = currentClient.myFarmID;
 
-        myMarket.setIsLocal(false);
-        this.worldEntity.marketUpdater.stop();
-
         FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
-        this.worldEntity.setFarmFor(myCurrentPlayer, true, myFarm);
+        this.worldEntity.setFarmFor(myCurrentPlayer, myFarm);
 
         currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
     }
@@ -450,6 +468,7 @@ public class Gameplay implements Controller {
         marketPack.put("spriteManager", this.spriteManager);
         marketPack.put("gameScene", this.gameScene);
         marketPack.put("uiContainer", this.interfaceOverlay);
+        marketPack.put("networked", this.networker != null);
         marketPack.put("currentPlayer", currentPlayer);
         marketPack.put("tasks", purchasableTasks);
         return marketPack;

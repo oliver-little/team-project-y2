@@ -8,11 +8,9 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.state.MarketOperationRequest;
-import teamproject.wipeout.networking.state.MarketOperationResponse;
 import teamproject.wipeout.networking.state.MarketState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,9 +28,8 @@ public class Market implements StateUpdatable<MarketState> {
 
     private Supplier<GameClient> clientSupplier;
 
-    private boolean isLocal;
-    private boolean waitingForResponse;
-    
+    private final boolean isLocal;
+
     /**
      * Default constructor for market, this takes in all available items from a JSON file and creates a stock database setting default prices and quantities.
      */
@@ -50,7 +47,6 @@ public class Market implements StateUpdatable<MarketState> {
         }
 
         isLocal = local;
-        waitingForResponse = false;
     }
 
     public void setClientSupplier(Supplier<GameClient> clientSupplier) {
@@ -73,23 +69,13 @@ public class Market implements StateUpdatable<MarketState> {
      */
     public void updateFromState(MarketState newState) {
         Platform.runLater(() -> {
-            for (Map.Entry<Integer, Double> updatedStock : newState.items.entrySet()) {
+            for (Map.Entry<Integer, Double> updatedStock : newState.getItemDeviations().entrySet()) {
                 MarketItem currentStock = this.stockDatabase.get(updatedStock.getKey());
                 currentStock.setQuantityDeviation(updatedStock.getValue());
             }
         });
     }
 
-    /**
-     * Sets market property of being local (= does all price computing),
-     * or not local (= server-side computing).
-     *
-     * @param newIsLocal Local market property
-     */
-    public void setIsLocal(boolean newIsLocal) {
-        this.isLocal = newIsLocal;
-    }
-    
     /**
      * This function is run when a player purchases an item from the market.
      * @param id The item ID they want to buy.
@@ -99,7 +85,7 @@ public class Market implements StateUpdatable<MarketState> {
     public double buyItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            System.out.println("The requested item is not for sale.");
+            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
@@ -113,7 +99,7 @@ public class Market implements StateUpdatable<MarketState> {
         }
 
         if (isLocal) {
-            this.sendRequest(new MarketOperationRequest(id, totalCost, quantity, true));
+            this.sendRequest(new MarketOperationRequest(id, quantity, true));
 
         } else {
             item.incrementQuantityDeviation(quantity);
@@ -132,21 +118,21 @@ public class Market implements StateUpdatable<MarketState> {
     public double sellItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            System.out.println("The requested item is not for sale.");
+            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
         MarketItem item = stockDatabase.get(id);
 
         if (item.getDefaultSellPrice() < 0) {
-            System.out.println("Cannot sell this kind of item.");
+            //System.out.println("Cannot sell this kind of item.");
             return -1;
         }
 
         double totalCost = calculateTotalCost(id, quantity, false);
 
         if (isLocal) {
-            sendRequest(new MarketOperationRequest(id, totalCost, quantity, false));
+            sendRequest(new MarketOperationRequest(id, quantity, false));
 
         } else {
             item.decrementQuantityDeviation(quantity);
@@ -199,16 +185,6 @@ public class Market implements StateUpdatable<MarketState> {
         }
 
         return totalCost;
-    }
-
-    /**
-     * Response from the server arrived.
-     * (Client-side method)
-     *
-     * @param response {@link MarketOperationResponse} of the server
-     */
-    public void responseArrived(MarketOperationResponse response) {
-        waitingForResponse = false;
     }
 
     /**

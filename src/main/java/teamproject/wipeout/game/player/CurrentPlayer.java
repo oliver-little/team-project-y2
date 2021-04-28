@@ -9,9 +9,10 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.farm.Pickables;
+import teamproject.wipeout.game.farm.Pickable;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
-import teamproject.wipeout.game.inventory.*;
+import teamproject.wipeout.game.inventory.InventoryItem;
+import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
@@ -46,6 +47,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * Creates a new instance of GameEntity
      *
      * @param scene The GameScene this entity is part of
+     * @param playerInfo Player ID and name
      */
     public CurrentPlayer(GameScene scene, Pair<Integer, String> playerInfo, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene, playerInfo, spriteManager, itemStore);
@@ -268,15 +270,15 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     /**
      * Scan all entities for items the player is standing over, and pick them up, and delete them from the map
      */
-    public Set<Pickables.Pickable> pickup() {
+    public Set<Pickable> pickup() {
         List<GameEntity> entities = this.pickableCollector.getEntities();
-        HashSet<Pickables.Pickable> picked = new HashSet<Pickables.Pickable>();
+        HashSet<Pickable> picked = new HashSet<Pickable>();
 
         for (GameEntity ge: entities){
             // Check if entity is pickable
             if (ge.hasComponent(PickableComponent.class)){
                 if(HitboxComponent.checkCollides(this, ge)) {
-                    Pickables.Pickable pickable = ge.getComponent(PickableComponent.class).pickable;
+                    Pickable pickable = ge.getComponent(PickableComponent.class).pickable;
                     if (!this.acquireItem(pickable.getID())) {
                     	System.out.println("No space for item with id: " + pickable.getID());
                     } else {

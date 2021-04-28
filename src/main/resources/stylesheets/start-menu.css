@@ -33,13 +33,42 @@
 
 .hbox {
     -fx-padding: 20 20 20 20;
-
 }
 
 .label {
     -fx-text-fill: WHITE;
 }
 
+.combo-box-base  
+{
+    -fx-background-color: white;
+    -fx-background-radius: 5, 5, 4, 3;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+    -fx-padding: 0;
+}
+
 .combo-box-popup .list-cell:disabled  {
     -fx-opacity: 0.4 ;
+}
+
+.combo-box .scroll-bar {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.8;
+}
+
+.tile-pane  {
+    -fx-background-color: rgba(255, 205, 112, 0.8);
+    -fx-opacity: 0.8;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(0,0,0,0.8);
+    -fx-border-width: 1;
+    -fx-border-radius: 10px;
+    -fx-padding: 20 20 20 20;
+}
+
+.my-hbox  {
+    -fx-border-color: rgba(160, 158, 158, 0.8);
+    -fx-border-width: 1;
+    -fx-border-radius: 5px;
+    -fx-padding: 10 10 10 10;
 }

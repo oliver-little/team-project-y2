@@ -13,10 +13,8 @@ import teamproject.wipeout.networking.state.*;
 import teamproject.wipeout.util.threads.ServerThread;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,15 +40,55 @@ public class GameClient {
 
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
+
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
+
+    private final HashMap<Integer, Player> players;
 
     private Integer clientID;
     private WorldEntity worldEntity;
     private NewPlayerAction newPlayerAction;
     private Runnable onDisconnect;
 
-    private final HashMap<Integer, Player> players;
+    /**
+     * Connects to a specified game server and starts
+     * listening for incoming updates({@link GameUpdate}) from the game server.
+     * It does not allow the client to connect to multiple game servers simultaneously.
+     *
+     * @param server     {@link InetSocketAddress} of the game server you want to connect to.
+     * @param clientName Client's/player's name
+     * @throws IOException            Problem with establishing a connection to the given server.
+     * @throws ClassNotFoundException Problem with reading data received from the server.
+     */
+    public static GameClient openConnection(InetSocketAddress server, String clientName)
+            throws IOException, ClassNotFoundException {
+
+        GameClient client = new GameClient(clientName);
+
+        // Connect the socket
+        client.clientSocket.connect(server, 3000); // 3s timeout
+
+        client.in = new ObjectInputStream(client.clientSocket.getInputStream());
+        client.out = new ObjectOutputStream(client.clientSocket.getOutputStream());
+
+        GameUpdate receivedUpdate = (GameUpdate) client.in.readObject();
+
+        if (receivedUpdate.type == GameUpdateType.DECLINE) {
+            return null;
+        }
+
+        client.clientID = (Integer) receivedUpdate.content;
+        client.isActive.set(true);
+
+        // Send my ID and my latest playerState
+        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.clientID, client.clientName));
+        client.out.flush();
+
+        client.startReceivingUpdates();
+
+        return client;
+    }
 
     /**
      * Default initializer for {@code GameClient}
@@ -77,6 +115,11 @@ public class GameClient {
         this.players = new HashMap<Integer, Player>();
     }
 
+    /**
+     * {@code clientID} variable getter
+     *
+     * @return Client ID
+     */
     public Integer getID() {
         return this.clientID;
     }
@@ -90,10 +133,29 @@ public class GameClient {
         return this.isActive.get();
     }
 
+    /**
+     * Adds current player to the {@code Map} of connected players.
+     *
+     * @param currentPlayer {@link CurrentPlayer} that will be added into connected players
+     */
     public void addCurrentPlayer(CurrentPlayer currentPlayer) {
         this.players.put(currentPlayer.playerID, currentPlayer);
     }
 
+    /**
+     * Sets the current world entity.
+     *
+     * @param worldEntity {@link WorldEntity} to be set
+     */
+    public void setWorldEntity(WorldEntity worldEntity) {
+        this.worldEntity = worldEntity;
+    }
+
+    /**
+     * Sets an action that will be executed when a new player connects to the same game server.
+     *
+     * @param newPlayerAction {@link NewPlayerAction} to be executed
+     */
     public void setNewPlayerAction(NewPlayerAction newPlayerAction) {
         this.newPlayerAction = newPlayerAction;
         for (PlayerState state : this.tempPlayerStates) {
@@ -104,49 +166,13 @@ public class GameClient {
         this.tempPlayerStates.clear();
     }
 
+    /**
+     * Sets an action that will be executed when the current player is disconnected from the game server.
+     *
+     * @param onDisconnect {@link Runnable} to be executed
+     */
     public void setOnDisconnect(Runnable onDisconnect) {
         this.onDisconnect = onDisconnect;
-    }
-
-    /**
-     * Connects to a specified game server, sends client's ID and starts
-     * listening for incoming updates({@link GameUpdate}) from the game server.
-     * It does not allow the client to connect to multiple game servers simultaneously.
-     *
-     * @param server {@link InetAddress} of the game server you want to connect to.
-     * @param clientName Player's name
-     * @throws IOException Problem with establishing a connection to the given server.
-     */
-    public static GameClient openConnection(InetSocketAddress server, String clientName)
-            throws IOException, ClassNotFoundException {
-
-        GameClient client = new GameClient(clientName);
-
-        // Connect the socket
-        client.clientSocket.connect(server, 3000); // 3s timeout
-
-        client.in = new ObjectInputStream(client.clientSocket.getInputStream());
-        client.out = new ObjectOutputStream(client.clientSocket.getOutputStream());
-
-        GameUpdate receivedUpdate = (GameUpdate) client.in.readObject();
-
-        if (receivedUpdate.type == GameUpdateType.DECLINE) {
-            return null;
-        }
-
-        client.clientID = (Integer) receivedUpdate.content;
-        client.isActive.set(true);
-
-        // Send my ID and my latest playerState
-        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.clientID, client.clientName));
-
-        client.startReceivingUpdates();
-
-        return client;
-    }
-
-    public void setWorldEntity(WorldEntity worldEntity) {
-        this.worldEntity = worldEntity;
     }
 
     /**
@@ -154,26 +180,25 @@ public class GameClient {
      * If the client is not connected to a server, nothing happens.
      *
      * @param update Instance of a {@link GameUpdate} to be sent to the connected server
-     * @throws IOException Problem with sending the given {@code GameUpdate} to the connected server.
      */
     public void send(GameUpdate update) {
         if (!this.isActive.get()) {
             return;
         }
+
         try {
-            this.out.writeObject(update);
-            this.out.reset();
-        } catch (SocketException ignore) {
-            this.onDisconnect.run();
+            this.out.writeObject(update.deepClone());
+            this.out.flush();
+        } catch (IOException ignore) {
+            this.runOnDisconnect();
             this.closeConnection(false);
-        } catch (IOException exception) {
-            exception.printStackTrace();
         }
     }
 
     /**
      * Sends a given {@code PlayerState} instance to the connected game server wrapped inside a {@link GameUpdate}.
-     * If the client is not connected to a server, nothing happens.
+     * Processes the updated {@code PlayerState} instance inside the {@link GameClient} for gameplay purposes.
+     * If the client is not connected to a server, only the processing happens.
      *
      * @param updatedState Instance of a {@link PlayerState} to be sent to the connected server
      */
@@ -183,38 +208,8 @@ public class GameClient {
     }
 
     /**
-     * Method which disconnects the client from the game server it is currently connected to.
-     *
-     * @param clientSide Specifies whether the disconnect command comes from the client's side.
-     */
-    public void closeConnection(boolean clientSide) {
-        if (!this.isActive.get()) {
-            return;
-        }
-        this.isActive.set(false);
-
-        try {
-            if (clientSide) {
-                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.clientID));
-                this.out.reset();
-            }
-
-            if (!this.clientSocket.isClosed()) {
-                this.out.close();
-                this.in.close();
-                this.clientSocket.close();
-            }
-
-            this.connectedClients.clear();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Starts listening to updates coming from the game server
-     * on a separate {@link ServerThread}.
+     * Starts listening to updates coming from the connected game server on a separate {@link ServerThread}.
+     * Stops when client is disconnected from the game server.
      */
     public void startReceivingUpdates() {
         new ServerThread(() -> {
@@ -236,7 +231,7 @@ public class GameClient {
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
                         case ANIMAL_STATE:
-                            if (!receivedUpdate.originClientID.equals(this.clientID)) {
+                            if (!(receivedUpdate.originID == this.clientID)) {
                                 this.worldEntity.myAnimal.updateFromState((AnimalState) receivedUpdate.content);
                             }
                             break;
@@ -258,63 +253,71 @@ public class GameClient {
                         case CLOCK_CALIB:
                             this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
-                        case RESPONSE:
-                            MarketOperationResponse response = (MarketOperationResponse) receivedUpdate.content;
-                            this.worldEntity.getMarket().responseArrived(response);
-                            break;
                         case DISCONNECT:
-                            this.handleDisconnectPlayer(receivedUpdate.originClientID);
+                            this.handlePlayerDisconnect(receivedUpdate.originID);
+                            break;
+                        case SERVER_STOP:
+                            if (this.worldEntity != null && !this.worldEntity.isGameplayActive()) {
+                                this.runOnDisconnect();
+                            }
+                            this.closeConnection(false);
                             break;
                         default:
                             break;
                     }
 
                 } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
-                    // Do NOT let one corrupted packet cause the game to crash
-                } catch (EOFException ignore) {
-                    this.onDisconnect.run();
+                    // Do NOT let one corrupted packet cause the game crash
+                } catch (IOException | ClassNotFoundException ignore) {
+                    // The server had a "hard disconnect" (= did not send a disconnect signal)/ other malfunction
+                    this.runOnDisconnect();
                     this.closeConnection(false);
-                    // The server had a "hard disconnect" (= did not send a disconnect signal)
                     break;
-                } catch (IOException | ClassNotFoundException exception) {
-                    if (this.isActive.get()) {
-                        exception.printStackTrace();
-                    } else {
-                        this.onDisconnect.run();
-                        this.closeConnection(false);
-                        break;
-                    }
                 }
             }
         }).start();
     }
 
     /**
-     * Processes a given {@link PlayerState} update.
+     * Method which disconnects the client from the game server it is currently connected to.
+     * If the client is not connected to a server, nothing happens.
      *
-     * @param state {@code PlayerState} to be processed.
+     * @param clientSide Specifies whether the disconnect command comes from the client's side.
      */
-    private void handlePlayerStateUpdate(PlayerState state) {
-        if (!this.players.containsKey(state.getPlayerID())) {
-            if (this.newPlayerAction == null) {
-                this.tempPlayerStates.add(state);
-                return;
+    public void closeConnection(boolean clientSide) {
+        if (!this.isActive.get()) {
+            return;
+        }
+        this.isActive.set(false);
+
+        if (clientSide) {
+            try {
+                this.out.writeObject(new GameUpdate(GameUpdateType.DISCONNECT, this.clientID));
+                this.out.flush();
+            } catch (IOException ignore) {
+                // Disconnecting, we don't care about exceptions at this point
             }
-            this.createPlayerFromState(state);
-
-        } else {
-            this.players.get(state.getPlayerID()).updateFromState(state);
         }
+
+        if (!this.clientSocket.isClosed()) {
+            try {
+
+                this.out.close();
+                this.in.close();
+                this.clientSocket.close();
+            } catch (IOException ignore) {
+                // Disconnecting, we don't care about exceptions at this point
+            }
+        }
+
+        this.connectedClients.clear();
     }
 
-    private void createPlayerFromState(PlayerState state) {
-        Player newPlayer = this.newPlayerAction.createWith(state);
-        if (newPlayer != null) {
-            this.players.put(newPlayer.playerID, newPlayer);
-            this.worldEntity.addPlayer(newPlayer);
-        }
-    }
-
+    /**
+     * Processes clients that are currently connected to the same game server.
+     *
+     * @param clients {@code Map<Integer, String>} of clients - (Integer = Client ID, String = Client name)
+     */
     private void handleReceivedClientConnections(Map<Integer, String> clients) {
         if (clients.size() != 1) {
             this.connectedClients.clear();
@@ -322,13 +325,62 @@ public class GameClient {
         this.connectedClients.putAll(clients);
     }
 
-    private void handleDisconnectPlayer(Integer disconnectedClientID) {
+    /**
+     * Creates a new {@link Player} from a given {@link PlayerState}.
+     *
+     * @param playerState {@code PlayerState} used to create a new {@code Player}
+     */
+    private void createPlayerFromState(PlayerState playerState) {
+        Player newPlayer = this.newPlayerAction.createWith(playerState);
+        if (newPlayer != null) {
+            this.players.put(newPlayer.playerID, newPlayer);
+            this.worldEntity.addPlayer(newPlayer);
+        }
+    }
+
+    /**
+     * Processes a given {@link PlayerState} update.
+     *
+     * @param playerState {@code PlayerState} to be processed
+     */
+    private void handlePlayerStateUpdate(PlayerState playerState) {
+        if (!this.players.containsKey(playerState.getPlayerID())) {
+            if (this.newPlayerAction == null) {
+                this.tempPlayerStates.add(playerState);
+                return;
+            }
+            this.createPlayerFromState(playerState);
+
+        } else {
+            this.players.get(playerState.getPlayerID()).updateFromState(playerState);
+        }
+    }
+
+    /**
+     * Handles disconnecting of any player(= client).
+     *
+     * @param disconnectedClientID {@code PlayerState} to be processed
+     */
+    private void handlePlayerDisconnect(Integer disconnectedClientID) {
         if (disconnectedClientID.equals(this.clientID)) {
+            this.runOnDisconnect();
             this.closeConnection(false);
+
         } else {
             this.connectedClients.remove(disconnectedClientID);
             Player removedPlayer = this.players.remove(disconnectedClientID);
-            this.worldEntity.removePlayer(removedPlayer);
+            if (this.worldEntity != null && removedPlayer != null) {
+                this.worldEntity.removePlayer(removedPlayer);
+            }
+        }
+    }
+
+    /**
+     * Executes {@code Runnable onDisconnect} action if it is not null.
+     */
+    private void runOnDisconnect() {
+        if (this.onDisconnect != null) {
+            this.onDisconnect.run();
         }
     }
 

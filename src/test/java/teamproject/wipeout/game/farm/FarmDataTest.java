@@ -1,29 +1,23 @@
 package teamproject.wipeout.game.farm;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 // FarmData dimensions (FARM_ROWS and FARM_COLUMNS) must be at least:
 // FARM_ROWS = 3, and
 // FARM_COLUMNS = 5,
 // for these tests to function properly
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FarmDataTest {
-/*
     private static final double GROWTH = 0.5;
 
-    private static Item item;
-    private static Item finishedItem;
-    private static Consumer<FarmItem> customGrowthDelegate;
-    private static FarmItem growthDelegateItem;
+    private Item item;
+    private Item finishedItem;
 
     private FarmItem farmItem;
     private FarmItem finishedFarmItem;
@@ -32,14 +26,10 @@ class FarmDataTest {
     private FarmData farmData;
 
     @BeforeAll
-    static void initialization() throws FileNotFoundException, ReflectiveOperationException {
+    void initialization() throws FileNotFoundException, ReflectiveOperationException {
         ItemStore itemStore = new ItemStore("items.json");
         item = itemStore.getItem(28);
         finishedItem = itemStore.getItem(43);
-
-        customGrowthDelegate = (delegateItem) -> {
-            growthDelegateItem = delegateItem;
-        };
     }
 
     @BeforeEach
@@ -47,22 +37,19 @@ class FarmDataTest {
         farmItem = new FarmItem(item, GROWTH * item.getComponent(PlantComponent.class).maxGrowthStage);
 
         finishedFarmItem = new FarmItem(finishedItem);
-        finishedFarmItem.growth = finishedFarmItem.getGrowthRate() * finishedFarmItem.getMaxGrowthStage();
+        finishedFarmItem.growth.set(finishedFarmItem.getGrowthRate() * getMaxGrowthStageFor(finishedFarmItem));
         dummyFarmItem = new FarmItem(null, 0.1);
 
-        farmData = new FarmData(1, 1, null);
+        farmData = new FarmData(1, 1, (value) -> {}, null);
 
         Assertions.assertTrue(farmData.farmRows >= 3);
         Assertions.assertTrue(farmData.farmColumns >= 5);
 
-        farmData.addGrowthDelegate(customGrowthDelegate);
         farmData.items.get(0).set(0, farmItem);
         farmData.items.get(0).set(1, finishedFarmItem);
         farmData.items.get(0).set(2, dummyFarmItem);
         farmData.items.get(1).set(1, dummyFarmItem);
         farmData.items.get(1).set(2, dummyFarmItem);
-
-        growthDelegateItem = null;
     }
 
     @Test
@@ -78,16 +65,16 @@ class FarmDataTest {
         Assertions.assertFalse(farmData.areCoordinatesInvalid(1, 0));
         Assertions.assertFalse(farmData.areCoordinatesInvalid(1, 1));
 
-        Assertions.assertFalse(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS - 1, FarmData.FARM_COLUMNS - 1));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS, FarmData.FARM_COLUMNS));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS - 1, FarmData.FARM_COLUMNS));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS, FarmData.FARM_COLUMNS - 1));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS + 1, FarmData.FARM_COLUMNS));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS, FarmData.FARM_COLUMNS + 1));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS + 1, FarmData.FARM_COLUMNS + 1));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS + 10, FarmData.FARM_COLUMNS - 1));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS - 1, FarmData.FARM_COLUMNS + 10));
-        Assertions.assertTrue(farmData.areCoordinatesInvalid(FarmData.FARM_ROWS + 10, FarmData.FARM_COLUMNS + 10));
+        Assertions.assertFalse(farmData.areCoordinatesInvalid(farmData.farmRows - 1, farmData.farmColumns - 1));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows, farmData.farmColumns));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows - 1, farmData.farmColumns));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows, farmData.farmColumns - 1));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows + 1, farmData.farmColumns));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows, farmData.farmColumns + 1));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows + 1, farmData.farmColumns + 1));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows + 10, farmData.farmColumns - 1));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows - 1, farmData.farmColumns + 10));
+        Assertions.assertTrue(farmData.areCoordinatesInvalid(farmData.farmRows + 10, farmData.farmColumns + 10));
     }
 
     @Test
@@ -130,7 +117,7 @@ class FarmDataTest {
         FarmItem nullFarmItemOutOfBounds1 = farmData.itemAt(-1, -1);
         FarmItem nullFarmItemOutOfBounds2 = farmData.itemAt(-1, 0);
         FarmItem nullFarmItemOutOfBounds3 = farmData.itemAt(1, -1);
-        FarmItem nullFarmItemOutOfBounds4 = farmData.itemAt(FarmData.FARM_ROWS, FarmData.FARM_COLUMNS);
+        FarmItem nullFarmItemOutOfBounds4 = farmData.itemAt(farmData.farmRows, farmData.farmColumns);
 
         Assertions.assertEquals(farmItem, farmItem1);
         Assertions.assertEquals(finishedFarmItem, farmItem2);
@@ -151,8 +138,8 @@ class FarmDataTest {
         boolean canBePlaced_0_0 = farmData.canBePlaced(0, 0, 1, 1);
         boolean canBePlaced_1_0 = farmData.canBePlaced(1, 0, 1, 1);
         boolean canBePlacedXW_1_0 = farmData.canBePlaced(1, 0, 2, 1);
-        boolean canBePlacedXW_2_0 = farmData.canBePlaced(2, 0, FarmData.FARM_COLUMNS, 1);
-        boolean canBePlacedXXW_2_0 = farmData.canBePlaced(2, 0, FarmData.FARM_COLUMNS + 1, 1);
+        boolean canBePlacedXW_2_0 = farmData.canBePlaced(2, 0, farmData.farmColumns, 1);
+        boolean canBePlacedXXW_2_0 = farmData.canBePlaced(2, 0, farmData.farmColumns + 1, 1);
 
         Assertions.assertTrue(canBePlaced_1_0);
         Assertions.assertFalse(canBePlaced_Invalid1);
@@ -169,8 +156,8 @@ class FarmDataTest {
         boolean canBePlacedXL_1_2 = farmData.canBePlaced(1, 2, 2, 2);
         boolean canBePlacedXH_1_0 = farmData.canBePlaced(1, 0, 1, 2);
         boolean canBePlacedXL_0_3 = farmData.canBePlaced(0, 3, 2, 2);
-        boolean canBePlacedXH_0_3 = farmData.canBePlaced(0, 3, 1, FarmData.FARM_ROWS);
-        boolean canBePlacedXXH_0_3 = farmData.canBePlaced(0, 3, 1, FarmData.FARM_ROWS + 1);
+        boolean canBePlacedXH_0_3 = farmData.canBePlaced(0, 3, 1, farmData.farmRows);
+        boolean canBePlacedXXH_0_3 = farmData.canBePlaced(0, 3, 1, farmData.farmRows + 1);
 
         Assertions.assertFalse(canBePlaced_0_1);
         Assertions.assertFalse(canBePlaced_0_2);
@@ -233,9 +220,9 @@ class FarmDataTest {
         Assertions.assertNull(farmData.canBePicked(-1, -1)); // out of bounds
         Assertions.assertNull(farmData.canBePicked(0, -1)); // out of bounds
         Assertions.assertNull(farmData.canBePicked(-1, 0)); // out of bounds
-        Assertions.assertNull(farmData.canBePicked(0, FarmData.FARM_COLUMNS)); // out of bounds
-        Assertions.assertNull(farmData.canBePicked(FarmData.FARM_ROWS, 0)); // out of bounds
-        Assertions.assertNull(farmData.canBePicked(FarmData.FARM_ROWS, FarmData.FARM_COLUMNS)); // out of bounds
+        Assertions.assertNull(farmData.canBePicked(0, farmData.farmColumns)); // out of bounds
+        Assertions.assertNull(farmData.canBePicked(farmData.farmRows, 0)); // out of bounds
+        Assertions.assertNull(farmData.canBePicked(farmData.farmRows, farmData.farmColumns)); // out of bounds
 
         Assertions.assertEquals(finishedFarmItem, farmData.canBePicked(0, 1).getKey());
         Assertions.assertEquals(finishedFarmItem, farmData.canBePicked(0, 2).getKey());
@@ -249,7 +236,7 @@ class FarmDataTest {
     }
 
     @Test
-    void pickItemAtStartCoordinates() {
+    void testPickingItemAtStartCoordinates() {
         Item pickedItemMinus1 = farmData.pickItemAt(-1, -1);
         Item pickedItem1 = farmData.pickItemAt(0, 0);
         Item pickedItem2 = farmData.pickItemAt(1, 0);
@@ -264,12 +251,15 @@ class FarmDataTest {
         Assertions.assertEquals(finishedItem.name, pickedItem3.name);
 
         // Grow the 1st item so that it can be picked...
-        farmItem.growth = 1 + farmItem.getGrowthRate() * farmItem.getMaxGrowthStage();
+        farmItem.growth.set(1 + farmItem.getGrowthRate() * getMaxGrowthStageFor(farmItem));
         pickedItem1 = farmData.pickItemAt(0, 0);
 
         Assertions.assertEquals(item, pickedItem1);
         Assertions.assertEquals(item.id, pickedItem1.id);
         Assertions.assertEquals(item.name, pickedItem1.name);
+
+        int[] treePosition = farmData.positionForItem(finishedFarmItem);
+        farmData.destroyItemAt(treePosition[0], treePosition[1]);
 
         for (ArrayList<FarmItem> row : farmData.items) {
             for (FarmItem emptyItem : row) {
@@ -279,7 +269,7 @@ class FarmDataTest {
     }
 
     @Test
-    void pickItemAtAnyCoordinates() {
+    void testPickingItemAtAnyCoordinates() {
         // Coordinates of dummy FarmItem pointing to the real oversized FarmItem...
         Item pickedItem = farmData.pickItemAt(1, 2);
 
@@ -288,8 +278,11 @@ class FarmDataTest {
         Assertions.assertEquals(finishedItem.name, pickedItem.name);
 
         // Grow the 1st item so that it can be picked...
-        farmItem.growth = farmItem.getGrowthRate() * farmItem.getMaxGrowthStage();
+        farmItem.growth.set(farmItem.getGrowthRate() * getMaxGrowthStageFor(farmItem));
         Assertions.assertNotNull(farmData.pickItemAt(0, 0));
+
+        int[] treePosition = farmData.positionForItem(finishedFarmItem);
+        farmData.destroyItemAt(treePosition[0], treePosition[1]);
 
         for (ArrayList<FarmItem> row : farmData.items) {
             for (FarmItem emptyItem : row) {
@@ -299,36 +292,37 @@ class FarmDataTest {
     }
 
     @Test
-    void pickItem() {
+    void testPickingItem() {
         Item pickedItem0 = farmData.pickItem(null);
         Item pickedItem1 = farmData.pickItem(new FarmItem(finishedItem)); // FarmItem has not been placed onto the farm
-        Item pickedItem2 = farmData.pickItem(farmItem);
+        Item pickedItem2 = farmData.pickItem(farmItem); // FarmItem isn't fully grown
         Item pickedItem3 = farmData.pickItem(finishedFarmItem);
 
         Assertions.assertNull(pickedItem0);
         Assertions.assertNull(pickedItem1);
         Assertions.assertNull(pickedItem2);
+        Assertions.assertNotNull(pickedItem3);
 
         Assertions.assertEquals(finishedItem, pickedItem3);
         Assertions.assertEquals(finishedItem.id, pickedItem3.id);
         Assertions.assertEquals(finishedItem.name, pickedItem3.name);
 
-        // Grow the 1st item so that it can be picked...
-        farmItem.growth = farmItem.getGrowthRate() * farmItem.getMaxGrowthStage();
-        pickedItem2 = farmData.pickItem(farmItem);
+        int[] treePosition = farmData.positionForItem(finishedFarmItem);
+        farmData.destroyItemAt(treePosition[0], treePosition[1]);
 
-        Assertions.assertEquals(item, pickedItem2);
-        Assertions.assertEquals(item.id, pickedItem2.id);
-        Assertions.assertEquals(item.name, pickedItem2.name);
+        int[] itemPosition = farmData.positionForItem(farmItem);
+        farmData.destroyItemAt(itemPosition[0], itemPosition[1]);
 
-        Assertions.assertTrue(farmData.placeItem(finishedItem, 0.0, FarmData.FARM_ROWS - 2, FarmData.FARM_COLUMNS - 2));
-        finishedFarmItem = farmData.items.get(FarmData.FARM_ROWS - 2).get(FarmData.FARM_COLUMNS - 2);
-        finishedFarmItem.growth = finishedFarmItem.getGrowthRate() * finishedFarmItem.getMaxGrowthStage();
-        Item pickedItem4 = farmData.pickItem(finishedFarmItem);
+        for (ArrayList<FarmItem> row : farmData.items) {
+            for (FarmItem emptyItem : row) {
+                Assertions.assertNull(emptyItem);
+            }
+        }
 
-        Assertions.assertEquals(finishedItem, pickedItem4);
-        Assertions.assertEquals(finishedItem.id, pickedItem4.id);
-        Assertions.assertEquals(finishedItem.name, pickedItem4.name);
+        Assertions.assertTrue(farmData.placeItem(finishedItem, 0.1, farmData.farmRows - 2, farmData.farmColumns - 2));
+        finishedFarmItem = farmData.items.get(farmData.farmRows - 2).get(farmData.farmColumns - 2);
+        treePosition = farmData.positionForItem(finishedFarmItem);
+        farmData.destroyItemAt(treePosition[0], treePosition[1]);
 
         for (ArrayList<FarmItem> row : farmData.items) {
             for (FarmItem emptyItem : row) {
@@ -338,35 +332,32 @@ class FarmDataTest {
     }
 
     @Test
-    void testGettingGrowthDelegate() {
-        Assertions.assertNotEquals(customGrowthDelegate, farmData.getGrowthDelegate());
+    void testExpandingFarm() {
+        int expandBy = 2;
+
+        int oldRows = farmData.getNumberOfRows();
+        int expansionLevel = farmData.getExpansionLevel();
+
+        Assertions.assertEquals(0, expansionLevel);
+
+        farmData.expandFarm(expandBy);
+
+        int newRows = farmData.getNumberOfRows();
+        expansionLevel = farmData.getExpansionLevel();
+
+        Assertions.assertEquals(expandBy, expansionLevel);
+        Assertions.assertNotEquals(oldRows, newRows);
+        Assertions.assertEquals(newRows, oldRows + expandBy);
+        Assertions.assertEquals(farmData.farmRows, oldRows + expandBy);
     }
 
-    @Test
-    void testGrowthDelegateManipulation() {
-        Assertions.assertNotNull(farmData.getGrowthDelegate());
-
-        farmData.addGrowthDelegate(customGrowthDelegate);
-        Assertions.assertNotNull(farmData.getGrowthDelegate());
-
-        farmData.removeGrowthDelegate(customGrowthDelegate);
-        Assertions.assertNotNull(farmData.getGrowthDelegate());
-        Assertions.assertNotEquals(customGrowthDelegate, farmData.getGrowthDelegate());
+    /**
+     * Gets the max growth stage of the {@link FarmItem} from the {@link PlantComponent}.
+     *
+     * @return Max growth stage in the form of an {@code int}.
+     */
+    private int getMaxGrowthStageFor(FarmItem farmItem) {
+        return farmItem.get().getComponent(PlantComponent.class).maxGrowthStage;
     }
 
-    @Test
-    void testGrowthDelegate() {
-        customGrowthDelegate.accept(farmItem);
-        Assertions.assertEquals(farmItem, growthDelegateItem);
-
-        farmData.removeGrowthDelegate(customGrowthDelegate);
-        farmData.getGrowthDelegate().accept(finishedFarmItem);
-        Assertions.assertEquals(farmItem, growthDelegateItem);
-        Assertions.assertNotEquals(finishedFarmItem, growthDelegateItem);
-
-        farmData.addGrowthDelegate(customGrowthDelegate);
-        farmData.getGrowthDelegate().accept(finishedFarmItem);
-        Assertions.assertEquals(finishedFarmItem, growthDelegateItem);
-    }
-*/
 }

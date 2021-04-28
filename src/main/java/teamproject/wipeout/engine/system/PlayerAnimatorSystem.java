@@ -93,9 +93,13 @@ public class PlayerAnimatorSystem implements EventSystem {
      */
     private Consumer<GameEntity> remove = (entity) -> {
         if (this.listeningTo.containsKey(entity)) {
-            entity.getComponent(MovementComponent.class).facingDirectionChanged.removeObserver(this.listeningTo.remove(entity));
-            
-            entity.getComponent(RenderComponent.class).removeRenderable(this.spriteRenderables.remove(entity));
+            if (entity.hasComponent(MovementComponent.class)) {
+                entity.getComponent(MovementComponent.class).facingDirectionChanged.removeObserver(this.listeningTo.remove(entity));
+            }
+
+            if (entity.hasComponent(RenderComponent.class)) {
+                entity.getComponent(RenderComponent.class).removeRenderable(this.spriteRenderables.remove(entity));
+            }
         }
     };
 }

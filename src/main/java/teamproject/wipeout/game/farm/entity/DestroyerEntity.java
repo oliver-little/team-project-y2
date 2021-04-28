@@ -10,34 +10,21 @@ import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.item.components.PlantComponent;
 
 /**
- * Represents a tool for picking plants.
+ * Represents a tool for picking/destroying plants.
+ *
+ * @see GameEntity
  */
 public class DestroyerEntity extends GameEntity {
 
-    protected RectRenderable destroyerArea;
-
-    private boolean destroyMode;
+    private final RectRenderable destroyerArea;
+    private final boolean destroyMode;
 
     /**
      * Creates a new instance of {@code DestroyerEntity}.
      *
-     * @param scene The GameScene this entity is part of
-     */
-    public DestroyerEntity(GameScene scene) {
-        super(scene);
-
-        this.destroyerArea = new RectRenderable(Color.RED, FarmEntity.SQUARE_SIZE, FarmEntity.SQUARE_SIZE * FarmEntity.SKEW_FACTOR);
-        this.destroyerArea.radius = FarmEntity.SQUARE_SIZE / 3.0;
-        this.destroyerArea.alpha = 0.5;
-        destroyMode = false;
-
-        this.addComponent(new RenderComponent(this.destroyerArea));
-    }
-
-    /**
-     * Creates a new instance of {@code DestroyerEntity}.
-     * @param scene The GameScene this entity is part of
-     * @param destroyMode Specifies whether the entity a destroyer, TRUE for destroy, FALSE for harvest.
+     * @param scene       The {@link GameScene} this entity is part of
+     * @param destroyMode Specifies whether the entity is a destroyer or picker;
+     *                    {@code true} for destroyer, {@code false} for picker.
      */
     public DestroyerEntity(GameScene scene, boolean destroyMode) {
         super(scene);
@@ -51,6 +38,15 @@ public class DestroyerEntity extends GameEntity {
     }
 
     /**
+     * {@code destroyMode} getter
+     *
+     * @return {@code true} if the player is destroying an item or {@code false} if the player is harvesting an item.
+     */
+    public boolean getDestroyMode() {
+        return this.destroyMode;
+    }
+
+    /**
      * Sets green or red color for the entity based on a given argument.
      *
      * @param isPickable {@code true} for green. {@code true} for red.
@@ -60,63 +56,37 @@ public class DestroyerEntity extends GameEntity {
     }
 
     /**
-     * Adapts (= resizes and changes color) the {@code DestroyerEntity}
+     * Adapts(= resizes and changes color) the {@code DestroyerEntity}
      * to the {@code FarmItem} it is currently pointing to.
      *
-     * @param farmItemPair {@link Pair} of {@link FarmItem} and {@code Boolean}(= is grown?) that the entity
-     * is currently pointing to. Pass {@code null} to reset the {@code DestroyerEntity} to default state.
+     * @param farmItemPair {@link Pair} of {@link FarmItem} and {@code Boolean}(= is fully grown?) that the entity
+     *                     is currently pointing to. Pass {@code null} to reset the {@code DestroyerEntity} to default state.
      */
     public void adaptToFarmItem(Pair<FarmItem, Boolean> farmItemPair) {
         if (farmItemPair == null) {
             this.destroyerArea.color = Color.RED;
             this.resizeUsing(null);
+
         } else {
-            this.setColorForPickable(farmItemPair.getValue());
+            this.setColorForPickable(this.destroyMode || farmItemPair.getValue());
             this.resizeUsing(farmItemPair.getKey().get().getComponent(PlantComponent.class));
         }
     }
 
     /**
-     * Adapts (= resizes and changes color) the {@code DestroyerEntity}
-     * to the {@code FarmItem} it is currently pointing to.
-     * 
-     * Called for destroyer entities with the destroyMode of TRUE.
+     * Resizes the {@code DestroyerEntity} based on the given {@code PlantComponent}.
      *
-     * @param farmItemPair {@link Pair} of {@link FarmItem} and {@code Boolean}(= is grown?) that the entity
-     * is currently pointing to. Pass {@code null} to reset the {@code DestroyerEntity} to default state.
+     * @param plantComponent {@link PlantComponent} used for resizing.
+     *                       Pass {@code null} to reset the {@code DestroyerEntity} to default size.
      */
-    public void adaptToDestroyFarmItem(Pair<FarmItem, Boolean> farmItemPair) {
-        if (farmItemPair == null) {
-            this.destroyerArea.color = Color.RED;
-            this.resizeUsing(null);
-        } else {
-            this.setColorForPickable(true);
-            this.resizeUsing(farmItemPair.getKey().get().getComponent(PlantComponent.class));
-        }
-    }
-
-    /**
-     * Resizes the {@code DestroyerEntity} based on a given {@code PlantComponent}.
-     *
-     * @param plant {@link PlantComponent} used for resizing.
-     * Pass {@code null} to reset the {@code DestroyerEntity} to default size.
-     */
-    protected void resizeUsing(PlantComponent plant) {
-        if (plant == null || (plant.width == 1  && plant.height == 1)) {
+    private void resizeUsing(PlantComponent plantComponent) {
+        if (plantComponent == null) {
             this.destroyerArea.width = FarmEntity.SQUARE_SIZE;
-            this.destroyerArea.height = FarmEntity.SQUARE_SIZE * FarmEntity.SKEW_FACTOR;
+            this.destroyerArea.height = FarmEntity.SQUARE_SIZE;
             return;
         }
-        this.destroyerArea.width = plant.width * FarmEntity.SQUARE_SIZE;
-        this.destroyerArea.height = plant.height * FarmEntity.SQUARE_SIZE;
-    }
-
-    /**
-     * Getter for destroy mode.
-     * @return {@code true} if the player is destroying an item or {@code false} if the player is harvesting an item.
-     */
-    public boolean getDestroyMode() {
-        return this.destroyMode;
+        this.destroyerArea.width = plantComponent.width * FarmEntity.SQUARE_SIZE;
+        this.destroyerArea.height = plantComponent.height * FarmEntity.SQUARE_SIZE * FarmEntity.SKEW_FACTOR;
     }
 
 }
