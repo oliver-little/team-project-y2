@@ -73,6 +73,7 @@ public class GameOverUI extends StackPane {
         title.setFont(Font.font("Kalam", 80));
 
         leaderboard = new Leaderboard(players);
+        leaderboard.setAlignment(Pos.CENTER);
 
         Button closeButton = new Button("Go back to menu");
         closeButton.setOnAction(e -> this.endGame());
