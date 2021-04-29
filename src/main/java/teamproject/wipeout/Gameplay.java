@@ -269,6 +269,7 @@ public class Gameplay implements Controller {
             this.worldEntity.setClockSupplier(() -> clockSystem);
 
         	leaderboardBox.getChildren().addAll(title, leaderboard);
+        	leaderboardBox.setMouseTransparent(true);
             this.interfaceOverlay.getChildren().addAll(leaderboardBox);
             
             // UI Overlay
@@ -284,6 +285,7 @@ public class Gameplay implements Controller {
         } else if (this.gameMode == GameMode.WEALTH_MODE) {
 
         	leaderboardBox.getChildren().addAll(title, target, leaderboard);
+        	leaderboardBox.setMouseTransparent(true);
             this.interfaceOverlay.getChildren().addAll(leaderboardBox);
         	
             // UI Overlay

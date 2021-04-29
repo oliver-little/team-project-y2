@@ -16,7 +16,7 @@ public class Leaderboard extends VBox
     private static final String[] ORDINAL_STRINGS = new String[]{"1st", "2nd", "3rd", "4th", "5th", "6th"};
     
 	public Leaderboard(List<Player> players) {
-		
+			
 		this.list = new ListView<>();
         list.setMaxWidth(180);
         list.setMaxHeight(100);
