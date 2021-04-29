@@ -242,38 +242,57 @@ public class Gameplay implements Controller {
         
         this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI);
         
+    	VBox leaderboardBox = new VBox();
+        Text title = UIUtil.createTitle("Leaderboard:");
+        title.setFont(Font.font("Kalam", 30));
+        
+        Text target = UIUtil.createTitle("Target: $"+wealthTarget);
+        target.setFont(Font.font("Kalam", 20));
+        
+    	Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
+    	leaderboard.setAlignment(Pos.CENTER_RIGHT);
+    	leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
+
+        
         //Clock UI / System
         if(this.gamemode==Gamemode.TIME_MODE) {
             ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
             this.systemUpdater.addSystem(clockSystem);
             this.worldEntity.setClockSupplier(() -> clockSystem);
 
+        	leaderboardBox.getChildren().addAll(title, leaderboard);
+            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
+            
             // UI Overlay
-            VBox rightUI = this.createRightUIOverlay(clockSystem.clockUI, settingsUI);
-            this.interfaceOverlay.getChildren().addAll(rightUI);
+            VBox topRight = new VBox(2);
+            topRight.setAlignment(Pos.TOP_RIGHT);
+            topRight.setPickOnBounds(false);
+            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+            topRight.getChildren().addAll(clockSystem.clockUI, settingsUI);
+            this.interfaceOverlay.getChildren().addAll(topRight);
+            
         }
         else if(gamemode==Gamemode.WEALTH_MODE) {
-        	// TODO FIX settings UI for wealth mode
-            // UI Overlay
-            //VBox rightUI = this.createRightUIOverlay(null, settingsUI);
-        	VBox leaderboardBox = new VBox();
-            Text title = UIUtil.createTitle("Leaderboard:");
-            title.setFont(Font.font("Kalam", 30));
-            
-            Text target = UIUtil.createTitle("Target: $"+wealthTarget);
-            target.setFont(Font.font("Kalam", 20));
-            
-        	Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
-        	leaderboard.setAlignment(Pos.CENTER_RIGHT);
-        	leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
+
         	leaderboardBox.getChildren().addAll(title, target, leaderboard);
             this.interfaceOverlay.getChildren().addAll(leaderboardBox);
         	
+            // UI Overlay
+            VBox topRight = new VBox(1);
+            topRight.setAlignment(Pos.TOP_RIGHT);
+            topRight.setPickOnBounds(false);
+            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+            topRight.getChildren().addAll(settingsUI);
+            this.interfaceOverlay.getChildren().addAll(topRight);
+            
+        	// checks if any player has reacher money target
         	for (Player p : worldEntity.getPlayers()) {
         		p.moneyProperty().addListener((event) -> {
-        			leaderboard.update(worldEntity.getPlayers());
             		if(p.moneyProperty().get()>=wealthTarget) {
-            			//System.out.println(p.playerName+" has reached $"+wealthTarget);
             			this.onGameEnd().run();
             			//Stops game end being called multiple times 
             			wealthTarget=Double.MAX_VALUE;
@@ -281,6 +300,13 @@ public class Gameplay implements Controller {
             	});
         	}
         }
+        
+        //updates leaderboard when any player's money changes
+    	for (Player p : worldEntity.getPlayers()) {
+    		p.moneyProperty().addListener((event) -> {
+    			leaderboard.update(worldEntity.getPlayers());
+        	});
+    	}
 
 
         // Setup networking if possible
