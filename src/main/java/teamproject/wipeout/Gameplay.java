@@ -217,10 +217,6 @@ public class Gameplay implements Controller {
         MoneyUI moneyUI = new MoneyUI(currentPlayer);
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
-        // Task UI
-        TaskUI taskUI = new TaskUI(currentPlayer);
-        StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
-        currentPlayer.setTaskUI(taskUI);
 
         // Settings UI
         Runnable returnToMenu = () -> {
@@ -240,7 +236,7 @@ public class Gameplay implements Controller {
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu);
 
         
-        this.interfaceOverlay.getChildren().addAll(inventoryUI, taskUI, moneyUI);
+        this.interfaceOverlay.getChildren().addAll(inventoryUI, moneyUI);
         
     	VBox leaderboardBox = new VBox();
         Text title = UIUtil.createTitle("Leaderboard:");
@@ -308,6 +304,13 @@ public class Gameplay implements Controller {
         	});
     	}
 
+    	
+        // Task UI
+        TaskUI taskUI = new TaskUI(currentPlayer);
+        StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
+        currentPlayer.setTaskUI(taskUI);
+        
+        this.interfaceOverlay.getChildren().addAll(taskUI);
 
         // Setup networking if possible
         if (this.networker != null) {
