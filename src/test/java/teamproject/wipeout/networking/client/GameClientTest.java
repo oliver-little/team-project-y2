@@ -3,6 +3,7 @@ package teamproject.wipeout.networking.client;
 import javafx.collections.MapChangeListener;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
+import teamproject.wipeout.GameMode;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;
@@ -55,14 +56,14 @@ class GameClientTest {
     @BeforeAll
     void initializeGameClient() throws IOException, InterruptedException, ReflectiveOperationException {
         this.spriteManager = new SpriteManager();
-        this.spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+        this.spriteManager.loadSpriteSheet("player/player-one-female-descriptor.json", "player/player-one-female.png");
 
         this.gameScene = new GameScene();
         Pair<Integer, String> playerInfo = new Pair<Integer, String>(CLIENT_ID, "Test");
         this.clientPlayer = new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
         this.newPlayers = new HashSet<>();
 
-        this.gameServer = new GameServer(SERVER_NAME);
+        this.gameServer = new GameServer(SERVER_NAME, GameMode.TIME_MODE, 1_000);
         this.gameServer.startClientSearch();
 
         ServerDiscovery serverDiscovery = new ServerDiscovery();
@@ -97,7 +98,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testOpeningConnection() {
         try {
-            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName, null);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -119,7 +120,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testClosingConnection() {
         try {
-            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName, null);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -146,7 +147,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testSendingUpdates() {
         try {
-            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName, null);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -164,7 +165,7 @@ class GameClientTest {
             Thread.sleep(CATCHUP_TIME); // time for the client to disconnect
             Assertions.assertTrue(this.gameClient.connectedClients.isEmpty());
 
-            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName, null);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -184,7 +185,7 @@ class GameClientTest {
     @Timeout(value = 1, unit = TimeUnit.SECONDS)
     void testReceivingOthersDisconnect() {
         try {
-            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName);
+            this.gameClient = GameClient.openConnection(this.serverAddress, this.clientPlayer.playerName, null);
             Assertions.assertNotNull(this.gameClient);
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
@@ -192,7 +193,7 @@ class GameClientTest {
             Pair<Integer, String> playerInfo = new Pair<Integer, String>(DUMMY_CLIENT_ID, "TestLast");
             Player secondPlayer = new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
             this.playerWaitingForFarmID = secondPlayer;
-            GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer.playerName);
+            GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer.playerName, null);
             this.clientWaitingForFarmID = secondClient;
             Assertions.assertNotNull(secondClient);
 

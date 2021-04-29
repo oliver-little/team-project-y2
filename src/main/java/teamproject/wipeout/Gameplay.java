@@ -59,7 +59,8 @@ import teamproject.wipeout.game.task.TasksHelper;
 import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
-import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.networking.data.InitContainer;
+import teamproject.wipeout.networking.Networker;
 import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
 
 import java.io.IOException;
@@ -79,15 +80,15 @@ public class Gameplay implements Controller {
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
 
-    private int numberOfSingleplayers = 4;
-    private Gamemode gamemode;
-    private double gameTime = 200.0;
-    private double wealthTarget = 100;
+    private final long gameDuration;
+    private final GameMode gameMode;
+    private final long wealthTarget;
     private final long gameStartTime;
 
     private final PlayerSpriteSheetManager playerSpriteSheetManager;
     private final Pair<Integer, String> playerInfo;
     private final String playerSpriteSheet;
+    private final int farmID;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
@@ -114,23 +115,25 @@ public class Gameplay implements Controller {
     private final Networker networker;
 
 
-    public Gameplay(Networker networker, Long givenGameStartTime, Pair<Integer, String> playerInfo, Map<String, KeyCode> bindings, Gamemode gamemode, double gamemodeValue) {
+    public Gameplay(Networker networker, Long givenGameStartTime, InitContainer initContainer, String playerName, Map<String, KeyCode> bindings) {
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
-        if (playerInfo == null) {
+        if (playerName == null) {
             this.playerInfo = new Pair<Integer, String>(new Random().nextInt(1024), CurrentPlayer.DEFAULT_NAME);
+            this.farmID = 1;
         } else {
-            this.playerInfo = playerInfo;
+            this.playerInfo = new Pair<Integer, String>(initContainer.getClientID(), playerName);
+            this.farmID = initContainer.getFarmID();
         }
         
-        this.gamemode = gamemode;
-        if(gamemode==Gamemode.TIME_MODE) {
-        	this.gameTime = gamemodeValue;
-        }
-        else if(gamemode==Gamemode.WEALTH_MODE) {
-        	//this.gameTime=Double.MAX_VALUE;
-        	this.wealthTarget=gamemodeValue;
-        	
+        this.gameMode = initContainer.getGameMode();
+        if (this.gameMode == GameMode.WEALTH_MODE) {
+            this.gameDuration = -1;
+        	this.wealthTarget = initContainer.getGameModeValue();
+
+        } else {
+            this.gameDuration = initContainer.getGameModeValue();
+            this.wealthTarget = -1;
         }
 
         if (networker == null) {
@@ -138,7 +141,7 @@ public class Gameplay implements Controller {
             this.playerSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
         } else {
             this.playerSpriteSheetManager = null;
-            this.playerSpriteSheet = null;
+            this.playerSpriteSheet = initContainer.getClientSpriteSheet();
         }
 
         this.focusListener = null;
@@ -218,9 +221,6 @@ public class Gameplay implements Controller {
             this.networker.setWorldEntity(this.worldEntity);
         }
 
-        // Game Audio
-        
-
         // Inventory UI
         InventoryUI inventoryUI = new InventoryUI(this.spriteManager, this.itemStore);
         currentPlayer.setInventoryUI(inventoryUI);
@@ -263,8 +263,8 @@ public class Gameplay implements Controller {
 
         
         //Clock UI / System
-        if(this.gamemode==Gamemode.TIME_MODE) {
-            ClockSystem clockSystem = new ClockSystem(this.gameTime, this.gameStartTime, this.onGameEnd());
+        if (this.gameMode == GameMode.TIME_MODE) {
+            ClockSystem clockSystem = new ClockSystem(this.gameDuration, this.gameStartTime, this.onGameEnd());
             this.systemUpdater.addSystem(clockSystem);
             this.worldEntity.setClockSupplier(() -> clockSystem);
 
@@ -281,8 +281,7 @@ public class Gameplay implements Controller {
             topRight.getChildren().addAll(clockSystem.clockUI, settingsUI);
             this.interfaceOverlay.getChildren().addAll(topRight);
             
-        }
-        else if(gamemode==Gamemode.WEALTH_MODE) {
+        } else if (this.gameMode == GameMode.WEALTH_MODE) {
 
         	leaderboardBox.getChildren().addAll(title, target, leaderboard);
             this.interfaceOverlay.getChildren().addAll(leaderboardBox);
@@ -297,13 +296,11 @@ public class Gameplay implements Controller {
             topRight.getChildren().addAll(settingsUI);
             this.interfaceOverlay.getChildren().addAll(topRight);
             
-        	// checks if any player has reacher money target
-        	for (Player p : worldEntity.getPlayers()) {
-        		p.moneyProperty().addListener((event) -> {
-            		if(p.moneyProperty().get()>=wealthTarget) {
+        	// checks if any player has reached money target
+        	for (Player p : this.worldEntity.getPlayers()) {
+        		p.moneyProperty().addListener((ChangeListener<? super Number>) (observable, oldVal, newVal) -> {
+            		if (newVal.longValue() >= this.wealthTarget) {
             			this.onGameEnd().run();
-            			//Stops game end being called multiple times 
-            			wealthTarget=Double.MAX_VALUE;
             		}
             	});
         	}
@@ -311,12 +308,9 @@ public class Gameplay implements Controller {
         
         //updates leaderboard when any player's money changes
     	for (Player p : worldEntity.getPlayers()) {
-    		p.moneyProperty().addListener((event) -> {
-    			leaderboard.update(worldEntity.getPlayers());
-        	});
+    		p.moneyProperty().addListener((event) -> leaderboard.update(worldEntity.getPlayers()));
     	}
 
-    	
         // Task UI
         TaskUI taskUI = new TaskUI(currentPlayer);
         StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
@@ -329,7 +323,7 @@ public class Gameplay implements Controller {
             this.setupNetworking();
 
         } else { // else setup a default farm for the current player
-            this.worldEntity.setFarmFor(currentPlayer, null);
+            this.worldEntity.setRandomFarmFor(currentPlayer);
         }
 
         //currentPlayer.acquireItem(6, 98); //for checking stack/inventory limits
@@ -523,12 +517,10 @@ public class Gameplay implements Controller {
         }));
 
         currentClient.addCurrentPlayer(myCurrentPlayer);
-        currentClient.farmEntities = this.worldEntity.farms;
+        currentClient.setFarmEntities(this.worldEntity.farms);
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
 
-        myCurrentPlayer.setSpriteSheetName(currentClient.currentPlayerSpriteSheet, true);
-
-        FarmEntity myFarm = this.worldEntity.farms.get(currentClient.myFarmID);
+        FarmEntity myFarm = this.worldEntity.farms.get(this.farmID);
         this.worldEntity.setFarmFor(myCurrentPlayer, myFarm);
 
         currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
@@ -552,7 +544,6 @@ public class Gameplay implements Controller {
         worldPack.put("spriteManager", this.spriteManager);
         worldPack.put("gameScene", this.gameScene);
         worldPack.put("inputHandler", this.inputHandler);
-        worldPack.put("players", this.numberOfSingleplayers);
         worldPack.put("currentPlayer", currentPlayer);
         worldPack.put("marketEntity", marketEntity);
         worldPack.put("singleplayer", this.networker == null);

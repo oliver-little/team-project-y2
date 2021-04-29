@@ -2,6 +2,7 @@ package teamproject.wipeout.networking.client;
 
 import javafx.collections.MapChangeListener;
 import org.junit.jupiter.api.*;
+import teamproject.wipeout.GameMode;
 import teamproject.wipeout.networking.server.GameServer;
 
 import java.io.IOException;
@@ -61,7 +62,7 @@ class ServerDiscoveryTest {
     void testFindingGameServer() {
         String testServerName = "TestServer#123";
         try {
-            GameServer gameServer = new GameServer(testServerName);
+            GameServer gameServer = new GameServer(testServerName, GameMode.TIME_MODE, 1_000);
             gameServer.startClientSearch();
 
             this.serverDiscovery.startLookingForServers();
@@ -89,7 +90,7 @@ class ServerDiscoveryTest {
     void testLoosingGameServer() {
         String testServerName = "TestServer#456";
         try {
-            GameServer gameServer = new GameServer(testServerName);
+            GameServer gameServer = new GameServer(testServerName, GameMode.TIME_MODE, 1_000);
             gameServer.startClientSearch();
 
             this.serverDiscovery.startLookingForServers();

@@ -17,6 +17,8 @@ import java.util.function.Consumer;
  */
 public class FarmData implements StateUpdatable<FarmState> {
 
+    public static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
+
     public final Integer farmID;
     public final Integer playerID;
 

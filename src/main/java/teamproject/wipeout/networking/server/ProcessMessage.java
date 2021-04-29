@@ -15,10 +15,6 @@ public enum ProcessMessage implements Serializable {
 
     public final String rawValue;
 
-    ProcessMessage(String message) {
-        this.rawValue = message;
-    }
-
     /**
      * Creates a {@code ProcessMessage} from the given {@code String} raw value.
      *
@@ -26,11 +22,16 @@ public enum ProcessMessage implements Serializable {
      * @return {@code ProcessMessage} or, {@code null} if the raw value does not match the default ones
      */
     public static ProcessMessage fromRawValue(String rawValue) {
-        for (ProcessMessage message : values()) {
+        for (ProcessMessage message : ProcessMessage.values()) {
             if (message.rawValue.equals(rawValue)) {
                 return message;
             }
         }
         return null;
     }
+
+    ProcessMessage(String message) {
+        this.rawValue = message;
+    }
+
 }

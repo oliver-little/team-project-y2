@@ -7,7 +7,7 @@ import teamproject.wipeout.game.item.components.TradableComponent;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
-import teamproject.wipeout.networking.state.MarketOperationRequest;
+import teamproject.wipeout.networking.data.MarketOperationRequest;
 import teamproject.wipeout.networking.state.MarketState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 
@@ -210,7 +210,7 @@ public class Market implements StateUpdatable<MarketState> {
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            client.send(new GameUpdate(GameUpdateType.REQUEST, client.getID(), request));
+            client.send(new GameUpdate(GameUpdateType.REQUEST, client.getClientID(), request));
         }
     }
 

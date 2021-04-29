@@ -76,15 +76,6 @@ public class PlayerState extends GameEntityState {
     }
 
     /**
-     * {@code spriteSheet} setter
-     *
-     * @param newSpriteSheet New {@code String} value of player's sprite sheet
-     */
-    public void setSpriteSheet(String newSpriteSheet) {
-        this.spriteSheet = newSpriteSheet;
-    }
-
-    /**
      * {@code money} getter
      *
      * @return {@code Double} value of player's money balance

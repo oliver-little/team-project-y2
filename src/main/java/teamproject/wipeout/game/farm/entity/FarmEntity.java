@@ -49,6 +49,11 @@ import java.util.function.Supplier;
  */
 public class FarmEntity extends GameEntity {
 
+    public static final Point2D[] FARM_POSITIONS = new Point2D[]{
+            new Point2D(220, 240), new Point2D(981, 240),
+            new Point2D(220, 800), new Point2D(981, 800)
+    };
+
     public static final int MAX_EXPANSION_SIZE = 5;
     public static final int SQUARE_SIZE = 32;
     public static final double SKEW_FACTOR = 0.89;
@@ -1015,7 +1020,7 @@ public class FarmEntity extends GameEntity {
 
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.getID(), this.data.getCurrentState()));
+            client.send(new GameUpdate(GameUpdateType.FARM_STATE, client.getClientID(), this.data.getCurrentState()));
         }
     }
 

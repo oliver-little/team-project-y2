@@ -17,13 +17,13 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
+import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.farm.Pickables;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.Market;
-import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.AIPlayer;
 import teamproject.wipeout.game.player.AIPlayerHelper;
@@ -39,6 +39,7 @@ import teamproject.wipeout.networking.state.WorldState;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
@@ -51,6 +52,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public final CurrentPlayer myCurrentPlayer;
 	public final AnimalEntity myAnimal;
+	public final ArrayList<Integer> availableFarmIDs;
 	public final Map<Integer, FarmEntity> farms;
 	public final Pickables pickables;
 
@@ -74,6 +76,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.spriteManager = (SpriteManager) worldPack.get("spriteManager");
 		this.itemStore = (ItemStore) worldPack.get("itemStore");
 
+		this.availableFarmIDs = new ArrayList<Integer>(Arrays.asList(FarmData.ALL_FARM_IDS));
 		this.farms = new HashMap<Integer, FarmEntity>();
 		this.pickables = new Pickables(this.scene, this.spriteManager, this.itemStore);
 		this.pickables.setOnUpdate(() -> this.sendStateUpdate());
@@ -106,8 +109,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.aiPlayerHelper = new AIPlayerHelper(this.marketEntity.getMarket());
 
 		// Farms
-		Integer numberOfPlayers = (Integer) worldPack.get("players");
-		this.createFarmsFor(numberOfPlayers);
+		this.createFarms();
 
 		// AI
         this.navMesh = NavigationMesh.generateMesh(
@@ -147,15 +149,22 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	public void setFarmFor(Player player, FarmEntity farm) {
-		FarmEntity playerFarm = farm == null ? this.farms.get(1) : farm;
-
-		this.setPositionForPlayer(player, playerFarm);
-
-		player.assignFarm(playerFarm);
-		playerFarm.assignPlayer(player.playerID, true, this.clientSupplier);
+		this.setPositionForPlayer(player, farm);
+		player.assignFarm(farm);
+		farm.assignPlayer(player.playerID, true, this.clientSupplier);
 	}
 
-	public void setFarmFor(AIPlayer aiPlayer, FarmEntity farm) {
+	public void setRandomFarmFor(CurrentPlayer player) {
+		FarmEntity farm = this.getRandomFarm();
+
+		this.setPositionForPlayer(player, farm);
+		player.assignFarm(farm);
+		farm.assignPlayer(player.playerID, true, this.clientSupplier);
+	}
+
+	public void setRandomFarmFor(AIPlayer aiPlayer) {
+		FarmEntity farm = this.getRandomFarm();
+
 		Point2D[] corners = this.setPositionForPlayer(aiPlayer, farm);
 		aiPlayer.setDesignatedMarketPoint(corners[0]);
 		aiPlayer.assignFarm(farm, corners[1]);
@@ -291,30 +300,25 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		}
 	}
 
-	private void createFarmsFor(int numberOfPlayers) {
+	private void createFarms() {
 		try {
-			if (numberOfPlayers == 4) {
-				FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
-				FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 240), this.pickables, this.spriteManager, this.itemStore);
-				FarmEntity farmEntity3 = new FarmEntity(this.scene, 3, new Point2D(220, 800), this.pickables, this.spriteManager, this.itemStore);
-				FarmEntity farmEntity4 = new FarmEntity(this.scene, 4, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
+			for (int i = 0; i < this.availableFarmIDs.size(); i++) {
+				int farmID = this.availableFarmIDs.get(i);
+				Point2D farmPosition = FarmEntity.FARM_POSITIONS[i];
 
-				this.farms.put(farmEntity1.farmID, farmEntity1);
-				this.farms.put(farmEntity2.farmID, farmEntity2);
-				this.farms.put(farmEntity3.farmID, farmEntity3);
-				this.farms.put(farmEntity4.farmID, farmEntity4);
-
-			} else if (numberOfPlayers == 2) {
-				FarmEntity farmEntity1 = new FarmEntity(this.scene, 1, new Point2D(220, 240), this.pickables, this.spriteManager, this.itemStore);
-				FarmEntity farmEntity2 = new FarmEntity(this.scene, 2, new Point2D(981, 800), this.pickables, this.spriteManager, this.itemStore);
-
-				this.farms.put(farmEntity1.farmID, farmEntity1);
-				this.farms.put(farmEntity2.farmID, farmEntity2);
+				FarmEntity farmEntity = new FarmEntity(this.scene, farmID, farmPosition, this.pickables, this.spriteManager, this.itemStore);
+				this.farms.put(farmID, farmEntity);
 			}
 
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}
+	}
+
+	private FarmEntity getRandomFarm() {
+		int randIndex = ThreadLocalRandom.current().nextInt(this.availableFarmIDs.size());
+		Integer farmID = this.availableFarmIDs.remove(randIndex);
+		return this.farms.get(farmID);
 	}
 
 	private AnimalEntity createAnimalAt(Point2D startPoint) {
@@ -332,13 +336,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	}
 
 	private void createAIPlayers() {
-		for (int i = 2; i < 5; i++) {
-			Pair<Integer, String> playerInfo = new Pair<Integer, String>(i, AIPlayer.AI_NAMES[i - 2]);
+		for (int i = 0; i < AIPlayer.AI_NAMES.length; i++) {
+			Pair<Integer, String> playerInfo = new Pair<Integer, String>(i, AIPlayer.AI_NAMES[i]);
 			String playerSpriteSheet = this.playerSpriteSheetSupplier == null ? null : this.playerSpriteSheetSupplier.get();
 			AIPlayer aiPlayer = new AIPlayer(this.scene, playerInfo, playerSpriteSheet, this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
-			this.setFarmFor(aiPlayer, this.farms.get(i));
+			this.setRandomFarmFor(aiPlayer);
 
 			this.players.add(aiPlayer);
 		}
@@ -365,7 +369,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		GameClient client = this.clientSupplier.get();
 		if (client != null) {
-			client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getID(), this.getCurrentState()));
+			client.send(new GameUpdate(GameUpdateType.WORLD_STATE, client.getClientID(), this.getCurrentState()));
 		}
 	}
 

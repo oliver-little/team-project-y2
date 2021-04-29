@@ -29,7 +29,6 @@ import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -330,7 +329,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.getID(), this.animalState));
+            client.send(new GameUpdate(GameUpdateType.ANIMAL_STATE, client.getClientID(), this.animalState));
         }
     }
 

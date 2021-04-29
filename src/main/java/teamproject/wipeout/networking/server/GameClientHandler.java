@@ -2,6 +2,7 @@ package teamproject.wipeout.networking.server;
 
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.threads.BackgroundThread;
 
@@ -36,18 +37,20 @@ public class GameClientHandler {
     /**
      * Default initializer for {@code GameClientHandler}
      *
-     * @param socket      {@link Socket} representing the connection with the client
-     * @param serverID    ID of the server
-     * @param clientInfo  ID of the client and ID of client's farm
-     * @param updater     {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @param socket            {@link Socket} representing the connection with the client
+     * @param server            Current {@link GameServer} instance
+     * @param clientInfo        ID of the client and ID of client's farm
+     * @param clientSpriteSheet Chosen sprite sheet for the client
+     * @param updater           {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
      * @throws IOException               Thrown when the {@code Socket} cannot be read from(= get updates) or written to(= send updates).
      * @throws ClassNotFoundException    Problem with reading data received from the client.
      * @throws ClientConnectionException Problem with connecting the client.
      */
-    protected GameClientHandler(Socket socket, Integer serverID, int[] clientInfo, GameUpdateHandler updater)
+    protected GameClientHandler(Socket socket, GameServer server, int[] clientInfo, String clientSpriteSheet, GameUpdateHandler updater)
             throws IOException, ClassNotFoundException, ClientConnectionException {
 
-        Integer clientID = clientInfo[0];
+        int clientID = clientInfo[0];
+        int farmID = clientInfo[1];
 
         this.clientSocket = socket;
 
@@ -57,21 +60,24 @@ public class GameClientHandler {
         this.in = new ObjectInputStream(this.clientSocket.getInputStream());
 
         // Accept connection
-        this.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, serverID, clientID));
+        InitContainer initContainer = new InitContainer(server.gameMode, server.gameModeValue, clientID, farmID, clientSpriteSheet);
+        this.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, server.id, initContainer));
         this.out.flush();
 
         // Client ID is sent by the client -> sitting in the input stream
         GameUpdate handshake = (GameUpdate) this.in.readObject();
+
         if (handshake.type != GameUpdateType.ACCEPT) {
             throw new ClientConnectionException("Client did not accept connection");
         }
-        if (!clientID.equals(handshake.originID)) {
+
+        if (clientID != handshake.originID) {
             throw new ClientConnectionException("Client connection has been altered");
         }
 
         this.clientID = clientID;
         this.clientName = (String) handshake.content;
-        this.farmID = clientInfo[1];
+        this.farmID = farmID;
 
         this.updater = updater;
     }
@@ -79,18 +85,19 @@ public class GameClientHandler {
     /**
      * Initializes {@link GameClientHandler} and processes the initial {@link PlayerState} of the newly connected client.
      *
-     * @param socket      {@link Socket} representing the connection with the client
-     * @param serverID    ID of the server
-     * @param clientInfo  ID of the client and ID of client's farm
-     * @param updater     {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @param socket            {@link Socket} representing the connection with the client
+     * @param server            Current {@link GameServer} instance
+     * @param clientInfo        ID of the client and ID of client's farm
+     * @param clientSpriteSheet Chosen sprite sheet for the client
+     * @param updater           {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
      * @throws IOException            Thrown when the {@code Socket} cannot be read from(= get updates)
      *                                or written to(= send updates).
      * @throws ClassNotFoundException Problem with reading data received from the client.
      */
-    static public GameClientHandler allowConnection(Socket socket, Integer serverID, int[] clientInfo, GameUpdateHandler updater)
+    static public GameClientHandler allowConnection(Socket socket, GameServer server, int[] clientInfo, String clientSpriteSheet, GameUpdateHandler updater)
             throws IOException, ClassNotFoundException, ClientConnectionException {
 
-        GameClientHandler newInstance = new GameClientHandler(socket, serverID, clientInfo, updater);
+        GameClientHandler newInstance = new GameClientHandler(socket, server, clientInfo, clientSpriteSheet, updater);
 
         newInstance.startReceivingUpdates();
 

@@ -1,14 +1,16 @@
 package teamproject.wipeout.networking.server;
 
 import javafx.util.Pair;
+import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.data.MarketOperationRequest;
 import teamproject.wipeout.networking.state.AnimalState;
 import teamproject.wipeout.networking.state.FarmState;
-import teamproject.wipeout.networking.state.MarketOperationRequest;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
 import teamproject.wipeout.util.threads.BackgroundThread;
@@ -41,11 +43,10 @@ public class GameServer {
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
     public static final int MAX_CONNECTIONS = 4;
 
-    // Constants important only for the game server
-    private static final Integer[] ALL_FARM_IDS = new Integer[]{1, 2, 3, 4};
-
     public final Integer id;
     public final String name;
+    public final GameMode gameMode;
+    public final long gameModeValue;
     public final short serverPort;
 
     protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
@@ -69,16 +70,47 @@ public class GameServer {
     private ServerThread newConnectionsThread;
 
     /**
+     * Executed when the child process that is supposed to run the {@code GameServer} is started.
+     *
+     * @param args {@code String[]} containing the GameServer's name, gameplay duration and game mode
+     */
+    public static void main(String[] args) {
+        try {
+            // Create a GameServer
+            String serverName = args[0];
+            GameMode gameMode = GameMode.fromName(args[1]);
+            long gameModeValue = Long.parseLong(args[2]);
+
+            GameServer server = new GameServer(serverName, gameMode, gameModeValue);
+
+            // Start multicasting the server's IP address and accepting new client connections
+            server.startClientSearch();
+
+            // Listen to the child process' input(= ProcessMessages send by the parent process)
+            server.listenToProcessMessages();
+
+        } catch (IOException | ReflectiveOperationException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    /**
      * Default initializer for {@code GameServer}.
      * The server is created, starts accepting new connections and serving them.
      *
-     * @param name Name we want to give to the {@code GameServer}.
+     * @param name          Name we want to give to the {@code GameServer}.
+     * @param gameMode      Chosen {@link GameMode}
+     * @param gameModeValue Duration of the gameplay
      * @throws IOException                  Network problem / No available ports
      * @throws ReflectiveOperationException Problem with "items.json" file of the server market
      */
-    public GameServer(String name) throws IOException, ReflectiveOperationException {
+    public GameServer(String name, GameMode gameMode, long gameModeValue)
+            throws IOException, ReflectiveOperationException {
+
         this.id = name.hashCode();
         this.name = name;
+        this.gameMode = gameMode;
+        this.gameModeValue = gameModeValue;
 
         // Look for available port
         ServerSocket interimServerSocket = null;
@@ -99,7 +131,7 @@ public class GameServer {
         this.serverSocket = interimServerSocket;
 
         this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
-        this.availableFarms = new AtomicReference<ArrayList<Integer>>(new ArrayList<Integer>(Arrays.asList(ALL_FARM_IDS)));
+        this.availableFarms = new AtomicReference<ArrayList<Integer>>(new ArrayList<Integer>(Arrays.asList(FarmData.ALL_FARM_IDS)));
         this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
         this.farmStates = new AtomicReference<HashMap<Integer, FarmState>>(new HashMap<Integer, FarmState>());
         this.animalState = new AtomicReference<Pair<Integer, AnimalState>>(null);
@@ -128,28 +160,6 @@ public class GameServer {
         this.newConnectionsThread = null;
 
         this.handleNewConnections();
-    }
-
-    /**
-     * Executed when the child process that is supposed to run the {@code GameServer} is started.
-     *
-     * @param args {@code String[]} containing only the GameServer's name
-     */
-    public static void main(String[] args) {
-        try {
-            // Create a GameServer
-            String serverName = args[0];
-            GameServer server = new GameServer(serverName);
-
-            // Start multicasting the server's IP address and accepting new client connections
-            server.startClientSearch();
-
-            // Listen to the child process' input(= ProcessMessages send by the parent process)
-            server.listenToProcessMessages();
-
-        } catch (IOException | ReflectiveOperationException exception) {
-            exception.printStackTrace();
-        }
     }
 
     /**
@@ -303,7 +313,7 @@ public class GameServer {
     }
 
     /**
-     * Synchronize gameplay clocks across clients.
+     * Synchronize gameplay clocks across clients, which also starts the game.
      */
     private void calibrateClocks() {
         try {
@@ -371,9 +381,10 @@ public class GameServer {
     /**
      * @return Farm ID that has not been used yet. If there is no farm ID left, it returns {@code -1}.
      */
-    private int handleFarmRequest() throws IOException {
+    private int handleFarmRequest() {
         try {
             return this.removeAvailableFarm();
+
         } catch (IndexOutOfBoundsException | UnsupportedOperationException ignore) {
             return -1;
         }
@@ -386,7 +397,7 @@ public class GameServer {
      */
     private void addAvailableFarm(Integer farmID) {
         ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        farms.add(0, farmID);
+        farms.add(farmID);
         this.availableFarms.setRelease(farms);
     }
 
@@ -397,7 +408,13 @@ public class GameServer {
      */
     private int removeAvailableFarm() throws IndexOutOfBoundsException, UnsupportedOperationException {
         ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        int farmID = farms.remove(0);
+        if (farms.size() == 0) {
+            return -1;
+        }
+
+        int randIndex = ThreadLocalRandom.current().nextInt(farms.size());
+        Integer farmID = farms.remove(randIndex);
+
         this.availableFarms.setRelease(farms);
         return farmID;
     }
@@ -477,10 +494,11 @@ public class GameServer {
                         int[] clientInfo = new int[]{clientID, farmID};
                         String clientSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
 
-                        GameClientHandler client = GameClientHandler.allowConnection(clientSocket, this.id, clientInfo, this::clientUpdateArrived);
-
-                        client.updateWith(new GameUpdate(GameUpdateType.PLAYER_SPRITE, this.id, clientSpriteSheet));
-                        client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, farmID));
+                        GameClientHandler client = GameClientHandler.allowConnection(
+                                clientSocket, this,
+                                clientInfo, clientSpriteSheet,
+                                (update) -> this.clientUpdateArrived(update)
+                        );
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added
                             this.sendFirstUpdateToClient(client, clientHandlers);
