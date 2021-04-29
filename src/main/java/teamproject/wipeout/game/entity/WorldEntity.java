@@ -245,6 +245,15 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.clockSupplier = clock;
 	}
 
+	public void stopAIPlayers() {
+		for (Player player : this.players) {
+			if (player instanceof AIPlayer) {
+				AIPlayer aiPlayer = (AIPlayer) player;
+				aiPlayer.stop();
+			}
+		}
+	}
+
 	protected Point2D[] setPositionForPlayer(Player player, FarmEntity farm) {
 		Point2D marketCorner = this.marketEntity.corners[farm.farmID - 1].subtract(player.size.getX() / 2, player.size.getY() / 2);
 

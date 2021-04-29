@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -92,7 +93,7 @@ public class ServerDiscovery {
             long currentTime = System.currentTimeMillis();
             String removeServerNamed = null;
             for (Map.Entry<String, Long> entry : this.lastHeardServers.entrySet()) {
-                if (currentTime - entry.getValue() > 505) {
+                if (currentTime - entry.getValue() > REFRESH_DELAY) {
                     removeServerNamed = entry.getKey();
                     break;
                 }
@@ -134,21 +135,21 @@ public class ServerDiscovery {
         new UtilityThread(() -> {
             // Construct the packet which will be used to receive multicast packets
             // (packet contains a server name and an address)
-            byte[] packetBytes = new byte[128];
+            byte[] packetBytes = new byte[GameServer.SERVER_NAME_BYTE_LENGTH + GameServer.PORT_BYTE_LENGTH];
             DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length);
 
             try {
                 while (this.isActive.get()) {
                     this.multicastSocket.receive(packet);
 
-                    byte[] portBytes = new byte[2];
-                    byte[] nameBytes = new byte[126];
+                    byte[] portBytes = new byte[GameServer.PORT_BYTE_LENGTH];
+                    byte[] nameBytes = new byte[GameServer.SERVER_NAME_BYTE_LENGTH];
 
                     System.arraycopy(packetBytes, 0, portBytes, 0, portBytes.length);
                     System.arraycopy(packetBytes, portBytes.length, nameBytes, 0, nameBytes.length);
 
                     short serverPort = ByteBuffer.wrap(portBytes).order(ByteOrder.LITTLE_ENDIAN).getShort();
-                    String serverName = new String(nameBytes).trim();
+                    String serverName = new String(nameBytes, StandardCharsets.UTF_8).trim();
 
                     if (!this.availableServers.containsKey(serverName)) {
                         InetAddress serverAddress = packet.getAddress();

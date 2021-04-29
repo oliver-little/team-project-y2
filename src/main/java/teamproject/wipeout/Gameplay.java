@@ -564,7 +564,7 @@ public class Gameplay implements Controller {
             AnchorPane.setBottomAnchor(this.interfaceOverlay, 0.0);
             AnchorPane.setLeftAnchor(this.interfaceOverlay, 0.0);
 
-            // Disable input TODO Stop AI Players
+            this.worldEntity.stopAIPlayers();
             this.inputHandler.disableInput(true);
         };
     }

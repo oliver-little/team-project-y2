@@ -62,6 +62,7 @@ public class AIPlayer extends Player {
     private Point2D designatedMarketPoint;
 
     private double currentFarmExpansionPrice;
+    private boolean shouldStop;
 
     /**
      * Creates a new {@code AIPlayer} entity.
@@ -86,6 +87,7 @@ public class AIPlayer extends Player {
         this.designatedMarketPoint = null;
 
         this.currentFarmExpansionPrice = FarmExpansionUI.FARM_EXPANSION_START_PRICE;
+        this.shouldStop = false;
 
         this.removeComponent(CollisionResolutionComponent.class);
         this.addComponent(this.collisionResolution);
@@ -120,9 +122,22 @@ public class AIPlayer extends Player {
     }
 
     /**
+     * Stops the {@code AIPlayer} and its decision process.
+     */
+    public void stop() {
+        this.shouldStop = true;
+        this.removeComponent(SteeringComponent.class);
+        this.executor.shutdown();
+    }
+
+    /**
      * Main decision making method for the {@code AIPlayer}.
      */
     private void aiMakeDecision() {
+        if (this.shouldStop) {
+            return;
+        }
+
         Supplier<ClockSystem> clockSupplier = this.worldEntity.getClockSupplier();
         if (clockSupplier != null && clockSupplier.get().getTime() <= 0.0) {
             return;

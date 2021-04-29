@@ -22,6 +22,7 @@ import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.networking.Networker;
+import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -146,7 +148,7 @@ public class StartMenu implements Controller {
         root.getChildren().add(menuBox);
     }
 
-    private void createHostGameMenu() { // TODO limit length of server name
+    private void createHostGameMenu() {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
@@ -174,26 +176,29 @@ public class StartMenu implements Controller {
         
         StackPane errorBox = new StackPane();
 
-
-        GameModeUI gamemodeBox = new GameModeUI(); 
+        GameModeUI gameModeBox = new GameModeUI();
         
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
         	if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
         		new ErrorUI(errorBox, "Error: No server name entered", null);
         	}
-        	else if(nameTF.getText()==null || nameTF.getText().equals("")) {
-        		new ErrorUI(errorBox, "Error: No name entered", null);
+        	else if(serverNameTF.getText().getBytes(StandardCharsets.UTF_8).length > GameServer.SERVER_NAME_BYTE_LENGTH) {
+        		new ErrorUI(errorBox, "Error: Server name is too long", null);
         	}
+            else if(nameTF.getText()==null || nameTF.getText().equals("")) {
+                new ErrorUI(errorBox, "Error: No name entered", null);
+            }
         	else {
-        	    long gameModeValue = (long) gamemodeBox.getValue();
-        		createServer(serverNameTF.getText(), nameTF.getText(), gamemodeBox.getGameMode(), gameModeValue);
+        	    GameMode gameMode = gameModeBox.getGameMode();
+        	    long gameModeValue = (long) gameModeBox.getValue();
+        		createServer(serverNameTF.getText(), nameTF.getText(), gameMode, gameModeValue);
         	}
         	
         }));
         
         
-        hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, hostButton);
+        hostPane.getChildren().addAll(nameBox, serverNameBox, gameModeBox, hostButton);
 
         menuBox.getChildren().addAll(hostPane, errorBox);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
@@ -237,6 +242,21 @@ public class StartMenu implements Controller {
         playerList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         menuBox.getChildren().addAll(playerList);
+        ObservableMap<Integer, String> observablePlayers = client.connectedClients.get();
+        observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
+            if (!client.getIsActive()) {
+                Platform.runLater(() -> createMainMenu());
+                return;
+            }
+
+            Platform.runLater(() -> {
+                playerList.getItems().clear();
+                for (String player : observablePlayers.values()) {
+                    playerList.getItems().add(player);
+                }
+            });
+        });
+
 
         Pair<String, Runnable> backButton = new Pair<String, Runnable>("Back", () -> {
             if (isHost) {
@@ -262,24 +282,9 @@ public class StartMenu implements Controller {
 
         root.getChildren().add(menuBox);
 
-        ObservableMap<Integer, String> observablePlayers = client.connectedClients.get();
-        for (String player : observablePlayers.values()) {
+        for (String player : client.connectedClients.get().values()) {
             playerList.getItems().add(player);
         }
-
-        observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
-            if (!client.getIsActive()) {
-                Platform.runLater(() -> createMainMenu());
-                return;
-            }
-
-            Platform.runLater(() -> {
-                playerList.getItems().clear();
-                for (String player : observablePlayers.values()) {
-                    playerList.getItems().add(player);
-                }
-            });
-        });
     }
 
     private void createJoinGameMenu(){
@@ -320,7 +325,6 @@ public class StartMenu implements Controller {
         
         menuBox.getChildren().addAll(playerInfoBox, serverBox, errorBox);
 
-        // TODO use list view instead of toggle group
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
         servers.addListener((MapChangeListener<? super String, ? super InetSocketAddress>) (change) -> {
             Platform.runLater(() -> {
@@ -366,9 +370,11 @@ public class StartMenu implements Controller {
     }
 
     /**
-     * connects player to server
-     * @param serverName
-     * @param username
+     * Connects player to server.
+     * 
+     * @param serverName Chosen server name
+     * @param username Chosen player name
+     * @param serverAddress {@link InetSocketAddress} of the server we want to connect to
      */
     private void joinServer(String serverName, String username, InetSocketAddress serverAddress) {
         this.networker.getServerDiscovery().stopLookingForServers();
@@ -538,7 +544,7 @@ public class StartMenu implements Controller {
             this.startLocalGame(givenNetworker, client.getGameStartTime(), client.getInitContainer());
 
         } else {
-            // TODO show error
+            this.disconnectError();
         }
     }
 

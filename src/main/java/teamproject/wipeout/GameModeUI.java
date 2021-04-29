@@ -20,9 +20,31 @@ import javafx.scene.layout.VBox;
 public class GameModeUI extends VBox
 {
 	
-	private Label valueLabel;
-	private ComboBox<String> gamemodeSelector;
-	
+	private final Label valueLabel;
+	private final ComboBox<String> gameModeSelector;
+
+	private static Map<String, Object> getGameModeData(GameMode gamemode) {
+		Map<String, Object> data = new HashMap();
+		if (gamemode== GameMode.TIME_MODE) {
+			data.put("desc", "Minutes");
+			data.put("min", 5);
+			data.put("max", 30);
+			data.put("default", 1);
+		}
+		else if(gamemode== GameMode.WEALTH_MODE) {
+			data.put("desc", "Money Target");
+			data.put("min", 50);
+			data.put("max", 1000);
+			data.put("default", 100);
+		}
+		else {
+			System.out.println(gamemode + " gamemode does not exist");
+			return null;
+		}
+
+		return data;
+	}
+
 	public GameModeUI() {
 		this.setAlignment(Pos.CENTER);
 		
@@ -36,20 +58,20 @@ public class GameModeUI extends VBox
         valueLabel = new Label();
         
         GameMode[] gameModes = GameMode.values();
-        String[] gamemodeStrings = new String[gameModes.length];
+        String[] gameModeStrings = new String[gameModes.length];
         for (int i = 0; i< gameModes.length; i++) {
-        	gamemodeStrings[i] = gameModes[i].toString();
+        	gameModeStrings[i] = gameModes[i].toString();
         }
         
-        gamemodeSelector = new ComboBox<String>(FXCollections.observableArrayList(gamemodeStrings));
-        gamemodeSelector.setOnAction((event) -> {
-        	Map<String, Object> gamemodeData = getGamemodeData(this.getGameMode());
-        	valueLabel.setText(Integer.toString((int) gamemodeData.get("default")));
-        	valueDesc.setText((String) gamemodeData.get("desc")+ ":");
+        gameModeSelector = new ComboBox<String>(FXCollections.observableArrayList(gameModeStrings));
+        gameModeSelector.setOnAction((event) -> {
+        	Map<String, Object> gameModeData = getGameModeData(this.getGameMode());
+        	valueLabel.setText(Integer.toString((int) gameModeData.get("default")));
+        	valueDesc.setText((String) gameModeData.get("desc")+ ":");
         });
-        gamemodeSelector.getSelectionModel().selectFirst();
+        gameModeSelector.getSelectionModel().selectFirst();
         // trigger event to set value label
-        Event.fireEvent(gamemodeSelector, new ActionEvent());
+        Event.fireEvent(gameModeSelector, new ActionEvent());
         
         
         final int interval = 5;
@@ -58,8 +80,8 @@ public class GameModeUI extends VBox
         decrementButton.getStyleClass().add("small-button");
         decrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData(this.getGameMode());
-        	if (value-interval>=((int)gamemodeData.get("min"))) {
+        	Map<String, Object> gameModeData = getGameModeData(this.getGameMode());
+        	if (value-interval>=((int) gameModeData.get("min"))) {
         		valueLabel.setText(Integer.toString(value-interval));
         	}
         	
@@ -69,7 +91,7 @@ public class GameModeUI extends VBox
         incrementButton.getStyleClass().add("small-button");        
         incrementButton.setOnAction((event) ->{
         	int value = Integer.parseInt(valueLabel.getText());
-        	Map<String, Object> gamemodeData = getGamemodeData(this.getGameMode());
+        	Map<String, Object> gamemodeData = getGameModeData(this.getGameMode());
         	if (value+interval<=((int) gamemodeData.get("max"))) {
         		valueLabel.setText(Integer.toString(value+interval));
         	}
@@ -77,30 +99,8 @@ public class GameModeUI extends VBox
         });
         
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
-        this.getChildren().addAll(valueDesc, gamemodeSelector, valueBox);
+        this.getChildren().addAll(valueDesc, gameModeSelector, valueBox);
 	}
-	
-    public static Map<String, Object> getGamemodeData(GameMode gamemode) {
-    	Map<String, Object> data = new HashMap();
-    	if (gamemode== GameMode.TIME_MODE) {
-    		data.put("desc", "Minutes");
-    		data.put("min", 5);
-    		data.put("max", 30);
-    		data.put("default", 10);
-    	}
-    	else if(gamemode== GameMode.WEALTH_MODE) {
-    		data.put("desc", "Money Target");
-    		data.put("min", 50);
-    		data.put("max", 1000);
-    		data.put("default", 100);
-    	}
-    	else {
-    		System.out.println(gamemode + " gamemode does not exist");
-    		return null;
-    	}
-    	
-    	return data;
-    }
     
     public double getValue() {
     	double val = Integer.parseInt(valueLabel.getText());
@@ -114,15 +114,14 @@ public class GameModeUI extends VBox
     }
     
     public GameMode getGameMode() {
-    	if(gamemodeSelector.getValue().equals(GameMode.TIME_MODE.toString())) {
+    	if(gameModeSelector.getValue().equals(GameMode.TIME_MODE.toString())) {
     		return GameMode.TIME_MODE;
     	}
-    	else if(gamemodeSelector.getValue().equals(GameMode.WEALTH_MODE.toString())) {
+    	else if(gameModeSelector.getValue().equals(GameMode.WEALTH_MODE.toString())) {
     		return GameMode.WEALTH_MODE;
     	}
     	else {
     		return null;
     	}
     }
-
 }

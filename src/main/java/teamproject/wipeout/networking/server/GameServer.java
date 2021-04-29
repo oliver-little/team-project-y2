@@ -43,6 +43,9 @@ public class GameServer {
     public static final int MULTICAST_DELAY = 500; // = 0.5 second
     public static final int MAX_CONNECTIONS = 4;
 
+    public static final int PORT_BYTE_LENGTH = 2; // 2 bytes needed to store number of type 'short'
+    public static final int SERVER_NAME_BYTE_LENGTH = 62;
+
     public final Integer id;
     public final String name;
     public final GameMode gameMode;
@@ -571,10 +574,10 @@ public class GameServer {
             while (this.isSearching) {
                 try {
                     // Construct packet which will be multicasted (packet contains server name and address)
-                    byte[] portBytes = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(this.serverPort).array();
+                    byte[] portBytes = ByteBuffer.allocate(PORT_BYTE_LENGTH).order(ByteOrder.LITTLE_ENDIAN).putShort(this.serverPort).array();
                     byte[] nameBytes = this.name.getBytes(StandardCharsets.UTF_8);
 
-                    byte[] packetBytes = new byte[128];
+                    byte[] packetBytes = new byte[SERVER_NAME_BYTE_LENGTH + PORT_BYTE_LENGTH];
                     System.arraycopy(portBytes, 0, packetBytes, 0, portBytes.length);
                     System.arraycopy(nameBytes, 0, packetBytes, portBytes.length, nameBytes.length);
 
