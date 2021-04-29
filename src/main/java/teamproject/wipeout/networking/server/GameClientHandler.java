@@ -36,17 +36,18 @@ public class GameClientHandler {
     /**
      * Default initializer for {@code GameClientHandler}
      *
-     * @param socket   {@link Socket} representing the connection with the client
-     * @param serverID ID of the server
-     * @param clientID ID of the client
-     * @param farmID   ID of client's farm
-     * @param updater  {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @param socket      {@link Socket} representing the connection with the client
+     * @param serverID    ID of the server
+     * @param clientInfo  ID of the client and ID of client's farm
+     * @param updater     {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
      * @throws IOException               Thrown when the {@code Socket} cannot be read from(= get updates) or written to(= send updates).
      * @throws ClassNotFoundException    Problem with reading data received from the client.
      * @throws ClientConnectionException Problem with connecting the client.
      */
-    protected GameClientHandler(Socket socket, Integer serverID, Integer clientID, Integer farmID, GameUpdateHandler updater)
+    protected GameClientHandler(Socket socket, Integer serverID, int[] clientInfo, GameUpdateHandler updater)
             throws IOException, ClassNotFoundException, ClientConnectionException {
+
+        Integer clientID = clientInfo[0];
 
         this.clientSocket = socket;
 
@@ -70,7 +71,7 @@ public class GameClientHandler {
 
         this.clientID = clientID;
         this.clientName = (String) handshake.content;
-        this.farmID = farmID;
+        this.farmID = clientInfo[1];
 
         this.updater = updater;
     }
@@ -78,19 +79,18 @@ public class GameClientHandler {
     /**
      * Initializes {@link GameClientHandler} and processes the initial {@link PlayerState} of the newly connected client.
      *
-     * @param socket   {@link Socket} representing the connection with the client
-     * @param serverID ID of the server
-     * @param clientID ID of the client
-     * @param farmID   ID of client's farm
-     * @param updater  {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
+     * @param socket      {@link Socket} representing the connection with the client
+     * @param serverID    ID of the server
+     * @param clientInfo  ID of the client and ID of client's farm
+     * @param updater     {@link GameUpdateHandler} dealing with incoming {@link GameUpdate}s
      * @throws IOException            Thrown when the {@code Socket} cannot be read from(= get updates)
      *                                or written to(= send updates).
      * @throws ClassNotFoundException Problem with reading data received from the client.
      */
-    static public GameClientHandler allowConnection(Socket socket, Integer serverID, Integer clientID, Integer farmID, GameUpdateHandler updater)
+    static public GameClientHandler allowConnection(Socket socket, Integer serverID, int[] clientInfo, GameUpdateHandler updater)
             throws IOException, ClassNotFoundException, ClientConnectionException {
 
-        GameClientHandler newInstance = new GameClientHandler(socket, serverID, clientID, farmID, updater);
+        GameClientHandler newInstance = new GameClientHandler(socket, serverID, clientInfo, updater);
 
         newInstance.startReceivingUpdates();
 

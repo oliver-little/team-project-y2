@@ -25,6 +25,7 @@ import teamproject.wipeout.game.potion.PotionThrowEntity;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -33,6 +34,8 @@ import java.util.function.Supplier;
  * Instance adding AI capabilities to the base {@link Player} class.
  */
 public class AIPlayer extends Player {
+
+    public static final String[] AI_NAMES = new String[]{"Siri", "Alexa", "Cortana"};
 
     public static final double COLLISION_RESOLUTION_SPEED = 250.0;
     public static final long COLLISION_RESOLUTION_TIME = 500;
@@ -67,13 +70,13 @@ public class AIPlayer extends Player {
      * @param playerInfo  Player ID and name
      * @param worldEntity Current {@link WorldEntity}
      */
-    public AIPlayer(GameScene scene, Pair<Integer, String> playerInfo, WorldEntity worldEntity) {
-        super(scene, playerInfo, worldEntity.spriteManager, worldEntity.itemStore);
+    public AIPlayer(GameScene scene, Pair<Integer, String> playerInfo, String spriteSheet, WorldEntity worldEntity) {
+        super(scene, playerInfo, spriteSheet, worldEntity.spriteManager, worldEntity.itemStore);
 
         this.navMesh = worldEntity.getNavMesh();
         this.collisionResolution = this.createCollisionResolutionComponent();
         this.executor = Executors.newSingleThreadScheduledExecutor();
-        this.random = new Random();
+        this.random = ThreadLocalRandom.current();
 
         this.worldEntity = worldEntity;
         this.boughtItems = new HashMap<Integer, Integer>();

@@ -16,6 +16,7 @@ public class PlayerState extends GameEntityState {
 
     private Integer playerID;
     private String playerName;
+    private String spriteSheet;
     private double money;
 
     private int farmID;
@@ -29,13 +30,15 @@ public class PlayerState extends GameEntityState {
      *
      * @param playerID     Player's ID
      * @param playerName   Player's name
+     * @param spriteSheet  Player's sprite sheet
      * @param money        Player's money balance
      * @param position     Player's position represented by {@link Point2D}.
      * @param acceleration Player's acceleration represented by {@link Point2D}
      */
-    public PlayerState(Integer playerID, String playerName, double money, Point2D position, Point2D acceleration) {
+    public PlayerState(Integer playerID, String playerName, String spriteSheet, double money, Point2D position, Point2D acceleration) {
         this.playerID = playerID;
         this.playerName = playerName;
+        this.spriteSheet = spriteSheet;
         this.money = money;
 
         this.farmID = -1;
@@ -64,9 +67,27 @@ public class PlayerState extends GameEntityState {
     }
 
     /**
+     * {@code spriteSheet} getter
+     *
+     * @return Player's sprite sheet
+     */
+    public String getSpriteSheet() {
+        return this.spriteSheet;
+    }
+
+    /**
+     * {@code spriteSheet} setter
+     *
+     * @param newSpriteSheet New {@code String} value of player's sprite sheet
+     */
+    public void setSpriteSheet(String newSpriteSheet) {
+        this.spriteSheet = newSpriteSheet;
+    }
+
+    /**
      * {@code money} getter
      *
-     * @return {@link Double} value of player's money balance
+     * @return {@code Double} value of player's money balance
      */
     public Double getMoney() {
         return this.money;
@@ -75,7 +96,7 @@ public class PlayerState extends GameEntityState {
     /**
      * {@code money} setter
      *
-     * @param newMoney New {@link Double} value of player's money balance
+     * @param newMoney New {@code Double} value of player's money balance
      */
     public void setMoney(Double newMoney) {
         this.money = newMoney;
@@ -138,7 +159,7 @@ public class PlayerState extends GameEntityState {
     /**
      * {@code speedMultiplier} getter
      *
-     * @return {@link Double} value of the player's {@code speedMultiplier}
+     * @return {@code Double} value of the player's {@code speedMultiplier}
      */
     public Double getSpeedMultiplier() {
         return this.speedMultiplier;
@@ -147,7 +168,7 @@ public class PlayerState extends GameEntityState {
     /**
      * {@code speedMultiplier} setter
      *
-     * @param speedMultiplier New {@link Double} value of the player's {@code speedMultiplier}
+     * @param speedMultiplier New {@code Double} value of the player's {@code speedMultiplier}
      */
     public void setSpeedMultiplier(Double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
@@ -159,6 +180,7 @@ public class PlayerState extends GameEntityState {
      * @param state {@link PlayerState} used for the state update
      */
     public void updateStateFrom(PlayerState state) {
+        this.spriteSheet = state.spriteSheet;
         this.money = state.money;
         this.farmID = state.farmID;
         this.position = state.position;
@@ -172,6 +194,7 @@ public class PlayerState extends GameEntityState {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.playerID);
         out.writeUTF(this.playerName);
+        out.writeUTF(this.spriteSheet);
         out.writeDouble(this.money);
 
         out.writeInt(this.farmID);
@@ -188,6 +211,7 @@ public class PlayerState extends GameEntityState {
     private void readObject(ObjectInputStream in) throws IOException {
         this.playerID = in.readInt();
         this.playerName = in.readUTF();
+        this.spriteSheet = in.readUTF();
         this.money = in.readDouble();
 
         this.farmID = in.readInt();
@@ -210,8 +234,8 @@ public class PlayerState extends GameEntityState {
             return false;
         }
         PlayerState that = (PlayerState) o;
-        return this.playerID.equals(that.playerID) && this.money == that.money &&
-                this.position == that.position && this.acceleration.equals(that.acceleration);
+        return this.playerID.equals(that.playerID) && this.spriteSheet.equals(that.spriteSheet) &&
+                this.money == that.money && this.position.equals(that.position) && this.acceleration.equals(that.acceleration);
     }
 
     @Override

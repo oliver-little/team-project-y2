@@ -45,7 +45,6 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public static final int[] WORLD_SIZE = new int[]{1461, 1184};
 	public static final Point2D MARKET_START = new Point2D(576, 544);
-	public static final String[] AI_NAMES = new String[]{"Siri", "Alexa", "Cortana"};
 
 	public final ItemStore itemStore;
 	public final SpriteManager spriteManager;
@@ -57,9 +56,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public final AIPlayerHelper aiPlayerHelper;
 
+	private Supplier<String> playerSpriteSheetSupplier;
 	private Supplier<GameClient> clientSupplier;
 	private Supplier<ClockSystem> clockSupplier;
 
+	private final boolean isSingleplayer;
 	private final ArrayList<Player> players;
 	private final InputHandler inputHandler;
 	private final NavigationMesh navMesh;
@@ -117,13 +118,10 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		this.myAnimal = this.createAnimalAt(new Point2D(10.0, 10.0));
 
+		this.isSingleplayer = (Boolean) worldPack.get("singleplayer");
+		this.playerSpriteSheetSupplier = null;
 		this.clockSupplier = null;
 		this.clientSupplier = null;
-
-		Boolean singleplayer = (Boolean) worldPack.get("singleplayer");
-		if (singleplayer) {
-			this.createAIPlayers();
-		}
 	}
 
 	public Market getMarket() {
@@ -132,6 +130,13 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public NavigationMesh getNavMesh() {
 		return this.navMesh;
+	}
+
+	public void setPlayerSpriteSheetSupplier(Supplier<String> playerSpriteSheetSupplier) {
+		this.playerSpriteSheetSupplier = playerSpriteSheetSupplier;
+		if (this.isSingleplayer) {
+			this.createAIPlayers();
+		}
 	}
 
 	public void setClientSupplier(Supplier<GameClient> supplier) {
@@ -328,8 +333,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	private void createAIPlayers() {
 		for (int i = 2; i < 5; i++) {
-			Pair<Integer, String> playerInfo = new Pair<Integer, String>(i, AI_NAMES[i - 2]);
-			AIPlayer aiPlayer = new AIPlayer(this.scene, playerInfo, this);
+			Pair<Integer, String> playerInfo = new Pair<Integer, String>(i, AIPlayer.AI_NAMES[i - 2]);
+			String playerSpriteSheet = this.playerSpriteSheetSupplier == null ? null : this.playerSpriteSheetSupplier.get();
+			AIPlayer aiPlayer = new AIPlayer(this.scene, playerInfo, playerSpriteSheet, this);
 
 			aiPlayer.setThrownPotion((potion) ->  this.addPotion(potion));
 			this.setFarmFor(aiPlayer, this.farms.get(i));

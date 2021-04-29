@@ -18,7 +18,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Window;
 import javafx.util.Pair;
-import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameLoop;
@@ -50,7 +49,6 @@ import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
@@ -62,6 +60,7 @@ import teamproject.wipeout.game.task.ui.TaskUI;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
 
 import java.io.IOException;
 import java.util.*;
@@ -86,7 +85,9 @@ public class Gameplay implements Controller {
     private double wealthTarget = 100;
     private final long gameStartTime;
 
+    private final PlayerSpriteSheetManager playerSpriteSheetManager;
     private final Pair<Integer, String> playerInfo;
+    private final String playerSpriteSheet;
 
     private ReadOnlyDoubleProperty widthProperty;
     private ReadOnlyDoubleProperty heightProperty;
@@ -130,6 +131,14 @@ public class Gameplay implements Controller {
         	//this.gameTime=Double.MAX_VALUE;
         	this.wealthTarget=gamemodeValue;
         	
+        }
+
+        if (networker == null) {
+            this.playerSpriteSheetManager = new PlayerSpriteSheetManager();
+            this.playerSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
+        } else {
+            this.playerSpriteSheetManager = null;
+            this.playerSpriteSheet = null;
         }
 
         this.focusListener = null;
@@ -182,7 +191,7 @@ public class Gameplay implements Controller {
         this.eventSystems = List.of(mouseClick, playerAnimator, sabotage);
 
         // Player
-    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, this.playerInfo, this.spriteManager, this.itemStore);
+    	CurrentPlayer currentPlayer = new CurrentPlayer(this.gameScene, this.playerInfo, this.playerSpriteSheet, this.spriteManager, this.itemStore);
 
         // Camera
         CameraEntity cameraEntity = new CameraEntity(this.gameScene);
@@ -198,6 +207,9 @@ public class Gameplay implements Controller {
 
         // World Entity
         this.worldEntity = new WorldEntity(this.createWorldPack(marketEntity, currentPlayer));
+        if (this.playerSpriteSheetManager != null) {
+            this.worldEntity.setPlayerSpriteSheetSupplier(this.playerSpriteSheetManager.getPlayerSpriteSheetSupplier());
+        }
         currentPlayer.setThrownPotion((potion) ->  this.worldEntity.addPotion(potion));
 
         // Connect world entity with networker if possible
@@ -393,7 +405,7 @@ public class Gameplay implements Controller {
     }
 
     private void loadSpriteSheets() throws IOException {
-        this.spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+        PlayerSpriteSheetManager.loadPlayerSpriteSheets(this.spriteManager);
         this.spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
         this.spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
         this.spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
@@ -513,9 +525,10 @@ public class Gameplay implements Controller {
         currentClient.addCurrentPlayer(myCurrentPlayer);
         currentClient.farmEntities = this.worldEntity.farms;
         currentClient.setNewPlayerAction(this.networker.onPlayerConnection(this.gameScene, this.itemStore, this.spriteManager));
-        Integer newFarmID = currentClient.myFarmID;
 
-        FarmEntity myFarm = this.worldEntity.farms.get(newFarmID);
+        myCurrentPlayer.setSpriteSheetName(currentClient.currentPlayerSpriteSheet, true);
+
+        FarmEntity myFarm = this.worldEntity.farms.get(currentClient.myFarmID);
         this.worldEntity.setFarmFor(myCurrentPlayer, myFarm);
 
         currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));

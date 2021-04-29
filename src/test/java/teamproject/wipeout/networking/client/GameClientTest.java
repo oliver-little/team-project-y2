@@ -49,7 +49,7 @@ class GameClientTest {
     private final NewPlayerAction newPlayerAction = (newPlayer) -> {
         newPlayers.add(newPlayer);
         Pair<Integer, String> playerInfo = new Pair<Integer, String>(newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID());
-        return new Player(this.gameScene, playerInfo, this.spriteManager, null);
+        return new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
     };
 
     @BeforeAll
@@ -59,7 +59,7 @@ class GameClientTest {
 
         this.gameScene = new GameScene();
         Pair<Integer, String> playerInfo = new Pair<Integer, String>(CLIENT_ID, "Test");
-        this.clientPlayer = new Player(this.gameScene, playerInfo, this.spriteManager, null);
+        this.clientPlayer = new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
         this.newPlayers = new HashSet<>();
 
         this.gameServer = new GameServer(SERVER_NAME);
@@ -190,7 +190,7 @@ class GameClientTest {
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
 
             Pair<Integer, String> playerInfo = new Pair<Integer, String>(DUMMY_CLIENT_ID, "TestLast");
-            Player secondPlayer = new Player(this.gameScene, playerInfo, this.spriteManager, null);
+            Player secondPlayer = new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
             this.playerWaitingForFarmID = secondPlayer;
             GameClient secondClient = GameClient.openConnection(this.serverAddress, secondPlayer.playerName);
             this.clientWaitingForFarmID = secondClient;

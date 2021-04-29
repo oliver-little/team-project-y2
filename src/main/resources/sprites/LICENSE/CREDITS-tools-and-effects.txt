@@ -165,30 +165,4 @@ items.png
 = Bridge repair kit =
 * By Tuomo Untinen
 
-effects.png
-= Look cursor, cast cursor, attack cursor, use cursor and talk cursor =
-* By Tuomo Untinen
-= Speech ballons and sweat =
-* By Tuomo Untinen
-= Small magic effect, good magic effect, poison and flame spell effects =
-* By Tuomo Untinen
-= Curse fear and darkness spell effects =
-* By Tuomo Untinen
-* Skull by Johannes Sjölund
-= Electric, teleport, freezing drowning and force fist spell effects =
-* By Tuomo Untinen
-= Bright light spell effect, blood stains and blade swing effects =
-* By Tuomo Untinen
-= Ranged attack miss effect =
-* By Tuomo Untinen
-= Sleeping speech bubble =
-* By Tuomo Untinen
-= Shopkeeper's speech bubble =
-* By Tuomo Untinen
-= Teddy bear speech bubble =
-* By Tuomo Untinen
-= Eating speech bubble =
-* Original meat By Jetrel
-* Adaptation by Tuomo Untinen
-
 

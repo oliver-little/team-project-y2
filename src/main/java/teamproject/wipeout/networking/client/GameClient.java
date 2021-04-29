@@ -34,6 +34,7 @@ public class GameClient {
     public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
 
+    public String currentPlayerSpriteSheet;
     public Integer myFarmID;
     public Map<Integer, FarmEntity> farmEntities;
     public Consumer<Long> clockCalibration;
@@ -98,6 +99,7 @@ public class GameClient {
         this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
         this.tempPlayerStates = new HashSet<PlayerState>();
 
+        this.currentPlayerSpriteSheet = null;
         this.myFarmID = null;
         this.farmEntities = null;
         this.clockCalibration = null;
@@ -227,6 +229,15 @@ public class GameClient {
                         case CONNECTED:
                             this.handleReceivedClientConnections((HashMap<Integer, String>) receivedUpdate.content);
                             break;
+                        case PLAYER_SPRITE:
+                            this.currentPlayerSpriteSheet = (String) receivedUpdate.content;
+                            break;
+                        case FARM_ID:
+                            this.myFarmID = (Integer) receivedUpdate.content;
+                            break;
+                        case CLOCK_CALIB:
+                            this.clockCalibration.accept((Long) receivedUpdate.content);
+                            break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);
                             break;
@@ -239,9 +250,6 @@ public class GameClient {
                             FarmState fState = (FarmState) receivedUpdate.content;
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
-                        case FARM_ID:
-                            this.myFarmID = (Integer) receivedUpdate.content;
-                            break;
                         case MARKET_STATE:
                             MarketState mState = (MarketState) receivedUpdate.content;
                             this.worldEntity.getMarket().updateFromState(mState);
@@ -249,9 +257,6 @@ public class GameClient {
                         case WORLD_STATE:
                             WorldState wState = (WorldState) receivedUpdate.content;
                             this.worldEntity.updateFromState(wState);
-                            break;
-                        case CLOCK_CALIB:
-                            this.clockCalibration.accept((Long) receivedUpdate.content);
                             break;
                         case DISCONNECT:
                             this.handlePlayerDisconnect(receivedUpdate.originID);
