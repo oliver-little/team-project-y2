@@ -44,7 +44,7 @@ public class UIUtil {
 
         return title;
     }
-
+    
     public static VBox createMenu(List<Pair<String, Runnable>> menuData) {
         VBox buttonBox = new VBox(10);
         buttonBox.setAlignment(Pos.CENTER);

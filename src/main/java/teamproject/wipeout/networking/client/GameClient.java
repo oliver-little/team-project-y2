@@ -8,6 +8,7 @@ import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
+import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.networking.state.*;
 import teamproject.wipeout.util.threads.ServerThread;
@@ -34,21 +35,21 @@ public class GameClient {
     public final SimpleMapProperty<Integer, String> connectedClients;
     public final HashSet<PlayerState> tempPlayerStates;
 
-    public String currentPlayerSpriteSheet;
-    public Integer myFarmID;
-    public Map<Integer, FarmEntity> farmEntities;
-    public Consumer<Long> clockCalibration;
-
     protected final Socket clientSocket;
     protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
 
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
 
+    private final Consumer<GameClient> startGame;
     private final HashMap<Integer, Player> players;
+
+    private long gameStartTime;
+    private InitContainer initContainer;
 
     private Integer clientID;
     private WorldEntity worldEntity;
+    private Map<Integer, FarmEntity> farmEntities;
     private NewPlayerAction newPlayerAction;
     private Runnable onDisconnect;
 
@@ -59,13 +60,14 @@ public class GameClient {
      *
      * @param server     {@link InetSocketAddress} of the game server you want to connect to.
      * @param clientName Client's/player's name
+     * @param startGame  ({@code Consumer) action executed to start the gameplay
      * @throws IOException            Problem with establishing a connection to the given server.
      * @throws ClassNotFoundException Problem with reading data received from the server.
      */
-    public static GameClient openConnection(InetSocketAddress server, String clientName)
+    public static GameClient openConnection(InetSocketAddress server, String clientName, Consumer<GameClient> startGame)
             throws IOException, ClassNotFoundException {
 
-        GameClient client = new GameClient(clientName);
+        GameClient client = new GameClient(clientName, startGame);
 
         // Connect the socket
         client.clientSocket.connect(server, 3000); // 3s timeout
@@ -79,11 +81,12 @@ public class GameClient {
             return null;
         }
 
-        client.clientID = (Integer) receivedUpdate.content;
+        client.initContainer = (InitContainer) receivedUpdate.content;
+        client.clientID = client.initContainer.getClientID();
         client.isActive.set(true);
 
         // Send my ID and my latest playerState
-        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.clientID, client.clientName));
+        client.out.writeObject(new GameUpdate(GameUpdateType.ACCEPT, client.getClientID(), client.clientName));
         client.out.flush();
 
         client.startReceivingUpdates();
@@ -92,42 +95,64 @@ public class GameClient {
     }
 
     /**
-     * Default initializer for {@code GameClient}
+     * Default initializer for {@code GameClient}.
+     *
+     * @param clientName Client's/player's name
+     * @param startGame  ({@code Consumer) action executed to start the gameplay
      */
-    protected GameClient(String clientName) {
+    protected GameClient(String clientName, Consumer<GameClient> startGame) {
+        this.players = new HashMap<Integer, Player>();
+        this.startGame = startGame;
+
         this.clientName = clientName;
         this.connectedClients = new SimpleMapProperty<Integer, String>(FXCollections.observableHashMap());
         this.tempPlayerStates = new HashSet<PlayerState>();
-
-        this.currentPlayerSpriteSheet = null;
-        this.myFarmID = null;
-        this.farmEntities = null;
-        this.clockCalibration = null;
 
         this.clientSocket = new Socket();
         this.isActive = new AtomicBoolean(false);
         this.out = null;
         this.in = null;
 
-        this.clientID = null;
         this.worldEntity = null;
         this.newPlayerAction = null;
         this.onDisconnect = null;
 
-        this.players = new HashMap<Integer, Player>();
+        this.gameStartTime = -1;
+        this.initContainer = null;
+
+        this.clientID = null;
+        this.farmEntities = null;
     }
 
     /**
-     * {@code clientID} variable getter
+     * {@code gameStartTime} getter
+     *
+     * @return Game start time
+     */
+    public long getGameStartTime() {
+        return this.gameStartTime;
+    }
+
+    /**
+     * {@code initContainer} getter
+     *
+     * @return {@link InitContainer}
+     */
+    public InitContainer getInitContainer() {
+        return this.initContainer;
+    }
+
+    /**
+     * {@code clientID} getter
      *
      * @return Client ID
      */
-    public Integer getID() {
+    public Integer getClientID() {
         return this.clientID;
     }
 
     /**
-     * {@code isActive} variable getter
+     * {@code isActive} getter
      *
      * @return {@code true} if the client is active. <br> Otherwise {@code false}.
      */
@@ -151,6 +176,15 @@ public class GameClient {
      */
     public void setWorldEntity(WorldEntity worldEntity) {
         this.worldEntity = worldEntity;
+    }
+
+    /**
+     * {@code farmEntities} setter
+     *
+     * @param farmEntities {@code Map} of currently existing {@link FarmEntity}s
+     */
+    public void setFarmEntities(Map<Integer, FarmEntity> farmEntities) {
+        this.farmEntities = farmEntities;
     }
 
     /**
@@ -229,14 +263,9 @@ public class GameClient {
                         case CONNECTED:
                             this.handleReceivedClientConnections((HashMap<Integer, String>) receivedUpdate.content);
                             break;
-                        case PLAYER_SPRITE:
-                            this.currentPlayerSpriteSheet = (String) receivedUpdate.content;
-                            break;
-                        case FARM_ID:
-                            this.myFarmID = (Integer) receivedUpdate.content;
-                            break;
                         case CLOCK_CALIB:
-                            this.clockCalibration.accept((Long) receivedUpdate.content);
+                            this.gameStartTime = (Long) receivedUpdate.content;
+                            this.startGame.accept(this);
                             break;
                         case PLAYER_STATE:
                             this.handlePlayerStateUpdate((PlayerState) receivedUpdate.content);

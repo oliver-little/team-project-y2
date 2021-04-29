@@ -107,7 +107,7 @@ public class InputHandler {
     }
 
     /**
-     * {@code disableInput} variable getter.
+     * {@code disableInput} getter
      *
      * @return boolean value of the {@code disableInput} variable.
      */

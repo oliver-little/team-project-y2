@@ -4,6 +4,7 @@ import javafx.collections.MapChangeListener;
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
+import teamproject.wipeout.GameMode;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;
@@ -22,7 +23,7 @@ import static teamproject.wipeout.networking.server.GameServer.MAX_CONNECTIONS;
 class GameServerTest {
     private static final Integer[] CLIENT_IDs = {0, 1, 2, 3, 4, 5};
     private static final String SERVER_NAME = "TestServer#99";
-    private static final int CATCHUP_TIME = 80;
+    private static final int CATCHUP_TIME = 100;
 
     private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
         this.playerWaitingForFarmID.getCurrentState().setFarmID(farmPair.getValue());
@@ -49,7 +50,7 @@ class GameServerTest {
     void initializeGameServer() {
         try {
             SpriteManager spriteManager = new SpriteManager();
-            spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+            spriteManager.loadSpriteSheet("player/player-one-female-descriptor.json", "player/player-one-female.png");
 
             GameScene gameScene = new GameScene();
 
@@ -58,7 +59,7 @@ class GameServerTest {
                 this.serverAddress = change.getValueAdded();
             });
 
-            this.gameServer = new GameServer(SERVER_NAME);
+            this.gameServer = new GameServer(SERVER_NAME, GameMode.TIME_MODE, 1_000);
 
             this.gameServer.startClientSearch();
             serverDiscovery.startLookingForServers();
@@ -93,8 +94,7 @@ class GameServerTest {
     void setUp() throws IOException, ClassNotFoundException, InterruptedException {
         this.gameClients = new GameClient[CLIENT_IDs.length];
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
-            GameClient client = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName);
-            client.clockCalibration = (time) -> {};
+            GameClient client = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName, (c) -> {});
 
             this.playerWaitingForFarmID = this.clientPlayers[i];
             this.clientWaitingForFarmID = client;
@@ -144,7 +144,7 @@ class GameServerTest {
 
         try {
             for (int i = 5; i < CLIENT_IDs.length; ++i) {
-                GameClient newClient = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName);
+                GameClient newClient = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName, (c) -> {});
                 Assertions.assertNull(newClient);
             }
 

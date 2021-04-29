@@ -15,13 +15,13 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.networking.data.InitContainer;
+import teamproject.wipeout.networking.Networker;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
@@ -102,6 +102,33 @@ public class StartMenu implements Controller {
         keyBindings.put("Destroy", KeyCode.D);
         keyBindings.put("Harvest", KeyCode.H);
     }
+    
+    private void createSingleplayerMenu() {
+        root.getChildren().remove(menuBox);
+        menuBox.getChildren().clear();
+
+        menuBox.getChildren().addAll(UIUtil.createTitle("Singleplayer"));
+    	
+        GameModeUI gameModeBox = new GameModeUI();
+
+        Runnable startGameAction = () -> {
+            GameMode gameMode = gameModeBox.getGameMode();
+            long gameModeValue = (long) gameModeBox.getValue();
+            InitContainer initContainer = new InitContainer(gameMode, gameModeValue, null, null, null);
+            startLocalGame(null, null, initContainer);
+        };
+
+        List<Pair<String, Runnable>> menuData = Arrays.asList(
+                new Pair<String, Runnable>("Start Game", startGameAction),
+                new Pair<String, Runnable>("Back", () -> createMainMenu())
+        );
+        
+        buttonBox = UIUtil.createMenu(menuData);
+        menuBox.getChildren().addAll(gameModeBox, buttonBox);
+        root.getChildren().add(menuBox);
+    	
+
+    }
 
     private void createMultiplayerMenu(){
         root.getChildren().remove(menuBox);
@@ -147,6 +174,9 @@ public class StartMenu implements Controller {
         
         StackPane errorBox = new StackPane();
 
+
+        GameModeUI gamemodeBox = new GameModeUI(); 
+        
         Button hostButton = new Button("Host Server");
         hostButton.setOnAction(((event) -> {
         	if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
@@ -156,13 +186,14 @@ public class StartMenu implements Controller {
         		new ErrorUI(errorBox, "Error: No name entered", null);
         	}
         	else {
-        		createServer(serverNameTF.getText(), nameTF.getText());
+        	    long gameModeValue = (long) gamemodeBox.getValue();
+        		createServer(serverNameTF.getText(), nameTF.getText(), gamemodeBox.getGameMode(), gameModeValue);
         	}
         	
         }));
-
-        hostPane.getChildren().addAll(nameBox, serverNameBox, hostButton);
         
+        
+        hostPane.getChildren().addAll(nameBox, serverNameBox, gamemodeBox, hostButton);
 
         menuBox.getChildren().addAll(hostPane, errorBox);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
@@ -173,21 +204,21 @@ public class StartMenu implements Controller {
         menuBox.getChildren().add(buttonBox);
 
         root.getChildren().add(menuBox);
+        
     }
 
-    private boolean createServer(String serverName, String hostName){
-        InetSocketAddress serverAddress = networker.startServer(serverName);
+    
+    private void createServer(String serverName, String hostName, GameMode gameMode, long gameModeValue) {
+        InetSocketAddress serverAddress = networker.startServer(serverName, gameMode, gameModeValue);
 
         createLobbyMenu(serverName, hostName, serverAddress, true);
-
-        return true;
     }
 
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         root.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
-        Consumer<Long> startGame = (gameStartTime) -> Platform.runLater(() -> startLocalGame(networker, gameStartTime));
+        Consumer<GameClient> startGame = (client) -> Platform.runLater(() -> startLocalGame(networker, client));
         GameClient client = networker.connectClient(serverAddress, userName, startGame);
         if (client == null) {
             StackPane errorBox = new StackPane();
@@ -338,14 +369,11 @@ public class StartMenu implements Controller {
      * connects player to server
      * @param serverName
      * @param username
-     * @return true if player joins successfully, false otherwise
      */
-    private boolean joinServer(String serverName, String username, InetSocketAddress serverAddress) {
+    private void joinServer(String serverName, String username, InetSocketAddress serverAddress) {
         this.networker.getServerDiscovery().stopLookingForServers();
 
         createLobbyMenu(serverName, username, serverAddress, false);
-
-        return true;
     }
 
     /**
@@ -486,13 +514,14 @@ public class StartMenu implements Controller {
     private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Singleplayer", () -> startLocalGame(null, null)),
+                new Pair<String, Runnable>("Singleplayer", () -> createSingleplayerMenu()),
                 new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
                 new Pair<String, Runnable>("Settings", () -> createSettingsMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
     }
+    
 
     private void startServerGame() {
         try {
@@ -503,15 +532,19 @@ public class StartMenu implements Controller {
         }
     }
 
-    private void startLocalGame(Networker givenNetworker, Long gameStartTime) {
-        Pair<Integer, String> playerInfo = null;
-        if (givenNetworker != null) {
-            GameClient client = givenNetworker.getClient();
-            if (client != null) {
-                playerInfo = new Pair<Integer, String>(client.getID(), this.chosenName);
-            }
+
+    private void startLocalGame(Networker givenNetworker, GameClient client) {
+        if (client != null) {
+            this.startLocalGame(givenNetworker, client.getGameStartTime(), client.getInitContainer());
+
+        } else {
+            // TODO show error
         }
-        Gameplay game = new Gameplay(givenNetworker, gameStartTime, playerInfo, this.keyBindings);
+    }
+
+    private void startLocalGame(Networker givenNetworker, Long gameStartTime, InitContainer initContainer) {
+        Gameplay game = new Gameplay(givenNetworker, gameStartTime, initContainer, this.chosenName, this.keyBindings);
+
         Parent content = game.getParentWith(this.root.getScene().getWindow());
 
         this.root.getScene().setRoot(content);

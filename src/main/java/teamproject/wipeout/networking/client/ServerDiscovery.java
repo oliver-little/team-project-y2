@@ -45,11 +45,11 @@ public class ServerDiscovery {
 
         this.multicastSocket = null;
 
-        this.executorService  =null;
+        this.executorService = null;
     }
 
     /**
-     * {@code availableServers} variable getter
+     * {@code availableServers} getter
      *
      * @return {@code ObservableMap<String, InetAddress>} of server names and addresses
      */
@@ -58,7 +58,7 @@ public class ServerDiscovery {
     }
 
     /**
-     * {@code isActive} variable getter
+     * {@code isActive} getter
      *
      * @return {@code true} if the game server search is ongoing. <br> Otherwise {@code false}.
      */

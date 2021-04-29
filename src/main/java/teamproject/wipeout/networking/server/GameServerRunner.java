@@ -3,6 +3,7 @@ package teamproject.wipeout.networking.server;
 import com.google.gson.Gson;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
+import teamproject.wipeout.GameMode;
 
 import java.io.*;
 import java.util.List;
@@ -24,11 +25,13 @@ public class GameServerRunner {
      * Creates a new child process and starts a {@link GameServer} with the given name.
      * Only one {@code GameServer} can be run.
      *
-     * @param serverName Name for the {@code GameServer}
+     * @param serverName    Name for the {@code GameServer}
+     * @param gameMode      Chosen game mode of type {@link GameMode}
+     * @param gameModeValue Chosen {@code long} value for the game mode
      * @throws IOException Thrown when the child process cannot be started.
      */
     // Running a child process: https://www.programmersought.com/article/95206092506/ (template that was used)
-    public short startServer(String serverName) throws ServerRunningException, IOException {
+    public short startServer(String serverName, GameMode gameMode, long gameModeValue) throws ServerRunningException, IOException {
         // Only one game server can be running
         if (this.serverProcess != null) {
             throw new ServerRunningException(this.serverName + " - server is already running!");
@@ -50,7 +53,10 @@ public class GameServerRunner {
 
         String className = GameServer.class.getName();
 
-        List<String> theCommand = List.of(javaBin, "-cp", classpath, className, serverName);
+        List<String> theCommand = List.of(
+                javaBin, "-cp", classpath, className,
+                serverName, gameMode.toString(), Long.toString(gameModeValue)
+        );
 
         ProcessBuilder sProcessBuilder = new ProcessBuilder(theCommand);
         sProcessBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -67,7 +73,7 @@ public class GameServerRunner {
     }
 
     /**
-     * {@code serverName} variable getter
+     * {@code serverName} getter
      *
      * @return Name of the {@link GameServer}. Can be {@code null} if no {@code GameServer} is active.
      */
@@ -76,7 +82,7 @@ public class GameServerRunner {
     }
 
     /**
-     * {@code gameRunning} variable getter
+     * {@code gameRunning} getter
      *
      * @return {@code true} if the game is running on the server. <br> Otherwise {@code false}.
      */

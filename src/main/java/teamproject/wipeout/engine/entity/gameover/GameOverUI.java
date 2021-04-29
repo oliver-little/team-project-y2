@@ -3,14 +3,10 @@ package teamproject.wipeout.engine.entity.gameover;
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.ParallelTransition;
-import javafx.animation.ScaleTransition;
 import javafx.animation.SequentialTransition;
-import javafx.animation.TranslateTransition;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -22,12 +18,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import teamproject.wipeout.Leaderboard;
 import teamproject.wipeout.StartMenu;
 import teamproject.wipeout.UIUtil;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
-import teamproject.wipeout.util.Networker;
+import teamproject.wipeout.networking.Networker;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.util.Comparator;
@@ -44,9 +41,9 @@ public class GameOverUI extends StackPane {
     private final VBox content;
     private final List<Player> players;
     private final Text winner;
-    private final ListView<String> list;
+    private Leaderboard leaderboard;
 
-    static class SortByMoney implements Comparator<Player> {
+    public static class SortByMoney implements Comparator<Player> {
         // Used for sorting in descending order of money number
         public int compare(Player a, Player b)
         {
@@ -63,7 +60,6 @@ public class GameOverUI extends StackPane {
         this.players = players;
         this.content = new VBox(2);
         this.content.setAlignment(Pos.CENTER);
-        this.list = new ListView<>();
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "task-ui.css");
 
         winner = UIUtil.createTitle("");
@@ -72,11 +68,8 @@ public class GameOverUI extends StackPane {
         Text title = UIUtil.createTitle("Game Over!");
         title.setFont(Font.font("Kalam", 80));
 
-        list.setMaxWidth(180);
-        list.setMaxHeight(100);
-        list.setMouseTransparent( true );
-        list.setFocusTraversable( false );
-        list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
+        leaderboard = new Leaderboard(players);
+        leaderboard.setAlignment(Pos.CENTER);
 
         Button closeButton = new Button("Go back to menu");
         closeButton.setOnAction(e -> this.endGame());
@@ -89,7 +82,7 @@ public class GameOverUI extends StackPane {
         subtitleSpacer.setPrefHeight(40);
         VBox.setVgrow(subtitleSpacer, Priority.ALWAYS);
 
-        content.getChildren().addAll(title, titleSpacer, winner, subtitleSpacer, list, closeButton);
+        content.getChildren().addAll(title, titleSpacer, winner, subtitleSpacer, leaderboard, closeButton);
         content.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         this.setBackground(new Background(new BackgroundFill(new Color(0, 0, 0, 0.75), CornerRadii.EMPTY, Insets.EMPTY)));
@@ -100,7 +93,7 @@ public class GameOverUI extends StackPane {
         // Setup animation
         this.setOpacity(0);
         winner.setOpacity(0);
-        list.setOpacity(0);
+        leaderboard.setOpacity(0);
         closeButton.setOpacity(0);
 
         FadeTransition bgFade = new FadeTransition(Duration.seconds(0.5), this);
@@ -114,7 +107,7 @@ public class GameOverUI extends StackPane {
         winnerFade.setToValue(1);
         winnerFade.setInterpolator(Interpolator.EASE_BOTH);
 
-        FadeTransition listFade = new FadeTransition(Duration.seconds(0.5), list);
+        FadeTransition listFade = new FadeTransition(Duration.seconds(0.5), leaderboard);
         listFade.setFromValue(0);
         listFade.setToValue(1);
         listFade.setInterpolator(Interpolator.EASE_BOTH);
@@ -132,8 +125,8 @@ public class GameOverUI extends StackPane {
     }
 
     public void refreshText() {
-        this.list.getItems().clear();
-        this.players.sort(new SortByMoney().reversed());
+    	leaderboard.update(players);
+
 
         String winnerName = this.players.get(0).playerName;
         String winString = winnerName + " wins!";
@@ -143,10 +136,6 @@ public class GameOverUI extends StackPane {
 
         winner.setText(winString);
 
-        for (int i = 0; i < this.players.size(); i++) {
-            Player player = this.players.get(i);
-            this.list.getItems().add(ORDINAL_STRINGS[i] + ": " + player.playerName + " " + "$" + String.format("%.2f",  player.moneyProperty().getValue()));
-        }
     }
 
     public void endGame() {

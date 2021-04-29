@@ -32,6 +32,10 @@ public class PlayerSpriteSheetManager {
 
     public String getPlayerSpriteSheet() {
         int availableCount = this.availablePlayerSpriteSheets.size();
+        if (availableCount == 0) {
+            return null;
+        }
+
         int randIndex = this.random.nextInt(availableCount);
         return this.availablePlayerSpriteSheets.remove(randIndex);
     }

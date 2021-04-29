@@ -1,4 +1,4 @@
-package teamproject.wipeout.networking.state;
+package teamproject.wipeout.networking.data;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -71,8 +71,8 @@ public class MarketOperationRequest implements Serializable {
         this.buy = in.readBoolean();
     }
 
-    private void readObjectNoData() throws GameEntityStateException {
-        throw new GameEntityStateException("MarketOperationRequest is corrupted");
+    private void readObjectNoData() throws IOException {
+        throw new IOException("MarketOperationRequest is corrupted");
     }
 
     // Customized equals() and hashCode() methods implemented
