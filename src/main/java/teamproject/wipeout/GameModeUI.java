@@ -14,8 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
- * Class that constructs the gamemode selection UI 
- *
+ * Class that constructs the game mode selection UI
  */
 public class GameModeUI extends VBox
 {
@@ -29,7 +28,7 @@ public class GameModeUI extends VBox
 			data.put("desc", "Minutes");
 			data.put("min", 5);
 			data.put("max", 30);
-			data.put("default", 1);
+			data.put("default", 10);
 		}
 		else if(gamemode== GameMode.WEALTH_MODE) {
 			data.put("desc", "Money Target");
