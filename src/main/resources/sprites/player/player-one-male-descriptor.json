@@ -1,0 +1,61 @@
+{
+  "fileType": "SpritesheetDescriptor",
+  "version": "1.0.0",
+  "name": "player-one-male",
+  "sprites": [
+    {
+      "name": "walk-up",
+      "type": "sprite-list-x",
+      "parameters" : {
+        "x": 0,
+        "y": 512,
+        "width": 64,
+        "height": 64,
+        "length": 9
+      }
+    },
+    {
+      "name": "walk-left",
+      "type": "sprite-list-x",
+      "parameters" : {
+        "x": 0,
+        "y": 576,
+        "width": 64,
+        "height": 64,
+        "length": 9
+      }
+    },
+    {
+      "name": "walk-down",
+      "type": "sprite-list-x",
+      "parameters" : {
+        "x": 0,
+        "y": 640,
+        "width": 64,
+        "height": 64,
+        "length": 9
+      }
+    },
+    {
+      "name": "walk-right",
+      "type": "sprite-list-x",
+      "parameters" : {
+        "x": 0,
+        "y": 704,
+        "width": 64,
+        "height": 64,
+        "length": 9
+      }
+    },
+    {
+      "name": "idle",
+      "type": "sprite",
+      "parameters" : {
+        "x": 0,
+        "y": 640,
+        "width": 64,
+        "height": 64
+      }
+    }
+  ]
+}

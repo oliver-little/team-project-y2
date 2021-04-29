@@ -70,7 +70,7 @@ class GameServerTest {
             this.clientPlayers = new Player[CLIENT_IDs.length];
             for (int i = 0; i < CLIENT_IDs.length; i++) {
                 Pair<Integer, String> playerInfo = new Pair<Integer, String>(CLIENT_IDs[i], "id_"+i);
-                Player player = new Player(gameScene, playerInfo, spriteManager, null);
+                Player player = new Player(gameScene, playerInfo, null, spriteManager, null);
                 player.setWorldPosition(new Point2D(i, i));
                 this.clientPlayers[i] = player;
             }

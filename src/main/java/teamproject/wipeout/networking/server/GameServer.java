@@ -10,6 +10,7 @@ import teamproject.wipeout.networking.state.AnimalState;
 import teamproject.wipeout.networking.state.FarmState;
 import teamproject.wipeout.networking.state.MarketOperationRequest;
 import teamproject.wipeout.networking.state.PlayerState;
+import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
 import teamproject.wipeout.util.threads.BackgroundThread;
 import teamproject.wipeout.util.threads.ServerThread;
 import teamproject.wipeout.util.threads.UtilityThread;
@@ -63,6 +64,7 @@ public class GameServer {
 
     private final ServerSocket serverSocket;
     private final HashSet<Integer> generatedIDs;
+    private final PlayerSpriteSheetManager playerSpriteSheetManager;
 
     private ServerThread newConnectionsThread;
 
@@ -121,6 +123,7 @@ public class GameServer {
         this.isActive = false;
 
         this.generatedIDs = new HashSet<Integer>();
+        this.playerSpriteSheetManager = new PlayerSpriteSheetManager();
 
         this.newConnectionsThread = null;
 
@@ -469,10 +472,14 @@ public class GameServer {
 
                     // (1.) Game session is not active and the number of clients is under the limit
                     if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
-                        Integer clientID = this.generateClientID();
-                        Integer farmID = this.handleFarmRequest();
-                        GameClientHandler client = GameClientHandler.allowConnection(clientSocket, this.id, clientID, farmID, this::clientUpdateArrived);
+                        int clientID = this.generateClientID();
+                        int farmID = this.handleFarmRequest();
+                        int[] clientInfo = new int[]{clientID, farmID};
+                        String clientSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
 
+                        GameClientHandler client = GameClientHandler.allowConnection(clientSocket, this.id, clientInfo, this::clientUpdateArrived);
+
+                        client.updateWith(new GameUpdate(GameUpdateType.PLAYER_SPRITE, this.id, clientSpriteSheet));
                         client.updateWith(new GameUpdate(GameUpdateType.FARM_ID, this.id, farmID));
 
                         if (clientHandlers.add(client)) { // Duplicate clients are NOT added

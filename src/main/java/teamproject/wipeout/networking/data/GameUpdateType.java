@@ -8,8 +8,8 @@ import java.io.Serializable;
  * serialized inside a {@code GameUpdate} instance.
  */
 public enum GameUpdateType implements Serializable {
-    ACCEPT, DECLINE, CONNECTED, // Types used for establishing a connection
-    CLOCK_CALIB, REQUEST,       // Types used for during the game
-    DISCONNECT, SERVER_STOP,    // Types used for closing a connection
+    ACCEPT, DECLINE, CONNECTED,             // Types used for establishing a connection
+    CLOCK_CALIB, PLAYER_SPRITE, REQUEST,    // Types used for during the game
+    DISCONNECT, SERVER_STOP,                // Types used for closing a connection
     WORLD_STATE, PLAYER_STATE, FARM_STATE, FARM_ID, MARKET_STATE, ANIMAL_STATE // Types describing specific state updates
 }

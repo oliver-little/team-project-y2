@@ -21,12 +21,11 @@ public class CurrentPlayerTest {
 	private static GameScene scene = new GameScene();
 	private static ItemStore itemStore;
 	private static int MAX_SIZE; //no. of inventory slots
-	private static SpriteManager spriteManager;
-	
+
 	@BeforeAll
 	static void initialization() throws ReflectiveOperationException, IOException {
 		itemStore = new ItemStore("items.json");
-		spriteManager = new SpriteManager();
+		SpriteManager spriteManager = new SpriteManager();
 		spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
 		spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
         spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
@@ -39,7 +38,7 @@ public class CurrentPlayerTest {
 		int playerID = new Random().nextInt(1024);
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 		Pair<Integer, String> playerInfo = new Pair<Integer, String>(playerID, "testPlayer");
-		currentPlayer = new CurrentPlayer(scene, playerInfo, spriteManager, itemStore);
+		currentPlayer = new CurrentPlayer(scene, playerInfo, null, spriteManager, itemStore);
 		currentPlayer.setInventoryUI(invUI);
 		MAX_SIZE = currentPlayer.MAX_SIZE;
 	}

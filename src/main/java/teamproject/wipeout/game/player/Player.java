@@ -34,14 +34,22 @@ import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.networking.state.StateUpdatable;
 import teamproject.wipeout.util.SupplierGenerator;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
-    public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
-    public static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
+    public static final String[] PLAYER_SPRITESHEETS = {
+            "player-one-male", "player-two-male", "player-three-male",
+            "player-one-female", "player-two-female", "player-three-female",
+            "skeleton"
+    };
+
+    private static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
+    private static final OvalParticle SLOW_PARTICLE = new OvalParticle(new Color(0.001, 1, 0.733, 1));
 
     //no. of inventory slots
     public static final int MAX_SIZE = 10;
@@ -52,41 +60,41 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public final Integer playerID;
     public final String playerName;
-    public final String spriteSheetName;
-
     public final Point2D size;
+
+    protected final MovementComponent physics;
+    protected final ItemStore itemStore;
 
     //ArrayList used to store inventory
     protected ArrayList<InventoryItem> inventory = new ArrayList<InventoryItem>();
 
-    protected final MovementComponent physics;
-
-    private Transform position;
-    private Supplier<GameClient> clientSupplier;
-    private Consumer<PotionEntity> thrownPotion;
-
     private final PlayerState playerState;
     private final DoubleProperty money;
     private final ParticleEntity sabotageEffect;
+    private final SpriteManager spriteManager;
 
-    protected final ItemStore itemStore;
+    private String spriteSheetName;
+    private Transform position;
+    private Consumer<PotionEntity> thrownPotion;
+    private Supplier<GameClient> clientSupplier;
 
     /**
      * Creates a new instance of GameEntity
      *
      * @param scene The GameScene this entity is part of
      */
-    public Player(GameScene scene, Pair<Integer, String> playerInfo, SpriteManager spriteManager, ItemStore itemStore) {
+    public Player(GameScene scene, Pair<Integer, String> playerInfo, String spriteSheet, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
         this.playerID = playerInfo.getKey();
         this.playerName = playerInfo.getValue();
-        this.spriteSheetName = "player-red";
+        this.spriteSheetName = spriteSheet == null ? PLAYER_SPRITESHEETS[0] : spriteSheet;
 
         this.money = new SimpleDoubleProperty(INITIAL_MONEY);
 
         this.itemStore = itemStore;
+        this.spriteManager = spriteManager;
 
-        this.playerState = new PlayerState(playerID, playerName, this.money.getValue(), Point2D.ZERO, Point2D.ZERO);
+        this.playerState = new PlayerState(playerID, playerName, spriteSheetName, money.getValue(), Point2D.ZERO, Point2D.ZERO);
 
         // Particle simulation
         ParticleParameters parameters = new ParticleParameters(100, true,
@@ -96,7 +104,8 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
             SupplierGenerator.rangeSupplier(1.0, 4.0),
             null,
             SupplierGenerator.staticSupplier(0.0),
-            SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10)));
+            SupplierGenerator.rangeSupplier(new Point2D(-25, -30), new Point2D(25, -10))
+        );
 
         parameters.setEmissionRate(20);
         parameters.setEmissionPositionGenerator(SupplierGenerator.rangeSupplier(new Point2D(12, 0), new Point2D(52, 40)));
@@ -147,21 +156,14 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         Point2D tempSize = null;
         try {
             this.addComponent(new RenderComponent(new Point2D(0, -3)));
-            Image[] idleSpriteSet = spriteManager.getSpriteSet(this.spriteSheetName, "idle");
-            this.addComponent(new PlayerAnimatorComponent(
-                    spriteManager.getSpriteSet(this.spriteSheetName, "walk-up"),
-                    spriteManager.getSpriteSet(this.spriteSheetName, "walk-right"),
-                    spriteManager.getSpriteSet(this.spriteSheetName, "walk-down"),
-                    spriteManager.getSpriteSet(this.spriteSheetName, "walk-left"),
-                    idleSpriteSet
-            ));
-
-            Image idleSprite = idleSpriteSet[0];
+            Image idleSprite = spriteManager.getSpriteSet(this.spriteSheetName, "idle")[0];
             tempSize = new Point2D(idleSprite.getWidth(), idleSprite.getHeight());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         this.size = tempSize;
+        this.setSpriteSheetName(this.spriteSheetName, false);
 
         TextRenderable tag= new TextRenderable(playerName, 20);
         GameEntity nameTag = new GameEntity(scene);
@@ -199,6 +201,30 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public void setThrownPotion(Consumer<PotionEntity> thrownPotion) {
         this.thrownPotion = thrownPotion;
+    }
+
+    public void setSpriteSheetName(String newSpriteSheet, boolean sendUpdate) {
+        this.removeComponent(PlayerAnimatorComponent.class);
+
+        this.spriteSheetName = newSpriteSheet;
+        this.playerState.setSpriteSheet(newSpriteSheet);
+
+        try {
+            this.addComponent(new PlayerAnimatorComponent(
+                    this.spriteManager.getSpriteSet(this.spriteSheetName, "walk-up"),
+                    this.spriteManager.getSpriteSet(this.spriteSheetName, "walk-right"),
+                    this.spriteManager.getSpriteSet(this.spriteSheetName, "walk-down"),
+                    this.spriteManager.getSpriteSet(this.spriteSheetName, "walk-left"),
+                    this.spriteManager.getSpriteSet(this.spriteSheetName, "idle")
+            ));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (sendUpdate) {
+            this.sendPlayerStateUpdate();
+        }
     }
 
     /**
@@ -240,28 +266,32 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     }
 
     public void updateFromState(PlayerState newState) {
+        if (!newState.getSpriteSheet().equals(this.spriteSheetName)) {
+            this.setSpriteSheetName(newState.getSpriteSheet(), false);
+        }
+
         this.physics.setSpeedMultiplier(newState.getSpeedMultiplier());
         this.physics.acceleration = newState.getAcceleration();
-        if (newState.getAcceleration().equals(Point2D.ZERO)) {
+        if (newState.getAcceleration().equals(Point2D.ZERO) && this.position != null) {
             this.position.setPosition(newState.getPosition());
         }
         this.money.set(newState.getMoney());
         this.playerState.updateStateFrom(newState);
 
         // Update remote players
-        if (newState.getSpeedMultiplier() != 1) {
-            if (newState.getSpeedMultiplier() < 1) {
+        if (newState.getSpeedMultiplier() != 1.0) {
+            if (newState.getSpeedMultiplier() < 1.0) {
                 sabotageEffect.getParameters().setEmissionType(SLOW_PARTICLE);
-            }
-            else {
+
+            } else {
                 sabotageEffect.getParameters().setEmissionType(FAST_PARTICLE);
             }
 
             if (!sabotageEffect.isPlaying()) {
                 sabotageEffect.play();
             }
-        }
-        else if (sabotageEffect.isPlaying()) {
+
+        } else if (sabotageEffect.isPlaying()) {
             sabotageEffect.stop();
         }
     }

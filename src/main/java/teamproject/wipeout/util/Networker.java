@@ -1,15 +1,11 @@
 package teamproject.wipeout.util;
 
 import javafx.util.Pair;
-import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
-import teamproject.wipeout.engine.component.physics.HitboxComponent;
-import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.ItemStore;
-import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
@@ -24,6 +20,7 @@ import java.net.UnknownHostException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+// TODO documentation
 public class Networker {
 
     public final GameServerRunner serverRunner;
@@ -90,7 +87,7 @@ public class Networker {
             }
 
             Pair<Integer, String> playerInfo = new Pair<Integer, String>(newPlayerState.getPlayerID(), newPlayerState.getPlayerName());
-            Player newCurrentPlayer = new Player(gameScene, playerInfo, spriteManager, itemStore);
+            Player newCurrentPlayer = new Player(gameScene, playerInfo, null, spriteManager, itemStore);
             newCurrentPlayer.setWorldPosition(newPlayerState.getPosition());
 
             FarmEntity myFarm = this.worldEntity.farms.get(newPlayerState.getFarmID());
