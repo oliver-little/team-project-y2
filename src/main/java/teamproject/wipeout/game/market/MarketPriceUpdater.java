@@ -56,8 +56,6 @@ public class MarketPriceUpdater {
      */
     private Runnable priceUpdater() {
         return () -> {
-            boolean stateChanged = false;
-
             for (MarketItem item : this.market.stockDatabase.values()) {
                 double quantityDeviation = item.getQuantityDeviation();
 
@@ -80,11 +78,8 @@ public class MarketPriceUpdater {
                         item.decrementQuantityDeviation(QUANTITYDEVIATIONSTEP);
                     }
                 }
-                stateChanged = true;
-            }
 
-            if (stateChanged) {
-                this.market.sendMarketUpdate();
+                market.sendMarketUpdate(item);
             }
         };
     }

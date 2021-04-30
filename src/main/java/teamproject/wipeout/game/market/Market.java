@@ -59,7 +59,7 @@ public class Market implements StateUpdatable<MarketState> {
      * @return Current {@link MarketState}
      */
     public MarketState getCurrentState() {
-        return new MarketState(stockDatabase);
+        return null; // TODO fix
     }
 
     /**
@@ -69,15 +69,13 @@ public class Market implements StateUpdatable<MarketState> {
      */
     public void updateFromState(MarketState newState) {
         Platform.runLater(() -> {
-            for (Map.Entry<Integer, Double> updatedStock : newState.getItemDeviations().entrySet()) {
-                MarketItem currentStock = this.stockDatabase.get(updatedStock.getKey());
-                currentStock.setQuantityDeviation(updatedStock.getValue());
-            }
+            this.stockDatabase.get(newState.getItemID()).setQuantityDeviation(newState.getItemDeviation());
         });
     }
 
     /**
      * This function is run when a player purchases an item from the market.
+     *
      * @param id The item ID they want to buy.
      * @param quantity The quantity of the item they want to buy.
      * @return The total cost that the market will charge them or -1 if you cannot buy the item.
@@ -85,7 +83,6 @@ public class Market implements StateUpdatable<MarketState> {
     public double buyItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
@@ -103,7 +100,7 @@ public class Market implements StateUpdatable<MarketState> {
 
         } else {
             item.incrementQuantityDeviation(quantity);
-            this.sendMarketUpdate();
+            sendMarketUpdate(item);
         }
 
         return totalCost;
@@ -118,14 +115,12 @@ public class Market implements StateUpdatable<MarketState> {
     public double sellItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
         MarketItem item = stockDatabase.get(id);
 
         if (item.getDefaultSellPrice() < 0) {
-            //System.out.println("Cannot sell this kind of item.");
             return -1;
         }
 
@@ -136,7 +131,7 @@ public class Market implements StateUpdatable<MarketState> {
 
         } else {
             item.decrementQuantityDeviation(quantity);
-            sendMarketUpdate();
+            sendMarketUpdate(item);
         }
 
         return totalCost;
@@ -191,9 +186,11 @@ public class Market implements StateUpdatable<MarketState> {
      * (Server) sends a new market state to all clients.
      * (Server-side method)
      */
-    protected void sendMarketUpdate() {
+    protected void sendMarketUpdate(MarketItem marketItem) {
         if (serverUpdater != null) {
-            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), getCurrentState());
+            MarketState  marketState = new MarketState(marketItem.getID(), marketItem.getQuantityDeviation());
+
+            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), marketState);
             serverUpdater.accept(update);
         }
     }
