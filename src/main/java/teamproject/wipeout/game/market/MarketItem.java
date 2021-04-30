@@ -4,7 +4,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import teamproject.wipeout.game.item.components.TradableComponent;
 
-public class MarketItem {
+public class    MarketItem {
     
     public static final int INITIAL_QUANTITY_DEVIATION = 0;
 
