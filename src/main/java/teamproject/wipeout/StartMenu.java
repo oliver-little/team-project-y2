@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -425,15 +426,36 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().clear();
 
-        menuBox.getChildren().add(UIUtil.createTitle("Settings"));
+        menuBox.getChildren().add(UIUtil.createTitle("How to Play"));
 
+        VBox instructions = new VBox();
+        instructions.setAlignment(Pos.TOP_CENTER);
+        instructions.setMaxSize(600, 300);
+        
+        String info = "Goal: Make as much money as fast as possible!\n"
+        		+ "How to play:\n"
+        		+ "1. Move around with the arrow keys to get to the market in the centre.\n"
+        		+ "2. Click on the market and buy seeds.\n"
+        		+ "3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse."
+        		+ "Now plant the seeds by clicking somewhere on your farm.\n"
+        		+ "4. Wait for them to grow and then harvest them by pressing H and clicking on the crop.\n"
+        		+ "5. Pick up the harvested crop by standing on them and pressing X.\n"
+        		+ "6. Hurry back to the market and sell your crops to make money!";
+        
+        Label instructionInfo = new Label(info);
+        instructionInfo.setWrapText(true);
+        instructions.getChildren().addAll(instructionInfo);
+        
+        menuBox.getChildren().add(instructions);
+        
+        
         TilePane tilePane = new TilePane();
         tilePane.setAlignment(Pos.TOP_CENTER);
         tilePane.setVgap(20);
         tilePane.setHgap(20);
         tilePane.setMaxSize(600, 300);
 
-        menuBox.getChildren().add(tilePane);
+        menuBox.getChildren().add(tilePane);    
         tilePane.getStyleClass().add("tile-pane");
 
         //create a HBox for each drop down menu (key-binding)
@@ -522,7 +544,7 @@ public class StartMenu implements Controller {
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Singleplayer", () -> createSingleplayerMenu()),
                 new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
-                new Pair<String, Runnable>("Settings", () -> createSettingsMenu()),
+                new Pair<String, Runnable>("How to Play", () -> createSettingsMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;
