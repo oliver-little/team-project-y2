@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.util.resources.ResourceLoader;
 
 public class MarketTest {
 
@@ -15,6 +16,7 @@ public class MarketTest {
 
     @BeforeAll
     public static void initialization() {
+        ResourceLoader.setTargetClass(MarketTest.class);
         itemStore = assertDoesNotThrow(() -> new ItemStore("marketitemstest.json"));
     }
 

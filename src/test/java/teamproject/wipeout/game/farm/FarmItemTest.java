@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.PlantComponent;
+import teamproject.wipeout.util.resources.ResourceLoader;
 
 import java.io.FileNotFoundException;
 
@@ -22,6 +23,8 @@ class FarmItemTest {
 
     @BeforeAll
     static void initialization() throws FileNotFoundException, ReflectiveOperationException {
+        ResourceLoader.setTargetClass(ResourceLoader.class);
+
         ItemStore itemStore = new ItemStore("items.json");
         item = itemStore.getItem(28);
         finishedItem = itemStore.getItem(43);

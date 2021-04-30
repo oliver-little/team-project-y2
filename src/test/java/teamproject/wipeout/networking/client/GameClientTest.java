@@ -10,6 +10,7 @@ import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.networking.state.PlayerState;
+import teamproject.wipeout.util.resources.ResourceLoader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -46,22 +47,16 @@ class GameClientTest {
         }
     };
 
-    private HashSet<PlayerState> newPlayers;
-    private final NewPlayerAction newPlayerAction = (newPlayer) -> {
-        newPlayers.add(newPlayer);
-        Pair<Integer, String> playerInfo = new Pair<Integer, String>(newPlayer.getPlayerID(), "Test"+newPlayer.getPlayerID());
-        return new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
-    };
-
     @BeforeAll
     void initializeGameClient() throws IOException, InterruptedException, ReflectiveOperationException {
+        ResourceLoader.setTargetClass(ResourceLoader.class);
+
         this.spriteManager = new SpriteManager();
         this.spriteManager.loadSpriteSheet("player/player-one-female-descriptor.json", "player/player-one-female.png");
 
         this.gameScene = new GameScene();
         Pair<Integer, String> playerInfo = new Pair<Integer, String>(CLIENT_ID, "Test");
         this.clientPlayer = new Player(this.gameScene, playerInfo, null, this.spriteManager, null);
-        this.newPlayers = new HashSet<>();
 
         this.gameServer = new GameServer(SERVER_NAME, GameMode.TIME_MODE, 1_000);
         this.gameServer.startClientSearch();
