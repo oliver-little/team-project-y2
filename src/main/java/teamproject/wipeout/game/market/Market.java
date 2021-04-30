@@ -145,16 +145,23 @@ public class Market implements StateUpdatable<MarketState> {
         return totalCost;
     }
 
+    /**
+     * Calculates the cost of buying/selling a certain number of items.
+     * @param id The item id.
+     * @param quantity The number of items to buy/sell.
+     * @param buy Whether the player is buying or selling. True for buying, false for selling.
+     * @return The cost to buy/sell.
+     */
     public double calculateTotalCost(int id, int quantity, boolean buy) {
         return calculateTotalCostAndDeviations(id, quantity, buy).getKey();
     }
 
     /**
-     * Calculates the cost of buying/selling a certain number of items. This function specifically accounts for the game's pricing model.
+     * Calculates the cost of buying/selling a certain number of items. This function additionally accounts for the game's pricing model. This function returns the quantity deviation for which the cost of an item falls below 0.01, used for the MarketPriceUpdater and market pricing models.
      * @param id The item id.
      * @param quantity The number of items to buy/sell.
      * @param buy Whether the player is buying or selling. True for buying, false for selling.
-     * @return The cost to buy/sell.
+     * @return A pair of values: The cost to buy/sell and the quantity deviation at which the price of an item falls below 0.01.
      */
     public Pair<Double, Integer> calculateTotalCostAndDeviations(int id, int quantity, boolean buy) {
 
