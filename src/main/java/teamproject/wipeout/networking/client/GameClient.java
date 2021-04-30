@@ -280,8 +280,8 @@ public class GameClient {
                             this.farmEntities.get(fState.getFarmID()).updateFromState(fState);
                             break;
                         case MARKET_STATE:
-                            MarketState mState = (MarketState) receivedUpdate.content;
-                            this.worldEntity.getMarket().updateFromState(mState);
+                            //MarketState mState = (MarketState) receivedUpdate.content;
+                            //this.worldEntity.getMarket().updateFromState(mState);
                             break;
                         case WORLD_STATE:
                             WorldState wState = (WorldState) receivedUpdate.content;
