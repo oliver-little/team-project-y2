@@ -9,6 +9,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "tomato",
+          "seedsItemID" : 28,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -24,6 +25,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-vegetables",
           "spriteSetName" : "lettuce",
+          "seedsItemID" : 29,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -39,6 +41,7 @@
         "InventoryComponent" : {
           "spriteSheetName" : "inventory-fruit",
           "spriteSetName" : "apple",
+          "seedsItemID" : 42,
           "stackSizeLimit" : 99
         },
         "TradableComponent" : {
@@ -65,7 +68,9 @@
           "spriteSetName" : "tomato",
           "grownItemID" : 1,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "minDrop" : 1,
+          "maxDrop" : 2
         }
       }
     },
@@ -87,7 +92,9 @@
           "spriteSetName" : "lettuce",
           "grownItemID" : 2,
           "maxGrowthStage" : 3,
-          "growthRate" : 3.00
+          "growthRate" : 3.00,
+          "minDrop" : 1,
+          "maxDrop" : 2
         }
       }
     },
@@ -109,9 +116,12 @@
           "spriteSetName" : "apple-tree",
           "grownItemID" : 15,
           "maxGrowthStage" : 4,
-          "growthRate" : 3.00,
+          "growthRate" : 15.00,
           "width": 2,
-          "height": 2
+          "height": 2,
+          "minDrop" : 3,
+          "maxDrop" : 8,
+          "isTree" : true
         }
       }
     }
