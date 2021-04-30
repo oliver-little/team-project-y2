@@ -2,5 +2,7 @@ Source for footstep sound effect from https://www.fesliyanstudios.com
 
 steps.wav - Footsteps In Grass Moderate A Sound Effect: https://www.fesliyanstudios.com/play-mp3/6986
 
+breakingGlass2.wav - Glass Bottle Shattering A2 Sound Effect: https://www.fesliyanstudios.com/play-mp3/3876
+
 free sound effects from https://www.fesliyanstudios.com
 https://www.fesliyanstudios.com/sound-effects-policy

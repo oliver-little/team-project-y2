@@ -1,0 +1,5 @@
+Source for cog icon (used for settings menu)
+
+CC-BY 3.0
+cog.png - https://game-icons.net/1x1/lorc/cog.html#download
+by Lorc - https://lorcblog.blogspot.com/
