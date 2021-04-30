@@ -32,23 +32,23 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, false);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
-        assertEquals("10.52", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("5.52", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("13.75", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("8.75", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*1000) + 100);
-            assertEquals(9.5, marketItem.getQuantityDeviation());
-            assertEquals("10.49", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.49", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals(9.9, marketItem.getQuantityDeviation());
+            assertEquals("13.69", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("8.69", String.format("%.2f", marketItem.getCurrentSellPrice()));
             
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*1000));
-            assertEquals(9, marketItem.getQuantityDeviation());
-            assertEquals("10.47", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.47", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals(9.8, marketItem.getQuantityDeviation());
+            assertEquals("13.63", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("8.63", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
             System.out.println(e);
@@ -64,12 +64,12 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, false);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
-        assertEquals("10.52", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("5.52", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("13.75", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("8.75", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
@@ -80,21 +80,20 @@ public class MarketPricingTest {
 
         market.buyItem(50, 10);
 
-        assertEquals(19, marketItem.getQuantityDeviation());
+        assertEquals(19.8, marketItem.getQuantityDeviation());
 
-        assertEquals("11.10", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("6.10", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("25.90", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("20.90", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*1000));
-            assertEquals(18.5, marketItem.getQuantityDeviation());
-            assertEquals("11.06", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("6.06", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals(19.7, marketItem.getQuantityDeviation());
+            assertEquals("25.67", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("20.67", String.format("%.2f", marketItem.getCurrentSellPrice()));
             
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*7000));
-            assertEquals(15, marketItem.getQuantityDeviation());
-            assertEquals("10.82", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.82", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals("24.19", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("19.19", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
             System.out.println(e);
@@ -110,12 +109,12 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, false);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
-        assertEquals("10.52", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("5.52", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("13.75", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("8.75", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
@@ -126,30 +125,22 @@ public class MarketPricingTest {
 
         market.buyItem(50, 10);
 
-        assertEquals(19, marketItem.getQuantityDeviation());
+        assertEquals(19.8, marketItem.getQuantityDeviation());
 
-        assertEquals("11.10", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("6.10", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("25.90", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("20.90", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {          
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*8500));
+            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*8000));
 
-            market.sellItem(50, 14);
+            market.sellItem(50, 18);
 
-            assertEquals(1, marketItem.getQuantityDeviation());
-            assertEquals("10.05", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.05", String.format("%.2f", marketItem.getCurrentSellPrice()));
-
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*5000));
-
-            assertEquals(0, marketItem.getQuantityDeviation());
-            assertEquals("10.00", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.00", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals("10.26", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("5.26", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
             System.out.println(e);
         }
-
 
         marketPriceUpdater.stop();
     }
@@ -161,12 +152,12 @@ public class MarketPricingTest {
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, false);
 
         assertEquals(10, marketItem.getQuantityDeviation());
 
-        assertEquals("10.52", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("5.52", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("13.75", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("8.75", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
@@ -177,31 +168,18 @@ public class MarketPricingTest {
 
         market.buyItem(50, 10);
 
-        assertEquals(19, marketItem.getQuantityDeviation());
+        assertEquals(19.8, marketItem.getQuantityDeviation());
 
-        assertEquals("11.10", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-        assertEquals("6.10", String.format("%.2f", marketItem.getCurrentSellPrice()));
+        assertEquals("25.90", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("20.90", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {          
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*8500));
+            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*8000));
 
-            market.sellItem(50, 24);
+            market.sellItem(50, 25);
 
-            assertEquals(-9, marketItem.getQuantityDeviation());
-            assertEquals("9.53", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("4.53", String.format("%.2f", marketItem.getCurrentSellPrice()));
-
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*9000));
-
-            assertEquals(-4.5, marketItem.getQuantityDeviation());
-            assertEquals("9.77", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("4.77", String.format("%.2f", marketItem.getCurrentSellPrice()));
-
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*11000));
-
-            assertEquals(0, marketItem.getQuantityDeviation());
-            assertEquals("10.00", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("5.00", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            assertEquals("8.38", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("3.38", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
             System.out.println(e);
@@ -214,32 +192,25 @@ public class MarketPricingTest {
     @Test
     public void increasingPrices() {
 
-        market.sellItem(50,60);
+        market.sellItem(50,17);
 
         MarketItem marketItem = market.stockDatabase.get(50);
 
-        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, true);
+        MarketPriceUpdater marketPriceUpdater = new MarketPriceUpdater(market, false);
 
-        assertEquals(-60, marketItem.getQuantityDeviation());
+        assertEquals(-14, marketItem.getQuantityDeviation());
 
-        assertEquals("0.01", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+        assertEquals("4.78", String.format("%.2f", marketItem.getCurrentBuyPrice()));
         assertEquals("0.01", String.format("%.2f", marketItem.getCurrentSellPrice()));
 
         try {
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*1000) + 100);
-            assertEquals(-59.5, marketItem.getQuantityDeviation());
-            assertEquals("0.23", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("0.01", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*10000) + 100);
+            assertEquals("5.40", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("0.40", String.format("%.2f", marketItem.getCurrentSellPrice()));
             
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*19500));
-            assertEquals(-50, marketItem.getQuantityDeviation());
-            assertEquals("3.95", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("0.01", String.format("%.2f", marketItem.getCurrentSellPrice()));
-
-            Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*10000));
-            assertEquals(-45, marketItem.getQuantityDeviation());
-            assertEquals("5.31", String.format("%.2f", marketItem.getCurrentBuyPrice()));
-            assertEquals("0.31", String.format("%.2f", marketItem.getCurrentSellPrice()));
+            market.buyItem(50,12);
+            assertEquals("9.74", String.format("%.2f", marketItem.getCurrentBuyPrice()));
+            assertEquals("4.74", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
             System.out.println(e);
