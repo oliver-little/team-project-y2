@@ -1,13 +1,13 @@
 package teamproject.wipeout.engine.component.physics;
 
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-
 import javafx.geometry.Point2D;
+import org.junit.jupiter.api.Test;
 import teamproject.wipeout.engine.component.shape.Circle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.component.shape.Segment;
 import teamproject.wipeout.engine.component.shape.Shape;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class GeometryUtilTest
 {

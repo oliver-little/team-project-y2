@@ -1,13 +1,13 @@
 package teamproject.wipeout.game.market;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.util.resources.ResourceLoader;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarketTest {
 

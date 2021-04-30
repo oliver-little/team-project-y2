@@ -1,21 +1,21 @@
 package teamproject.wipeout.game.player;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-
 import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.inventory.*;
+import teamproject.wipeout.game.inventory.InventoryItem;
+import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class CurrentPlayerTest {
 	private static CurrentPlayer currentPlayer;

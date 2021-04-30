@@ -1,10 +1,9 @@
 package teamproject.wipeout.engine.component.physics;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import javafx.geometry.Point2D;
 import org.junit.jupiter.api.Test;
 
-import javafx.geometry.Point2D;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class MovementTest
 {

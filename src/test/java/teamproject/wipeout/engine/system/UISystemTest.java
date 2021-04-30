@@ -1,17 +1,16 @@
 package teamproject.wipeout.engine.system;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.Test;
-
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import org.junit.jupiter.api.Test;
 import teamproject.wipeout.engine.component.ui.DialogUIComponent;
 import teamproject.wipeout.engine.component.ui.UIComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UISystemTest {
     @Test

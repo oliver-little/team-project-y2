@@ -1,14 +1,13 @@
 package teamproject.wipeout.game.assetmanagement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javafx.scene.image.Image;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import teamproject.wipeout.util.resources.ResourceLoader;
 
 import java.io.FileNotFoundException;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import javafx.scene.image.Image;
-import teamproject.wipeout.util.resources.ResourceLoader;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SpriteManagerTest {
 

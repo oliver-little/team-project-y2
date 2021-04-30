@@ -1,16 +1,16 @@
 package teamproject.wipeout.engine.system.ai;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javafx.geometry.Point2D;
+import org.junit.jupiter.api.Test;
+import teamproject.wipeout.engine.component.ai.NavigationEdge;
+import teamproject.wipeout.engine.component.ai.NavigationMesh;
+import teamproject.wipeout.engine.component.ai.NavigationSquare;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.ai.NavigationEdge;
-import teamproject.wipeout.engine.component.ai.NavigationMesh;
-import teamproject.wipeout.engine.component.ai.NavigationSquare;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class PathFindingSystemTest {
 
