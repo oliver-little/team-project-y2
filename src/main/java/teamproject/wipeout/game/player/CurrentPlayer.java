@@ -43,6 +43,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     private final SignatureEntityCollector pickableCollector;
     private final AudioComponent audio;
 
+    public boolean debug = false;
+
     /**
      * Creates a new instance of GameEntity
      *
@@ -112,13 +114,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public boolean buyTask(Task task) {
         if(currentAvailableTasks.containsKey(task.id)) {
-            inventoryUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
+            if (!debug) inventoryUI.displayMessage(ERROR_TYPE.TASK_EXISTS);
             return false;
         } else if (currentAvailableTasks.size() >= MAX_TASK_SIZE) {
-            inventoryUI.displayMessage(ERROR_TYPE.TASKS_FULL);
+            if (!debug) inventoryUI.displayMessage(ERROR_TYPE.TASKS_FULL);
             return false;
         } else if (!hasEnoughMoney(task.priceToBuy)) {
-            inventoryUI.displayMessage(ERROR_TYPE.MONEY);
+            if (!debug) inventoryUI.displayMessage(ERROR_TYPE.MONEY);
             return false;
         }
         this.addNewTask(task);
@@ -161,7 +163,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public boolean acquireItem(Integer itemID, int quantity) {
         if (this.addToInventory(itemID, quantity) < 0) {
-            this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
+            if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_FULL);
             return false;
         }
         return true;
@@ -199,14 +201,14 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * removes item(s) from the inventory, even if they span multiple slots, starting from the right-most slot
      * @param itemID for item to be removed
      * @param quantity of items to be removed
-     * @return itemID if successfully removed, negative int if unable to remove
+     * @return int[] with itemID - 0, and quantity removed - 1 (if successfully removed, empty int[] if unable to remove)
      */
     public int[] removeItem(int itemID, int quantity) {
         int[] removedItem = super.removeItem(itemID, quantity);
         if (removedItem.length == 2) {
             this.inventoryUI.updateUI(this.inventory, removedItem[1]);
         } else {
-            this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
+            if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
         }
         return removedItem;
     }
@@ -231,7 +233,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 return true;
             }
         }
-        System.out.println("There isn't " + quantity + " items in the selected slot");
         return false;
     }
 
@@ -313,7 +314,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 this.currentAvailableTasks.remove(task.id);
                 this.setMoney(this.getMoney() + task.reward);
                 this.playSound("coinPrize.wav");
-                this.inventoryUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
+                if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.TASK_COMPLETED);
             }
         }
         taskUI.showTasks(tasks);
@@ -360,7 +361,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     public boolean hasEnoughMoney(double price) {
         boolean enoughMoney = super.hasEnoughMoney(price);
         if (!enoughMoney) {
-            this.inventoryUI.displayMessage(ERROR_TYPE.MONEY);
+            if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.MONEY);
         }
         return enoughMoney;
     }

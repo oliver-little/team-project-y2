@@ -292,10 +292,10 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		GameEntity worldBoundaries = this.scene.createEntity();
 		worldBoundaries.addComponent(new Transform(0,0));
 		Rectangle[] hitboxes = {
-				new Rectangle(-5,-5,5,height+10),
-				new Rectangle(-5,-5,width+10,5),
-				new Rectangle(-5,height,width+10,5),
-				new Rectangle(width,-5,5,height+10)
+				new Rectangle(-20,-20,20,height+20),
+				new Rectangle(-20,-20,width+20,20),
+				new Rectangle(-20,height,width+20,20),
+				new Rectangle(width,-20,20,height+20)
 		};
 		this.addComponent(new HitboxComponent(hitboxes));
 		this.addComponent(new CollisionResolutionComponent(false, null));
