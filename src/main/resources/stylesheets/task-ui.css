@@ -1,7 +1,7 @@
 .button {
     -fx-pref-width: 180px;
 
-    -fx-background-color: rgba(255, 255, 255);
+    -fx-background-color: rgb(255, 255, 255);
     -fx-background-radius: 5px;
     -fx-background-insets: 1 1 1 1;
 
@@ -10,11 +10,11 @@
 }
     
 .button:hover {
-    -fx-background-color:rgba(216, 216, 216);
+    -fx-background-color:rgb(216, 216, 216);
 }
 
 .button:pressed {
-    -fx-background-color:rgba(172, 172, 172);
+    -fx-background-color:rgb(172, 172, 172);
 }
 
 .list-view {

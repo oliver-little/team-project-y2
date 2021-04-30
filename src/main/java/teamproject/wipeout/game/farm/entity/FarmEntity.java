@@ -691,7 +691,7 @@ public class FarmEntity extends GameEntity {
      * @param y            Y scene coordinate
      * @param makePickable {@code true} if you want the item to be pickable, otherwise {@code false}
      * @param isDestroying {@code true} if you want the item to be destroyed, otherwise {@code false} for being harvested
-     * @return {@code Integer array} with the farm coordinates of picked item, {@code null} if no item has been picked
+     * @return {@code Integer array} with the ID of plant's produce and its quantity, {@code null} if no item has been picked
      */
     public Integer[] pickItemAt(double x, double y, boolean makePickable, boolean isDestroying) {
         Point2D coors = this.rescaleCoordinatesToFarm(x, y);
@@ -753,7 +753,7 @@ public class FarmEntity extends GameEntity {
             this.playAudio("chomp.wav");
         }
 
-        return new Integer[]{pickedItem.id, numberOfPickables};
+        return new Integer[]{pickedPlantComponent.grownItemID, numberOfPickables};
     }
 
     // ***

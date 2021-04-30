@@ -178,7 +178,7 @@ public class Gameplay implements Controller {
         this.gameScene = new GameScene();
         this.renderer = new RenderSystem(this.gameScene, this.dynamicCanvas, this.staticCanvas);
         this.initializeSystemUpdater();
-        gameLoop = new GameLoop(this.systemUpdater, this.renderer);
+        this.gameLoop = new GameLoop(this.systemUpdater, this.renderer);
 
         // Input
         this.inputHandler = new InputHandler(this.root.getScene());
@@ -229,7 +229,6 @@ public class Gameplay implements Controller {
         MoneyUI moneyUI = new MoneyUI(currentPlayer);
         StackPane.setAlignment(moneyUI, Pos.TOP_CENTER);
 
-
         // Settings UI
         Runnable returnToMenu = () -> {
             if (this.networker != null && !this.networker.stopServer()) {
@@ -250,68 +249,8 @@ public class Gameplay implements Controller {
         
         this.interfaceOverlay.getChildren().addAll(inventoryUI, moneyUI);
         
-    	VBox leaderboardBox = new VBox();
-        Text title = UIUtil.createTitle("Leaderboard:");
-        title.setFont(Font.font("Kalam", 30));
-        
-        Text target = UIUtil.createTitle("Target: $"+wealthTarget);
-        target.setFont(Font.font("Kalam", 20));
-        
-    	Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
-    	leaderboard.setAlignment(Pos.CENTER_RIGHT);
-    	leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
-
-        
-        //Clock UI / System
-        if (this.gameMode == GameMode.TIME_MODE) {
-            ClockSystem clockSystem = new ClockSystem(this.gameDuration, this.gameStartTime, this.onGameEnd());
-            this.systemUpdater.addSystem(clockSystem);
-            this.worldEntity.setClockSupplier(() -> clockSystem);
-
-        	leaderboardBox.getChildren().addAll(title, leaderboard);
-        	leaderboardBox.setMouseTransparent(true);
-            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
-            
-            // UI Overlay
-            VBox topRight = new VBox(2);
-            topRight.setAlignment(Pos.TOP_RIGHT);
-            topRight.setPickOnBounds(false);
-            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
-
-            topRight.getChildren().addAll(clockSystem.clockUI, settingsUI);
-            this.interfaceOverlay.getChildren().addAll(topRight);
-            
-        } else if (this.gameMode == GameMode.WEALTH_MODE) {
-
-        	leaderboardBox.getChildren().addAll(title, target, leaderboard);
-        	leaderboardBox.setMouseTransparent(true);
-            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
-        	
-            // UI Overlay
-            VBox topRight = new VBox(1);
-            topRight.setAlignment(Pos.TOP_RIGHT);
-            topRight.setPickOnBounds(false);
-            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
-
-            topRight.getChildren().addAll(settingsUI);
-            this.interfaceOverlay.getChildren().addAll(topRight);
-            
-        	// checks if any player has reached money target
-        	for (Player p : this.worldEntity.getPlayers()) {
-        		p.moneyProperty().addListener((ChangeListener<? super Number>) (observable, oldVal, newVal) -> {
-            		if (newVal.longValue() >= this.wealthTarget) {
-            			this.onGameEnd().run();
-            		}
-            	});
-        	}
-        }
-        
-        //updates leaderboard when any player's money changes
-    	for (Player p : worldEntity.getPlayers()) {
-    		p.moneyProperty().addListener((event) -> leaderboard.update(worldEntity.getPlayers()));
-    	}
+        // Right UI overlay (Time/Settings/Leaderboard) based on the chosen game mode
+        this.createRightUIOverlay(settingsUI);
 
         // Task UI
         TaskUI taskUI = new TaskUI(currentPlayer);
@@ -449,15 +388,60 @@ public class Gameplay implements Controller {
         cameraEntity.addComponent(new CameraFollowComponent(currentPlayer, cameraPosition));
     }
 
-    private VBox createRightUIOverlay(ClockUI clockUI, SettingsUI settingsUI) {
-        VBox topRight = new VBox(2);
-        topRight.setAlignment(Pos.TOP_RIGHT);
-        topRight.setPickOnBounds(false);
-        topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+    private void createRightUIOverlay(SettingsUI settingsUI) {
+        VBox leaderboardBox = new VBox();
+        Text title = UIUtil.createTitle("Leaderboard:");
+        title.setFont(Font.font("Kalam", 30));
 
-        topRight.getChildren().addAll(clockUI, settingsUI);
-        return topRight;
+        Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
+        leaderboard.setAlignment(Pos.CENTER_RIGHT);
+        leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
+
+        //Clock UI / System
+        if (this.gameMode == GameMode.TIME_MODE) {
+            ClockSystem clockSystem = new ClockSystem(this.gameDuration, this.gameStartTime, this.onGameEnd());
+            this.systemUpdater.addSystem(clockSystem);
+            this.worldEntity.setClockSupplier(() -> clockSystem);
+
+            leaderboardBox.getChildren().addAll(title, leaderboard);
+            leaderboardBox.setMouseTransparent(true);
+            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
+
+            // UI Overlay
+            VBox topRight = new VBox(2);
+            topRight.setAlignment(Pos.TOP_RIGHT);
+            topRight.setPickOnBounds(false);
+            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+            topRight.getChildren().addAll(clockSystem.clockUI, settingsUI);
+            this.interfaceOverlay.getChildren().addAll(topRight);
+
+        } else if (this.gameMode == GameMode.WEALTH_MODE) {
+            Text target = UIUtil.createTitle("Target: $"+wealthTarget);
+            target.setFont(Font.font("Kalam", 20));
+
+            leaderboardBox.getChildren().addAll(title, target, leaderboard);
+            leaderboardBox.setMouseTransparent(true);
+            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
+
+            // UI Overlay
+            VBox topRight = new VBox(1);
+            topRight.setAlignment(Pos.TOP_RIGHT);
+            topRight.setPickOnBounds(false);
+            topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
+
+            topRight.getChildren().addAll(settingsUI);
+            this.interfaceOverlay.getChildren().addAll(topRight);
+
+            leaderboard.setGameModeValueAction((playerMoney) -> {
+                // checks if any player has reached money target
+                if (playerMoney >= this.wealthTarget) {
+                    this.onGameEnd().run();
+                }
+            });
+        }
     }
 
     private void setupKeyInput(CurrentPlayer currentPlayer, InventoryUI inventoryUI) {
