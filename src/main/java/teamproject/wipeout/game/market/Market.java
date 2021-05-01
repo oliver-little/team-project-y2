@@ -1,6 +1,7 @@
 package teamproject.wipeout.game.market;
 
 import javafx.application.Platform;
+import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.TradableComponent;
@@ -124,13 +125,20 @@ public class Market implements StateUpdatable<MarketState> {
             return -1;
         }
 
-        double totalCost = calculateTotalCost(id, quantity, false);
+        Pair<Double, Integer> costDeviationPair = calculateTotalCostAndDeviations(id, quantity, false);
+        double totalCost = costDeviationPair.getKey();
+        double deviations = costDeviationPair.getValue();
 
         if (isLocal) {
             sendRequest(new MarketOperationRequest(id, quantity, false));
 
         } else {
-            item.decrementQuantityDeviation(quantity);
+            if (deviations != -1) {
+                item.decrementQuantityDeviation(deviations);
+            }
+            else {
+                item.decrementQuantityDeviation(quantity);
+            }
             sendMarketUpdate(item);
         }
 
@@ -138,13 +146,24 @@ public class Market implements StateUpdatable<MarketState> {
     }
 
     /**
-     * Calculates the cost of buying/selling a certain number of items. This function specifically accounts for the game's pricing model.
+     * Calculates the cost of buying/selling a certain number of items.
      * @param id The item id.
      * @param quantity The number of items to buy/sell.
      * @param buy Whether the player is buying or selling. True for buying, false for selling.
      * @return The cost to buy/sell.
      */
     public double calculateTotalCost(int id, int quantity, boolean buy) {
+        return calculateTotalCostAndDeviations(id, quantity, buy).getKey();
+    }
+
+    /**
+     * Calculates the cost of buying/selling a certain number of items. This function additionally accounts for the game's pricing model. This function returns the quantity deviation for which the cost of an item falls below 0.01, used for the MarketPriceUpdater and market pricing models.
+     * @param id The item id.
+     * @param quantity The number of items to buy/sell.
+     * @param buy Whether the player is buying or selling. True for buying, false for selling.
+     * @return A pair of values: The cost to buy/sell and the quantity deviation at which the price of an item falls below 0.01.
+     */
+    public Pair<Double, Integer> calculateTotalCostAndDeviations(int id, int quantity, boolean buy) {
 
         MarketItem item = stockDatabase.get(id);
 
@@ -156,6 +175,8 @@ public class Market implements StateUpdatable<MarketState> {
 
         double price;
 
+        int numDeviationsBeforeZero = -1;
+
         if (buy) {
             price = item.getDefaultBuyPrice();
         }
@@ -166,20 +187,24 @@ public class Market implements StateUpdatable<MarketState> {
         for (int i = 0; i < quantity; i++) {
             costDeviation = MarketItem.costFunction(quantityDeviation) + price;
             if (costDeviation <= 0.01) {
+                if (numDeviationsBeforeZero == -1) {
+                    numDeviationsBeforeZero = i;
+                }
                 costDeviation = 0.01;
             }
-            totalCost += costDeviation;
-
-            if (buy) {
-                quantityDeviation++;
-            }
             else {
-                quantityDeviation--;
+                if (buy) {
+                    quantityDeviation++;
+                }
+                else {
+                    quantityDeviation--;
+                }
             }
-            
+
+            totalCost += costDeviation; 
         }
 
-        return totalCost;
+        return new Pair<Double, Integer>(totalCost, numDeviationsBeforeZero);
     }
 
     /**
