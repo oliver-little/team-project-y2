@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Leaderboard VBox that displays the players and their money in descending order
+ */
 public class Leaderboard extends VBox {
 
     private static final String[] ORDINAL_STRINGS = new String[]{"1st", "2nd", "3rd", "4th"};
@@ -75,7 +78,7 @@ public class Leaderboard extends VBox {
         this.gameModeValueAction = gameModeValueAction;
     }
 
-	public void update(List<Player> unsortedPlayers) {
+	public List<Player> update(List<Player> unsortedPlayers) {
         List<Player> sortedPlayers = unsortedPlayers.stream().sorted(this.moneyComparator).collect(Collectors.toList());
 
         Platform.runLater(() -> {
@@ -89,6 +92,8 @@ public class Leaderboard extends VBox {
                 this.list.getItems().add(playerEntry);
             }
         });
+        
+        return sortedPlayers;
 	}
 
     private void newPlayersAdded(List<Player> newPlayers) {
