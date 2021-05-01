@@ -7,6 +7,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -47,6 +48,7 @@ import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.CameraEntity;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
+import teamproject.wipeout.game.instructions.InstructionsUI;
 import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.entity.MarketEntity;
@@ -244,20 +246,24 @@ public class Gameplay implements Controller {
             this.root.getScene().setRoot(startMenu.getContent());
             
         };
-        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu);
-
+        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu, this.keyBindings);
+        InstructionsUI instructionsUI = new InstructionsUI(this.keyBindings);
         
         this.interfaceOverlay.getChildren().addAll(inventoryUI, moneyUI);
         
         // Right UI overlay (Time/Settings/Leaderboard) based on the chosen game mode
-        this.createRightUIOverlay(settingsUI);
+        this.createRightUIOverlay(settingsUI, instructionsUI);
 
         // Task UI
         TaskUI taskUI = new TaskUI(currentPlayer);
-        StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
+//        StackPane.setAlignment(taskUI, Pos.TOP_LEFT);
         currentPlayer.setTaskUI(taskUI);
+
+        this.createLeftUIOverlay(taskUI);
+
+
         
-        this.interfaceOverlay.getChildren().addAll(taskUI);
+//        this.interfaceOverlay.getChildren().addAll(taskUI);
 
         // Setup networking if possible
         if (this.networker != null) {
@@ -387,8 +393,31 @@ public class Gameplay implements Controller {
         cameraPosition.bind(camPosBinding);
         cameraEntity.addComponent(new CameraFollowComponent(currentPlayer, cameraPosition));
     }
+    private void createLeftUIOverlay(TaskUI taskUI) {
+        // UI Overlay
+        VBox topLeft = new VBox(3);
+        topLeft.setAlignment(Pos.TOP_LEFT);
+        topLeft.setPickOnBounds(false);
+        topLeft.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        StackPane.setAlignment(topLeft, Pos.TOP_LEFT);
 
-    private void createRightUIOverlay(SettingsUI settingsUI) {
+        VBox leaderboardBox = new VBox();
+        Text title = UIUtil.createTitle("Leaderboard:");
+        title.setFont(Font.font("Kalam", 30));
+
+        Leaderboard leaderboard = new Leaderboard(this.worldEntity.getPlayers());
+        leaderboardBox.getChildren().addAll(title, leaderboard);
+        leaderboardBox.setMouseTransparent(true);
+
+        topLeft.setSpacing(20);
+        topLeft.getChildren().addAll(leaderboardBox, taskUI);
+        this.interfaceOverlay.getChildren().addAll(topLeft);
+//        leaderboard.setAlignment(Pos.CENTER_RIGHT);
+//        leaderboardBox.setAlignment(Pos.CENTER_RIGHT);
+
+    }
+
+    private void createRightUIOverlay(SettingsUI settingsUI, InstructionsUI instructionsUI) {
         VBox leaderboardBox = new VBox();
         Text title = UIUtil.createTitle("Leaderboard:");
         title.setFont(Font.font("Kalam", 30));
@@ -405,7 +434,7 @@ public class Gameplay implements Controller {
 
             leaderboardBox.getChildren().addAll(title, leaderboard);
             leaderboardBox.setMouseTransparent(true);
-            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
+//            this.interfaceOverlay.getChildren().addAll(leaderboardBox);
 
             // UI Overlay
             VBox topRight = new VBox(2);
@@ -414,6 +443,11 @@ public class Gameplay implements Controller {
             topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
             StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
 
+//            HBox buttons = new HBox();
+//            buttons.setPadding(new Insets(15, 12, 15, 12));
+//            buttons.setSpacing(10);
+
+//            buttons.getChildren().addAll(settingsUI);
             topRight.getChildren().addAll(clockSystem.clockUI, settingsUI);
             this.interfaceOverlay.getChildren().addAll(topRight);
 
@@ -426,13 +460,13 @@ public class Gameplay implements Controller {
             this.interfaceOverlay.getChildren().addAll(leaderboardBox);
 
             // UI Overlay
-            VBox topRight = new VBox(1);
+            VBox topRight = new VBox(2);
             topRight.setAlignment(Pos.TOP_RIGHT);
             topRight.setPickOnBounds(false);
             topRight.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
             StackPane.setAlignment(topRight, Pos.TOP_RIGHT);
 
-            topRight.getChildren().addAll(settingsUI);
+            topRight.getChildren().addAll(settingsUI, instructionsUI);
             this.interfaceOverlay.getChildren().addAll(topRight);
 
             leaderboard.setGameModeValueAction((playerMoney) -> {
