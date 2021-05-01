@@ -78,7 +78,7 @@ public class Leaderboard extends VBox {
         this.gameModeValueAction = gameModeValueAction;
     }
 
-	public void update(List<Player> unsortedPlayers) {
+	public List<Player> update(List<Player> unsortedPlayers) {
         List<Player> sortedPlayers = unsortedPlayers.stream().sorted(this.moneyComparator).collect(Collectors.toList());
 
         Platform.runLater(() -> {
@@ -92,6 +92,8 @@ public class Leaderboard extends VBox {
                 this.list.getItems().add(playerEntry);
             }
         });
+        
+        return sortedPlayers;
 	}
 
     private void newPlayersAdded(List<Player> newPlayers) {
