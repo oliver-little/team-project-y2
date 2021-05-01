@@ -47,6 +47,8 @@ public class GameModeUI extends VBox
 	public GameModeUI() {
 		this.setAlignment(Pos.CENTER);
 		
+		Label gamemodeLabel = new Label("Gamemode:");
+		
         Label valueDesc = new Label();
         
         HBox valueBox = new HBox();
@@ -98,7 +100,7 @@ public class GameModeUI extends VBox
         });
         
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
-        this.getChildren().addAll(valueDesc, gameModeSelector, valueBox);
+        this.getChildren().addAll(gamemodeLabel, gameModeSelector, valueDesc, valueBox);
 	}
     
     public double getValue() {
