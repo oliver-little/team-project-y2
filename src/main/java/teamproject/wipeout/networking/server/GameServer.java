@@ -141,15 +141,8 @@ public class GameServer {
 
         this.serverMarket = new Market(new ItemStore("items.json"), false);
         this.serverMarket.serverIDGetter = () -> this.id;
-        this.serverMarket.serverUpdater = (gameUpdate) -> {
-            try {
-                this.updateClients(gameUpdate);
-
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        };
-        //new MarketPriceUpdater(this.serverMarket, false);
+        this.serverMarket.serverUpdater = (gameUpdate) -> this.updateClients(gameUpdate);
+        new MarketPriceUpdater(this.serverMarket, false);
 
         this.searchSocket = null;
         this.isSearching = false;
@@ -221,9 +214,8 @@ public class GameServer {
      * except the client who created the {@code GameUpdate} instance.
      *
      * @param update Instance of a {@link GameUpdate} to be sent
-     * @throws IOException The {@code GameUpdate} cannot be sent
      */
-    protected void updateClients(GameUpdate update) throws IOException {
+    protected void updateClients(GameUpdate update) {
         for (GameClientHandler client : this.connectedClients.get()) {
             if (!client.clientID.equals(update.originID)) {
                 client.updateWith(update);
@@ -255,7 +247,7 @@ public class GameServer {
     }
 
     /**
-     * Sends the {@link ProcessMessage}{@code .SERVER_STOP} message to all connected clients.
+     * Sends the {@link ProcessMessage#STOP_SERVER} message to all connected clients.
      * (Even to the host of the server!)
      */
     protected void serverStopping() {
@@ -264,11 +256,7 @@ public class GameServer {
 
         GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
         for (GameClientHandler client : clientHandlers) {
-            try {
-                client.updateWith(stopServer);
-            } catch (IOException ignore) {
-                // Stopping server so it's not important
-            }
+            client.updateWith(stopServer);
         }
 
         this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
@@ -319,15 +307,9 @@ public class GameServer {
      * Synchronize gameplay clocks across clients, which also starts the game.
      */
     private void calibrateClocks() {
-        try {
-            Long currentTime = System.currentTimeMillis();
-            this.updateClients(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.id, currentTime));
-
-            this.gameStartTime = currentTime;
-
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
+        Long currentTime = System.currentTimeMillis();
+        this.updateClients(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.id, currentTime));
+        this.gameStartTime = currentTime;
     }
 
     /**
@@ -558,7 +540,10 @@ public class GameServer {
         }
         client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClients));
 
-        client.updateWith(this.playerStates.get().values());
+        // Update newly connected client with all current player states
+        for (PlayerState playerState : this.playerStates.get().values()) {
+            client.updateWith(new GameUpdate(playerState));
+        }
 
         for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
             GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());

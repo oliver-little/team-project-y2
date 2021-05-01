@@ -225,9 +225,21 @@ public class GameClient {
         try {
             this.out.writeObject(update.deepClone());
             this.out.flush();
+
         } catch (IOException ignore) {
-            this.runOnDisconnect();
-            this.closeConnection(false);
+            if (!this.clientSocket.isClosed()) {
+                try {
+                    this.out.reset();
+
+                } catch (IOException e) {
+                    // Do NOT let one corrupted packet cause the game crash
+                }
+
+            } else {
+                // The server had a "hard disconnect" (= did not send a disconnect signal)/ other malfunction
+                //this.runOnDisconnect();
+                //this.closeConnection(false);
+            }
         }
     }
 
@@ -300,9 +312,15 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException ignore) {
-                    // Do NOT let one corrupted packet cause the game crash
-                } catch (IOException | ClassNotFoundException ignore) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException | ClassNotFoundException e) {
+                    try {
+                        this.in.reset();
+
+                    } catch (IOException ignore) {
+                        // Do NOT let one corrupted packet cause the game crash
+                    }
+
+                } catch (IOException ignore) {
                     // The server had a "hard disconnect" (= did not send a disconnect signal)/ other malfunction
                     this.runOnDisconnect();
                     this.closeConnection(false);
@@ -339,6 +357,7 @@ public class GameClient {
                 this.out.close();
                 this.in.close();
                 this.clientSocket.close();
+
             } catch (IOException ignore) {
                 // Disconnecting, we don't care about exceptions at this point
             }

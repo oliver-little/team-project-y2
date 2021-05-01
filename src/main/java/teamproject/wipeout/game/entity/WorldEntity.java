@@ -234,8 +234,12 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 	public void removePlayer(Player player) {
 		this.players.remove(player);
-		int farmToClear = player.getCurrentState().getFarmID();
-		this.farms.get(farmToClear).removePlayer();
+
+		int farmIDToClear = player.getCurrentState().getFarmID();
+		FarmEntity farmToClear = this.farms.get(farmIDToClear);
+		if (farmToClear != null) {
+			farmToClear.removePlayer();
+		}
 		player.destroy();
 	}
 
