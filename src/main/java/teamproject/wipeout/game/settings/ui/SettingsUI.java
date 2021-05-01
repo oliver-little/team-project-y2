@@ -3,6 +3,7 @@ package teamproject.wipeout.game.settings.ui;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Map;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -20,6 +21,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -34,15 +36,20 @@ import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+import static java.awt.Font.BOLD;
+
 public class SettingsUI extends VBox {
     
     private MovementAudioSystem mas;
     private AudioSystem as;
     private GameAudio backingTrack;
-    private ScrollPane scrollPane = new ScrollPane();
-    private boolean opened = false;
-    private Button openCloseButton = new Button();
-
+    private ScrollPane scrollPaneToShow = new ScrollPane();
+    private boolean openedSettings = false;
+    private boolean openedInstructions = false;
+    private Button openCloseButtonSettings = new Button();
+    private Button openCloseButtonInstructions = new Button();
+    private VBox settingsBox;
+    private VBox instructionsBox;
 
     /**
      * Creates the UI for the in-game settings menu
@@ -50,7 +57,7 @@ public class SettingsUI extends VBox {
      * @param mas - movement-audio system for volume changes
      * @param backingTrack - GameAudio object for backing track volume
      */
-    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, Runnable doReturnToMenu){
+    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, Runnable doReturnToMenu, Map<String, KeyCode> keyBindings){
         super();
 
         this.mas = mas;
@@ -66,7 +73,7 @@ public class SettingsUI extends VBox {
 
         this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         
-        VBox box = new VBox();
+        settingsBox = new VBox();
 
         HBox buttonBox = new HBox();
         
@@ -79,19 +86,54 @@ public class SettingsUI extends VBox {
         } catch(Exception e){
             e.printStackTrace();
         }
-        
-        openCloseButton.setAlignment(Pos.BASELINE_RIGHT);
-        openCloseButton.setGraphic(cog);
-        openCloseButton.setOnAction(e -> {
-            opened = !opened;
-            this.setMenuVisible(opened);
+
+        ImageView instructions = null;
+        try{
+            InputStream s = new FileInputStream(ResourceLoader.get(ResourceType.UI, "instructions.png"));
+//            Image img = ImageUtil.scaleImage(new Image(s), 30 / 100.0f);
+            Image tmpImg = new Image(s);
+//            Image img = ImageUtil.scaleImage(tmpImg, 30 / tmpImg.getWidth());
+
+//            Image img = ImageUtil.scaleImage(tmpImg, )
+//            ImageUtil.scaleImage(img, 200 / 30.0f);
+            instructions = new ImageView(tmpImg);
+            instructions.setSmooth(false);
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+        openCloseButtonSettings.setGraphic(cog);
+        openCloseButtonSettings.setOnAction(e -> {
+            openedSettings = !openedSettings;
+            if(openedSettings) {
+                openedInstructions = false;
+                scrollPaneToShow.setContent(this.settingsBox);
+                scrollPaneToShow.setPrefSize(this.settingsBox.getWidth() + 10, this.settingsBox.getHeight() + 10);
+            }
+
+            this.setMenuVisible(openedSettings, scrollPaneToShow);
         });
-        buttonBox.getChildren().add(openCloseButton);
-        buttonBox.setAlignment(Pos.BASELINE_RIGHT);
-        
+//        openCloseButtonSettings.setPrefSize(50, 50);
+
+        openCloseButtonInstructions.setGraphic(instructions);
+        openCloseButtonInstructions.setOnAction(e -> {
+            openedInstructions = !openedInstructions;
+            if(openedInstructions) {
+                openedSettings = false;
+                scrollPaneToShow.setContent(this.instructionsBox);
+                scrollPaneToShow.setPrefSize(this.settingsBox.getWidth() + 10, this.settingsBox.getHeight() + 10);
+            }
+            this.setMenuVisible(openedInstructions, scrollPaneToShow);
+        });
+//        openCloseButtonInstructions.setPrefSize(50, 50);
+
+        buttonBox.getChildren().addAll(openCloseButtonSettings, openCloseButtonInstructions);
+        buttonBox.setAlignment(Pos.TOP_RIGHT);
+
         this.getChildren().add(buttonBox);
 
-        box.setSpacing(7);
+        settingsBox.setSpacing(7);
 
         HBox backingBox = new HBox();
         Slider backingSlider = new Slider(); //slider for music volume
@@ -120,11 +162,9 @@ public class SettingsUI extends VBox {
         /// MUSIC IS SET TO MUTE BY DEFAULT HERE
         muteMusic.setSelected(true);
         backingSlider.setDisable(true);
-        ///
 
         muteMusic.addEventFilter(KeyEvent.ANY, KeyEvent::consume);
         backingBox.getChildren().addAll(backingSlider, muteMusic);
-        
         
         HBox effectsBox = new HBox();
         Slider effectsSlider = new Slider(); //slider for effects volume
@@ -166,33 +206,50 @@ public class SettingsUI extends VBox {
         closeButtonContainer.getChildren().addAll(closeButton);
         closeButtonContainer.setAlignment(Pos.CENTER);
 
-
         Label title1 = new Label("Music Volume");
         Label title2 = new Label("Effects Volume");
-        box.getChildren().addAll(title1, backingBox, title2, effectsBox, closeButtonContainer);
-        box.setPadding(new Insets(0, 5, 5, 5));
+        settingsBox.getChildren().addAll(title1, backingBox, title2, effectsBox, closeButtonContainer);
+        settingsBox.setPadding(new Insets(0, 5, 15, 5));
 
-        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setContent(box);
-        this.getChildren().add(scrollPane);
-        setMenuVisible(false); //hides menu by default on game start-up
+        instructionsBox = new VBox();
+
+        Label toMove = new Label("To move use: " + keyBindings.get("Move left") + ", " + keyBindings.get("Move right") + ", " +
+                keyBindings.get("Move up")  + ", " + keyBindings.get("Move down"));
+
+        Label toPlantItem = new Label("To plant: click on the inventory item, \n then click on an empty slot ");
+
+        Label toHarvestItem = new Label("To harvest use: " + keyBindings.get("Harvest"));
+
+        Label toCollectItem = new Label("To collect use: " + keyBindings.get("Pick-up"));
+
+        Label toDropItem = new Label("To drop use: " + keyBindings.get("Drop"));
+
+        Label toDestroyItem = new Label("To destroy use: " + keyBindings.get("Destroy"));
+
+        instructionsBox.setSpacing(0);
+        instructionsBox.getChildren().addAll(toMove, toPlantItem, toHarvestItem, toCollectItem, toDropItem, toDestroyItem);
+
+        scrollPaneToShow.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPaneToShow.setVbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPaneToShow.setContent(settingsBox);
+        this.getChildren().add(scrollPaneToShow);
+        setMenuVisible(false, scrollPaneToShow); //hides menu by default on game start-up
     }
 
     /**
      * Shows/hides the menu using animation
      * @param visible
      */
-    private void setMenuVisible(boolean visible){
+    private void setMenuVisible(boolean visible, ScrollPane currentScrollPane){
         KeyValue goalWidth = null;
         if (visible) {
-            Rectangle clipRect = new Rectangle(0, 0, scrollPane.getWidth(), 0);
-            scrollPane.setClip(clipRect);
-            goalWidth = new KeyValue(clipRect.heightProperty(), scrollPane.getHeight(), Interpolator.EASE_OUT);
+            Rectangle clipRect = new Rectangle(0, 0, currentScrollPane.getWidth(), 0);
+            currentScrollPane.setClip(clipRect);
+            goalWidth = new KeyValue(clipRect.heightProperty(), currentScrollPane.getHeight(), Interpolator.EASE_OUT);
         }
         else {
-            Rectangle clipRect = new Rectangle(0, 0, scrollPane.getWidth(), scrollPane.getHeight());
-            scrollPane.setClip(clipRect);
+            Rectangle clipRect = new Rectangle(0, 0, currentScrollPane.getWidth(), currentScrollPane.getHeight());
+            currentScrollPane.setClip(clipRect);
             goalWidth = new KeyValue(clipRect.heightProperty(), 0, Interpolator.EASE_IN);
         }
 
@@ -200,5 +257,4 @@ public class SettingsUI extends VBox {
         Timeline timeline = new Timeline(frame);
         timeline.play();
     }
-    
 }
