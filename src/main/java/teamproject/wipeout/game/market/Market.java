@@ -1,6 +1,7 @@
 package teamproject.wipeout.game.market;
 
 import javafx.application.Platform;
+import javafx.util.Pair;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.TradableComponent;
@@ -59,7 +60,7 @@ public class Market implements StateUpdatable<MarketState> {
      * @return Current {@link MarketState}
      */
     public MarketState getCurrentState() {
-        return new MarketState(stockDatabase);
+        return null; // TODO fix
     }
 
     /**
@@ -69,15 +70,13 @@ public class Market implements StateUpdatable<MarketState> {
      */
     public void updateFromState(MarketState newState) {
         Platform.runLater(() -> {
-            for (Map.Entry<Integer, Double> updatedStock : newState.getItemDeviations().entrySet()) {
-                MarketItem currentStock = this.stockDatabase.get(updatedStock.getKey());
-                currentStock.setQuantityDeviation(updatedStock.getValue());
-            }
+            this.stockDatabase.get(newState.getItemID()).setQuantityDeviation(newState.getItemDeviation());
         });
     }
 
     /**
      * This function is run when a player purchases an item from the market.
+     *
      * @param id The item ID they want to buy.
      * @param quantity The quantity of the item they want to buy.
      * @return The total cost that the market will charge them or -1 if you cannot buy the item.
@@ -85,7 +84,6 @@ public class Market implements StateUpdatable<MarketState> {
     public double buyItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
@@ -103,7 +101,7 @@ public class Market implements StateUpdatable<MarketState> {
 
         } else {
             item.incrementQuantityDeviation(quantity);
-            this.sendMarketUpdate();
+            sendMarketUpdate(item);
         }
 
         return totalCost;
@@ -118,38 +116,54 @@ public class Market implements StateUpdatable<MarketState> {
     public double sellItem(int id, int quantity) {
 
         if (!stockDatabase.containsKey(id)) {
-            //System.out.println("The requested item is not for sale.");
             return -1;
         }
 
         MarketItem item = stockDatabase.get(id);
 
         if (item.getDefaultSellPrice() < 0) {
-            //System.out.println("Cannot sell this kind of item.");
             return -1;
         }
 
-        double totalCost = calculateTotalCost(id, quantity, false);
+        Pair<Double, Integer> costDeviationPair = calculateTotalCostAndDeviations(id, quantity, false);
+        double totalCost = costDeviationPair.getKey();
+        double deviations = costDeviationPair.getValue();
 
         if (isLocal) {
             sendRequest(new MarketOperationRequest(id, quantity, false));
 
         } else {
-            item.decrementQuantityDeviation(quantity);
-            sendMarketUpdate();
+            if (deviations != -1) {
+                item.decrementQuantityDeviation(deviations);
+            }
+            else {
+                item.decrementQuantityDeviation(quantity);
+            }
+            sendMarketUpdate(item);
         }
 
         return totalCost;
     }
 
     /**
-     * Calculates the cost of buying/selling a certain number of items. This function specifically accounts for the game's pricing model.
+     * Calculates the cost of buying/selling a certain number of items.
      * @param id The item id.
      * @param quantity The number of items to buy/sell.
      * @param buy Whether the player is buying or selling. True for buying, false for selling.
      * @return The cost to buy/sell.
      */
     public double calculateTotalCost(int id, int quantity, boolean buy) {
+        return calculateTotalCostAndDeviations(id, quantity, buy).getKey();
+    }
+
+    /**
+     * Calculates the cost of buying/selling a certain number of items. This function additionally accounts for the game's pricing model. This function returns the quantity deviation for which the cost of an item falls below 0.01, used for the MarketPriceUpdater and market pricing models.
+     * @param id The item id.
+     * @param quantity The number of items to buy/sell.
+     * @param buy Whether the player is buying or selling. True for buying, false for selling.
+     * @return A pair of values: The cost to buy/sell and the quantity deviation at which the price of an item falls below 0.01.
+     */
+    public Pair<Double, Integer> calculateTotalCostAndDeviations(int id, int quantity, boolean buy) {
 
         MarketItem item = stockDatabase.get(id);
 
@@ -161,6 +175,8 @@ public class Market implements StateUpdatable<MarketState> {
 
         double price;
 
+        int numDeviationsBeforeZero = -1;
+
         if (buy) {
             price = item.getDefaultBuyPrice();
         }
@@ -171,29 +187,35 @@ public class Market implements StateUpdatable<MarketState> {
         for (int i = 0; i < quantity; i++) {
             costDeviation = MarketItem.costFunction(quantityDeviation) + price;
             if (costDeviation <= 0.01) {
+                if (numDeviationsBeforeZero == -1) {
+                    numDeviationsBeforeZero = i;
+                }
                 costDeviation = 0.01;
             }
-            totalCost += costDeviation;
-
-            if (buy) {
-                quantityDeviation++;
-            }
             else {
-                quantityDeviation--;
+                if (buy) {
+                    quantityDeviation++;
+                }
+                else {
+                    quantityDeviation--;
+                }
             }
-            
+
+            totalCost += costDeviation; 
         }
 
-        return totalCost;
+        return new Pair<Double, Integer>(totalCost, numDeviationsBeforeZero);
     }
 
     /**
      * (Server) sends a new market state to all clients.
      * (Server-side method)
      */
-    protected void sendMarketUpdate() {
+    protected void sendMarketUpdate(MarketItem marketItem) {
         if (serverUpdater != null) {
-            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), getCurrentState());
+            MarketState  marketState = new MarketState(marketItem.getID(), marketItem.getQuantityDeviation());
+
+            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), marketState);
             serverUpdater.accept(update);
         }
     }
@@ -210,7 +232,7 @@ public class Market implements StateUpdatable<MarketState> {
         }
         GameClient client = this.clientSupplier.get();
         if (client != null) {
-            client.send(new GameUpdate(GameUpdateType.REQUEST, client.getClientID(), request));
+            //client.send(new GameUpdate(GameUpdateType.REQUEST, client.getClientID(), request));
         }
     }
 

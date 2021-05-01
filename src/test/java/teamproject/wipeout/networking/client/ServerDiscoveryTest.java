@@ -4,6 +4,7 @@ import javafx.collections.MapChangeListener;
 import org.junit.jupiter.api.*;
 import teamproject.wipeout.GameMode;
 import teamproject.wipeout.networking.server.GameServer;
+import teamproject.wipeout.util.resources.ResourceLoader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,6 +23,8 @@ class ServerDiscoveryTest {
 
     @BeforeAll
     void initializeServerDiscovery() {
+        ResourceLoader.setTargetClass(ResourceLoader.class);
+
         this.serverName = new AtomicReference<String>(null);
         this.serverAddress = new AtomicReference<InetSocketAddress>(null);
 
@@ -70,9 +73,10 @@ class ServerDiscoveryTest {
 
             gameServer.stopServer();
 
-            Thread.sleep(GENERAL_DELAY);
+            Thread.sleep(ServerDiscoveryTest.GENERAL_DELAY);
 
         } catch (IOException | ReflectiveOperationException | InterruptedException exception) {
+            exception.printStackTrace();
             Assertions.fail(exception.getMessage());
         }
 
@@ -102,9 +106,10 @@ class ServerDiscoveryTest {
 
             gameServer.stopServer();
 
-            Thread.sleep(GENERAL_DELAY);
+            Thread.sleep(ServerDiscoveryTest.GENERAL_DELAY);
 
         } catch (IOException | ReflectiveOperationException | InterruptedException exception) {
+            exception.printStackTrace();
             Assertions.fail(exception.getMessage());
         }
 
@@ -123,14 +128,14 @@ class ServerDiscoveryTest {
         try {
             this.serverDiscovery.startLookingForServers();
 
-            Thread.sleep(GENERAL_DELAY);
+            Thread.sleep(ServerDiscoveryTest.GENERAL_DELAY);
 
             Assertions.assertTrue(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is not active despite the fact that it started searching.");
 
             this.serverDiscovery.startLookingForServers();
 
-            Thread.sleep(GENERAL_DELAY);
+            Thread.sleep(ServerDiscoveryTest.GENERAL_DELAY);
 
             Assertions.assertTrue(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is not active despite the fact that it started searching.");

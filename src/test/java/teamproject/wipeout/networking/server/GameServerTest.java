@@ -193,13 +193,13 @@ class GameServerTest {
 
         try {
             this.gameServer.disconnectClient(clients.get(0).clientID);
+
+            Thread.sleep(CATCHUP_TIME * 2); // so that the server has time to disconnect clients
             Assertions.assertEquals(MAX_CONNECTIONS - 1, this.gameServer.connectedClients.get().size());
 
-            Thread.sleep(CATCHUP_TIME); // so that the server has time to disconnect clients
-
             this.gameServer.disconnectClient((clients.get(2).clientID));
-            Thread.sleep(CATCHUP_TIME); // so that the server has time to disconnect clients
 
+            Thread.sleep(CATCHUP_TIME * 2); // so that the server has time to disconnect clients
             Assertions.assertEquals(MAX_CONNECTIONS - 2, this.gameServer.connectedClients.get().size());
 
         } catch (IOException | InterruptedException exception) {

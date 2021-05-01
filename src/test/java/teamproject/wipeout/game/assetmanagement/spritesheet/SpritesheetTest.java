@@ -1,22 +1,19 @@
 package teamproject.wipeout.game.assetmanagement.spritesheet;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import teamproject.wipeout.util.resources.ResourceLoader;
+import teamproject.wipeout.util.resources.ResourceType;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-
 import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.Set;
 
-import javax.imageio.ImageIO;
-
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import teamproject.wipeout.util.resources.ResourceLoader;
-import teamproject.wipeout.util.resources.ResourceType;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SpritesheetTest {
 

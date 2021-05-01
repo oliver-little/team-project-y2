@@ -2,15 +2,13 @@ package teamproject.wipeout.engine.component.physics;
 
 import javafx.geometry.Point2D;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import teamproject.wipeout.engine.component.Transform;
 import teamproject.wipeout.engine.component.shape.Circle;
 import teamproject.wipeout.engine.component.shape.Rectangle;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HitboxComponentTest {
 

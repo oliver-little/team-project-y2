@@ -7,13 +7,7 @@ import javafx.animation.SequentialTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -23,43 +17,31 @@ import teamproject.wipeout.StartMenu;
 import teamproject.wipeout.UIUtil;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
-import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.Networker;
+import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.util.resources.ResourceType;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class GameOverUI extends StackPane {
-
-    public static final String[] ORDINAL_STRINGS = new String[]{"1st", "2nd", "3rd", "4th", "5th", "6th"};
 
     private final StackPane root;
     private final Networker networker;
     private final Runnable onClose;
 
-    private final VBox content;
     private final List<Player> players;
     private final Text winner;
-    private Leaderboard leaderboard;
-
-    public static class SortByMoney implements Comparator<Player> {
-        // Used for sorting in descending order of money number
-        public int compare(Player a, Player b)
-        {
-            return (int)(a.getMoney() - b.getMoney());
-        }
-    }
+    private final Leaderboard leaderboard;
 
     public GameOverUI(StackPane root, Networker networker, List<Player> players, Runnable onClose) {
         super();
         this.root = root;
         this.networker = networker;
+        this.players = players;
         this.onClose = onClose;
 
-        this.players = players;
-        this.content = new VBox(2);
-        this.content.setAlignment(Pos.CENTER);
+        VBox content = new VBox(2);
+        content.setAlignment(Pos.CENTER);
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "task-ui.css");
 
         winner = UIUtil.createTitle("");
@@ -125,8 +107,7 @@ public class GameOverUI extends StackPane {
     }
 
     public void refreshText() {
-    	leaderboard.update(players);
-
+        this.leaderboard.update(this.players);
 
         String winnerName = this.players.get(0).playerName;
         String winString = winnerName + " wins!";
@@ -135,7 +116,6 @@ public class GameOverUI extends StackPane {
         }
 
         winner.setText(winString);
-
     }
 
     public void endGame() {

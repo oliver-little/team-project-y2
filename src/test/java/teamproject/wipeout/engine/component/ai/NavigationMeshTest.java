@@ -1,14 +1,13 @@
 package teamproject.wipeout.engine.component.ai;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import javafx.geometry.Point2D;
+import org.junit.jupiter.api.Test;
+import teamproject.wipeout.engine.component.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.shape.Rectangle;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NavigationMeshTest {
 

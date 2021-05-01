@@ -1,5 +1,7 @@
 package teamproject.wipeout.game.entity;
 
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -63,7 +65,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	private Supplier<ClockSystem> clockSupplier;
 
 	private final boolean isSingleplayer;
-	private final ArrayList<Player> players;
+	private final SimpleListProperty<Player> players;
 	private final InputHandler inputHandler;
 	private final NavigationMesh navMesh;
 
@@ -101,7 +103,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 
 		// Current Player
 		this.myCurrentPlayer = (CurrentPlayer) worldPack.get("currentPlayer");
-		this.players = new ArrayList<Player>();
+		this.players = new SimpleListProperty<Player>(FXCollections.observableArrayList(new ArrayList<Player>()));
 		this.players.add(this.myCurrentPlayer);
 
 		// Market
@@ -222,7 +224,7 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.inputHandler.onKeyRelease(code, this.myCurrentPlayer.getMyFarm().onKeyAction(this.inputHandler.mouseHoverSystem, true));
 	}
 
-	public ArrayList<Player> getPlayers() {
+	public SimpleListProperty<Player> getPlayers() {
 		return this.players;
 	}
 

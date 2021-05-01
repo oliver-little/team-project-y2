@@ -149,7 +149,7 @@ public class GameServer {
                 exception.printStackTrace();
             }
         };
-        new MarketPriceUpdater(this.serverMarket, false);
+        //new MarketPriceUpdater(this.serverMarket, false);
 
         this.searchSocket = null;
         this.isSearching = false;

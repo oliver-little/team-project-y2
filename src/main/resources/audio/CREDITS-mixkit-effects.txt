@@ -1,0 +1,15 @@
+Sources for sound effects from mixkit.com
+
+coins.wav - Coins sound: https://mixkit.co/free-sound-effects/money/
+
+coinPrize.wav - Coins sound: https://mixkit.co/free-sound-effects/money/ 
+
+thud.wav - Heavy fall into mud: https://mixkit.co/free-sound-effects/thud/
+
+pop.wav - Hard pop click: https://mixkit.co/free-sound-effects/pop/
+
+shovel.wav - Garden shovel stab: https://mixkit.co/free-sound-effects/garden/
+
+slice.wav - Metal hit whoosh: https://mixkit.co/free-sound-effects/whoosh/
+
+https://mixkit.co/terms/

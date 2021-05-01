@@ -13,6 +13,7 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.entity.WorldEntity;
+import teamproject.wipeout.game.farm.FarmItem;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.item.Item;
@@ -21,6 +22,7 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.market.MarketItem;
 import teamproject.wipeout.game.market.ui.FarmExpansionUI;
 import teamproject.wipeout.game.potion.PotionThrowEntity;
+import teamproject.wipeout.util.SortByMoney;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -29,6 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Instance adding AI capabilities to the base {@link Player} class.
@@ -53,6 +56,7 @@ public class AIPlayer extends Player {
     private final CollisionResolutionComponent collisionResolution;
     private final ScheduledExecutorService executor;
     private final Random random;
+    private final Comparator<Player> moneyComparator;
 
     private final WorldEntity worldEntity;
     private final HashMap<Integer, Integer> boughtItems;
@@ -78,6 +82,7 @@ public class AIPlayer extends Player {
         this.collisionResolution = this.createCollisionResolutionComponent();
         this.executor = Executors.newSingleThreadScheduledExecutor();
         this.random = ThreadLocalRandom.current();
+        this.moneyComparator = new SortByMoney(true);
 
         this.worldEntity = worldEntity;
         this.boughtItems = new HashMap<Integer, Integer>();
@@ -235,7 +240,12 @@ public class AIPlayer extends Player {
 
         Runnable onComplete = () -> {
             double randDestroy = Math.random();
-            boolean isTree = this.aiFarm.itemAt(x, y).get().getComponent(PlantComponent.class).isTree;
+            FarmItem farmItem = this.aiFarm.itemAt(x, y);
+            if (farmItem == null || farmItem.get() == null) {
+                Platform.runLater(this.aiDecisionAlgorithm());
+                return;
+            }
+            boolean isTree = farmItem.get().hasComponent(PlantComponent.class) && farmItem.get().getComponent(PlantComponent.class).isTree;
 
             if (this.getMoney() > 100.0 && (randDestroy < 0.05 || (randDestroy < 0.1 && isTree))) {
                 this.aiFarm.pickItemAt(x, y, false, true);
@@ -489,8 +499,8 @@ public class AIPlayer extends Player {
             useOnPlayer = this;
 
         } else {
-            allPlayers.sort(Comparator.comparing(player -> player.getMoney()));
-            useOnPlayer = allPlayers.get(this.random.nextInt(allPlayers.size()));
+            List<Player> sortedPlayers = allPlayers.stream().sorted(this.moneyComparator).collect(Collectors.toList());
+            useOnPlayer = sortedPlayers.get(this.random.nextInt(sortedPlayers.size()));
         }
 
         Item currentPotion = this.itemStore.getItem(potionID);

@@ -1,20 +1,21 @@
 package teamproject.wipeout.game.player;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-
 import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
-import teamproject.wipeout.game.inventory.*;
+import teamproject.wipeout.game.inventory.InventoryItem;
+import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.item.components.InventoryComponent;
+import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class CurrentPlayerTest {
 	private static CurrentPlayer currentPlayer;
@@ -26,7 +27,7 @@ public class CurrentPlayerTest {
 	static void initialization() throws ReflectiveOperationException, IOException {
 		itemStore = new ItemStore("items.json");
 		SpriteManager spriteManager = new SpriteManager();
-		spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
+		//spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
 		spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
         spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
@@ -34,12 +35,13 @@ public class CurrentPlayerTest {
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
-
+		PlayerSpriteSheetManager.loadPlayerSpriteSheets(spriteManager);
 		int playerID = new Random().nextInt(1024);
 		InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
 		Pair<Integer, String> playerInfo = new Pair<Integer, String>(playerID, "testPlayer");
 		currentPlayer = new CurrentPlayer(scene, playerInfo, null, spriteManager, itemStore);
 		currentPlayer.setInventoryUI(invUI);
+		currentPlayer.debug = true; //disables the error messages, which require JavaFX toolkit to be initialised
 		MAX_SIZE = currentPlayer.MAX_SIZE;
 	}
 	
@@ -146,7 +148,7 @@ public class CurrentPlayerTest {
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		Assertions.assertNull(inventory.get(3)); //ensures slot merged from is emptied
-		Assertions.assertEquals(-1, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
+		Assertions.assertEquals(0, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1).length); //ensure empty list returned
 	}
 	@Test
 	void testRemovingItems2() {
@@ -164,7 +166,7 @@ public class CurrentPlayerTest {
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		Assertions.assertNull(inventory.get(1)); //ensures slot merged from is emptied
-		Assertions.assertEquals(-1, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
+		Assertions.assertEquals(0, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1).length);
 	}
 	@Test
 	void testRemovingItems3() {
@@ -181,7 +183,7 @@ public class CurrentPlayerTest {
 		Assertions.assertEquals(3, currentPlayer.countSlotsOccupiedBy(1));
 		ArrayList<InventoryItem> inventory = currentPlayer.getInventory();
 		Assertions.assertNull(inventory.get(0)); //ensures slot merged from is emptied
-		Assertions.assertEquals(-1, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1));
+		Assertions.assertEquals(0, currentPlayer.removeItem(1, itemStore.getItem(1).getComponent(InventoryComponent.class).stackSizeLimit*3 + 1).length);
 	}
 	
 }

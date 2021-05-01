@@ -1,12 +1,13 @@
 package teamproject.wipeout.game.market;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.util.resources.ResourceLoader;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarketTest {
 
@@ -15,6 +16,7 @@ public class MarketTest {
 
     @BeforeAll
     public static void initialization() {
+        ResourceLoader.setTargetClass(MarketTest.class);
         itemStore = assertDoesNotThrow(() -> new ItemStore("marketitemstest.json"));
     }
 
@@ -33,8 +35,8 @@ public class MarketTest {
 
         assertEquals(1, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("2.05", String.format("%.2f", buyPrice));
-        assertEquals("1.05", String.format("%.2f", sellPrice));
+        assertEquals("2.26", String.format("%.2f", buyPrice));
+        assertEquals("1.26", String.format("%.2f", sellPrice));
 
         assertEquals("2.00", String.format("%.2f", totalCost));
     }
@@ -49,10 +51,10 @@ public class MarketTest {
 
         assertEquals(50, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("8.05", String.format("%.2f", buyPrice));
-        assertEquals("7.05", String.format("%.2f", sellPrice));
+        assertEquals("1098.63", String.format("%.2f", buyPrice));
+        assertEquals("1097.63", String.format("%.2f", sellPrice));
 
-        assertEquals("199.64", String.format("%.2f", totalCost));
+        assertEquals("7382.09", String.format("%.2f", totalCost));
     }
 
     @Test
@@ -65,10 +67,10 @@ public class MarketTest {
 
         assertEquals(100, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("76.20", String.format("%.2f", buyPrice));
-        assertEquals("75.20", String.format("%.2f", sellPrice));
+        assertEquals("1202606.28", String.format("%.2f", buyPrice));
+        assertEquals("1202605.28", String.format("%.2f", sellPrice));
 
-        assertEquals("1627.40", String.format("%.2f", totalCost));
+        assertEquals("8002938.76", String.format("%.2f", totalCost));
     }
 
     @Test
@@ -81,8 +83,8 @@ public class MarketTest {
 
         assertEquals(-1, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("1.95", String.format("%.2f", buyPrice));
-        assertEquals("0.95", String.format("%.2f", sellPrice));
+        assertEquals("1.74", String.format("%.2f", buyPrice));
+        assertEquals("0.74", String.format("%.2f", sellPrice));
 
         assertEquals("1.00", String.format("%.2f", totalCost));
     }
@@ -95,12 +97,12 @@ public class MarketTest {
         double buyPrice = market.stockDatabase.get(1).getCurrentBuyPrice();
         double sellPrice = market.stockDatabase.get(1).getCurrentSellPrice();
 
-        assertEquals(-40, market.stockDatabase.get(1).getQuantityDeviation());
+        assertEquals(-4, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("0.01", String.format("%.2f", buyPrice));
+        assertEquals("0.96", String.format("%.2f", buyPrice));
         assertEquals("0.01", String.format("%.2f", sellPrice));
 
-        assertEquals("10.07", String.format("%.2f", totalCost));
+        assertEquals("2.81", String.format("%.2f", totalCost));
     }
 
     @Test
@@ -111,12 +113,12 @@ public class MarketTest {
         double buyPrice = market.stockDatabase.get(1).getCurrentBuyPrice();
         double sellPrice = market.stockDatabase.get(1).getCurrentSellPrice();
 
-        assertEquals(-100, market.stockDatabase.get(1).getQuantityDeviation());
+        assertEquals(-4, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("0.01", String.format("%.2f", buyPrice));
+        assertEquals("0.96", String.format("%.2f", buyPrice));
         assertEquals("0.01", String.format("%.2f", sellPrice));
 
-        assertEquals("10.67", String.format("%.2f", totalCost));
+        assertEquals("3.41", String.format("%.2f", totalCost));
     }
 
     @Test
@@ -130,10 +132,10 @@ public class MarketTest {
 
         assertEquals(10, market.stockDatabase.get(1).getQuantityDeviation());
 
-        assertEquals("2.52", String.format("%.2f", buyPrice));
-        assertEquals("1.52", String.format("%.2f", sellPrice));
+        assertEquals("5.75", String.format("%.2f", buyPrice));
+        assertEquals("4.75", String.format("%.2f", sellPrice));
 
-        assertEquals("142.88", String.format("%.2f", totalCost));
+        assertEquals("8400.82", String.format("%.2f", totalCost));
     }
     
 }
