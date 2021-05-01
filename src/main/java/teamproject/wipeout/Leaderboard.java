@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Leaderboard VBox that displays the players and their money in descending order
+ */
 public class Leaderboard extends VBox {
 
     private static final String[] ORDINAL_STRINGS = new String[]{"1st", "2nd", "3rd", "4th"};
