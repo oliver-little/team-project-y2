@@ -13,15 +13,11 @@ import teamproject.wipeout.engine.component.shape.Shape;
 import teamproject.wipeout.engine.entity.GameEntity;
 
 /**
- * Component that, when added to an entity, will resolve collisions between other entities with this component.
- * Has a boolean flag isMoveable that indicates whether an entity should be affected by collisions.
+ * Component that can be used to detect collisions between all entities with this component
  *  Made up of an array of shapes that act as the collision boundaries.
  */
 public class HitboxComponent implements GameComponent {
 
-	//each rectangle with attributes x, y, width, height
-	// x = horizontal offset from top left corner
-	// y = vertical offset from top left corner
 	/**
 	 * ArrayList of shapes to act as hitboxes
 	 * x,y coords of rectangle represent offset from entities top left corner.
@@ -73,7 +69,6 @@ public class HitboxComponent implements GameComponent {
     }
     
     
-    //collision detection
 	/**
 	 * Checks whether two game entities collide (whether any of one's hitboxes overlaps with the other's)
 	 * @param g1 first game entity
