@@ -70,7 +70,7 @@ public class StartMenu extends StackPane implements Controller {
     /**
      * Displays an error message (usually if a game ends unexpectedly or does not start correctly)
      */
-    public void disconnectError() {
+    public void createMainMenu() {
         this.getChildren().remove(menuBox);
 
         menuBox.getChildren().clear();
@@ -112,9 +112,16 @@ public class StartMenu extends StackPane implements Controller {
     private void createSingleplayerMenu() {
         menuBox.getChildren().clear();
 
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.TOP_CENTER);
+        vBox.setSpacing(10);
+        vBox.setMaxSize(600, 100);
+        vBox.getStyleClass().add("tile-pane");
+
         menuBox.getChildren().addAll(UIUtil.createTitle("Singleplayer"));
 
         GameModeUI gameModeBox = new GameModeUI();
+        vBox.getChildren().add(gameModeBox);
 
         Runnable startGameAction = () -> {
             GameMode gameMode = gameModeBox.getGameMode();
@@ -124,12 +131,22 @@ public class StartMenu extends StackPane implements Controller {
         };
 
         List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Start Game", startGameAction),
                 new Pair<String, Runnable>("Back", () -> createMainMenu())
         );
 
+        VBox startBox = UIUtil.createMenu(Arrays.asList(new Pair<String, Runnable>("Start Game", startGameAction)));
+        vBox.getChildren().add(startBox);
+
         buttonBox = UIUtil.createMenu(menuData);
-        menuBox.getChildren().addAll(gameModeBox, buttonBox);
+        menuBox.getChildren().addAll(vBox, buttonBox);
+    }
+
+    public void disconnectError() {
+        menuBox.getChildren().clear();
+
+        StackPane errorBox = new StackPane();
+        new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
+        menuBox.getChildren().add(errorBox);
     }
 
     /**

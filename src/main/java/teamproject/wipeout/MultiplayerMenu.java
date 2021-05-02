@@ -8,10 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.util.Pair;
 import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.networking.Networker;
@@ -159,7 +156,7 @@ public class MultiplayerMenu {
         joinPane.setMaxWidth(600);
 
         HBox playerInfoBox = new HBox();
-        playerInfoBox.getStyleClass().add("pane");
+        playerInfoBox.getStyleClass().add("hbox");
         playerInfoBox.setAlignment(Pos.CENTER);
 
         HBox nameBox = new HBox();
@@ -173,17 +170,19 @@ public class MultiplayerMenu {
 
         ObservableMap<String, InetSocketAddress> servers = this.networker.getServerDiscovery().getAvailableServers();
 
-        VBox serverBox = new VBox();
-        serverBox.getStyleClass().add("pane");
+        /*VBox serverBox = new VBox();
+        serverBox.getStyleClass().add("hbox");
         serverBox.setAlignment(Pos.CENTER);
+        serverBox.setMaxHeight(120);
+        serverBox.setPrefHeight(120);*/
 
         ListView<ServerListItem> serverList = new ListView<>();
         serverList.setMaxWidth(180);
         serverList.setMaxHeight(120);
         serverList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
-        serverBox.getChildren().add(serverList);
-        joinPane.getChildren().addAll(playerInfoBox, serverBox);
+        //serverBox.getChildren().add(serverList);
+        joinPane.getChildren().addAll(playerInfoBox, serverList);
         StackPane errorBox = new StackPane();
 
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
@@ -239,10 +238,10 @@ public class MultiplayerMenu {
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         menuBox.getChildren().clear();
 
-        StackPane stackPane = new StackPane();
-        stackPane.setMaxSize(600, 100);
-        stackPane.setAlignment(Pos.CENTER);
-        stackPane.getStyleClass().add("tile-pane");
+        VBox vBox = new VBox();
+        vBox.setMaxSize(600, 100);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getStyleClass().add("tile-pane");
 
         Consumer<GameClient> startGame = (client) -> Platform.runLater(() -> startLocalGame(networker, client));
         GameClient client = networker.connectClient(serverAddress, userName, startGame);
@@ -261,7 +260,7 @@ public class MultiplayerMenu {
         playerList.setMaxHeight(120);
         playerList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
-        stackPane.getChildren().add(playerList);
+        vBox.getChildren().add(playerList);
         ObservableMap<Integer, String> observablePlayers = client.connectedClients.get();
         observablePlayers.addListener((MapChangeListener<? super Integer, ? super String>) (change) -> {
             if (!client.getIsActive()) {
@@ -286,20 +285,15 @@ public class MultiplayerMenu {
             createMultiplayerMenu();
         });
 
-        List<Pair<String, Runnable>> menuData;
         if (isHost) {
-            menuData = Arrays.asList(
-                    new Pair<String, Runnable>("Start Game", () -> startServerGame()),
-                    backButton
-            );
-        } else {
-            menuData = Arrays.asList(backButton);
+            Pair<String, Runnable> startButton = new Pair<String, Runnable>("Start Game", () -> startServerGame());
+            VBox startBox = UIUtil.createMenu(Arrays.asList(startButton));
+            startBox.getStyleClass().add("hbox");
+            vBox.getChildren().add(startBox);
         }
 
-        VBox buttonBox = UIUtil.createMenu(menuData);
-        stackPane.getChildren().add(buttonBox);
-
-        menuBox.getChildren().add(stackPane);
+        VBox backBox = UIUtil.createMenu(Arrays.asList(backButton));
+        menuBox.getChildren().addAll(vBox, backBox);
 
         for (String player : client.connectedClients.get().values()) {
             playerList.getItems().add(player);
