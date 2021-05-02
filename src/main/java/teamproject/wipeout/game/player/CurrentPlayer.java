@@ -338,6 +338,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         }
     }
 
+    public void clearTasks() {
+        if(this.tasks != null) {
+            this.tasks.clear();
+        }
+    }
+
+
     /**
      * Adds a task to the player's list of tasks.
      * @param task The task to add.
@@ -350,7 +357,9 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         }
         this.currentAvailableTasks.putIfAbsent(task.id, 1);
         this.tasks.add(task);
-        this.checkTasks();
+        if(!debug) {
+            this.checkTasks();
+        }
     }
 
     /**
