@@ -19,6 +19,9 @@ import teamproject.wipeout.util.sort.RenderOrderComparator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MouseClickSystem hooks into InputHandler mouse click events and forwards events to the entity the user clicked on.
+ */
 public class MouseClickSystem implements EventSystem {
 
     public static final Point2D CLICK_ERROR_OFFSET = new Point2D(8, 20);
@@ -29,12 +32,23 @@ public class MouseClickSystem implements EventSystem {
     private SignatureEntityCollector collector;
     private CameraEntityCollector cameraCollector;
     
+    /**
+     * Creates a new instance of MouseClickSystem
+     * @param scene The GameScene this system is part of
+     * @param input The InputHandler instance to hook into
+     */
     public MouseClickSystem(GameScene scene, InputHandler input) {
         this.collector = new SignatureEntityCollector(scene, signature);
         this.cameraCollector = new CameraEntityCollector(scene);
         input.onMouseClick(this.onClick);
     }
 
+    /**
+     * Creates a new instance of MouseClickSystem
+     * @param scene The GameScene this system is part of
+     * @param input The InputHandler instance to hook into
+     * @param cameraCollector An existing instance of cameraCollector to use
+     */
     public MouseClickSystem(GameScene scene, InputHandler input, CameraEntityCollector cameraCollector) {
         this.collector = new SignatureEntityCollector(scene, signature);
         this.cameraCollector = cameraCollector;
@@ -45,6 +59,9 @@ public class MouseClickSystem implements EventSystem {
         this.collector.cleanup();
     }
 
+    /**
+     * Runnable called when a click event occurs
+     */
     public InputClickableAction onClick = (x, y, button) -> {
         Pair<GameEntity, Point2D> clicked = this.getClicked(x, y);
         if (clicked != null) {
@@ -55,6 +72,12 @@ public class MouseClickSystem implements EventSystem {
         }
     };
 
+    /**
+     * Given an x and y coordinate, finds the frontmost clickable entity at the click location.
+     * @param x The click x coordinate
+     * @param y The click y coordinate
+     * @return The entity tht was clicked, and the adjusted x and y coordinate the click occured at
+     */
     protected Pair<GameEntity, Point2D> getClicked(double x, double y) {
         // Transform mouse click position by camera position and zoom
         double zoom = 1;

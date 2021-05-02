@@ -36,6 +36,11 @@ public class MarketPriceUpdater {
         }
     };
 
+    /**
+     * Creates a new instance of MarketPriceUpdater
+     * @param market The Market instance
+     * @param local Whether this MarketPriceUpdater is running locally, or on the server.
+     */
     public MarketPriceUpdater(Market market, boolean local) {
         this.market = market;
         this.executor = Executors.newSingleThreadScheduledExecutor();
@@ -44,10 +49,16 @@ public class MarketPriceUpdater {
         this.isLocal = local;
     }
 
+    /**
+     * Starts the price updater
+     */
     public void start() {
         executor.scheduleWithFixedDelay(this.runUpdatePrices, TIMEFREQUENCY, TIMEFREQUENCY, TimeUnit.SECONDS);
     }
 
+    /**
+     * Stops the price updater
+     */
     public void stop() {
        executor.shutdown();
     }

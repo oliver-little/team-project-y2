@@ -52,6 +52,18 @@ public class ParticleParameters {
 
     private List<ParticleUpdateFunction> updaters;
 
+    /**
+     * Creates a new instance of ParticleParameters
+     * @param runtime The runtime of this particle effect (s)
+     * @param loop Whether this particle effect should loop
+     * @param emissionType A ParticleType instance describing what this effect should emit
+     * @param simulationSpace The simulation space of this particle effect (world or local)
+     * @param lifetime A supplier for the lifetime of each particle
+     * @param width A supplier for the width of each particle
+     * @param height A supplier for the height of each particle
+     * @param opacity A supplier for the opacity of each particle
+     * @param velocity A supplier for the velocity of each particle
+     */
     public ParticleParameters(double runtime, boolean loop, ParticleType emissionType, ParticleSimulationSpace simulationSpace, Supplier<Double> lifetime, Supplier<Double> width, Supplier<Double> height, Supplier<Double> opacity, Supplier<Point2D> velocity) {
         this.runtime = runtime;
         this.loop = loop;

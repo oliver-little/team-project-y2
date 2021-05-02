@@ -44,6 +44,9 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
+/**
+ * Container entity for most aspects of the game world.
+ */
 public class WorldEntity extends GameEntity implements StateUpdatable<WorldState> {
 
 	public static final int[] WORLD_SIZE = new int[]{1461, 1184};
@@ -72,6 +75,10 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 	private final MarketEntity marketEntity;
 	private final HashMap<Integer, Point2D[]> potions;
 
+	/**
+	 * Creates a new instance of WorldEntity
+	 * @param worldPack An information pack for WorldEntity.
+	 */
 	public WorldEntity(Map<String, Object> worldPack) {
 		super((GameScene) worldPack.get("gameScene"));
 
@@ -128,15 +135,26 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.clientSupplier = null;
 	}
 
+	/**
+	 * Cleans up threads set up by WorldEntity's children
+	 */
 	public void cleanup() {
 		this.marketEntity.disableUpdater();
 		this.stopAIPlayers();
 	}
 
+	/**
+	 * Getter for the Market controlled by the MarketEntity
+	 * @return The Market instance
+	 */
 	public Market getMarket() {
 		return this.marketEntity.getMarket();
 	}
 
+	/**
+	 * Getter for this world's NavigationMesh
+	 * @return The NavigationMesh
+	 */
 	public NavigationMesh getNavMesh() {
 		return this.navMesh;
 	}
@@ -256,6 +274,9 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.clockSupplier = clock;
 	}
 
+	/**
+	 * Stops all AI players in the world.
+	 */
 	public void stopAIPlayers() {
 		for (Player player : this.players) {
 			if (player instanceof AIPlayer) {

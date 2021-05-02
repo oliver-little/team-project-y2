@@ -49,6 +49,9 @@ public class StartMenu extends StackPane implements Controller {
     private final MultiplayerMenu multiplayerMenu;
     private final SettingsMenu settingsMenu;
 
+    /**
+     * Creates a new instance of StartMenu
+     */
     public StartMenu() {
         super();
         this.menuBox = new VBox(30);
@@ -57,11 +60,17 @@ public class StartMenu extends StackPane implements Controller {
         this.settingsMenu = new SettingsMenu(this.menuBox, () -> this.createMainMenu());
     }
 
+    /**
+     * Cleans up active threads when StartMenu is closed.
+     */
     public void cleanup() {
         this.multiplayerMenu.cleanupNetworker();
     }
 
-    public void createMainMenu() {
+    /**
+     * Displays an error message (usually if a game ends unexpectedly or does not start correctly)
+     */
+    public void disconnectError() {
         this.getChildren().remove(menuBox);
 
         menuBox.getChildren().clear();
@@ -97,6 +106,9 @@ public class StartMenu extends StackPane implements Controller {
         return menuData;
     }
 
+    /**
+     * Creates the UI for starting a singleplayer game
+     */
     private void createSingleplayerMenu() {
         menuBox.getChildren().clear();
 
@@ -118,14 +130,6 @@ public class StartMenu extends StackPane implements Controller {
 
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().addAll(gameModeBox, buttonBox);
-    }
-
-    public void disconnectError() {
-        menuBox.getChildren().clear();
-
-        StackPane errorBox = new StackPane();
-        new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
-        menuBox.getChildren().add(errorBox);
     }
 
     /**

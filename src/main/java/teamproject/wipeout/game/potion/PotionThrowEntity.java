@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.util.Collection;
 
 /**
- * Generates an icon following the mouse
+ * Generates an icon following the mouse, and throws a potion towards the mouse location when the player clicks
  */
 public class PotionThrowEntity extends GameEntity {
 
@@ -42,6 +42,17 @@ public class PotionThrowEntity extends GameEntity {
     private Runnable onComplete;
     private Runnable onAbort;
 
+    /**
+     * Creates a new instance of PotionThrowEntity
+     * @param scene The GameScene this entity is part of
+     * @param sm A SpriteManager instance to get the Potion sprite from
+     * @param throwingPlayer The player that threw the potion
+     * @param activePlayer The current, local player
+     * @param potion The potion Item instance
+     * @param possibleEffectEntities A list of entities that can be affected by this potion
+     * @param onComplete A function to call when a potion is thrown successfully.
+     * @param onAbort A function to call when the throw is cancelled.
+     */
     public PotionThrowEntity(GameScene scene, SpriteManager sm, Player throwingPlayer, CurrentPlayer activePlayer, Item potion, Collection<GameEntity> possibleEffectEntities, Runnable onComplete, Runnable onAbort) {
         super(scene);
 

@@ -4,6 +4,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import teamproject.wipeout.game.item.components.TradableComponent;
 
+/**
+ * Defines an individual item in the market, and handles price deviation for the item.
+ */
 public class MarketItem {
     
     public static final int INITIAL_QUANTITY_DEVIATION = 0;

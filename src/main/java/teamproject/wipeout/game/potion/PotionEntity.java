@@ -35,6 +35,9 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.util.SupplierGenerator;
 
+/**
+ * PotionEntity completes the visuals of throwing a potion from a start to end location.
+ */
 public class PotionEntity extends GameEntity {
 
     public static final double POTION_EFFECT_RADIUS = 100.0;
@@ -57,6 +60,17 @@ public class PotionEntity extends GameEntity {
     private AudioComponent audio;
     private Runnable potionRemover;
 
+    /**
+     * Creates a new instance of PotionEntity
+     * @param scene The GameScene this entity is part of
+     * @param sm A SpriteManager instance to get potion sprites from
+     * @param potion The potion Item instance
+     * @param possibleEffectEntities A list of entities that can be affected by this potion
+     * @param activePlayer The current player
+     * @param thrownByActivePlayer Whether the potion was thrown by the current player
+     * @param startPosition The start throw location
+     * @param endPosition The end throw location
+     */
     public PotionEntity(GameScene scene, SpriteManager sm, Item potion, Collection<GameEntity> possibleEffectEntities, CurrentPlayer activePlayer, boolean thrownByActivePlayer, Point2D startPosition, Point2D endPosition) {
         super(scene);
 
@@ -118,14 +132,26 @@ public class PotionEntity extends GameEntity {
         this.addComponent(new MovementComponent(movementVector.multiply(0.5), movementVector, 0.98));
     }
 
+    /**
+     * Gets the ID of the potion Item
+     * @return The item ID
+     */
     public Integer getPotionID() {
         return this.potion.id;
     }
 
+    /**
+     * Gets the start position of the potion throw
+     * @return The start position
+     */
     public Point2D getStartPosition() {
         return this.startPosition;
     }
 
+    /**
+     * Gets the end position of the potion throw
+     * @return The end position
+     */
     public Point2D getEndPosition() {
         return this.endPosition;
     }
@@ -134,6 +160,11 @@ public class PotionEntity extends GameEntity {
         this.potionRemover = potionRemover;
     }
 
+    /**
+     * Factory function for the trail particle effect behind the potion
+     * @param particleColor The color of the trail
+     * @return The ParticleParameters instance for the trail
+     */
     public static ParticleParameters potionTrailFactory(Color particleColor) {
         ParticleParameters parameters = new ParticleParameters(100, true, new OvalParticle(particleColor), ParticleSimulationSpace.WORLD, SupplierGenerator.rangeSupplier(0.5, 1.5), SupplierGenerator.rangeSupplier(1.0, 2.0), null, SupplierGenerator.staticSupplier(1.0), SupplierGenerator.circlePointSupplier(5, 10));
         parameters.setEmissionRate(50);
@@ -146,6 +177,11 @@ public class PotionEntity extends GameEntity {
         return parameters;
     }
 
+    /**
+     * Factory function for the particle effect explosion of the potion
+     * @param particleColor The color of the explosion
+     * @return The ParticleParameters instance for the explosion
+     */
     public static ParticleParameters potionExplosionFactory(Color particleColor) {
 
         ExplosionSupplier velocitySupplier = new ExplosionSupplier(20, 380);
@@ -161,6 +197,9 @@ public class PotionEntity extends GameEntity {
         return parameters;
     }
 
+    /**
+     * Runnable that is called every frame - checks if the potion has hit its goal location, then checks if the potion hit any possible entities that could be affected.
+     */
     public Consumer<Double> onStep = (timeStep) -> {
         if (this.getComponent(Transform.class).getWorldPosition().subtract(startPosition).magnitude() > throwDistance) {
             this.getComponent(ScriptComponent.class).requestDeletion = true;
@@ -214,6 +253,9 @@ public class PotionEntity extends GameEntity {
         }
     };
 
+    /**
+     * Destroys this potion
+     */
     private void destroyMyself() {
         this.destroy();
         if (this.potionRemover != null) {

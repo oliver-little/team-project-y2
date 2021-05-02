@@ -7,7 +7,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -25,7 +24,6 @@ import teamproject.wipeout.engine.core.GameLoop;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.core.SystemUpdater;
 import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
-import teamproject.wipeout.engine.entity.gameclock.ClockUI;
 import teamproject.wipeout.engine.entity.gameover.GameOverUI;
 import teamproject.wipeout.engine.input.InputHandler;
 import teamproject.wipeout.engine.system.EventSystem;
@@ -52,7 +50,6 @@ import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.entity.MarketEntity;
 import teamproject.wipeout.game.player.CurrentPlayer;
-import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.game.player.ui.MoneyUI;
 import teamproject.wipeout.game.settings.ui.SettingsUI;
 import teamproject.wipeout.game.task.Task;
@@ -114,7 +111,14 @@ public class Gameplay extends StackPane implements Controller {
 
     private final Networker networker;
 
-
+    /**
+     * Creates a new instance of Gameplay
+     * @param networker The Networker instance to use
+     * @param givenGameStartTime The system time the game began at
+     * @param initContainer The Game settings
+     * @param playerName The name of the current player
+     * @param bindings The keybindings to use
+     */
     public Gameplay(Networker networker, Long givenGameStartTime, InitContainer initContainer, String playerName, Map<String, KeyCode> bindings) {
         super();
 
@@ -151,8 +155,11 @@ public class Gameplay extends StackPane implements Controller {
         this.keyBindings = bindings;
         this.networker = networker;
     }
-    
 
+    /** 
+     * Sets up resizes and focus properties from the window
+     * @param window The window this Game is within
+     */
     public Parent getParentWith(Window window) {
         this.widthProperty = window.widthProperty();
         this.heightProperty = window.heightProperty();
@@ -320,6 +327,9 @@ public class Gameplay extends StackPane implements Controller {
 		return this;
 	}
 
+    /**
+     * Cleans up the game's threads and dependencies when the game should end.
+     */
     public void cleanup() {
         if (this.worldEntity != null) {
             this.worldEntity.cleanup();
@@ -351,6 +361,9 @@ public class Gameplay extends StackPane implements Controller {
         }
     }
 
+    /**
+     * Loads all spritesheets into the SpriteManager.
+     */
     private void loadSpriteSheets() throws IOException {
         PlayerSpriteSheetManager.loadPlayerSpriteSheets(this.spriteManager);
         this.spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
@@ -367,6 +380,9 @@ public class Gameplay extends StackPane implements Controller {
         this.spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
     }
 
+    /**
+     * Initialises the GameSystems
+     */
     private void initializeSystemUpdater() {
         this.systemUpdater = new SystemUpdater();
 
@@ -385,6 +401,11 @@ public class Gameplay extends StackPane implements Controller {
         this.systemUpdater.addSystem(this.movementAudio);
     }
 
+    /**
+     * Sets up the camera to follow the player.
+     * @param cameraEntity The CameraEntity to use
+     * @param currentPlayer The player to follow
+     */
     private void setupCameraFollowing(CameraEntity cameraEntity, CurrentPlayer currentPlayer) {
         // Use JavaFX binding to ensure camera is in correct position even when screen size changes
         RenderComponent targetRenderer = currentPlayer.getComponent(RenderComponent.class);
@@ -399,6 +420,10 @@ public class Gameplay extends StackPane implements Controller {
         cameraPosition.bind(camPosBinding);
         cameraEntity.addComponent(new CameraFollowComponent(currentPlayer, cameraPosition));
     }
+
+    /**
+     * Creates the UI on the left side of the screen (task and leaderboard)
+     */
     private void createLeftUIOverlay(TaskUI taskUI) {
         // UI Overlay
         VBox topLeft = new VBox(3);
@@ -434,6 +459,9 @@ public class Gameplay extends StackPane implements Controller {
 
     }
 
+    /**
+     * Creates the UI on the right side of the screen (clock, settings)
+     */
     private void createRightUIOverlay(SettingsUI settingsUI) {
         //Clock UI / System
         if (this.gameMode == GameMode.TIME_MODE) {
@@ -464,6 +492,9 @@ public class Gameplay extends StackPane implements Controller {
         }
     }
 
+    /**
+     * Sets up the keybindings for moving the player.
+     */
     private void setupKeyInput(CurrentPlayer currentPlayer, InventoryUI inventoryUI) {
         inventoryUI.onMouseClick(this.worldEntity);
         this.worldEntity.setupFarmPickingKey(this.keyBindings.get("Harvest"));
@@ -496,6 +527,9 @@ public class Gameplay extends StackPane implements Controller {
         );
     }
 
+    /**
+     * Sets up the keybindings for selecting inventory slots.
+     */
     private void setupKeyHotkeys(InventoryUI inventoryUI) {
         this.inputHandler.onKeyRelease(KeyCode.DIGIT1, inventoryUI.useSlot(0, this.worldEntity));
         this.inputHandler.onKeyRelease(KeyCode.DIGIT2, inventoryUI.useSlot(1, this.worldEntity));
@@ -509,6 +543,9 @@ public class Gameplay extends StackPane implements Controller {
         this.inputHandler.onKeyRelease(KeyCode.DIGIT0, inventoryUI.useSlot(9, this.worldEntity));
     }
 
+    /**
+     * Sets up the networker if the game is online.
+     */
     private void setupNetworking() {
         CurrentPlayer myCurrentPlayer = this.worldEntity.myCurrentPlayer;
 
@@ -533,6 +570,11 @@ public class Gameplay extends StackPane implements Controller {
         currentClient.send(new GameUpdate(myCurrentPlayer.getCurrentState()));
     }
 
+    /**
+     * Generates a pack of data for MarketEntity.
+     * @param currentPlayer The current player
+     * @param purchasableTasks All tasks available for purchase
+     */
     private Map<String, Object> createMarketPack(CurrentPlayer currentPlayer, ArrayList<Task> purchasableTasks) {
         HashMap<String, Object> marketPack = new HashMap<String, Object>();
         marketPack.put("itemStore", this.itemStore);
@@ -545,6 +587,11 @@ public class Gameplay extends StackPane implements Controller {
         return marketPack;
     }
 
+    /**
+     * Generates a pack of data for WorldEntity
+     * @param MarketEntity The MarketEntity instance in this game
+     * @param currentPlayer The current player
+     */
     private Map<String, Object> createWorldPack(MarketEntity marketEntity, CurrentPlayer currentPlayer) {
         HashMap<String, Object> worldPack = new HashMap<String, Object>();
         worldPack.put("itemStore", this.itemStore);
@@ -557,6 +604,9 @@ public class Gameplay extends StackPane implements Controller {
         return worldPack;
     }
 
+    /**
+     * Runnable called when the game ends normally.
+     */
     private Runnable onGameEnd() {
         return () -> {
             // Set up onEnd UI
