@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -425,15 +426,47 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().clear();
 
-        menuBox.getChildren().add(UIUtil.createTitle("Settings"));
+        menuBox.getChildren().add(UIUtil.createTitle("How to Play"));
 
+        TilePane instructionsTilePane = new TilePane();
+        instructionsTilePane.setMaxSize(600, 100);
+
+        Label goalLabel = new Label("Goal: Make as much money as fast as possible!");
+        Label howToPlayLabel = new Label("HOW TO PLAY:");
+        Label moveAroundLabel = new Label("1. Move around with the arrow keys to get to the market in the centre.");
+        Label marketLabel = new Label("2. Go close to the market and then click on it to buy seeds/tasks/potions.");
+        Label selectItemLabel = new Label("3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse.");
+        Label plantLabel = new Label("4. Now plant the seeds by clicking somewhere on your farm.");
+        Label harvestLabel = new Label("5. Wait for them to grow and then harvest them by pressing H and clicking on the crop.");
+        Label pickUpLabel = new Label("6. Pick up the harvested crop by standing on them and pressing X.");
+        Label sellItemLabel = new Label("7. Hurry back to the market and sell your crops to make money!");
+
+        instructionsTilePane.getChildren().addAll(goalLabel, howToPlayLabel, moveAroundLabel, marketLabel, selectItemLabel,
+                plantLabel, harvestLabel, pickUpLabel, sellItemLabel);
+
+        goalLabel.getStyleClass().add("black-label");
+        howToPlayLabel.getStyleClass().add("black-label");
+        moveAroundLabel.getStyleClass().add("black-label");
+        marketLabel.getStyleClass().add("black-label");
+        selectItemLabel.getStyleClass().add("black-label");
+        plantLabel.getStyleClass().add("black-label");
+        harvestLabel.getStyleClass().add("black-label");
+        pickUpLabel.getStyleClass().add("black-label");
+        sellItemLabel.getStyleClass().add("black-label");
+
+        instructionsTilePane.setTileAlignment(Pos.TOP_LEFT);
+        instructionsTilePane.getStyleClass().add("tile-pane");
+
+        menuBox.getChildren().add(instructionsTilePane);
+        
+        
         TilePane tilePane = new TilePane();
         tilePane.setAlignment(Pos.TOP_CENTER);
-        tilePane.setVgap(20);
+        tilePane.setVgap(5);
         tilePane.setHgap(20);
         tilePane.setMaxSize(600, 300);
 
-        menuBox.getChildren().add(tilePane);
+        menuBox.getChildren().add(tilePane);    
         tilePane.getStyleClass().add("tile-pane");
 
         //create a HBox for each drop down menu (key-binding)
@@ -522,7 +555,7 @@ public class StartMenu implements Controller {
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
                 new Pair<String, Runnable>("Singleplayer", () -> createSingleplayerMenu()),
                 new Pair<String, Runnable>("Multiplayer", () -> createMultiplayerMenu()),
-                new Pair<String, Runnable>("Settings", () -> createSettingsMenu()),
+                new Pair<String, Runnable>("How to Play", () -> createSettingsMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
         return menuData;

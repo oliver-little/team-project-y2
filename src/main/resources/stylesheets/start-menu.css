@@ -39,6 +39,10 @@
     -fx-text-fill: WHITE;
 }
 
+.black-label {
+    -fx-text-fill: BLACK;
+}
+
 .combo-box-base  
 {
     -fx-background-color: white;
@@ -63,12 +67,12 @@
     -fx-border-color: rgba(0,0,0,0.8);
     -fx-border-width: 1;
     -fx-border-radius: 10px;
-    -fx-padding: 20 20 20 20;
+    -fx-padding: 7 7 7 7;
 }
 
 .my-hbox  {
     -fx-border-color: rgba(160, 158, 158, 0.8);
     -fx-border-width: 1;
     -fx-border-radius: 5px;
-    -fx-padding: 10 10 10 10;
+    -fx-padding: 7 7 7 7;
 }
