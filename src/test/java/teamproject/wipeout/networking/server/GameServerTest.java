@@ -25,26 +25,12 @@ class GameServerTest {
     private static final String SERVER_NAME = "TestServer#99";
     private static final int CATCHUP_TIME = 100;
 
-    private final Consumer<Pair<GameClient, Integer>> farmIDReceived = (farmPair) -> {
-        this.playerWaitingForFarmID.getCurrentState().setFarmID(farmPair.getValue());
-        try {
-            this.clientWaitingForFarmID.send(new GameUpdate(this.playerWaitingForFarmID.getCurrentState()));
-            Thread.sleep(CATCHUP_TIME);
-
-        } catch (InterruptedException exception) {
-            exception.printStackTrace();
-        }
-    };
-
     private GameClient[] gameClients;
     private Player[] clientPlayers;
 
     private GameServer gameServer;
 
     private InetSocketAddress serverAddress;
-
-    private Player playerWaitingForFarmID;
-    private GameClient clientWaitingForFarmID;
 
     @BeforeAll
     void initializeGameServer() {
@@ -97,26 +83,20 @@ class GameServerTest {
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
             GameClient client = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName, (c) -> {});
 
-            this.playerWaitingForFarmID = this.clientPlayers[i];
-            this.clientWaitingForFarmID = client;
             this.gameClients[i] = client;
 
             Thread.sleep(CATCHUP_TIME); // time for the client to connect
         }
-        this.gameServer.startGame();
     }
 
     @AfterEach
     void tearDown() throws InterruptedException {
         this.gameServer.serverStopping();
-        Thread.sleep(CATCHUP_TIME); // time for the clients to disconnect
+        Thread.sleep(CATCHUP_TIME * 4); // time for the clients to disconnect
     }
 
     @RepeatedTest(5)
     void testClientSearchWithinLimit() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
-
         try {
             this.gameServer.startClientSearch();
             Assertions.assertTrue(this.gameServer.isSearching.get());
@@ -140,7 +120,7 @@ class GameServerTest {
         Assertions.assertTrue(CLIENT_IDs.length > MAX_CONNECTIONS,
                 "If this condition is not met, this test is pointless");
 
-        Assertions.assertFalse(this.gameServer.isSearching.get());
+        Assertions.assertTrue(this.gameServer.isSearching.get());
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
 
         try {
@@ -158,7 +138,7 @@ class GameServerTest {
 
     @RepeatedTest(5)
     void testStartingGame() {
-        Assertions.assertTrue(this.gameServer.isActive.get());
+        Assertions.assertFalse(this.gameServer.isActive.get());
         Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
 
         this.gameServer.startGame();
@@ -169,8 +149,6 @@ class GameServerTest {
 
     @RepeatedTest(5)
     void testDisconnectingAllClients() {
-        Assertions.assertFalse(this.gameServer.isSearching.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
 
         try {
             this.gameServer.serverStopping();
@@ -186,6 +164,7 @@ class GameServerTest {
 
     @RepeatedTest(5)
     void testDisconnectingHalfClients() {
+        this.gameServer.stopClientSearch();
         Assertions.assertFalse(this.gameServer.isSearching.get());
 
         List<GameClientHandler> clients = this.gameServer.getConnectedClients();
@@ -217,6 +196,7 @@ class GameServerTest {
 
             this.gameServer.startGame();
             Assertions.assertTrue(this.gameServer.isActive.get());
+            Assertions.assertFalse(this.gameServer.isSearching.get());
 
             for (int i = 0; i < MAX_CONNECTIONS; i++) {
                 Assertions.assertNotNull(this.gameClients[i]);
@@ -234,4 +214,5 @@ class GameServerTest {
             Assertions.fail(exception.getMessage());
         }
     }
+
 }

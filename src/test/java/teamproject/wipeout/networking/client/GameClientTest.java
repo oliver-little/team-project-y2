@@ -22,7 +22,7 @@ class GameClientTest {
     private static final Integer CLIENT_ID = 123;
     private static final Integer DUMMY_CLIENT_ID = 999;
     private static final String SERVER_NAME = "TestServer#1";
-    private static final int CATCHUP_TIME = 80;
+    private static final int CATCHUP_TIME = 100;
 
     private SpriteManager spriteManager;
     private GameScene gameScene;

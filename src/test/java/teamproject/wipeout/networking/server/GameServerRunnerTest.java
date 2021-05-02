@@ -1,12 +1,10 @@
 package teamproject.wipeout.networking.server;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.*;
 import teamproject.wipeout.GameMode;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 class GameServerRunnerTest {
 
@@ -15,7 +13,7 @@ class GameServerRunnerTest {
 
     private static final long DEFAULT_GAME_DURATION = 1_000;
     private static final GameMode DEFAULT_GAME_MODE = GameMode.TIME_MODE;
-    private static final int CATCHUP_TIME = 10;
+    private static final int CATCHUP_TIME = 50;
 
     private GameServerRunner runner;
 
@@ -31,6 +29,7 @@ class GameServerRunnerTest {
     }
 
     @RepeatedTest(5)
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
     void testStartingServer() {
         Assertions.assertNull(this.runner.getServerName());
         Assertions.assertFalse(this.runner.isServerActive());
@@ -51,6 +50,7 @@ class GameServerRunnerTest {
     }
 
     @RepeatedTest(5)
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
     void testStartingGame() {
         try {
             this.runner.startServer(SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
@@ -66,6 +66,7 @@ class GameServerRunnerTest {
     }
 
     @RepeatedTest(5)
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
     void testStoppingAndStartingNewServer() {
         try {
             this.runner.startServer(SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
@@ -83,4 +84,5 @@ class GameServerRunnerTest {
             Assertions.fail(exception.getMessage());
         }
     }
+
 }

@@ -549,7 +549,7 @@ public class GameServer {
                     this.searchSocket.send(packet);
                     Thread.sleep(MULTICAST_DELAY); // == sends the packet each 0.5 second
 
-                } catch (IOException | InterruptedException exception) {
+                } catch (IOException | InterruptedException | NullPointerException exception) {
                     if (this.isSearching.get()) {
                         exception.printStackTrace();
 
