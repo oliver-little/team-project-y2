@@ -2,11 +2,11 @@ package teamproject.wipeout;
 
 import java.net.InetSocketAddress;
 
-public class Server {
+public class ServerListItem {
 	private final String serverName;
 	private final InetSocketAddress address;
 
-	public Server(String name, InetSocketAddress address) {
+	public ServerListItem(String name, InetSocketAddress address) {
 		this.serverName = name;
 		this.address = address;		
 	}
