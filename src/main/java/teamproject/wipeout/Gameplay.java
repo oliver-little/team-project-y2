@@ -74,9 +74,8 @@ import java.util.*;
  * Begin by creating an instance, then call init, add App to a scene, then call createContent
  *
  */
-public class Gameplay implements Controller {
+public class Gameplay extends StackPane implements Controller {
 
-    private StackPane root;
     private Canvas dynamicCanvas;
     private Canvas staticCanvas;
     private StackPane interfaceOverlay;
@@ -117,6 +116,8 @@ public class Gameplay implements Controller {
 
 
     public Gameplay(Networker networker, Long givenGameStartTime, InitContainer initContainer, String playerName, Map<String, KeyCode> bindings) {
+        super();
+
         this.gameStartTime = givenGameStartTime == null ? System.currentTimeMillis() : givenGameStartTime;
 
         if (playerName == null) {
@@ -182,7 +183,7 @@ public class Gameplay implements Controller {
         this.gameLoop = new GameLoop(this.systemUpdater, this.renderer);
 
         // Input
-        this.inputHandler = new InputHandler(this.root.getScene());
+        this.inputHandler = new InputHandler(this.getScene());
 
         MouseClickSystem mouseClick = new MouseClickSystem(this.gameScene, this.inputHandler);
         MouseHoverSystem mouseHover = new MouseHoverSystem(this.gameScene, this.inputHandler);
@@ -242,7 +243,7 @@ public class Gameplay implements Controller {
             this.cleanup();
     
             StartMenu startMenu = new StartMenu();
-            this.root.getScene().setRoot(startMenu.getContent());
+            this.getScene().setRoot(startMenu.getContent());
             
         };
         SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu, this.keyBindings);
@@ -315,11 +316,14 @@ public class Gameplay implements Controller {
         AnchorPane.setBottomAnchor(this.interfaceOverlay, 10.0);
         AnchorPane.setLeftAnchor(this.interfaceOverlay, 10.0);
 
-        this.root = new StackPane(this.dynamicCanvas, this.staticCanvas, anchorPane);
-		return this.root;
+        this.getChildren().addAll(staticCanvas, dynamicCanvas, anchorPane);
+		return this;
 	}
 
     public void cleanup() {
+        if (this.worldEntity != null) {
+            this.worldEntity.cleanup();
+        }
         if (this.gameLoop != null) {
             this.gameLoop.stop();
         }
@@ -335,7 +339,15 @@ public class Gameplay implements Controller {
             }
         }
         if (this.focusListener != null) {
-            this.root.getScene().getWindow().focusedProperty().removeListener(this.focusListener);
+            this.getScene().getWindow().focusedProperty().removeListener(this.focusListener);
+        }
+
+        // Attempt to clean up networking in case of hard shutdown
+        if (this.networker != null && !this.networker.stopServer()) {
+            GameClient client = this.networker.getClient();
+            if (client != null) {
+                client.closeConnection(true);
+            }
         }
     }
 
@@ -502,8 +514,9 @@ public class Gameplay implements Controller {
 
         GameClient currentClient = this.networker.getClient();
         currentClient.setOnDisconnect(() -> Platform.runLater(() -> {
-            Scene scene = this.root.getScene();
+            Scene scene = this.getScene();
             if (scene != null) {
+                this.cleanup();
                 StartMenu startMenu = new StartMenu();
                 scene.setRoot(startMenu.getContent());
                 startMenu.disconnectError();
@@ -547,7 +560,7 @@ public class Gameplay implements Controller {
     private Runnable onGameEnd() {
         return () -> {
             // Set up onEnd UI
-            GameOverUI gameOverUI = new GameOverUI(this.root, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
+            GameOverUI gameOverUI = new GameOverUI(this, this.networker, this.worldEntity.getPlayers(), () -> this.cleanup());
             StackPane.setAlignment(gameOverUI, Pos.CENTER);
             this.interfaceOverlay.getChildren().clear();
             this.interfaceOverlay.getChildren().addAll(gameOverUI);

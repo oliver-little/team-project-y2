@@ -58,6 +58,8 @@ public class MarketEntity extends GameEntity {
     protected RectRenderable hoverRect;
     protected boolean mouseIn = false;
 
+    private MarketPriceUpdater marketPriceUpdater;
+
     public MarketEntity(Map<String, Object> marketPack) {
         super((GameScene) marketPack.get("gameScene"));
 
@@ -148,7 +150,7 @@ public class MarketEntity extends GameEntity {
         boolean isNetworked = (boolean) marketPack.get("networked");
         this.market = new Market(itemStore, isNetworked);
         if (!isNetworked) {
-            new MarketPriceUpdater(this.market, true);
+            this.marketPriceUpdater = new MarketPriceUpdater(this.market, true);
         }
 
         ArrayList<Task> purchasableTasks = (ArrayList<Task>) marketPack.get("tasks");
@@ -157,8 +159,14 @@ public class MarketEntity extends GameEntity {
         this.marketUI.setParent(uiContainer);
     }
 
-    public Market getMarket(){
+    public Market getMarket() {
         return this.market;
+    }
+
+    public void disableUpdater() {
+        if (marketPriceUpdater != null) {
+            this.marketPriceUpdater.stop();
+        }
     }
 
     public void setOnUIOpen(Runnable onOpen) {

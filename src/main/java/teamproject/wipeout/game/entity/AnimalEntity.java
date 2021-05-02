@@ -56,6 +56,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private MovementComponent movementComponent;
 
     private ScheduledExecutorService executor;
+    private boolean shouldStop;
 
     private Supplier<GameClient> clientSupplier;
     private AnimalState animalState;
@@ -70,6 +71,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
         super(scene);
 
         this.isPuppet = false;
+        this.shouldStop = false;
 
         this.navMesh = navMesh;
         this.farms = farms;
@@ -185,6 +187,15 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     }
 
     /**
+     * Stops the rat's AI algorithm and kills its thread.
+     */
+    public void stop() {
+        this.shouldStop = true;
+        this.removeComponent(SteeringComponent.class);
+        this.executor.shutdown();
+    }
+
+    /**
      * Helper function to calculate the path from the AI's current location to its destination, then initiates the traverse method.
      */
     private void aiTraverse(int x, int y, Runnable callback) {
@@ -263,7 +274,7 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
      * Runnable method which runs when the animal arrives at its destination, in this case, steals vegetables, picks a new destination to go to or idles.
      */
     private Runnable aiDecisionAlgorithm = () -> {
-        if (this.isPuppet) {
+        if (this.isPuppet || this.shouldStop) {
             return;
         }
 

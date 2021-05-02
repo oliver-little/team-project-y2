@@ -128,6 +128,11 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 		this.clientSupplier = null;
 	}
 
+	public void cleanup() {
+		this.marketEntity.disableUpdater();
+		this.stopAIPlayers();
+	}
+
 	public Market getMarket() {
 		return this.marketEntity.getMarket();
 	}
@@ -258,6 +263,8 @@ public class WorldEntity extends GameEntity implements StateUpdatable<WorldState
 				aiPlayer.stop();
 			}
 		}
+
+		this.myAnimal.stop();
 	}
 
 	protected Point2D[] setPositionForPlayer(Player player, FarmEntity farm) {

@@ -129,8 +129,6 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().addAll(gameModeBox, buttonBox);
         root.getChildren().add(menuBox);
-    	
-
     }
 
     private void createMultiplayerMenu(){
