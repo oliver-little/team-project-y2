@@ -15,6 +15,7 @@ import java.util.List;
 public class GameServerRunner {
 
     private String serverName;
+    private short serverPort;
     private boolean gameRunning;
 
     private Process serverProcess;
@@ -31,10 +32,10 @@ public class GameServerRunner {
      * @throws IOException Thrown when the child process cannot be started.
      */
     // Running a child process: https://www.programmersought.com/article/95206092506/ (template that was used)
-    public short startServer(String serverName, GameMode gameMode, long gameModeValue) throws ServerRunningException, IOException {
+    public short startServer(String serverName, GameMode gameMode, long gameModeValue) throws IOException {
         // Only one game server can be running
         if (this.serverProcess != null) {
-            throw new ServerRunningException(this.serverName + " - server is already running!");
+            return this.serverPort;
         }
 
         String javaHome = System.getProperty("java.home").replace("%20", " ");
@@ -68,8 +69,9 @@ public class GameServerRunner {
         this.processWriter = new BufferedWriter(new OutputStreamWriter(this.serverProcess.getOutputStream()));
         this.processReader = new BufferedReader(new InputStreamReader(this.serverProcess.getInputStream()));
 
-        String serverPort = this.processReader.readLine();
-        return Short.parseShort(serverPort);
+        String serverPortString = this.processReader.readLine();
+        this.serverPort = Short.parseShort(serverPortString);
+        return this.serverPort;
     }
 
     /**

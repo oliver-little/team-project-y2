@@ -55,6 +55,9 @@ public class GameUpdate implements Serializable {
         this.content = playerState;
     }
 
+    /**
+     * @return Deep clone of the {@code GameUpdate} instance
+     */
     public GameUpdate deepClone() {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

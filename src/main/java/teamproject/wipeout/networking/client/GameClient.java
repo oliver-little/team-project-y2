@@ -36,7 +36,7 @@ public class GameClient {
     public final HashSet<PlayerState> tempPlayerStates;
 
     protected final Socket clientSocket;
-    protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
+    protected final AtomicBoolean isActive; // Atomic because of use on multiple threads
 
     protected ObjectOutputStream out;
     protected ObjectInputStream in;
@@ -237,8 +237,8 @@ public class GameClient {
 
             } else {
                 // The server had a "hard disconnect" (= did not send a disconnect signal)/ other malfunction
-                //this.runOnDisconnect();
-                //this.closeConnection(false);
+                this.runOnDisconnect();
+                this.closeConnection(false);
             }
         }
     }
@@ -312,11 +312,11 @@ public class GameClient {
                             break;
                     }
 
-                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException | ClassNotFoundException e) {
+                } catch (OptionalDataException | UTFDataFormatException | StreamCorruptedException | ClassNotFoundException ignore) {
                     try {
                         this.in.reset();
 
-                    } catch (IOException ignore) {
+                    } catch (IOException e) {
                         // Do NOT let one corrupted packet cause the game crash
                     }
 

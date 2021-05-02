@@ -35,8 +35,6 @@ class GameServerRunnerTest {
         Assertions.assertNull(this.runner.getServerName());
         Assertions.assertFalse(this.runner.isServerActive());
 
-        boolean exceptionThrown = false;
-
         try {
             this.runner.startServer(SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
 
@@ -46,13 +44,10 @@ class GameServerRunnerTest {
             this.runner.startServer(OTHER_SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
             Assertions.assertNotEquals(OTHER_SERVER_NAME, this.runner.getServerName());
 
-        } catch (ServerRunningException runningException) {
-            exceptionThrown = true;
         } catch (IOException exception) {
             Assertions.fail(exception.getMessage());
         }
 
-        Assertions.assertTrue(exceptionThrown);
     }
 
     @RepeatedTest(5)
@@ -65,7 +60,7 @@ class GameServerRunnerTest {
 
             Assertions.assertTrue(this.runner.isGameRunning());
 
-        } catch (IOException | ServerRunningException exception) {
+        } catch (IOException exception) {
             Assertions.fail(exception.getMessage());
         }
     }
@@ -74,6 +69,7 @@ class GameServerRunnerTest {
     void testStoppingAndStartingNewServer() {
         try {
             this.runner.startServer(SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
+
             Thread.sleep(CATCHUP_TIME); // so that server has time to start up in the child process
             Assertions.assertTrue(this.runner.isServerActive());
 
@@ -83,7 +79,7 @@ class GameServerRunnerTest {
             this.runner.startServer(OTHER_SERVER_NAME, DEFAULT_GAME_MODE, DEFAULT_GAME_DURATION);
             Assertions.assertEquals(OTHER_SERVER_NAME, this.runner.getServerName());
 
-        } catch (IOException | ServerRunningException | InterruptedException exception) {
+        } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
     }

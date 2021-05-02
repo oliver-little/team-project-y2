@@ -12,7 +12,6 @@ import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.NewPlayerAction;
 import teamproject.wipeout.networking.client.ServerDiscovery;
 import teamproject.wipeout.networking.server.GameServerRunner;
-import teamproject.wipeout.networking.server.ServerRunningException;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -90,7 +89,7 @@ public class Networker {
             short startedOnPort = this.serverRunner.startServer(serverName, gameMode, gameModeValue);
             return new InetSocketAddress(InetAddress.getLocalHost(), startedOnPort);
 
-        } catch (ServerRunningException | IOException exception) {
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
 

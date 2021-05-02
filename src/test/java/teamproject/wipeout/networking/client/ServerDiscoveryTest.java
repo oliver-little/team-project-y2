@@ -146,16 +146,36 @@ class ServerDiscoveryTest {
     }
 
     @RepeatedTest(5)
-    @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
-    void testStopLookingForServers() {
+    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    void testStartStopLookingForServers() {
         try {
             this.serverDiscovery.startLookingForServers();
             Assertions.assertTrue(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is not active despite the fact that it started searching.");
 
+            this.serverDiscovery.startLookingForServers();
+            Assertions.assertTrue(this.serverDiscovery.getIsActive(),
+                    "ServerDiscovery is not active despite the fact that it started searching.");
+
+            this.serverDiscovery.startLookingForServers();
+            Assertions.assertTrue(this.serverDiscovery.getIsActive(),
+                    "ServerDiscovery is not active despite the fact that it started searching.");
+
+            // Duplicate start calls to ensure that the duplicates are ignored
+
             this.serverDiscovery.stopLookingForServers();
             Assertions.assertFalse(this.serverDiscovery.getIsActive(),
                     "ServerDiscovery is active despite the fact that it stopped searching.");
+
+            this.serverDiscovery.stopLookingForServers();
+            Assertions.assertFalse(this.serverDiscovery.getIsActive(),
+                    "ServerDiscovery is active despite the fact that it stopped searching.");
+
+            this.serverDiscovery.stopLookingForServers();
+            Assertions.assertFalse(this.serverDiscovery.getIsActive(),
+                    "ServerDiscovery is active despite the fact that it stopped searching.");
+
+            // Duplicate stop calls to ensure that the duplicates are ignored
 
         } catch (IOException exception) {
             Assertions.fail(exception.getMessage());

@@ -1,15 +1,14 @@
 package teamproject.wipeout.networking.server;
 
-import javafx.util.Pair;
 import teamproject.wipeout.GameMode;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
+import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.data.MarketOperationRequest;
-import teamproject.wipeout.networking.state.AnimalState;
 import teamproject.wipeout.networking.state.FarmState;
 import teamproject.wipeout.networking.state.PlayerState;
 import teamproject.wipeout.util.resources.PlayerSpriteSheetManager;
@@ -24,8 +23,10 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@code GameServer} class represents the server-part of the client-server network architecture.
@@ -52,24 +53,19 @@ public class GameServer {
     public final long gameModeValue;
     public final short serverPort;
 
-    protected final AtomicReference<ArrayList<GameClientHandler>> connectedClients;
-    protected final AtomicReference<ArrayList<Integer>> availableFarms;
-    protected final AtomicReference<HashMap<Integer, PlayerState>> playerStates;
-    protected final AtomicReference<HashMap<Integer, FarmState>> farmStates;
-    protected final AtomicReference<Pair<Integer, AnimalState>> animalState;
-    // Atomic variables above are used because of multithreading.
-    protected final Market serverMarket;
-
-    protected DatagramSocket searchSocket;
-    protected boolean isSearching;
-
-    protected long gameStartTime;
-    protected boolean isActive;
+    protected final AtomicBoolean isSearching; // Atomic because of use on multiple threads
+    protected final AtomicBoolean isActive; // Atomic because of use on multiple threads
 
     private final ServerSocket serverSocket;
+    private final List<GameClientHandler> connectedClients;
     private final HashSet<Integer> generatedIDs;
     private final PlayerSpriteSheetManager playerSpriteSheetManager;
+    private final CopyOnWriteArrayList<Integer> availableFarms;
+    private final ConcurrentHashMap<Integer, PlayerState> playerStates;
+    private final ConcurrentHashMap<Integer, FarmState> farmStates;
+    private final Market serverMarket;
 
+    private DatagramSocket searchSocket;
     private ServerThread newConnectionsThread;
 
     /**
@@ -115,6 +111,9 @@ public class GameServer {
         this.gameMode = gameMode;
         this.gameModeValue = gameModeValue;
 
+        this.isSearching = new AtomicBoolean(false);
+        this.isActive = new AtomicBoolean(false);
+
         // Look for available port
         ServerSocket interimServerSocket = null;
         short interimServerPort = -1;
@@ -133,11 +132,12 @@ public class GameServer {
         this.serverPort = interimServerPort;
         this.serverSocket = interimServerSocket;
 
-        this.connectedClients = new AtomicReference<ArrayList<GameClientHandler>>(new ArrayList<GameClientHandler>());
-        this.availableFarms = new AtomicReference<ArrayList<Integer>>(new ArrayList<Integer>(Arrays.asList(FarmData.ALL_FARM_IDS)));
-        this.playerStates = new AtomicReference<HashMap<Integer, PlayerState>>(new HashMap<Integer, PlayerState>());
-        this.farmStates = new AtomicReference<HashMap<Integer, FarmState>>(new HashMap<Integer, FarmState>());
-        this.animalState = new AtomicReference<Pair<Integer, AnimalState>>(null);
+        this.connectedClients = Collections.synchronizedList(new ArrayList<GameClientHandler>());
+        this.generatedIDs = new HashSet<Integer>();
+        this.playerSpriteSheetManager = new PlayerSpriteSheetManager();
+        this.availableFarms = new CopyOnWriteArrayList<Integer>(Arrays.asList(FarmData.ALL_FARM_IDS));
+        this.playerStates = new ConcurrentHashMap<Integer, PlayerState>();
+        this.farmStates = new ConcurrentHashMap<Integer, FarmState>();
 
         this.serverMarket = new Market(new ItemStore("items.json"), false);
         this.serverMarket.serverIDGetter = () -> this.id;
@@ -145,17 +145,18 @@ public class GameServer {
         new MarketPriceUpdater(this.serverMarket, false);
 
         this.searchSocket = null;
-        this.isSearching = false;
-
-        this.gameStartTime = -1;
-        this.isActive = false;
-
-        this.generatedIDs = new HashSet<Integer>();
-        this.playerSpriteSheetManager = new PlayerSpriteSheetManager();
-
         this.newConnectionsThread = null;
 
         this.handleNewConnections();
+    }
+
+    /**
+     * {@code connectedClients} getter
+     *
+     * @return {@code List} of currently connected {@link GameClientHandler}s (= clients)
+     */
+    protected List<GameClientHandler> getConnectedClients() {
+        return this.connectedClients;
     }
 
     /**
@@ -164,10 +165,9 @@ public class GameServer {
      * @throws IOException Network problem
      */
     public void startClientSearch() throws IOException {
-        if (this.isSearching) {
+        if (!this.isSearching.compareAndSet(false, true)) {
             return;
         }
-        this.isSearching = true;
         this.searchSocket = new DatagramSocket();
         this.startMulticasting();
     }
@@ -176,7 +176,7 @@ public class GameServer {
      * Stops multicasting the server's IP address.
      */
     public void stopClientSearch() {
-        this.isSearching = false;
+        this.isSearching.set(false);
         if (this.searchSocket != null) {
             this.searchSocket.close();
             this.searchSocket = null;
@@ -187,10 +187,9 @@ public class GameServer {
      * Starts a game session and rejects all new connection attempts.
      */
     public void startGame() {
-        if (this.isActive) {
+        if (!this.isActive.compareAndSet(false, true)) {
             return;
         }
-        this.isActive = true;
         this.stopClientSearch();
         this.calibrateClocks();
     }
@@ -201,7 +200,7 @@ public class GameServer {
      * @throws IOException Problem with closing connections
      */
     public void stopServer() throws IOException {
-        if (this.isSearching) {
+        if (this.isSearching.get()) {
             this.stopClientSearch();
         }
 
@@ -216,9 +215,11 @@ public class GameServer {
      * @param update Instance of a {@link GameUpdate} to be sent
      */
     protected void updateClients(GameUpdate update) {
-        for (GameClientHandler client : this.connectedClients.get()) {
-            if (!client.clientID.equals(update.originID)) {
-                client.updateWith(update);
+        synchronized(this.connectedClients) {
+            for (GameClientHandler client : this.connectedClients) {
+                if (!client.clientID.equals(update.originID)) {
+                    client.updateWith(update);
+                }
             }
         }
     }
@@ -230,19 +231,23 @@ public class GameServer {
      * @throws IOException Problem with closing the connection
      */
     protected void disconnectClient(Integer deleteClientID) throws IOException {
-        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        synchronized(this.connectedClients) {
+            GameClientHandler clientToDisconnect = null;
+            for (GameClientHandler client : this.connectedClients) {
+                if (client.clientID.equals(deleteClientID)) {
+                    clientToDisconnect = client;
+                }
+            }
 
-        for (GameClientHandler client : clientHandlers) {
-            if (client.clientID.equals(deleteClientID)) {
-                client.closeConnection(false);
-                this.addAvailableFarm(client.farmID);
+            if (clientToDisconnect != null) {
+                clientToDisconnect.closeConnection(false);
+                this.addAvailableFarm(clientToDisconnect.farmID);
+                this.connectedClients.remove(clientToDisconnect);
             }
         }
-        clientHandlers.removeIf((client) -> client.clientID.equals(deleteClientID));
         this.handlePlayerStateDelete(deleteClientID);
         this.handleFarmStateDelete(deleteClientID);
 
-        this.connectedClients.setRelease(clientHandlers);
         this.generatedIDs.remove(deleteClientID);
     }
 
@@ -251,15 +256,16 @@ public class GameServer {
      * (Even to the host of the server!)
      */
     protected void serverStopping() {
-        this.isActive = false;
-        ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
+        this.isActive.set(false);
 
-        GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
-        for (GameClientHandler client : clientHandlers) {
-            client.updateWith(stopServer);
+        synchronized(this.connectedClients) {
+            GameUpdate stopServer = new GameUpdate(GameUpdateType.SERVER_STOP, this.id);
+            for (GameClientHandler client : this.connectedClients) {
+                client.updateWith(stopServer);
+            }
+
+            this.connectedClients.clear();
         }
-
-        this.connectedClients.setRelease(new ArrayList<GameClientHandler>());
     }
 
     /**
@@ -309,7 +315,6 @@ public class GameServer {
     private void calibrateClocks() {
         Long currentTime = System.currentTimeMillis();
         this.updateClients(new GameUpdate(GameUpdateType.CLOCK_CALIB, this.id, currentTime));
-        this.gameStartTime = currentTime;
     }
 
     /**
@@ -322,9 +327,6 @@ public class GameServer {
         switch (update.type) {
             case PLAYER_STATE:
                 this.handlePlayerStateUpdate((PlayerState) update.content);
-                break;
-            case ANIMAL_STATE:
-                this.handleAnimalStateUpdate(update.originID, (AnimalState) update.content);
                 break;
             case FARM_STATE:
                 this.handleFarmStateUpdate(update.originID, (FarmState) update.content);
@@ -347,9 +349,7 @@ public class GameServer {
      * @param state {@link PlayerState} to be processed
      */
     private void handlePlayerStateUpdate(PlayerState state) {
-        HashMap<Integer, PlayerState> currentPlayerStates = this.playerStates.getAcquire();
-        currentPlayerStates.put(state.getPlayerID(), state);
-        this.playerStates.setRelease(currentPlayerStates);
+        this.playerStates.put(state.getPlayerID(), state);
     }
 
     /**
@@ -358,9 +358,7 @@ public class GameServer {
      * @param clientID ID of the {@link PlayerState} to be deleted
      */
     private void handlePlayerStateDelete(Integer clientID) {
-        HashMap<Integer, PlayerState> currentPlayerStates = this.playerStates.getAcquire();
-        currentPlayerStates.remove(clientID);
-        this.playerStates.setRelease(currentPlayerStates);
+        this.playerStates.remove(clientID);
     }
 
     /**
@@ -381,9 +379,7 @@ public class GameServer {
      * @param farmID Farm ID to be added
      */
     private void addAvailableFarm(Integer farmID) {
-        ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        farms.add(farmID);
-        this.availableFarms.setRelease(farms);
+        this.availableFarms.add(farmID);
     }
 
     /**
@@ -392,16 +388,14 @@ public class GameServer {
      * @return Available farm ID
      */
     private int removeAvailableFarm() throws IndexOutOfBoundsException, UnsupportedOperationException {
-        ArrayList<Integer> farms = this.availableFarms.getAcquire();
-        if (farms.size() == 0) {
+        int farmsSize = this.availableFarms.size();
+        if (farmsSize == 0) {
             return -1;
         }
 
-        int randIndex = ThreadLocalRandom.current().nextInt(farms.size());
-        Integer farmID = farms.remove(randIndex);
+        int randIndex = ThreadLocalRandom.current().nextInt(farmsSize);
 
-        this.availableFarms.setRelease(farms);
-        return farmID;
+        return this.availableFarms.remove(randIndex);
     }
 
     /**
@@ -410,9 +404,7 @@ public class GameServer {
      * @param state {@link FarmState} to be processed.
      */
     private void handleFarmStateUpdate(Integer clientID, FarmState state) {
-        HashMap<Integer, FarmState> currentFarmStates = this.farmStates.getAcquire();
-        currentFarmStates.put(clientID, state);
-        this.farmStates.setRelease(currentFarmStates);
+        this.farmStates.put(clientID, state);
     }
 
     /**
@@ -421,26 +413,7 @@ public class GameServer {
      * @param clientID ID of the client owning the {@link FarmState} to be deleted.
      */
     private void handleFarmStateDelete(Integer clientID) {
-        HashMap<Integer, FarmState> currentFarmStates = this.farmStates.getAcquire();
-        currentFarmStates.remove(clientID);
-        this.farmStates.setRelease(currentFarmStates);
-    }
-
-    /**
-     * Handles a given {@code AnimalState} update.
-     *
-     * @param state {@link AnimalState} to be processed
-     */
-    private void handleAnimalStateUpdate(Integer clientID, AnimalState state) {
-        Pair<Integer, AnimalState> currentAnimal = this.animalState.getAcquire();
-        if (currentAnimal == null) {
-            this.animalState.setRelease(new Pair<Integer, AnimalState>(clientID, state));
-            return;
-        } else if (!currentAnimal.getKey().equals(clientID)) {
-            return;
-        }
-        currentAnimal.getValue().updateStateFrom(state);
-        this.animalState.setRelease(currentAnimal);
+        this.farmStates.remove(clientID);
     }
 
     /**
@@ -470,34 +443,35 @@ public class GameServer {
             while (!this.serverSocket.isClosed()) {
                 try {
                     Socket clientSocket = this.serverSocket.accept();
-                    ArrayList<GameClientHandler> clientHandlers = this.connectedClients.getAcquire();
 
                     // (1.) Game session is not active and the number of clients is under the limit
-                    if (!this.isActive && clientHandlers.size() < MAX_CONNECTIONS) {
-                        int clientID = this.generateClientID();
-                        int farmID = this.handleFarmRequest();
-                        int[] clientInfo = new int[]{clientID, farmID};
-                        String clientSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
+                    synchronized(this.connectedClients) {
+                        if (!this.isActive.get() && this.connectedClients.size() < MAX_CONNECTIONS) {
+                            int clientID = this.generateClientID();
+                            int farmID = this.handleFarmRequest();
+                            int[] clientInfo = new int[]{clientID, farmID};
+                            String clientSpriteSheet = this.playerSpriteSheetManager.getPlayerSpriteSheet();
 
-                        GameClientHandler client = GameClientHandler.allowConnection(
-                                clientSocket, this,
-                                clientInfo, clientSpriteSheet,
-                                (update) -> this.clientUpdateArrived(update)
-                        );
+                            GameClientHandler client = GameClientHandler.allowConnection(
+                                    clientSocket, this,
+                                    clientInfo, clientSpriteSheet,
+                                    (update) -> this.clientUpdateArrived(update)
+                            );
 
-                        if (clientHandlers.add(client)) { // Duplicate clients are NOT added
-                            this.sendFirstUpdateToClient(client, clientHandlers);
+                            if (!this.connectedClients.contains(client)) { // Duplicate clients are NOT added
+                                this.connectedClients.add(client);
+                                this.sendFirstUpdateToClient(client, this.connectedClients);
+                            }
+
+                            HashMap<Integer, String> newClientMap = new HashMap<Integer, String>();
+                            newClientMap.put(client.clientID, client.clientName);
+                            this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, newClientMap));
+
+                        } else { // (2.) Otherwise deny attempts to connect
+                            GameClientHandler.denyConnection(clientSocket, this.id);
                         }
-
-                        HashMap<Integer, String> newClientMap = new HashMap<Integer, String>();
-                        newClientMap.put(client.clientID, client.clientName);
-                        this.updateClients(new GameUpdate(GameUpdateType.CONNECTED, client.clientID, newClientMap));
-
-                    } else { // (2.) Otherwise deny attempts to connect
-                        GameClientHandler.denyConnection(clientSocket, this.id);
                     }
 
-                    this.connectedClients.setRelease(clientHandlers);
                 } catch (ClientConnectionException ignore) {
                     // Client denied the connection or changed its client ID illegally
                     continue;
@@ -541,11 +515,11 @@ public class GameServer {
         client.updateWith(new GameUpdate(GameUpdateType.CONNECTED, this.id, connectedClients));
 
         // Update newly connected client with all current player states
-        for (PlayerState playerState : this.playerStates.get().values()) {
+        for (PlayerState playerState : this.playerStates.values()) {
             client.updateWith(new GameUpdate(playerState));
         }
 
-        for (Entry<Integer, FarmState> entry : this.farmStates.get().entrySet()) {
+        for (Entry<Integer, FarmState> entry : this.farmStates.entrySet()) {
             GameUpdate gameUpdate = new GameUpdate(GameUpdateType.FARM_STATE, entry.getKey(), entry.getValue());
             client.updateWith(gameUpdate);
         }
@@ -556,7 +530,7 @@ public class GameServer {
      */
     private void startMulticasting() {
         new UtilityThread(() -> {
-            while (this.isSearching) {
+            while (this.isSearching.get()) {
                 try {
                     // Construct packet which will be multicasted (packet contains server name and address)
                     byte[] portBytes = ByteBuffer.allocate(PORT_BYTE_LENGTH).order(ByteOrder.LITTLE_ENDIAN).putShort(this.serverPort).array();
@@ -576,8 +550,9 @@ public class GameServer {
                     Thread.sleep(MULTICAST_DELAY); // == sends the packet each 0.5 second
 
                 } catch (IOException | InterruptedException exception) {
-                    if (this.isSearching) {
+                    if (this.isSearching.get()) {
                         exception.printStackTrace();
+
                     } else {
                         break;
                     }

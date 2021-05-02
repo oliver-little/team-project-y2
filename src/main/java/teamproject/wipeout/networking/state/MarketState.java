@@ -1,8 +1,12 @@
 package teamproject.wipeout.networking.state;
 
+import teamproject.wipeout.game.market.MarketItem;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@code MarketState} class represents objects which contain game-critical
@@ -12,49 +16,38 @@ import java.io.ObjectOutputStream;
  */
 public class MarketState extends GameEntityState {
 
-    private Integer itemID;
-    private Double itemDeviation;
+    private Map<Integer, Double> itemDeviations;
 
     /**
      * Default initializer for a {@link MarketState}.
      *
-     * @param itemID Item ID of a {@code MarketItem}
-     * @param itemDeviation Quantity deviation of the {@code MarketItem}
+     * @param stocks Changed items on the market
      */
-    public MarketState(Integer itemID, Double itemDeviation) {
-        this.itemID = itemID;
-        this.itemDeviation = itemDeviation;
+    public MarketState(Map<Integer, MarketItem> stocks) {
+        this.itemDeviations = new HashMap<Integer, Double>();
+
+        stocks.forEach((itemID, marketItem) -> this.itemDeviations.put(itemID, marketItem.getQuantityDeviation()));
     }
 
     /**
-     * {@code itemID} getter
+     * {@code items} getter
      *
-     * @return {@code Integer} value of market item ID
+     * @return {@code Map<Integer, Double>} of market item quantity deviations. <br>
+     * (Integer = market item ID, Double = market item quantity deviation)
      */
-    public Integer getItemID() {
-        return this.itemID;
-    }
-
-    /**
-     * {@code itemDeviation} getter
-     *
-     * @return {@code Double} value of market item's quantity deviation
-     */
-    public Double getItemDeviation() {
-        return this.itemDeviation;
+    public Map<Integer, Double> getItemDeviations() {
+        return this.itemDeviations;
     }
 
     // Methods writeObject(), readObject() and readObjectNoData() are implemented
     // to make PlayerState serializable despite it containing non-serializable properties (Point2D)
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeInt(this.itemID);
-        out.writeDouble(this.itemDeviation);
+        out.writeObject(this.itemDeviations);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.itemID = in.readInt();
-        this.itemDeviation = in.readDouble();
+        this.itemDeviations = (Map<Integer, Double>) in.readObject();
     }
 
     private void readObjectNoData() throws GameEntityStateException {
@@ -69,11 +62,11 @@ public class MarketState extends GameEntityState {
             return false;
         }
         MarketState that = (MarketState) o;
-        return this.itemID.equals(that.itemID) && this.itemDeviation.equals(that.itemDeviation);
+        return this.itemDeviations.equals(that.itemDeviations);
     }
 
     @Override
     public int hashCode() {
-        return this.itemID.hashCode() / this.itemDeviation.hashCode();
+        return this.itemDeviations.hashCode();
     }
 }

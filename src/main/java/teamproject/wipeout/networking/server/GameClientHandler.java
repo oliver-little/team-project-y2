@@ -11,8 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Handler dealing with a client connection on the server.
@@ -33,7 +32,7 @@ public class GameClientHandler {
     protected final ObjectInputStream in;
     protected final ObjectOutputStream out;
 
-    private final LinkedList<GameUpdate> sendQueue;
+    private final ConcurrentLinkedQueue<GameUpdate> sendQueue;
     private final GameUpdateHandler updater;
 
     /**
@@ -119,7 +118,7 @@ public class GameClientHandler {
         this.clientName = (String) handshake.content;
         this.farmID = farmID;
 
-        this.sendQueue = new LinkedList<GameUpdate>();
+        this.sendQueue = new ConcurrentLinkedQueue<GameUpdate>();
         this.updater = updater;
     }
 
@@ -190,12 +189,12 @@ public class GameClientHandler {
                     // The client had a "hard disconnect" (= did not send a disconnect signal)
                     break;
 
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException ignore) {
                     if (!this.clientSocket.isClosed()) {
                         try {
                             this.in.reset();
 
-                        } catch (IOException ignore) {
+                        } catch (IOException e) {
                             // Do NOT let one corrupted packet cause the game crash
                         }
 
@@ -215,36 +214,35 @@ public class GameClientHandler {
     private void startSendingUpdates() {
         new UtilityThread(() -> {
             while (!this.clientSocket.isClosed()) {
-                if (!this.sendQueue.isEmpty()) {
-                    try {
-                        GameUpdate gameUpdate = this.sendQueue.removeFirst();
-                        this.out.writeObject(gameUpdate);
-                        this.out.flush();
+                try {
+                    GameUpdate gameUpdate;
+                    if ((gameUpdate = this.sendQueue.poll()) == null) {
+                        continue;
+                    }
 
-                        if (gameUpdate.type == GameUpdateType.DISCONNECT && gameUpdate.originID == this.clientID) {
-                            this.terminateConnection();
-                            break;
-                        }
+                    this.out.writeObject(gameUpdate);
+                    this.out.flush();
 
-                    } catch (NoSuchElementException ignore) {
-                        // sendQueue has been already emptied before removeFirst() method call.
-
-                    } catch (EOFException ignore) {
-                        // The client had a "hard disconnect" (= did not send a disconnect signal).
+                    if (gameUpdate.type == GameUpdateType.DISCONNECT && gameUpdate.originID == this.clientID) {
+                        this.terminateConnection();
                         break;
+                    }
 
-                    } catch (IOException exception) {
-                        if (!this.clientSocket.isClosed()) {
-                            try {
-                                this.out.reset();
+                } catch (EOFException ignore) {
+                    // The client had a "hard disconnect" (= did not send a disconnect signal).
+                    break;
 
-                            } catch (IOException e) {
-                                // Do NOT let one corrupted packet cause the game crash
-                            }
+                } catch (IOException ignore) {
+                    if (!this.clientSocket.isClosed()) {
+                        try {
+                            this.out.reset();
 
-                        } else {
-                            break;
+                        } catch (IOException e) {
+                            // Do NOT let one corrupted packet cause the game crash
                         }
+
+                    } else {
+                        break;
                     }
                 }
             }

@@ -60,7 +60,7 @@ public class Market implements StateUpdatable<MarketState> {
      * @return Current {@link MarketState}
      */
     public MarketState getCurrentState() {
-        return null; // TODO fix
+        return new MarketState(this.stockDatabase);
     }
 
     /**
@@ -70,7 +70,9 @@ public class Market implements StateUpdatable<MarketState> {
      */
     public void updateFromState(MarketState newState) {
         Platform.runLater(() -> {
-            this.stockDatabase.get(newState.getItemID()).setQuantityDeviation(newState.getItemDeviation());
+            for (Map.Entry<Integer, Double> entry : newState.getItemDeviations().entrySet()) {
+                this.stockDatabase.get(entry.getKey()).setQuantityDeviation(entry.getValue());
+            }
         });
     }
 
@@ -213,9 +215,10 @@ public class Market implements StateUpdatable<MarketState> {
      */
     protected void sendMarketUpdate(MarketItem marketItem) {
         if (serverUpdater != null) {
-            MarketState  marketState = new MarketState(marketItem.getID(), marketItem.getQuantityDeviation());
+            HashMap<Integer, MarketItem> updateStock = new HashMap<Integer, MarketItem>();
+            updateStock.put(marketItem.getID(), marketItem);
 
-            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), marketState);
+            GameUpdate update = new GameUpdate(GameUpdateType.MARKET_STATE, serverIDGetter.get(), new MarketState(updateStock));
             serverUpdater.accept(update);
         }
     }

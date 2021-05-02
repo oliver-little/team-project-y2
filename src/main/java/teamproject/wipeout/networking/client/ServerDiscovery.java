@@ -27,7 +27,7 @@ public class ServerDiscovery {
     protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
     protected final HashMap<String, Long> lastHeardServers;
     protected final InetSocketAddress searchGroup;
-    protected final AtomicBoolean isActive; // Atomic because of use in multiple threads
+    protected final AtomicBoolean isActive; // Atomic because of use on multiple threads
 
     protected MulticastSocket multicastSocket;
 
@@ -73,10 +73,10 @@ public class ServerDiscovery {
      * @throws IOException Network problem
      */
     public void startLookingForServers() throws IOException {
-        if (this.isActive.get()) {
+        if (!this.isActive.compareAndSet(false, true)) {
+            // isActive was already true
             return;
         }
-        this.isActive.set(true);
         this.availableServers.clear();
         this.lastHeardServers.clear();
 
@@ -138,8 +138,8 @@ public class ServerDiscovery {
             byte[] packetBytes = new byte[GameServer.SERVER_NAME_BYTE_LENGTH + GameServer.PORT_BYTE_LENGTH];
             DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length);
 
-            try {
-                while (this.isActive.get()) {
+            while (this.isActive.get()) {
+                try {
                     this.multicastSocket.receive(packet);
 
                     byte[] portBytes = new byte[GameServer.PORT_BYTE_LENGTH];
@@ -158,11 +158,11 @@ public class ServerDiscovery {
                     }
 
                     this.lastHeardServers.put(serverName, System.currentTimeMillis());
-                }
 
-            } catch (IOException exception) {
-                if (this.isActive.get()) {
-                    exception.printStackTrace();
+                } catch (IOException exception) {
+                    if (this.isActive.get()) {
+                        exception.printStackTrace();
+                    }
                 }
             }
         }).start();
@@ -174,8 +174,11 @@ public class ServerDiscovery {
     public void stopLookingForServers() {
         this.isActive.set(false);
         this.executorService.shutdown();
-        this.multicastSocket.close();
-        this.multicastSocket = null;
+
+        if (this.multicastSocket != null) {
+            this.multicastSocket.close();
+            this.multicastSocket = null;
+        }
     }
 
 }
