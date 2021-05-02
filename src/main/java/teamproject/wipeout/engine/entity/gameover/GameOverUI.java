@@ -107,9 +107,9 @@ public class GameOverUI extends StackPane {
     }
 
     public void refreshText() {
-        this.leaderboard.update(this.players);
+        List<Player> sortedPlayers = this.leaderboard.update(this.players);
 
-        String winnerName = this.players.get(0).playerName;
+        String winnerName = sortedPlayers.get(0).playerName;
         String winString = winnerName + " wins!";
         if (winnerName.equals(this.getCurrentPlayerName())) {
             winString = "You win!";
