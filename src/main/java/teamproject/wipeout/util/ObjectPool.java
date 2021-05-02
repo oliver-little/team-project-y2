@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Implements object pooling of a generic type.
+ */
 public class ObjectPool<T> {
 
     private Supplier<T> factory;

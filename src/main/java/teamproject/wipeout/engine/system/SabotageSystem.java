@@ -13,10 +13,17 @@ import teamproject.wipeout.engine.entity.collector.FunctionalSignatureCollector;
 import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.item.components.SabotageComponent;
 
+/**
+ * SabotageSystem implements sabotage potion effects for players, farms and the AI animal.
+ */
 public class SabotageSystem implements EventSystem {
 
     private FunctionalSignatureCollector entityCollector;
 
+    /**
+     * Creates a new instance of SabotageSystem
+     * @param scene The GameScene this system is part of
+     */
     public SabotageSystem(GameScene scene) {
         entityCollector = new FunctionalSignatureCollector(scene, Set.of(SabotageComponent.class), addSabotage, null, null);
     }
@@ -25,11 +32,14 @@ public class SabotageSystem implements EventSystem {
         entityCollector.cleanup();
     }
 
+    /**
+     * Consumer called when a new sabotage entity is added.
+     */
     public Consumer<GameEntity> addSabotage = (entity) -> {
         SabotageComponent sabotageComponent = entity.getComponent(SabotageComponent.class);
 
         if (sabotageComponent.type == SabotageComponent.SabotageType.SPEED && entity.hasComponent(MovementComponent.class)) {
-            //Applys a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
+            //Applies a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
 
             Timer timer = new Timer();
             TimerTask speedTask = new TimerTask() {
