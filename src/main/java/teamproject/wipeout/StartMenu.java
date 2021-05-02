@@ -15,7 +15,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -53,6 +52,9 @@ public class StartMenu extends StackPane implements Controller {
     private String chosenName;
     private final Networker networker;
 
+    /**
+     * Creates a new instance of StartMenu
+     */
     public StartMenu() {
         super();
         this.menuBox = new VBox(30);
@@ -67,11 +69,17 @@ public class StartMenu extends StackPane implements Controller {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> this.cleanupNetworker()));
     }
 
+    /**
+     * Cleans up active threads when StartMenu is closed.
+     */
     public void cleanup() {
         this.chosenName = null;
         this.cleanupNetworker();
     }
 
+    /**
+     * Displays an error message (usually if a game ends unexpectedly or does not start correctly)
+     */
     public void disconnectError() {
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -82,6 +90,9 @@ public class StartMenu extends StackPane implements Controller {
         this.getChildren().add(menuBox);
     }
 
+    /**
+     * Clears up networker dependencies while in the menu
+     */
     private void cleanupNetworker() {
         if (!this.networker.stopServer()) {
             GameClient client = this.networker.getClient();
@@ -108,6 +119,9 @@ public class StartMenu extends StackPane implements Controller {
         keyBindings.put("Harvest", KeyCode.H);
     }
     
+    /**
+     * Creates the UI for starting a singleplayer game
+     */
     private void createSingleplayerMenu() {
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -133,6 +147,9 @@ public class StartMenu extends StackPane implements Controller {
         this.getChildren().add(menuBox);
     }
 
+    /**
+     * Creates the UI for hosting or joining a multiplayer game
+     */
     private void createMultiplayerMenu(){
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -149,6 +166,9 @@ public class StartMenu extends StackPane implements Controller {
         this.getChildren().add(menuBox);
     }
 
+    /**
+     * Creates the UI for hosting a game
+     */
     private void createHostGameMenu() {
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -213,13 +233,26 @@ public class StartMenu extends StackPane implements Controller {
         
     }
 
-    
+    /**
+     * Initialises a server with parameters provided by the user, moves the menu into the lobby
+     * @param serverName The name of the server
+     * @param hostName The name of the host player
+     * @param GameMode Enum, either Time or Wealth mode
+     * @param gameModeValue Either the length of the game, or the amount of money to reach
+     */
     private void createServer(String serverName, String hostName, GameMode gameMode, long gameModeValue) {
         InetSocketAddress serverAddress = networker.startServer(serverName, gameMode, gameModeValue);
 
         createLobbyMenu(serverName, hostName, serverAddress, true);
     }
 
+    /**
+     * Creates the lobby for the player to wait in for other players to join
+     * @param serverName The name of the server
+     * @param userName The name of the player
+     * @param serverAddress The address of the server
+     * @param isHost Whether the current player is the host of the server.
+     */
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -288,6 +321,9 @@ public class StartMenu extends StackPane implements Controller {
         }
     }
 
+    /**
+     * Creates the menu for a player to join a hosted game
+     */
     private void createJoinGameMenu(){
         this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
@@ -550,6 +586,10 @@ public class StartMenu extends StackPane implements Controller {
         startAnimation();
     }
 
+    /**
+     * Creates the bindings for the main menu buttons
+     * @return A list of pairs - the String to display and the function to call when the button is clicked.
+     */
     private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
@@ -561,7 +601,9 @@ public class StartMenu extends StackPane implements Controller {
         return menuData;
     }
     
-
+    /**
+     * Begins the game on the server side
+     */
     private void startServerGame() {
         try {
             this.networker.serverRunner.startGame();
@@ -571,7 +613,11 @@ public class StartMenu extends StackPane implements Controller {
         }
     }
 
-
+    /**
+     * Begins a game on the client side
+     * @param givenNetworker The Networker object to use
+     * @param client The GameClient instance
+     */
     private void startLocalGame(Networker givenNetworker, GameClient client) {
         if (client != null) {
             this.startLocalGame(givenNetworker, client.getGameStartTime(), client.getInitContainer());
@@ -581,6 +627,12 @@ public class StartMenu extends StackPane implements Controller {
         }
     }
 
+    /**
+     * Begins a game on the client side
+     * @param givenNetworker The Networker object to use
+     * @param gameStartTime The system time when the game began
+     * @param initContainer Helper object with information about the game to begin.
+     */
     private void startLocalGame(Networker givenNetworker, Long gameStartTime, InitContainer initContainer) {
         Gameplay game = new Gameplay(givenNetworker, gameStartTime, initContainer, this.chosenName, this.keyBindings);
 

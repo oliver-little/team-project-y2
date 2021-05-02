@@ -37,6 +37,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+/**
+ * AnimalEntity implements the AI rat, which can move around the world and eat player's crops
+ */
 public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalState> {
 
     public static final OvalParticle FAST_PARTICLE = new OvalParticle(new Color(1, 0.824, 0.004, 1));
@@ -65,7 +68,12 @@ public class AnimalEntity extends GameEntity implements StateUpdatable<AnimalSta
     private ParticleEntity sabotageEffect;
 
     /**
-     * Creates a new animal entity, taking a game scene, starting position, a navigation mesh and a sprite manager.
+     * Creates a new instance of AnimalEntity
+     * @param scene The GameScene
+     * @param position The position to spawn the AnimalEntity at
+     * @param NavigationMesh The NavigationMesh to use
+     * @param SpriteManager The SpriteManager to get the animal sprite from
+     * @param farms The farms this animal can eat from
      */
     public AnimalEntity(GameScene scene, Point2D position, NavigationMesh navMesh, SpriteManager spriteManager, List<FarmEntity> farms) {
         super(scene);

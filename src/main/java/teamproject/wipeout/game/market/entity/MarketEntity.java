@@ -37,6 +37,9 @@ import teamproject.wipeout.game.market.ui.MarketUI;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.task.Task;
 
+/**
+ * Entity representing the Market in the game world.
+ */
 public class MarketEntity extends GameEntity {
 
     public static final double PLAYER_INTERACTION_DISTANCE = 250;
@@ -60,6 +63,10 @@ public class MarketEntity extends GameEntity {
 
     private MarketPriceUpdater marketPriceUpdater;
 
+    /**
+     * Creates a new instance of MarketEntity
+     * @param marketPack An information pack for MarketEntity.
+     */
     public MarketEntity(Map<String, Object> marketPack) {
         super((GameScene) marketPack.get("gameScene"));
 
@@ -159,24 +166,42 @@ public class MarketEntity extends GameEntity {
         this.marketUI.setParent(uiContainer);
     }
 
+    /**
+     * Getter for the Market instance controlled by this MarketEntity
+     * @return The Market instance
+     */
     public Market getMarket() {
         return this.market;
     }
 
+    /**
+     * Disables the MarketPriceUpdater, if it is active.
+     */
     public void disableUpdater() {
         if (marketPriceUpdater != null) {
             this.marketPriceUpdater.stop();
         }
     }
 
+    /**
+     * Setter for the runnable to call when the MarketUI is opened
+     * @param onOpen The runnable to call when the UI is opened.
+     */
     public void setOnUIOpen(Runnable onOpen) {
         this.onUIOpen = onOpen;
     }
 
+    /**
+     * Setter for the runnable to call  when the MarketUI is closed.
+     * @param onClose The runnable to call when the UI is closed.
+     */
     public void setOnUIClose(Runnable onClose) {
         this.marketUI.onUIClose = onClose;
     }
 
+    /**
+     * Runnable called when this MarketEntity is clicked.
+     */
     private final EntityClickAction onClick = (x, y, button) -> {
         if (this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE && marketUI.getParent() == null) {
             if (this.onUIOpen != null) {
@@ -186,6 +211,9 @@ public class MarketEntity extends GameEntity {
         }
     };
 
+    /**
+     * Runnable called when this MarketEntity is hovered.
+     */
     private final InputHoverableAction onHover = (x, y) -> {
         if (clickableTopLeft.getX() < x && clickableTopLeft.getY() < y && clickableBottomRight.getX() > x && clickableBottomRight.getY() > y) {
             this.mouseIn = true;
@@ -195,6 +223,9 @@ public class MarketEntity extends GameEntity {
         }
     };
 
+    /**
+     * Runnable callede on every frame of the game.
+     */
     private final Consumer<Double> onStep = (step) -> {
         if (this.mouseIn && this.getPlayerDistance() < PLAYER_INTERACTION_DISTANCE) {
             this.hoverRect.alpha = 0.2;
@@ -204,6 +235,10 @@ public class MarketEntity extends GameEntity {
         }
     };
 
+    /**
+     * Gets the distance of the player from the market
+     * @return The distance between the player and the market
+     */
     private double getPlayerDistance() {
         return clickableCentre.distance(playerWorldPosition.get());
     }
