@@ -39,13 +39,12 @@ import java.util.function.Consumer;
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
  * It implements the Controller Interface.
  */
-public class StartMenu implements Controller {
+public class StartMenu extends StackPane implements Controller {
 
     private static final List<String> DROPDOWN_ITEMS = List.of("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","UP","DOWN","LEFT","RIGHT");
 
     private Text title;
     private VBox buttonBox;
-    private final Pane root;
     private final VBox menuBox;
 
     private final LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
@@ -55,7 +54,7 @@ public class StartMenu implements Controller {
     private final Networker networker;
 
     public StartMenu() {
-        this.root = new StackPane();
+        super();
         this.menuBox = new VBox(30);
 
         this.dropDowns = new ArrayList<ComboBox<String>>();
@@ -74,13 +73,13 @@ public class StartMenu implements Controller {
     }
 
     public void disconnectError() {
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         StackPane errorBox = new StackPane();
         new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
         menuBox.getChildren().add(errorBox);
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
     }
 
     private void cleanupNetworker() {
@@ -89,6 +88,9 @@ public class StartMenu implements Controller {
             if (client != null) {
                 client.closeConnection(true);
             }
+        }
+        if (this.networker.getServerDiscovery().getIsActive()) {
+            this.networker.getServerDiscovery().stopLookingForServers();
         }
     }
 
@@ -107,7 +109,7 @@ public class StartMenu implements Controller {
     }
     
     private void createSingleplayerMenu() {
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Singleplayer"));
@@ -128,11 +130,11 @@ public class StartMenu implements Controller {
         
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().addAll(gameModeBox, buttonBox);
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
     }
 
     private void createMultiplayerMenu(){
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Multiplayer"));
@@ -144,11 +146,11 @@ public class StartMenu implements Controller {
         );
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
     }
 
     private void createHostGameMenu() {
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Host Game"));
@@ -207,7 +209,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
         
     }
 
@@ -219,7 +221,7 @@ public class StartMenu implements Controller {
     }
 
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         Consumer<GameClient> startGame = (client) -> Platform.runLater(() -> startLocalGame(networker, client));
@@ -228,7 +230,7 @@ public class StartMenu implements Controller {
             StackPane errorBox = new StackPane();
             new ErrorUI(errorBox, "Error: Game server denied connection", () -> this.createJoinGameMenu());
             menuBox.getChildren().add(errorBox);
-            root.getChildren().add(menuBox);
+            this.getChildren().add(menuBox);
             return;
         }
         chosenName = userName;
@@ -279,7 +281,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
 
         for (String player : client.connectedClients.get().values()) {
             playerList.getItems().add(player);
@@ -287,7 +289,7 @@ public class StartMenu implements Controller {
     }
 
     private void createJoinGameMenu(){
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         menuBox.getChildren().addAll(UIUtil.createTitle("Join Game"));
@@ -359,7 +361,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
 
         try {
             this.networker.getServerDiscovery().startLookingForServers();
@@ -420,7 +422,7 @@ public class StartMenu implements Controller {
      * Creates settings menu for changing key bindings
      */
     private void createSettingsMenu(){
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
 
         menuBox.getChildren().clear();
 
@@ -506,11 +508,11 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(menuData);
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
     }
 
     private void createMainMenu(){
-        root.getChildren().remove(menuBox);
+        this.getChildren().remove(menuBox);
         menuBox.getChildren().clear();
 
         title = UIUtil.createTitle("Farmageddon");
@@ -519,7 +521,7 @@ public class StartMenu implements Controller {
         buttonBox = UIUtil.createMenu(getMainMenuData());
         menuBox.getChildren().add(buttonBox);
 
-        root.getChildren().add(menuBox);
+        this.getChildren().add(menuBox);
 
     }
 
@@ -527,15 +529,15 @@ public class StartMenu implements Controller {
      * Creates the content to be rendered onto the canvas.
      */
     private void createContent() {
-        root.setPrefSize(800, 600);
+        this.setPrefSize(800, 600);
 
-        root.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
+        this.getStylesheets().add(ResourceType.STYLESHEET.path + "start-menu.css");
 
         FileInputStream imgFile = null;
         try {
             imgFile = new FileInputStream(ResourceLoader.get(ResourceType.UI, "background.png"));
-            ImageView imageView = UIUtil.createBackground(imgFile, root);
-            root.getChildren().add(imageView);
+            ImageView imageView = UIUtil.createBackground(imgFile, this);
+            this.getChildren().add(imageView);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -582,9 +584,9 @@ public class StartMenu implements Controller {
     private void startLocalGame(Networker givenNetworker, Long gameStartTime, InitContainer initContainer) {
         Gameplay game = new Gameplay(givenNetworker, gameStartTime, initContainer, this.chosenName, this.keyBindings);
 
-        Parent content = game.getParentWith(this.root.getScene().getWindow());
+        Parent content = game.getParentWith(this.getScene().getWindow());
 
-        this.root.getScene().setRoot(content);
+        this.getScene().setRoot(content);
         game.createContent();
     }
 
@@ -623,6 +625,6 @@ public class StartMenu implements Controller {
 	@Override
 	public Parent getContent() {
 		this.createContent();
-		return this.root;
+		return this;
 	}
 }
