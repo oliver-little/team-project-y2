@@ -16,9 +16,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Component that, when added to an entity, will resolve collisions between other entities with this component.
+ * Component that is used resolve collisions between all entities with this component.
  * Has a boolean flag isMoveable that indicates whether an entity should be affected by collisions.
- *  Made up of an array of shapes that act as the collision boundaries.
  */
 public class CollisionResolutionComponent implements GameComponent {
 

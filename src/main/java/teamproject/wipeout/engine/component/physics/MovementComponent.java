@@ -8,12 +8,21 @@ import teamproject.wipeout.util.BasicEvent;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Component to add velocity and acceleration properties to an entity
+ */
 public class MovementComponent implements GameComponent {
 
     public static final double ZERO_VELOCITY_THRESHOLD = 25.0;
 
+    /**
+     * Point to represent the horizontal and vertical velocity respectively
+     */
     public Point2D velocity;
     public double velocityDecayRate = 0.95;
+    /**
+     * Point to represent the horizontal and vertical acceleration respectively
+     */
     public Point2D acceleration;
     public FacingDirection facingDirection;
     public BasicEvent<FacingDirection> facingDirectionChanged;

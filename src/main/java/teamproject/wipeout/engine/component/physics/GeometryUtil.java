@@ -7,7 +7,7 @@ import teamproject.wipeout.engine.component.shape.Segment;
 import teamproject.wipeout.engine.component.shape.Shape;
 
 /**
- * Class containing functions related to geometry in 2D space
+ * Collection of utility functions related to geometry in 2D space
  *
  */
 public class GeometryUtil
@@ -287,6 +287,12 @@ public class GeometryUtil
 	
 	}
 	
+	/**
+	 * Calculates the overlap vector of a rectangle and a circle
+	 * @param r the rectangle
+	 * @param c the circle
+	 * @return overlap vector of the rectangle and circle
+	 */
 	public static Point2D getResolutionVector(Rectangle r,Circle c) {
 		//ISSUE: collision with corner of rectangle will cause sudden movement
 		double overlap = Double.MAX_VALUE;
@@ -367,6 +373,12 @@ public class GeometryUtil
 		return distance;
 	}
 	
+	/**
+	 * Calculates vector to get from p1 to p2
+	 * @param p1 first point
+	 * @param p2 second point
+	 * @return vector from p1 to p2
+	 */
 	public static Point2D calculateVector(Point2D p1, Point2D p2) {
 		return p2.subtract(p1);
 	}
@@ -421,6 +433,12 @@ public class GeometryUtil
 		return false;
 	}
 
+	/**
+	 * Calculates the overlap vector two shapes
+	 * @param s1 first shape
+	 * @param s2 second shape
+	 * @return overlap vector of the two shapes
+	 */
 	public static Point2D getResolutionVector(Shape s1, Shape s2)
 	{
 		// info on downcasting: https://www.baeldung.com/java-type-casting
