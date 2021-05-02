@@ -428,30 +428,41 @@ public class StartMenu implements Controller {
 
         menuBox.getChildren().add(UIUtil.createTitle("How to Play"));
 
-        VBox instructions = new VBox();
-        instructions.setAlignment(Pos.TOP_CENTER);
-        instructions.setMaxSize(600, 300);
-        
-        String info = "Goal: Make as much money as fast as possible!\n"
-        		+ "How to play:\n"
-        		+ "1. Move around with the arrow keys to get to the market in the centre.\n"
-        		+ "2. Click on the market and buy seeds.\n"
-        		+ "3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse."
-        		+ "Now plant the seeds by clicking somewhere on your farm.\n"
-        		+ "4. Wait for them to grow and then harvest them by pressing H and clicking on the crop.\n"
-        		+ "5. Pick up the harvested crop by standing on them and pressing X.\n"
-        		+ "6. Hurry back to the market and sell your crops to make money!";
-        
-        Label instructionInfo = new Label(info);
-        instructionInfo.setWrapText(true);
-        instructions.getChildren().addAll(instructionInfo);
-        
-        menuBox.getChildren().add(instructions);
+        TilePane instructionsTilePane = new TilePane();
+        instructionsTilePane.setMaxSize(600, 100);
+
+        Label goalLabel = new Label("Goal: Make as much money as fast as possible!");
+        Label howToPlayLabel = new Label("HOW TO PLAY:");
+        Label moveAroundLabel = new Label("1. Move around with the arrow keys to get to the market in the centre.");
+        Label marketLabel = new Label("2. Go close to the market and then click on it to buy seeds/tasks/potions.");
+        Label selectItemLabel = new Label("3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse.");
+        Label plantLabel = new Label("4. Now plant the seeds by clicking somewhere on your farm.");
+        Label harvestLabel = new Label("5. Wait for them to grow and then harvest them by pressing H and clicking on the crop.");
+        Label pickUpLabel = new Label("6. Pick up the harvested crop by standing on them and pressing X.");
+        Label sellItemLabel = new Label("7. Hurry back to the market and sell your crops to make money!");
+
+        instructionsTilePane.getChildren().addAll(goalLabel, howToPlayLabel, moveAroundLabel, marketLabel, selectItemLabel,
+                plantLabel, harvestLabel, pickUpLabel, sellItemLabel);
+
+        goalLabel.getStyleClass().add("black-label");
+        howToPlayLabel.getStyleClass().add("black-label");
+        moveAroundLabel.getStyleClass().add("black-label");
+        marketLabel.getStyleClass().add("black-label");
+        selectItemLabel.getStyleClass().add("black-label");
+        plantLabel.getStyleClass().add("black-label");
+        harvestLabel.getStyleClass().add("black-label");
+        pickUpLabel.getStyleClass().add("black-label");
+        sellItemLabel.getStyleClass().add("black-label");
+
+        instructionsTilePane.setTileAlignment(Pos.TOP_LEFT);
+        instructionsTilePane.getStyleClass().add("tile-pane");
+
+        menuBox.getChildren().add(instructionsTilePane);
         
         
         TilePane tilePane = new TilePane();
         tilePane.setAlignment(Pos.TOP_CENTER);
-        tilePane.setVgap(20);
+        tilePane.setVgap(5);
         tilePane.setHgap(20);
         tilePane.setMaxSize(600, 300);
 
