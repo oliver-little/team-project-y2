@@ -17,7 +17,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
- * Used for the game's background music.
+ * Used for the game's background music, and for the player's walking sound effect.
  */
 public class GameAudio {
 	
@@ -53,7 +53,6 @@ public class GameAudio {
 		}
 		catch (IOException | UnsupportedAudioFileException | LineUnavailableException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -87,6 +86,9 @@ public class GameAudio {
 	    }
     }
     
+	/**
+	 * Stops the audio clip
+	 */
     public void stop() {
     	audioClip.stop();
 		audioClip.setMicrosecondPosition(0);
@@ -133,18 +135,19 @@ public class GameAudio {
 		this.play();
 	}
     
+	/**
+	 * Method which flips between muted and unmuted.
+	 */
     public void muteUnmute() {
 		if(muted) {
 			muted = false;
 			this.setVolume(0.05f);
-			// Restart the clip as if it was stopped
 			if (this.playing) {
 				audioClip.start();
 			}
 		}else {
 			muted = true;
 			this.setVolume(0f);
-			// Also stop the clip playing so sound cuts immediately
 			audioClip.stop();
 		}
 	}

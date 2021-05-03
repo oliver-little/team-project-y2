@@ -23,9 +23,11 @@ import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.util.*;
 
+/**
+ * Class which represents the player of this instance of the game
+ */
 public class CurrentPlayer extends Player implements StateUpdatable<PlayerState> {
 
-    //no. of task slots
     public static final int MAX_TASK_SIZE = 10;
 
     public static final String DEFAULT_NAME = "Me";
@@ -45,12 +47,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     public boolean debug = false;
 
-    /**
-     * Creates a new instance of GameEntity
-     *
-     * @param scene The GameScene this entity is part of
-     * @param playerInfo Player ID and name
-     */
     public CurrentPlayer(GameScene scene, Pair<Integer, String> playerInfo, String spriteSheet, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene, playerInfo, spriteSheet, spriteManager, itemStore);
 
@@ -173,8 +169,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * Adds new pair to inventory if item not present, otherwise increments quantity
      * @param itemID ID of item to be added
      * @param quantity quantity to be added
-     * @return index of where item was changed
-     */
+     * @return index of where item was added to
+    */
     protected int addToInventory(int itemID, Integer quantity) {
         int addedToInventoryIndex = super.addToInventory(itemID, quantity);
         if (addedToInventoryIndex >= 0 && !(debug)) {
@@ -187,6 +183,9 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * Rearranges items with a specific itemID to ensure they use the minimum number of slots possible
      * @param itemID - of item to be rearranged
      * @param quantity - quantity of item to be rearranged
+     * @param slotWithSpace - slot which contains space for more items.
+     * @param stackLimit - the stack limit of the particular item
+     * @return int[] with slot used - 0, and index of freed slot - 1 (if successfully rearranged, empty int[] if unable to rearrange)
      */
     protected int[] rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
     	int[] rearrangedItems = super.rearrangeItems(itemID, quantity, slotWithSpace, stackLimit);
@@ -251,7 +250,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     /**
      * Called to select which slot/index in the inventory, ready for dropItem() method to use
-     * @param slot or index selected
+     * @param slot - slot or index selected
+     * @return ID of item in the selected slot, or -1 if it is empty
      */
     public int selectSlot(int slot) {
         this.selectedSlot = slot;
@@ -281,7 +281,6 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 if(HitboxComponent.checkCollides(this, ge)) {
                     Pickable pickable = ge.getComponent(PickableComponent.class).pickable;
                     if (!this.acquireItem(pickable.getID())) {
-                    	System.out.println("No space for item with id: " + pickable.getID());
                     } else {
                         picked.add(pickable);
                         this.playSound("pop.wav");
@@ -295,10 +294,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         return picked;
     }
 
-    // Tasks
-
     /**
-     * Checks what tasks have been completed
+     * Method to check what tasks have been completed
      */
     public void checkTasks() {
         if (this.tasks == null) {
@@ -320,7 +317,10 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         taskUI.showTasks(tasks);
     }
     
-
+    /**
+     * Counts number of completed tasks
+     * @return number of completed tasks
+     */
     public int getNumberOfCompletedTasks() {
         int completedTasks = 0;
         for(Task task : this.tasks) {
@@ -375,6 +375,9 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         return enoughMoney;
     }
 
+    /**
+     * method to queue sounds using player's AudioComponent
+     */
     public void playSound(String fileName){
         this.audio.play(fileName);
     }

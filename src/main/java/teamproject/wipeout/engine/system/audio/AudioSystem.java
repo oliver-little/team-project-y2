@@ -9,6 +9,9 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
+/**
+ * Class which represents a GameSystem for all audio effects.
+ */
 public class AudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
@@ -77,6 +80,9 @@ public class AudioSystem implements GameSystem {
 		}
 	}
 
+	/**
+	 * method to change the state to muted and stop all sounds being played currently.
+	 */
 	public void mute(){
 		muted = true;
 		this.previousVolume = this.spotEffectsVolume;
@@ -89,6 +95,9 @@ public class AudioSystem implements GameSystem {
 		}
 	}
 
+	/**
+	 * sets state to unmuted, and sets volume all of entities to before muted volume.
+	 */
 	public void unmute(){
 		muted = false;
 		this.setSpotEffectsVolume(this.previousVolume);

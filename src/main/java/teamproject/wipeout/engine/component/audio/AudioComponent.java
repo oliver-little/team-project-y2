@@ -18,10 +18,11 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+/**
+ * GameComponent which represents spot effects for entities.
+ */
 public class AudioComponent implements GameComponent {
 
-	//private Boolean play; //set to True when the sound needs to be played
-    //private String fileName;
     private AudioInputStream audioStream;
     private double volume;
 
@@ -32,7 +33,6 @@ public class AudioComponent implements GameComponent {
 	 * The AudioSystem checks the boolean attribute {@link #play} to decide if the sound needs to play.
 	 */
 	public AudioComponent() {
-    	//play = false;
 		this.volume = 0.05f;
 	}
 
