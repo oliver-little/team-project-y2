@@ -56,7 +56,6 @@ public class SabotageSystem implements EventSystem {
 
                 timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
             }
-            System.out.println(entity.getComponent(MovementComponent.class).getSpeedMultiplier());
             entity.removeComponent(SabotageComponent.class);
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE && entity instanceof FarmEntity) {

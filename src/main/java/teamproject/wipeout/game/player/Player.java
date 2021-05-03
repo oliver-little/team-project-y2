@@ -53,7 +53,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     //no. of inventory slots
     public static final int MAX_SIZE = 10;
     //initial amount of money
-    public static final int INITIAL_MONEY = 2500;
+    public static final int INITIAL_MONEY = 25;
 
     private static final double NOMINAL_SPEED = 500.0;
 
