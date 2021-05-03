@@ -9,6 +9,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Mesh generation allows the AI characters to navigate through the map using the A* algorithm.
+ * This JUnit test tests the creation of a mesh when a world is loaded/obstacles are added or removed.
+ * This ensures that a navigable mesh is generated with expected coordinates, edges and boundaries,
+ * based on a number of input parameters such as obstacles and world borders.
+ */
 public class NavigationMeshTest {
 
     @Test

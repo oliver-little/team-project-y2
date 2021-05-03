@@ -12,6 +12,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+/**
+ * This tests that given a world navigation mesh, an AI character will take the correct,
+ * expected route through the world from a given start point and a destination.
+ * This tests the functionality of the implemented A* and steering algorithms used to allow the AI to find the optimal route through the map.
+ */
 public class PathFindingSystemTest {
 
     @Test

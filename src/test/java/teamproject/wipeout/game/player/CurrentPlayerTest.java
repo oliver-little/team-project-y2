@@ -17,6 +17,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * This tests the player’s inventory, specifically whether items can be added and removed correctly.
+ * For example, it tests the inventory blocks items being added if it is full; 
+ * blocks items being removed that are not already in the inventory; 
+ * correctly overflows a slot into another when the quantity of an item exceeds its stack limit, and correctly rearranges items when fewer slots can be used by items of the same ID to free up as many inventory slots as possible.
+ */
 public class CurrentPlayerTest {
 	private static CurrentPlayer currentPlayer;
 	private static GameScene scene = new GameScene();

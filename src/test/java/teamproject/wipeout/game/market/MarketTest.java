@@ -9,6 +9,12 @@ import teamproject.wipeout.util.resources.ResourceLoader;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * This tests the market pricing model and algorithm when buying and selling items from the market.
+ * It ensures that after buying or selling a specified number of a particular item,
+ * that the price change has been updated accordingly based on the mathematical model we designed.
+ * We tell the system to buy/sell a certain number of items, and compare the result against the expected manually calculated results.
+ */
 public class MarketTest {
 
     private static ItemStore itemStore;
