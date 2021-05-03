@@ -222,7 +222,6 @@ class GeometryUtilTest
     	assertTrue(GeometryUtil.intersects(l1, l2));
     	assertEquals(new Point2D(5,2),l1.pointOfIntersection(l2));
 		
-    	System.out.println("\nthe test");
 		l1 = new Segment(1,2,5,3);
 		l2 = new Segment(2,1,7,5);
 		assertTrue(GeometryUtil.intersects(l1, l2));
@@ -245,7 +244,6 @@ class GeometryUtilTest
 		Point2D n1 = new Point2D(1,0);
 		Point2D n2 = new Point2D(-1,0);
 		Point2D actual = GeometryUtil.calculateUnitNormal(l);
-		System.out.println(actual.toString());
 		assertTrue(actual.equals(n1) || actual.equals(n2));
 		
 		l = new Segment(0,0,10,10);
@@ -254,7 +252,6 @@ class GeometryUtilTest
 		n2 = new Point2D(1,-1);
 		n2 = n2.multiply(1/Math.sqrt(2));
 		actual = GeometryUtil.calculateUnitNormal(l);
-		System.out.println("actual: "+actual.toString());
 		assertTrue(actual.equals(n1) || actual.equals(n2));
 	}
 	
@@ -292,7 +289,6 @@ class GeometryUtilTest
 		Shape c2 = new Circle(18,0,10);
 		assertTrue(GeometryUtil.intersects(c1, c2));
 		Point2D rv = GeometryUtil.getResolutionVector(c1, c2);
-		//System.out.println(rv.toString());
 		Point2D expected = new Point2D(2,0);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
 
@@ -301,7 +297,6 @@ class GeometryUtilTest
 		c2 = new Circle(3,4,5);
 		assertTrue(GeometryUtil.intersects(c1, c2));
 		rv = GeometryUtil.getResolutionVector(c1, c2);
-		System.out.println(rv.toString());
 		expected = new Point2D(3,4);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
 	}
@@ -312,7 +307,6 @@ class GeometryUtilTest
 		Shape r2 = new Rectangle(9,0,10,10);
 		assertTrue(GeometryUtil.intersects(r1, r2));
 		Point2D rv = GeometryUtil.getResolutionVector(r1, r2);
-		//System.out.println(rv.toString());
 		Point2D expected = new Point2D(1,0);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
 		
@@ -320,7 +314,6 @@ class GeometryUtilTest
 		r2 = new Rectangle(8,9,10,10);
 		assertTrue(GeometryUtil.intersects(r1, r2));
 		rv = GeometryUtil.getResolutionVector(r1, r2);
-		//System.out.println(rv.toString());
 		expected = new Point2D(0,1);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
 		
@@ -328,7 +321,6 @@ class GeometryUtilTest
 		r2 = new Rectangle(-2,-1,4,5);
 		assertTrue(GeometryUtil.intersects(r1, r2));
 		rv = GeometryUtil.getResolutionVector(r1, r2);
-		//System.out.println(rv.toString());
 		expected = new Point2D(2,0);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
 	}
@@ -339,10 +331,8 @@ class GeometryUtilTest
 		Shape c2 = new Circle(14,10,10);
 		assertTrue(GeometryUtil.intersects(r1, c2));
 		Point2D rv = GeometryUtil.getResolutionVector(r1, c2);
-		//System.out.println(rv.toString());
 		Point2D expected = new Point2D(6,0);
 		assertTrue(rv.equals(expected) || rv.equals(expected.multiply(-1)));
-
 	}
 
 }
