@@ -1,5 +1,6 @@
 package teamproject.wipeout.engine.system;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Timer;
@@ -23,15 +24,22 @@ public class SabotageSystem implements EventSystem {
 
     private FunctionalSignatureCollector entityCollector;
 
+    private Set<Timer> timers;
+
     /**
      * Creates a new instance of SabotageSystem
      * @param scene The GameScene this system is part of
      */
     public SabotageSystem(GameScene scene) {
         entityCollector = new FunctionalSignatureCollector(scene, Set.of(SabotageComponent.class), addSabotage, null, null);
+        timers = new HashSet<Timer>();
     }
 
     public void cleanup() {
+        for (Timer timer : timers) {
+            timer.cancel();
+        }
+
         entityCollector.cleanup();
     }
 
@@ -49,13 +57,15 @@ public class SabotageSystem implements EventSystem {
                 TimerTask speedTask = new TimerTask() {
                     public void run() {
                         cancel();
+                        timers.remove(timer);
                         entity.getComponent(MovementComponent.class).divideSpeedMultiplierBy(sabotageComponent.multiplier);
                     }
                 };
                 entity.getComponent(MovementComponent.class).multiplySpeedMultiplierBy(sabotageComponent.multiplier);
-
+                timers.add(timer);
                 timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
             }
+
             entity.removeComponent(SabotageComponent.class);
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE && entity instanceof FarmEntity) {
@@ -67,6 +77,7 @@ public class SabotageSystem implements EventSystem {
             TimerTask growthTask = new TimerTask() {
                 public void run() {
                     cancel();
+                    timers.remove(timer);
                     farm.setGrowthMultiplier(farm.getGrowthMultiplier() / sabotageComponent.multiplier);
                 }
             };
@@ -74,6 +85,7 @@ public class SabotageSystem implements EventSystem {
             farm.setGrowthMultiplier(farm.getGrowthMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(growthTask, (long) sabotageComponent.duration * 1000);
+            timers.add(timer);
             entity.removeComponent(SabotageComponent.class);
         
         }
@@ -86,6 +98,7 @@ public class SabotageSystem implements EventSystem {
             TimerTask AITask = new TimerTask() {
                 public void run() {
                     cancel();
+                    timers.remove(timer);
                     farm.setAIMultiplier(farm.getAIMultiplier() / sabotageComponent.multiplier);
                 }
             };
@@ -93,6 +106,7 @@ public class SabotageSystem implements EventSystem {
             farm.setAIMultiplier(farm.getAIMultiplier() * sabotageComponent.multiplier);
 
             timer.schedule(AITask, (long) sabotageComponent.duration * 1000);
+            timers.add(timer);
             entity.removeComponent(SabotageComponent.class);
         
         }
