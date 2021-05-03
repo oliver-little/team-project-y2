@@ -19,9 +19,9 @@
       "type": "sprite-list-x",
       "parameters" : {
         "x": 0,
-        "y": 576,
+        "y": 577,
         "width": 64,
-        "height": 64,
+        "height": 63,
         "length": 9
       }
     },
