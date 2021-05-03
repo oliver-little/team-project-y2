@@ -147,11 +147,12 @@ public class MultiplayerMenu {
         menuBox.getChildren().add(UIUtil.createTitle("Join Game"));
 
         StackPane stackPane = new StackPane();
-        stackPane.setMaxSize(600, 100);
+        stackPane.setMaxWidth(600);
         stackPane.setAlignment(Pos.CENTER);
         stackPane.getStyleClass().add("tile-pane");
 
         VBox joinPane = new VBox();
+        joinPane.setSpacing(10);
         joinPane.setAlignment(Pos.CENTER);
         joinPane.setMaxWidth(600);
 
@@ -162,6 +163,7 @@ public class MultiplayerMenu {
         HBox nameBox = new HBox();
         nameBox.setAlignment(Pos.CENTER);
         Label nameLabel = new Label("Name: ");
+        nameLabel.getStyleClass().add("black-label");
         nameLabel.getStyleClass().add("label");
         TextField nameTF = new TextField();
         nameBox.getChildren().addAll(nameLabel,nameTF);
@@ -239,9 +241,10 @@ public class MultiplayerMenu {
         menuBox.getChildren().clear();
 
         VBox vBox = new VBox();
-        vBox.setMaxSize(600, 100);
+        vBox.setMaxWidth(600);
         vBox.setAlignment(Pos.CENTER);
         vBox.getStyleClass().add("tile-pane");
+        vBox.setSpacing(10);
 
         Consumer<GameClient> startGame = (client) -> Platform.runLater(() -> startLocalGame(networker, client));
         GameClient client = networker.connectClient(serverAddress, userName, startGame);

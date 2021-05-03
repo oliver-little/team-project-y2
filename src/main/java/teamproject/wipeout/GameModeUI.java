@@ -104,12 +104,12 @@ public class GameModeUI extends VBox {
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
 
 		HBox gameModeBox = new HBox();
-		gameModeBox.setSpacing(25);
+		gameModeBox.setSpacing(5);
 		gameModeBox.setAlignment(Pos.CENTER);
 		gameModeBox.getChildren().addAll(gameModeLabel, gameModeSelector);
 
 		HBox modeValueBox = new HBox();
-		modeValueBox.setSpacing(5);
+		modeValueBox.setSpacing(20);
 		modeValueBox.setAlignment(Pos.CENTER);
 		modeValueBox.getChildren().addAll(valueDesc, valueBox);
 
