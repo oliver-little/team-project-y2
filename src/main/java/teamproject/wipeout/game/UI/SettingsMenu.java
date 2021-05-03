@@ -10,6 +10,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -56,23 +57,30 @@ public class SettingsMenu {
         TilePane instructionsTilePane = new TilePane();
         instructionsTilePane.setMaxSize(600, 100);
 
-        Label goalLabel = new Label("Goal: Make as much money as fast as possible!");
-        Label howToPlayLabel = new Label("HOW TO PLAY:");
-        Label moveAroundLabel = new Label("1. Move around with the arrow keys to get to the market in the centre.");
-        Label marketLabel = new Label("2. Go close to the market and then click on it to buy seeds/tasks/potions.");
-        Label selectItemLabel = new Label("3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse.");
-        Label plantLabel = new Label("4. Now plant the seeds by clicking somewhere on your farm.");
-        Label harvestLabel = new Label("5. Wait for them to grow and then harvest them by pressing H and clicking on the crop.");
-        Label pickUpLabel = new Label("6. Pick up the harvested crop by standing on them and pressing X.");
-        Label sellItemLabel = new Label("7. Hurry back to the market and sell your crops to make money!");
+        TextFlow goal = new TextFlow();
+        Text goalTitle = new Text("Goal: ");
+        goalTitle.setStyle("-fx-font-weight: bold");
+        goal.getChildren().addAll(goalTitle, new Text("Make as much money as fast as possible!"));
+        goal.getStyleClass().add("black-label");
 
-        Label[] infoLabels = new Label[]{goalLabel, howToPlayLabel, moveAroundLabel, marketLabel, selectItemLabel,
+        Label howToPlayLabel = new Label("How to Play:");
+        howToPlayLabel.setStyle("-fx-font-weight: bold");
+        Label moveAroundLabel = new Label("    1. Move around with the arrow keys to get to the market in the centre.");
+        Label marketLabel = new Label("    2. Go close to the market and then click on it to buy seeds/tasks/potions.");
+        Label selectItemLabel = new Label("    3. Rush back to your farm, select the seed you want in the hotbar with the number keys or the mouse.");
+        Label plantLabel = new Label("    4. Now plant the seeds by clicking somewhere on your farm.");
+        Label harvestLabel = new Label("    5. Wait for them to grow and then harvest them by pressing H and clicking on the crop.");
+        Label pickUpLabel = new Label("    6. Pick up the harvested crop by standing on them and pressing X.");
+        Label sellItemLabel = new Label("    7. Hurry back to the market and sell your crops to make money!");
+
+        Label[] infoLabels = new Label[]{howToPlayLabel, moveAroundLabel, marketLabel, selectItemLabel,
                 plantLabel, harvestLabel, pickUpLabel, sellItemLabel};
 
         for (Label infoLabel : infoLabels) {
             infoLabel.getStyleClass().add("black-label");
         }
 
+        instructionsTilePane.getChildren().add(goal);
         instructionsTilePane.getChildren().addAll(infoLabels);
 
         instructionsTilePane.setTileAlignment(Pos.TOP_LEFT);
