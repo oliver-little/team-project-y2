@@ -1,4 +1,4 @@
-package teamproject.wipeout;
+package teamproject.wipeout.game.UI;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;

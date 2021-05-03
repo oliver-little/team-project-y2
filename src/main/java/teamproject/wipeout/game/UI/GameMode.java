@@ -1,4 +1,4 @@
-package teamproject.wipeout;
+package teamproject.wipeout.game.UI;
 
 /**
  * An enum for each gamemode implemented in the game

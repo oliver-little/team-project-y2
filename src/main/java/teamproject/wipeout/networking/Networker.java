@@ -1,7 +1,7 @@
 package teamproject.wipeout.networking;
 
 import javafx.util.Pair;
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.entity.WorldEntity;

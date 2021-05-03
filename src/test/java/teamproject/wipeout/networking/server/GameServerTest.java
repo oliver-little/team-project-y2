@@ -4,18 +4,16 @@ import javafx.collections.MapChangeListener;
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.client.ServerDiscovery;
-import teamproject.wipeout.networking.data.GameUpdate;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static teamproject.wipeout.networking.server.GameServer.MAX_CONNECTIONS;
 

@@ -3,7 +3,7 @@ package teamproject.wipeout.networking.client;
 import javafx.collections.MapChangeListener;
 import javafx.util.Pair;
 import org.junit.jupiter.api.*;
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.player.Player;

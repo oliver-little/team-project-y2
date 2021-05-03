@@ -1,4 +1,4 @@
-package teamproject.wipeout;
+package teamproject.wipeout.game.UI;
 
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;

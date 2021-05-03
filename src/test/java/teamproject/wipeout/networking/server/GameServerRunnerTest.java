@@ -1,7 +1,7 @@
 package teamproject.wipeout.networking.server;
 
 import org.junit.jupiter.api.*;
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
