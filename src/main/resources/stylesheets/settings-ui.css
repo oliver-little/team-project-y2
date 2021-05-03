@@ -1,5 +1,5 @@
 .pane {
-    -fx-background-color: rgba(255, 205, 112, 0.8);
+    -fx-background-color: rgba(255, 205, 112, 0.9);
     -fx-background-radius: 5px;
     -fx-border-color: rgba(0, 0, 0, 0.9);
     -fx-border-radius: 5px;
@@ -16,9 +16,12 @@
 }
 
 .label {
-    -fx-font-family: 'Kalam';
     -fx-font-size: 9pt;
     -fx-padding: 5 7 0 0;
+}
+
+.settings-label {
+    -fx-font-family: 'Kalam';
 }
 
 .button {

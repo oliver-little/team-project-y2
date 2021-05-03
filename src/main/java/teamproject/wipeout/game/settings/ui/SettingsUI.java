@@ -185,7 +185,9 @@ public class SettingsUI extends VBox {
         closeButtonContainer.setAlignment(Pos.CENTER);
 
         Label title1 = new Label("Music Volume");
+        title1.getStyleClass().add("settings-label");
         Label title2 = new Label("Effects Volume");
+        title2.getStyleClass().add("settings-label");
         settingsBox.getChildren().addAll(title1, backingBox, title2, effectsBox, closeButtonContainer);
         settingsBox.setPadding(new Insets(0, 5, 15, 5));
 
