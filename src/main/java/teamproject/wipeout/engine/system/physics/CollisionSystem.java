@@ -27,6 +27,12 @@ public class CollisionSystem implements GameSystem {
 
 	@Override
 	public void cleanup() {
+        List<GameEntity> entities = this._entityCollector.getEntities();
+
+        for (int i = 0; i < entities.size(); i++) {
+            entities.get(i).getComponent(CollisionResolutionComponent.class).cleanup();
+        }
+
 		this._entityCollector.cleanup();
 	}
 
@@ -34,9 +40,9 @@ public class CollisionSystem implements GameSystem {
     public void accept(Double timeStep) {
         List<GameEntity> entities = this._entityCollector.getEntities();
 
-        for(int i=0; i < entities.size(); i++) {
-            for(int j=i+1; j < entities.size(); j++) {
-            	if(i!=j) {
+        for(int i = 0; i < entities.size(); i++) {
+            for(int j = i+1; j < entities.size(); j++) {
+            	if(i != j) {
                 	ArrayList<Pair<Shape, Shape>> p = null;
 					if((p = HitboxComponent.collides(entities.get(i), entities.get(j))) != null) {
 						CollisionResolutionComponent.resolveCollision(entities.get(i),entities.get(j), p);

@@ -52,6 +52,12 @@ public class CollisionResolutionComponent implements GameComponent {
 		this.avoidanceExecutorService = Executors.newSingleThreadScheduledExecutor();
 	}
 
+	public void cleanup() {
+		if (this.avoidanceExecutorService != null) {
+			this.avoidanceExecutorService.shutdown();
+		}
+	}
+
 	public String getType() {
 		return "collisionResolution";
 	}
