@@ -16,15 +16,13 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -32,22 +30,21 @@ import javafx.util.Duration;
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.system.audio.AudioSystem;
 import teamproject.wipeout.engine.system.audio.MovementAudioSystem;
-import teamproject.wipeout.util.ImageUtil;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
-import static java.awt.Font.BOLD;
 
 public class SettingsUI extends VBox {
     
     private MovementAudioSystem mas;
     private AudioSystem as;
     private GameAudio backingTrack;
-    private ScrollPane scrollPaneToShow = new ScrollPane();
     private boolean openedSettings = false;
     private boolean openedInstructions = false;
     private Button openCloseButtonSettings = new Button();
     private Button openCloseButtonInstructions = new Button();
+
+    private Pane menuRegion;
     private VBox settingsBox;
     private VBox instructionsBox;
 
@@ -70,9 +67,9 @@ public class SettingsUI extends VBox {
         } catch (FileNotFoundException e){
             e.printStackTrace();
         }
-
-        this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         
+        menuRegion = new Pane();
+        menuRegion.getStyleClass().add("pane");
         settingsBox = new VBox();
 
         HBox buttonBox = new HBox();
@@ -90,12 +87,7 @@ public class SettingsUI extends VBox {
         ImageView instructions = null;
         try{
             InputStream s = new FileInputStream(ResourceLoader.get(ResourceType.UI, "instructions.png"));
-//            Image img = ImageUtil.scaleImage(new Image(s), 30 / 100.0f);
             Image tmpImg = new Image(s);
-//            Image img = ImageUtil.scaleImage(tmpImg, 30 / tmpImg.getWidth());
-
-//            Image img = ImageUtil.scaleImage(tmpImg, )
-//            ImageUtil.scaleImage(img, 200 / 30.0f);
             instructions = new ImageView(tmpImg);
             instructions.setSmooth(false);
 
@@ -108,30 +100,21 @@ public class SettingsUI extends VBox {
             openedSettings = !openedSettings;
             if(openedSettings) {
                 openedInstructions = false;
-                scrollPaneToShow.setContent(this.settingsBox);
-                scrollPaneToShow.setPrefSize(this.settingsBox.getWidth() + 10, this.settingsBox.getHeight() + 10);
             }
-
-            this.setMenuVisible(openedSettings, scrollPaneToShow);
+            this.setMenuVisible(openedSettings, settingsBox);
         });
-//        openCloseButtonSettings.setPrefSize(50, 50);
 
         openCloseButtonInstructions.setGraphic(instructions);
         openCloseButtonInstructions.setOnAction(e -> {
             openedInstructions = !openedInstructions;
             if(openedInstructions) {
                 openedSettings = false;
-                scrollPaneToShow.setContent(this.instructionsBox);
-                scrollPaneToShow.setPrefSize(this.settingsBox.getWidth() + 10, this.settingsBox.getHeight() + 10);
             }
-            this.setMenuVisible(openedInstructions, scrollPaneToShow);
+            this.setMenuVisible(openedInstructions, instructionsBox);
         });
-//        openCloseButtonInstructions.setPrefSize(50, 50);
 
         buttonBox.getChildren().addAll(openCloseButtonSettings, openCloseButtonInstructions);
         buttonBox.setAlignment(Pos.TOP_RIGHT);
-
-        this.getChildren().add(buttonBox);
 
         settingsBox.setSpacing(7);
 
@@ -140,20 +123,18 @@ public class SettingsUI extends VBox {
         backingSlider.setValue(5); //default set to volume 5
         backingSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(
-            ObservableValue<? extends Number> observableValue, 
-            Number oldValue, 
-            Number newValue) { 
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) { 
                 backingTrack.setVolume((double) newValue/100.0f);
             }
         });
         CheckBox muteMusic = new CheckBox("Mute"); //checkbox for muting music
         muteMusic.selectedProperty().addListener(
             (ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) -> {
-                if(new_val){
+                if(new_val) {
                     backingTrack.mute();
                     backingSlider.setDisable(true);
-                }else{
+                }
+                else {
                     backingTrack.unmute();
                     backingSlider.setDisable(false);
                 }
@@ -171,10 +152,7 @@ public class SettingsUI extends VBox {
         effectsSlider.setValue(as.getSpotEffectsVolume() * 100);
         effectsSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(
-            ObservableValue<? extends Number> observableValue, 
-            Number oldValue, 
-            Number newValue) { 
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) { 
                 mas.setVolume((double) newValue/100.0f);
                 as.setSpotEffectsVolume((double) newValue/100.0f);
             }
@@ -227,29 +205,32 @@ public class SettingsUI extends VBox {
         Label toDestroyItem = new Label("To destroy use: " + keyBindings.get("Destroy"));
 
         instructionsBox.setSpacing(0);
+        instructionsBox.setPadding(new Insets(0, 5, 5, 5));
         instructionsBox.getChildren().addAll(toMove, toPlantItem, toHarvestItem, toCollectItem, toDropItem, toDestroyItem);
 
-        scrollPaneToShow.setHbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPaneToShow.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPaneToShow.setContent(settingsBox);
-        this.getChildren().add(scrollPaneToShow);
-        setMenuVisible(false, scrollPaneToShow); //hides menu by default on game start-up
+        this.getChildren().addAll(buttonBox, menuRegion);
+        // Add both boxes initially so they are rendered correctly and width and height properties work properly
+        menuRegion.getChildren().addAll(settingsBox, instructionsBox);
+        menuRegion.setClip(new Rectangle(0, 0, 0, 0));
     }
 
     /**
      * Shows/hides the menu using animation
      * @param visible
      */
-    private void setMenuVisible(boolean visible, ScrollPane currentScrollPane){
+    private void setMenuVisible(boolean visible, VBox menu){
+        menuRegion.getChildren().clear();
+        menuRegion.getChildren().add(menu);
+
         KeyValue goalWidth = null;
         if (visible) {
-            Rectangle clipRect = new Rectangle(0, 0, currentScrollPane.getWidth(), 0);
-            currentScrollPane.setClip(clipRect);
-            goalWidth = new KeyValue(clipRect.heightProperty(), currentScrollPane.getHeight(), Interpolator.EASE_OUT);
+            Rectangle clipRect = new Rectangle(0, 0, menu.getWidth() + 5, 0);
+            menuRegion.setClip(clipRect);
+            goalWidth = new KeyValue(clipRect.heightProperty(), menu.getHeight() + 5, Interpolator.EASE_OUT);
         }
         else {
-            Rectangle clipRect = new Rectangle(0, 0, currentScrollPane.getWidth(), currentScrollPane.getHeight());
-            currentScrollPane.setClip(clipRect);
+            Rectangle clipRect = new Rectangle(0, 0, menu.getWidth(), menu.getHeight());
+            menuRegion.setClip(clipRect);
             goalWidth = new KeyValue(clipRect.heightProperty(), 0, Interpolator.EASE_IN);
         }
 
