@@ -10,6 +10,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
+/**
+ * Used for displaying error messages to the screen, by creating a new instance of "ErrorUI", with the corresponding ENUM error code will display a fadable message on screen.
+ */
 public class ErrorUI {
     
     public static final float FADE_IN_DURATION = 0.2f;
@@ -33,6 +36,11 @@ public class ErrorUI {
     	
     }
 
+    /**
+     * List of displayable error messages.
+     * @param errorPane Pane that you want to display the error to.
+     * @param errorType ENUM error code.
+     */
     public ErrorUI(StackPane errorPane, ERROR_TYPE errorType) {
         Label errorMessageLabel;
 
@@ -68,6 +76,12 @@ public class ErrorUI {
         createErrorBox(errorMessageLabel, errorPane, null);
     }
     
+    /**
+     * JavaFX UI code to display the message on screen, displays for a few seconds then fades out.
+     * @param errorMessageLabel Text to display.
+     * @param errorPane Pane to display error message to.
+     * @param onFadeOut Runs on fade out.
+     */
     private void createErrorBox(Label errorMessageLabel, StackPane errorPane, Runnable onFadeOut) {
         HBox errorBackground = new HBox();
 

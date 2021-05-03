@@ -9,7 +9,11 @@ import teamproject.wipeout.util.resources.ResourceLoader;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+/**
+ * Tests that the market prices change as expected when items are bought/sold from the market.
+ * In addition, this further tests the market price updater - checking that it automatically increases/decreases over time by "walking" the prices over our mathematical model.
+ * The test waits for a set amount of time and checks the expected price after the wait against the actual result.
+ */
 public class MarketPricingTest {
     private static ItemStore itemStore;
     private Market market;
