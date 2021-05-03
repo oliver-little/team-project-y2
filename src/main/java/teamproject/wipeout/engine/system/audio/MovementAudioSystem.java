@@ -10,6 +10,9 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
+/**
+ * Class which represents the GameSystem to add a sound effect to an entity's movement (if it has a MovementComponent)
+ */
 public class MovementAudioSystem implements GameSystem {
 
 	protected SignatureEntityCollector entityCollector;
@@ -70,6 +73,9 @@ public class MovementAudioSystem implements GameSystem {
 		return volume;
 	}
 	
+	/**
+	 * method to flip between muted and unmuted
+	 */
 	public void muteUnmute() {
 		if(muted) {
 			unmute();
@@ -78,6 +84,9 @@ public class MovementAudioSystem implements GameSystem {
 		}
 	}
 
+	/**
+	 * sets state to muted and stops any sound effects currently playing
+	 */
 	public void mute(){
 		muted = true;
 		this.previousVolume = this.volume;

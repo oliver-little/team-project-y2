@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Class which represents the Player entity. 
+ */
 public class Player extends GameEntity implements StateUpdatable<PlayerState> {
 
     public static final String[] PLAYER_SPRITESHEETS = {
@@ -247,6 +250,10 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return this.playerState;
     }
 
+    /**
+     * Method which updates the player's state for the networker
+     * @param newState - state to replace the old one
+     */
     public void updateFromState(PlayerState newState) {
         this.physics.setSpeedMultiplier(newState.getSpeedMultiplier());
         this.physics.acceleration = newState.getAcceleration();
@@ -451,13 +458,15 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * Rearranges items with a specific itemID to ensure they use the minimum number of slots possible
      * @param itemID - of item to be rearranged
      * @param quantity - quantity of item to be rearranged
+     * @param slotWithSpace - slot which contains space for more items.
+     * @param stackLimit - the stack limit of the particular item
+     * @return int[] with slot used - 0, and index of freed slot - 1 (if successfully rearranged, empty int[] if unable to rearrange)
      */
     protected int[] rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
         if (quantity <= 1) {
             return new int[0];
 
         } else if (slotWithSpace < 0) {
-            System.out.println("logic issue - wasted slots but no slot with space");
             return new int[0];
         }
 
@@ -533,19 +542,6 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         return this.inventory;
     }
 
-    //for checking
-    private void printInventory() {
-        int i = 0;
-        for(InventoryItem pair : inventory) {
-            if (pair == null) {
-                System.out.println(i + ": empty");
-            }else {
-                System.out.println(i + ": ItemID: "+pair.itemID+" Quantity: "+pair.quantity);
-            }
-            i++;
-        }
-    }
-
     /**
      * Checks if the inventory contains item(s) with a specific id
      * @param itemID - of item to be checked
@@ -580,6 +576,9 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         }
     }
 
+    /**
+     * method to update player's state for multiplayer games
+     */
     protected void sendPlayerStateUpdate() {
         if (this.clientSupplier == null) {
             return;

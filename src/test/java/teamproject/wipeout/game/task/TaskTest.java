@@ -26,6 +26,9 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+/**
+ * Test class to test player's tasks
+ */
 public class TaskTest {
 
     private static GameScene scene = new GameScene();

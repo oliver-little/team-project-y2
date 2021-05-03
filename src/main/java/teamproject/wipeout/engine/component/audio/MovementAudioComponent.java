@@ -21,6 +21,9 @@ import teamproject.wipeout.engine.component.physics.MovementComponent;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+/**
+ * GameComponent which represents audio effects related to an entity's movement
+ */
 public class MovementAudioComponent implements GameComponent{
 	
 	public MovementComponent moveComp;
