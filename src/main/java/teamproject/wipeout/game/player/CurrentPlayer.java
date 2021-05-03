@@ -177,7 +177,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     protected int addToInventory(int itemID, Integer quantity) {
         int addedToInventoryIndex = super.addToInventory(itemID, quantity);
-        if (addedToInventoryIndex >= 0) {
+        if (addedToInventoryIndex >= 0 && !(debug)) {
             this.inventoryUI.updateUI(this.inventory, addedToInventoryIndex);
         }
     	return addedToInventoryIndex;
@@ -190,7 +190,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     protected int[] rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
     	int[] rearrangedItems = super.rearrangeItems(itemID, quantity, slotWithSpace, stackLimit);
-    	if (rearrangedItems.length == 2) {
+    	if (rearrangedItems.length == 2 && !(debug)) {
             this.inventoryUI.updateUI(this.inventory, rearrangedItems[0]);
             this.inventoryUI.updateUI(this.inventory, rearrangedItems[1]);
         }
@@ -205,7 +205,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public int[] removeItem(int itemID, int quantity) {
         int[] removedItem = super.removeItem(itemID, quantity);
-        if (removedItem.length == 2) {
+        if (removedItem.length == 2 && !(debug)) {
             this.inventoryUI.updateUI(this.inventory, removedItem[1]);
         } else {
             if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
@@ -223,13 +223,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         if((pair != null) && (pair.quantity - quantity) >= 0) {
             if ((pair.quantity - quantity) == 0) {
                 inventory.set(selectedSlot, null); //free inventory slot
-                inventoryUI.updateUI(inventory, selectedSlot);
+                if (!debug) inventoryUI.updateUI(inventory, selectedSlot);
                 return true;
 
             } else {
                 pair.quantity -= quantity;
                 inventory.set(selectedSlot, pair);
-                inventoryUI.updateUI(inventory, selectedSlot);
+                if (!debug) inventoryUI.updateUI(inventory, selectedSlot);
                 return true;
             }
         }
@@ -384,6 +384,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      */
     public void clearInventory() {
         super.clearInventory();
+        if (!debug) return;
     	for (int i = 0; i < Player.MAX_SIZE; i++) {
             this.inventoryUI.updateUI(inventory, i);
         }

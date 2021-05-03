@@ -82,16 +82,22 @@ public class TaskTest {
         return tasks;
     }
 
-    private static CurrentPlayer setUpCurrentPlayer() throws IOException  {
-        SpriteManager spriteManager = new SpriteManager();
-        //spriteManager.loadSpriteSheet("player/player-red-descriptor.json", "player/player-red.png");
-        spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
+    private static CurrentPlayer setUpCurrentPlayer() throws IOException, ReflectiveOperationException  {
+        ResourceLoader.setTargetClass(ResourceLoader.class);
+		itemStore = new ItemStore("items.json");
+		SpriteManager spriteManager = new SpriteManager();
+		spriteManager.loadSpriteSheet("crops/crops-descriptor.json", "crops/crops.png");
         spriteManager.loadSpriteSheet("crops/fruit-tree-descriptor.json", "crops/FruitTrees.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
         spriteManager.loadSpriteSheet("inventory/inventory-tools-descriptor.json", "inventory/Tools.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-and-vegetable-descriptor.json", "inventory/FruitsAndVeg.png");
         spriteManager.loadSpriteSheet("inventory/inventory-vegetables-descriptor.json", "inventory/Vegetables.png");
         spriteManager.loadSpriteSheet("inventory/inventory-fruit-descriptor.json", "inventory/Fruits.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-animals-and-food-descriptor.json", "inventory/AnimalsAndFood.png");
+        spriteManager.loadSpriteSheet("inventory/inventory-potions-descriptor.json", "inventory/Potions.png");
+        spriteManager.loadSpriteSheet("ai/mouse-descriptor.json", "ai/mouse.png");
+        spriteManager.loadSpriteSheet("ai/rat-descriptor.json", "ai/rat.png");
+        spriteManager.loadSpriteSheet("gameworld/arrow-descriptor.json", "gameworld/Arrow.png");
         PlayerSpriteSheetManager.loadPlayerSpriteSheets(spriteManager);
         int playerID = new Random().nextInt(1024);
         InventoryUI invUI = new InventoryUI(spriteManager, itemStore);
