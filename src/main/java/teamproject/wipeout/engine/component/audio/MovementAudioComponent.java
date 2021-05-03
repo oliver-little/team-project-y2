@@ -1,25 +1,8 @@
 package teamproject.wipeout.engine.component.audio;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
-import com.sun.media.jfxmedia.AudioClip;
-
 import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.engine.component.physics.MovementComponent;
-import teamproject.wipeout.util.resources.ResourceLoader;
-import teamproject.wipeout.util.resources.ResourceType;
 
 /**
  * GameComponent which represents audio effects related to an entity's movement
@@ -31,28 +14,36 @@ public class MovementAudioComponent implements GameComponent{
 	GameAudio audio;
 	
 	/**
-	 * 
+	 * constructor
 	 * @param m - movement component to get velocity from
 	 * @param fileName - name of audio file to play when moving
 	 */
 	public MovementAudioComponent(MovementComponent m, String fileName) {
 		this.moveComp = m;
-		
 		audio = new GameAudio(fileName, true);
-		//audio.setVolume(0.1f);
 	}
 	
+	/**
+	 * called to play sound
+	 */
 	public void playSound() {
 		audio.play();
 		playing = true;
 		
 	}
 	
+	/**
+	 * called to stop sound
+	 */
 	public void stop() {
 		audio.stop();
 		playing = false;
 	}
 	
+	/**
+	 * called to set the volume
+	 * @param volume - volume to set effect to
+	 */
 	public void setVolume(double volume) {
     	audio.setVolume(volume);
     }
@@ -65,6 +56,10 @@ public class MovementAudioComponent implements GameComponent{
     	return audio.getVolume();
     }
 	
+	/**
+	 * gets the component type
+	 * @return string of component type
+	 */
 	public String getType()
 	{
 		return "audio";

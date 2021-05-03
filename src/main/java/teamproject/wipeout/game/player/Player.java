@@ -79,9 +79,12 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
     private Supplier<GameClient> clientSupplier;
 
     /**
-     * Creates a new instance of GameEntity
-     *
-     * @param scene The GameScene this entity is part of
+     * default constructor for the PlayerEntity
+     * @param scene - GameScene player is to be added to
+     * @param playerInfo - represents player's id and name
+     * @param spriteSheet - sprites for the player
+     * @param spriteManager - used to get player's sprited
+     * @param itemStore - store of items, their ids and other details
      */
     public Player(GameScene scene, Pair<Integer, String> playerInfo, String spriteSheet, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene);
@@ -181,33 +184,60 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
         nameTag.setParent(this);
     }
 
+    /**
+     * gets position of the player in the world
+     * @return Point2D of the player
+     */
     public Point2D getWorldPosition() {
         return this.position.getWorldPosition();
     }
 
+    /**
+     * gets amount of money the player currently has
+     * @return - player's money value
+     */
     public double getMoney() {
         return this.money.getValue();
     }
 
+    /**
+     * sets the player's money, and updates the player's state for neworking
+     * @param value - new value of player's money
+     */
     public void setMoney(double value) {
         this.money.set(value);
         this.playerState.setMoney(value);
         this.sendPlayerStateUpdate();
     }
 
+    /**
+     * gets money property
+     * @return money property of player
+     */
     public DoubleProperty moneyProperty() {
         return this.money;
     }
     
-
+    /**
+     * method to set supplier from client for networking
+     * @param supplier - client supplier
+     */
     public void setClientSupplier(Supplier<GameClient> supplier) {
         this.clientSupplier = supplier;
     }
 
+    /**
+     * gets the potion that has been thrown
+     * @return potion that has been thrown
+     */
     public Consumer<PotionEntity> getThrownPotion() {
         return this.thrownPotion;
     }
 
+    /**
+     * sets a potion which has been thrown
+     * @param thrownPotion
+     */
     public void setThrownPotion(Consumer<PotionEntity> thrownPotion) {
         this.thrownPotion = thrownPotion;
     }
