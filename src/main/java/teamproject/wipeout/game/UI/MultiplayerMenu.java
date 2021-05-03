@@ -113,20 +113,19 @@ public class MultiplayerMenu {
         TextField serverNameTF = new TextField();
         serverNameBox.getChildren().addAll(serverNameLabel,serverNameTF);
 
-        StackPane errorBox = new StackPane();
         GameModeUI gameModeBox = new GameModeUI();
 
         Button hostButton = new Button("Host Server");
 
         hostButton.setOnAction(((event) -> {
             if(serverNameTF.getText()==null || serverNameTF.getText().equals("")) {
-                new ErrorUI(errorBox, "Error: No server name entered", null);
+                new ErrorUI(stackPane, "Error: No server name entered", null);
 
             } else if(serverNameTF.getText().getBytes(StandardCharsets.UTF_8).length > GameServer.SERVER_NAME_BYTE_LENGTH) {
-                new ErrorUI(errorBox, "Error: Server name is too long", null);
+                new ErrorUI(stackPane, "Error: Server name is too long", null);
 
             } else if(nameTF.getText()==null || nameTF.getText().equals("")) {
-                new ErrorUI(errorBox, "Error: No name entered", null);
+                new ErrorUI(stackPane, "Error: No name entered", null);
 
             } else {
                 GameMode gameMode = gameModeBox.getGameMode();
@@ -138,7 +137,7 @@ public class MultiplayerMenu {
         hostPane.getChildren().addAll(nameBox, serverNameBox, gameModeBox, hostButton);
         stackPane.getChildren().add(hostPane);
 
-        menuBox.getChildren().addAll(stackPane, errorBox);
+        menuBox.getChildren().addAll(stackPane);
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 new Pair<String, Runnable>("Back", () -> createMultiplayerMenu())
         );
@@ -190,7 +189,6 @@ public class MultiplayerMenu {
 
         //serverBox.getChildren().add(serverList);
         joinPane.getChildren().addAll(playerInfoBox, serverList);
-        StackPane errorBox = new StackPane();
 
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
         servers.addListener((MapChangeListener<? super String, ? super InetSocketAddress>) (change) -> {
@@ -208,7 +206,7 @@ public class MultiplayerMenu {
 
                     if (selectedItem != null) {
                         if(nameTF.getText()==null || nameTF.getText().equals("")) {
-                            new ErrorUI(errorBox, "Error: No name entered", null);
+                            new ErrorUI(stackPane, "Error: No name entered", null);
                         }
                         else {
                             joinServer(selectedItem.getServerName(), nameTF.getText(), selectedItem.getAddress());
@@ -216,7 +214,7 @@ public class MultiplayerMenu {
 
                     }
                     else {
-                        new ErrorUI(errorBox, "Error: No Server Selected", null);
+                        new ErrorUI(stackPane, "Error: No Server Selected", null);
                     }
                 })
         );
@@ -233,7 +231,7 @@ public class MultiplayerMenu {
 
         joinPane.getChildren().add(joinBox);
         stackPane.getChildren().add(joinPane);
-        menuBox.getChildren().addAll(stackPane, errorBox, backBox);
+        menuBox.getChildren().addAll(stackPane, backBox);
 
         try {
             this.networker.getServerDiscovery().startLookingForServers();
@@ -343,5 +341,4 @@ public class MultiplayerMenu {
             this.parentMenu.disconnectError();
         }
     }
-
 }

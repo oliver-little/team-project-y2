@@ -12,7 +12,8 @@ import javafx.util.Duration;
 
 public class ErrorUI {
     
-    public static final int FADE_DURATION = 2;
+    public static final float FADE_IN_DURATION = 0.2f;
+    public static final int FADE_OUT_DURATION = 2;
     public static final int MESSAGE_DURATION = 3;
 
     public enum ERROR_TYPE {
@@ -81,13 +82,16 @@ public class ErrorUI {
 
         errorPane.getChildren().addAll(errorBackground);
 
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(FADE_DURATION), errorBackground);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(FADE_IN_DURATION), errorBackground);
         PauseTransition pause = new PauseTransition(Duration.seconds(MESSAGE_DURATION));
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(FADE_OUT_DURATION), errorBackground);
         
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0.0);
 
-        SequentialTransition sequentialTransition = new SequentialTransition(pause, fadeOut);
+        SequentialTransition sequentialTransition = new SequentialTransition(fadeIn, pause, fadeOut);
         
         sequentialTransition.setOnFinished((finish) -> {
             errorPane.getChildren().remove(errorBackground);
@@ -97,5 +101,4 @@ public class ErrorUI {
         });               
         sequentialTransition.play();
     }
-
 }
