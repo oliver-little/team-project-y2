@@ -18,6 +18,9 @@ import teamproject.wipeout.game.item.components.SabotageComponent;
  */
 public class SabotageSystem implements EventSystem {
 
+    public static final double SPEED_MULTIPLIER_UPPER_LIMIT = 9;
+    public static final double SPEED_MULTIPLIER_LOWER_LIMIT = 0.1;
+
     private FunctionalSignatureCollector entityCollector;
 
     /**
@@ -40,17 +43,19 @@ public class SabotageSystem implements EventSystem {
 
         if (sabotageComponent.type == SabotageComponent.SabotageType.SPEED && entity.hasComponent(MovementComponent.class)) {
             //Applies a speed multiplier to a player to which the potion is thrown at to slow them down by a constant multiplier for a set period of time (defined in items.JSON)
+            
+            if ((entity.getComponent(MovementComponent.class).getSpeedMultiplier() * sabotageComponent.multiplier <= SPEED_MULTIPLIER_UPPER_LIMIT) && (entity.getComponent(MovementComponent.class).getSpeedMultiplier() * sabotageComponent.multiplier >= SPEED_MULTIPLIER_LOWER_LIMIT)) {
+                Timer timer = new Timer();
+                TimerTask speedTask = new TimerTask() {
+                    public void run() {
+                        cancel();
+                        entity.getComponent(MovementComponent.class).divideSpeedMultiplierBy(sabotageComponent.multiplier);
+                    }
+                };
+                entity.getComponent(MovementComponent.class).multiplySpeedMultiplierBy(sabotageComponent.multiplier);
 
-            Timer timer = new Timer();
-            TimerTask speedTask = new TimerTask() {
-                public void run() {
-                    cancel();
-                    entity.getComponent(MovementComponent.class).divideSpeedMultiplierBy(sabotageComponent.multiplier);
-                }
-            };
-            entity.getComponent(MovementComponent.class).multiplySpeedMultiplierBy(sabotageComponent.multiplier);
-
-            timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
+                timer.schedule(speedTask, (long) sabotageComponent.duration * 1000);
+            }
             entity.removeComponent(SabotageComponent.class);
         }
         else if (sabotageComponent.type == SabotageComponent.SabotageType.GROWTHRATE && entity instanceof FarmEntity) {
