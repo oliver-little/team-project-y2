@@ -8,6 +8,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -74,6 +76,10 @@ public class SettingsMenu {
         instructionsTilePane.getStyleClass().add("tile-pane");
 
         menuBox.getChildren().add(instructionsTilePane);
+        
+        Text keyBindingTitle = UIUtil.createTitle("Key Bindings:");
+        keyBindingTitle.setFont(Font.font("Kalam", 30));
+        menuBox.getChildren().add(keyBindingTitle);
 
         TilePane tilePane = new TilePane();
         tilePane.setAlignment(Pos.TOP_CENTER);
