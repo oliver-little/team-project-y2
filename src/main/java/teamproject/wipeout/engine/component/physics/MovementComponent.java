@@ -87,6 +87,10 @@ public class MovementComponent implements GameComponent {
         this.speedMultiplier = speedMultiplier;
     }
 
+    public double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
     /** Update the facing diection every timestep, based on velocity */
     public void updateFacingDirection() {
         double x = this.acceleration.getX();
