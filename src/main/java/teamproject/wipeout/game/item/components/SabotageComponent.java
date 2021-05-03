@@ -34,6 +34,18 @@ public class SabotageComponent implements GameComponent, ItemComponent {
     }
 
     /**
+     * Creates a {@code SabotageComponent} with provided parameters
+     * @param type The type of sabotage
+     * @param duration The duration of the sabotage (s)
+     * @param multiplier The multiplier of the sabotage
+     */
+    public SabotageComponent(SabotageType type, double duration, double multiplier) {
+        this.type = type;
+        this.duration = duration;
+        this.multiplier = multiplier;
+    }
+
+    /**
      * ItemComponent interface implementation
      *
      * @return Component's type

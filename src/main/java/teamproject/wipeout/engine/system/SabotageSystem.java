@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.system;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -111,7 +110,7 @@ public class SabotageSystem implements EventSystem {
         
         }
         else {
-            throw new NoSuchElementException("Sabotage system failed: An item did not have a valid sabotage type.");
+            return;
         }
     };
 }

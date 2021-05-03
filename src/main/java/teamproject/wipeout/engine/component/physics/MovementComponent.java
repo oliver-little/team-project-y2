@@ -75,12 +75,16 @@ public class MovementComponent implements GameComponent {
 
     public void multiplySpeedMultiplierBy(double multiplier) {
         this.speedMultiplier *= multiplier;
-        this.speedMultiplierChanged.accept(speedMultiplier);
+        if (this.speedMultiplierChanged != null) {
+            this.speedMultiplierChanged.accept(speedMultiplier);
+        }
     }
 
     public void divideSpeedMultiplierBy(double multiplier) {
         this.speedMultiplier /= multiplier;
-        this.speedMultiplierChanged.accept(speedMultiplier);
+        if (this.speedMultiplierChanged != null) {
+            this.speedMultiplierChanged.accept(speedMultiplier);
+        }
     }
 
     public void setSpeedMultiplier(double speedMultiplier) {
