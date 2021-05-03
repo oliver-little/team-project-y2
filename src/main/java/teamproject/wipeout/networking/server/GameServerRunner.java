@@ -3,7 +3,7 @@ package teamproject.wipeout.networking.server;
 import com.google.gson.Gson;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Point2D;
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 
 import java.io.*;
 import java.util.List;

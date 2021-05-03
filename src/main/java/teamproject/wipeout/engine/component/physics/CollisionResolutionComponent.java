@@ -67,12 +67,24 @@ public class CollisionResolutionComponent implements GameComponent {
 		this.timeMultiplier = 1;
 	}
 
+	/**
+	 * Resolves each collision of shapes in the hitbox between two game entities
+	 * @param g1 first game entity
+	 * @param g2 second game entity
+	 * @param p List of pairs of shapes belonging to the two entities that collided.
+	 */
 	public static void resolveCollision(GameEntity g1, GameEntity g2, ArrayList<Pair<Shape, Shape>> p) {
 		for (Pair<Shape, Shape> shapePair : p) {
 			resolveCollision(g1, g2, shapePair);
 		}
 	}
     
+	/**
+	 * Resolves one collision of a pair of colliding shapes between two game entities
+	 * @param g1
+	 * @param g2
+	 * @param p Pairs of shapes belonging to the two entities that collided.
+	 */
     private static void resolveCollision(GameEntity g1, GameEntity g2, Pair<Shape, Shape> p) {
     	Point2D resolutionVector = GeometryUtil.getResolutionVector(p.getKey(), p.getValue());
     	if (resolutionVector == null) {

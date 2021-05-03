@@ -1,39 +1,28 @@
-package teamproject.wipeout;
+package teamproject.wipeout.game.UI;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.ScaleTransition;
 import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import teamproject.wipeout.Controller;
+import teamproject.wipeout.Gameplay;
 import teamproject.wipeout.game.market.ui.ErrorUI;
-import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.networking.Networker;
-import teamproject.wipeout.networking.server.GameServer;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * StartMenu is a class which is used for creating and setting up the start menu of the game.

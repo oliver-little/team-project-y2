@@ -1,6 +1,6 @@
 package teamproject.wipeout.networking.data;
 
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

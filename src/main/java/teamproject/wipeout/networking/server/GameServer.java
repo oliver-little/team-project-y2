@@ -1,11 +1,10 @@
 package teamproject.wipeout.networking.server;
 
-import teamproject.wipeout.GameMode;
+import teamproject.wipeout.game.UI.GameMode;
 import teamproject.wipeout.game.farm.FarmData;
 import teamproject.wipeout.game.item.ItemStore;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.MarketPriceUpdater;
-import teamproject.wipeout.networking.client.GameClient;
 import teamproject.wipeout.networking.data.GameUpdate;
 import teamproject.wipeout.networking.data.GameUpdateType;
 import teamproject.wipeout.networking.data.MarketOperationRequest;

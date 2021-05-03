@@ -1,4 +1,4 @@
-package teamproject.wipeout;
+package teamproject.wipeout.game.UI;
 
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
@@ -10,6 +10,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.util.Pair;
+import teamproject.wipeout.ServerListItem;
 import teamproject.wipeout.game.market.ui.ErrorUI;
 import teamproject.wipeout.networking.Networker;
 import teamproject.wipeout.networking.client.GameClient;
@@ -23,6 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Class that constructs the multiplayer UI screens
+ *
+ */
 public class MultiplayerMenu {
 
     private final Networker networker;

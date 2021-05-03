@@ -12,6 +12,9 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
+/**
+ * System that updates a camera's position so that it tracks its target entity
+*/
 public class CameraFollowSystem implements GameSystem
 {
 
