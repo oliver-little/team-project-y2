@@ -9,6 +9,11 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 
+/**
+ * Creates a 2D Array (of a given size) of TreeEntities with some randomness of image and position
+ * @author Admin
+ *
+ */
 public class ForestEntity extends GameEntity
 {
 

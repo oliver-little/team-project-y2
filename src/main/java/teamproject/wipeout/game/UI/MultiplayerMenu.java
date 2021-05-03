@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Class that constructs the multiplayer UI screens
+ *
+ */
 public class MultiplayerMenu {
 
     private final Networker networker;

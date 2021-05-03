@@ -11,6 +11,9 @@ import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 import teamproject.wipeout.engine.system.GameSystem;
 
+/**
+ * System that updates an entities velocity and position based on their velocity and acceleration
+ */
 public class MovementSystem implements GameSystem {
     
     protected SignatureEntityCollector _entityCollector;

@@ -24,6 +24,7 @@ public class GameModeUI extends VBox {
     private final ComboBox<String> gameModeSelector;
 
     private static Map<String, Object> getGameModeData(GameMode gamemode) {
+    	// This could be improved by pulling the data from a JSON instead of hardcoding
         HashMap<String, Object> data = new HashMap<String, Object>();
         if (gamemode == GameMode.TIME_MODE) {
             data.put("desc", "Minutes");

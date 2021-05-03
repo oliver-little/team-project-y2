@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * System that checks and resolves collisions between entities with the collision component
+ * System that checks and resolves collisions between entities with the collision component and collision resolution component
  */
 public class CollisionSystem implements GameSystem {
     

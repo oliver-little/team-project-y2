@@ -21,6 +21,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * Class used to create generic UI elements in the same style.
+ */
 public class UIUtil {
 
     /**
@@ -45,6 +48,12 @@ public class UIUtil {
         return title;
     }
     
+    /**
+     * A method that creates a VBox of buttons from pairs of strings, that are used as button labels,
+     * and runnables, that are used as code to execute upon clicking the button.
+     * @param menuData
+     * @return A VBox of the buttons that were created.
+     */
     public static VBox createMenu(List<Pair<String, Runnable>> menuData) {
         VBox buttonBox = new VBox(10);
         buttonBox.setAlignment(Pos.CENTER);
