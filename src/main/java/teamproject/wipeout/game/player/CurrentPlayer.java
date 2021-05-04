@@ -14,6 +14,7 @@ import teamproject.wipeout.game.farm.entity.FarmEntity;
 import teamproject.wipeout.game.inventory.InventoryItem;
 import teamproject.wipeout.game.inventory.InventoryUI;
 import teamproject.wipeout.game.item.ItemStore;
+import teamproject.wipeout.game.item.components.InventoryComponent;
 import teamproject.wipeout.game.market.Market;
 import teamproject.wipeout.game.market.ui.ErrorUI.ERROR_TYPE;
 import teamproject.wipeout.game.task.Task;
@@ -234,8 +235,43 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
      * @param quantity of items to be removed
      * @return int[] with itemID - 0, and quantity removed - 1 (if successfully removed, empty int[] if unable to remove)
      */
+    @Override
     public int[] removeItem(int itemID, int quantity) {
-        int[] removedItem = super.removeItem(itemID, quantity);
+        int noOfThisItem = countItems(itemID);
+        int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+        if(quantity > noOfThisItem) {
+            return new int[0];
+        }
+        int endQuantity = noOfThisItem - quantity;
+        int slotWithSpace = -1;
+        InventoryItem pair;
+
+        int i = MAX_SIZE - 1;
+        for (; i >= 0; i--) {
+            pair = inventory.get(i);
+            if((pair != null) && (pair.itemID == itemID)) {
+                if(quantity >= pair.quantity) {
+                    quantity -= pair.quantity;
+                    inventory.set(i, null); //free inventory slot
+                    this.inventoryUI.updateUI(this.inventory, i);
+                    if(quantity == 0) {
+                        break;
+                    }
+
+                } else {
+                    pair.quantity -= quantity;
+                    inventory.set(i, pair);
+                    slotWithSpace = i;
+                    break;
+                }
+            }
+        }
+        int itemOccupiedSlots = countSlotsOccupiedBy(itemID);
+        int minRequiredSlots = (int) (((double) (endQuantity + stackLimit -1))/((double) stackLimit));
+        if(itemOccupiedSlots > minRequiredSlots) {
+            this.rearrangeItems(itemID, endQuantity, slotWithSpace, stackLimit); //rearranges items if slots are being wasted
+        }
+        int[] removedItem = new int[]{itemID, i};
         if (removedItem.length == 2 && !(debug)) {
             this.inventoryUI.updateUI(this.inventory, removedItem[1]);
         } else {
