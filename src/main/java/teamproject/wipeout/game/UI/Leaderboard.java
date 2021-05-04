@@ -1,7 +1,9 @@
 package teamproject.wipeout.game.UI;
 
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
@@ -10,8 +12,10 @@ import teamproject.wipeout.util.SortByMoney;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -21,45 +25,71 @@ public class Leaderboard extends VBox {
 
     private static final String[] ORDINAL_STRINGS = new String[]{"1st", "2nd", "3rd", "4th"};
 
-    private SimpleListProperty<Player> players;
-    private Consumer<Long> gameModeValueAction;
-
     private final ListView<String> list;
     private final Comparator<Player> moneyComparator;
 
-	public Leaderboard(SimpleListProperty<Player> players) {
+    private SimpleListProperty<Player> players;
+    private Function<Long, Boolean> gameModeValueAction;
+
+    private boolean gameEnded;
+    private ListChangeListener<? super Player> newPlayerListener;
+    private HashMap<DoubleProperty, ChangeListener<? super Number>> moneyListeners;
+
+    /**
+     * Initializes {@code Leaderboard} for the gameplay purposes.
+     * The leaderboard will be updated with the changes to players' money balances.
+     *
+     * @param players {@code List} of (unsorted) {@link Player}s to be shown and updated in the leaderboard
+     */
+    public Leaderboard(SimpleListProperty<Player> players) {
         this();
 
         this.players = players;
         this.gameModeValueAction = null;
 
-        players.addListener((ListChangeListener<? super Player>) (change) -> {
+        this.gameEnded = false;
+        this.newPlayerListener = (ListChangeListener<? super Player>) (change) -> {
             if (!change.next()) {
                 return;
             }
 
             if (change.wasAdded()) {
-                this.newPlayersAdded((List<Player>) change.getAddedSubList());
+                this.newPlayersAdded(change.getAddedSubList());
             }
 
-            this.update((List<Player>) change.getList());
-        });
+            this.update(change.getList());
+        };
+        players.addListener(this.newPlayerListener);
+
+        this.moneyListeners = new HashMap<DoubleProperty, ChangeListener<? super Number>>();
 
         this.update(this.players);
         this.newPlayersAdded(this.players);
     }
 
+    /**
+     * Initializes {@code Leaderboard} for the GameOverUI purposes.
+     * The leaderboard will not be updated.
+     *
+     * @param finalPlayers {@code List} of (unsorted) {@link Player}s to be shown in the leaderboard
+     */
     public Leaderboard(List<Player> finalPlayers) {
         this();
 
         this.players = null;
         this.gameModeValueAction = null;
 
+        this.gameEnded = true;
+        this.newPlayerListener = null;
+        this.moneyListeners = null;
+
         this.update(finalPlayers);
     }
 
-    public Leaderboard() {
-
+    /**
+     * Private initializer that is used only as a part of public initializers.
+     */
+    private Leaderboard() {
         this.list = new ListView<String>();
         this.moneyComparator = new SortByMoney(true);
 
@@ -67,18 +97,30 @@ public class Leaderboard extends VBox {
 
         this.list.setMaxWidth(180);
         this.list.setMaxHeight(100);
-        this.list.setMouseTransparent( true );
-        this.list.setFocusTraversable( false );
+        this.list.setMouseTransparent(true);
+        this.list.setFocusTraversable(false);
         this.list.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
         this.getChildren().addAll(this.list);
     }
 
-    public void setGameModeValueAction(Consumer<Long> gameModeValueAction) {
+    /**
+     * {@code gameModeValueAction} setter
+     *
+     * @param gameModeValueAction New {@code gameModeValueAction} value of type {@code Function<Long, Boolean>}
+     */
+    public void setGameModeValueAction(Function<Long, Boolean> gameModeValueAction) {
         this.gameModeValueAction = gameModeValueAction;
     }
 
-	public List<Player> update(List<Player> unsortedPlayers) {
+    /**
+     * Updates the leaderboard based on the given (unsorted) {@code List} of {@link Player}s.
+     * Sorting is done inside this method.
+     *
+     * @param unsortedPlayers {@code List} of (unsorted) {@link Player}s
+     * @return {@code List} of sorted {@link Player}s
+     */
+    public List<Player> update(List<? extends Player> unsortedPlayers) {
         List<Player> sortedPlayers = unsortedPlayers.stream().sorted(this.moneyComparator).collect(Collectors.toList());
 
         Platform.runLater(() -> {
@@ -92,25 +134,50 @@ public class Leaderboard extends VBox {
                 this.list.getItems().add(playerEntry);
             }
         });
-        
-        return sortedPlayers;
-	}
 
-    private void newPlayersAdded(List<Player> newPlayers) {
-	    if (this.players == null) {
-	        return;
+        return sortedPlayers;
+    }
+
+    /**
+     * Processes new players that has been added to the {@code players SimpleListProperty}.
+     * Adds money listeners to the added players.
+     *
+     * @param newPlayers {@code List} of added {@link Player}s
+     */
+    private void newPlayersAdded(List<? extends Player> newPlayers) {
+        if (this.players == null) {
+            return;
         }
 
         // updates leaderboard when any player's money changes
         for (Player p : newPlayers) {
-            p.moneyProperty().addListener((observable, oldVal, newVal) -> {
+            ChangeListener<? super Number> moneyListener = (observable, oldVal, newVal) -> {
                 this.update(this.players);
 
-                if (this.gameModeValueAction != null) {
-                    this.gameModeValueAction.accept(newVal.longValue());
+                if (!this.gameEnded && this.gameModeValueAction != null) {
+                    this.gameEnded = this.gameModeValueAction.apply(newVal.longValue());
                 }
-            });
+
+                if (this.gameEnded) {
+                    this.removeListeners();
+                }
+            };
+
+            p.moneyProperty().addListener(moneyListener);
+            this.moneyListeners.put(p.moneyProperty(), moneyListener);
         }
+    }
+
+    /**
+     * Removes new player and money listeners.
+     */
+    private void removeListeners() {
+        for (Map.Entry<DoubleProperty, ChangeListener<? super Number>> entry : this.moneyListeners.entrySet()) {
+            entry.getKey().removeListener(entry.getValue());
+        }
+        this.players.removeListener(this.newPlayerListener);
+
+        this.moneyListeners.clear();
     }
 
 }

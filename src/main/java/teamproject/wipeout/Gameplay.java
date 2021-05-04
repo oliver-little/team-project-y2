@@ -451,7 +451,9 @@ public class Gameplay extends StackPane implements Controller {
                 // checks if any player has reached money target
                 if (playerMoney >= this.wealthTarget) {
                     this.onGameEnd().run();
+                    return true;
                 }
+                return false;
             });
         }
         leaderboardBox.getChildren().addAll(leaderboard);
@@ -593,7 +595,7 @@ public class Gameplay extends StackPane implements Controller {
 
     /**
      * Generates a pack of data for WorldEntity
-     * @param MarketEntity The MarketEntity instance in this game
+     * @param marketEntity The MarketEntity instance in this game
      * @param currentPlayer The current player
      */
     private Map<String, Object> createWorldPack(MarketEntity marketEntity, CurrentPlayer currentPlayer) {
