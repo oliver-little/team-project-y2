@@ -35,11 +35,11 @@ public class AudioComponent implements GameComponent {
 	public AudioComponent() {
 		this.volume = 0.05f;
 	}
-
-	public void addSound(String audioFileName){
-		sounds.put(audioFileName, false);
-	}
 	   
+	/**
+	 * gets the type of GameComponent
+	 * @return string detailing component type
+	 */
 	public String getType()
 	{
 		return "audio";
@@ -66,7 +66,7 @@ public class AudioComponent implements GameComponent {
 	}
 	
 	/**
-	 * called by any class when it wants the sound to play.
+	 * called by any class when it wants the sound to play - adds effect to queue.
 	 */
 	public void play(String audioFileName) {
 		if(volume == 0){

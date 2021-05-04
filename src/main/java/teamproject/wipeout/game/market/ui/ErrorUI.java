@@ -11,7 +11,8 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 /**
- * Used for displaying error messages to the screen, by creating a new instance of "ErrorUI", with the corresponding ENUM error code will display a fadable message on screen.
+ * Used for displaying error messages to the screen, by creating a new instance of "ErrorUI",
+ * with the corresponding ENUM error code will display a fadable message on screen.
  */
 public class ErrorUI {
     
@@ -28,6 +29,12 @@ public class ErrorUI {
         TASK_COMPLETED
     }
     
+    /**
+     * Constructor for error message. Displays a passed in error to the screen and fades out after a few seconds.
+     * @param errorPane The pane to display the message to.
+     * @param errorMessage The message to display.
+     * @param onFadeOut The action to run on fade out.
+     */
     public ErrorUI(StackPane errorPane, String errorMessage, Runnable onFadeOut) {
     	Label errorMessageLabel;
     	errorMessageLabel = new Label(errorMessage);

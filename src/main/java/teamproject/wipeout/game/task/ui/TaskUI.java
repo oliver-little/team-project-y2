@@ -15,6 +15,9 @@ import teamproject.wipeout.util.resources.ResourceType;
 
 import java.util.ArrayList;
 
+/**
+ * Creates the UI for the task list.
+ */
 public class TaskUI extends VBox {
 
     private ListView<String> list;

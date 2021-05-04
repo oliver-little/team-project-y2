@@ -47,6 +47,14 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
 
     public boolean debug = false;
 
+    /**
+     * constructor for CurrentPlayer (player represented by current instance of game)
+     * @param scene - GameScene player is to be added to
+     * @param playerInfo - represents player's id and name
+     * @param spriteSheet - sprites for the player
+     * @param spriteManager - used to get player's sprited
+     * @param itemStore - store of items, their ids and other details
+     */
     public CurrentPlayer(GameScene scene, Pair<Integer, String> playerInfo, String spriteSheet, SpriteManager spriteManager, ItemStore itemStore) {
         super(scene, playerInfo, spriteSheet, spriteManager, itemStore);
 
@@ -61,28 +69,52 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         this.taskUI = null;
     }
 
+    /**
+     * assigns a farm to the player
+     * @param farm - the farm entity to be assigned to the player
+     */
     public void assignFarm(FarmEntity farm) {
         super.assignFarm(farm);
         this.myFarm = farm;
     }
 
+    /**
+     * gets player's farm
+     * @return the player's FarmEntity
+     */
     public FarmEntity getMyFarm() {
         return this.myFarm;
     }
 
+    /**
+     * sets the UI for the player's inventory
+     * @param inventoryUI - UI which represents the inventory to be assigned to player
+     */
     public void setInventoryUI(InventoryUI inventoryUI) {
         this.inventoryUI = inventoryUI;
         this.selectSlot(0);
     }
 
+    /**
+     * gets the player's tasks
+     * @return an ArrayList of the player's tasks
+     */
     public ArrayList<Task> getTasks() {
         return this.tasks;
     }
 
+    /**
+     * gets the tasks which the player hasn't yet completed 
+     * @return ArrayList of player's tasks
+     */
     public LinkedHashMap<Integer, Integer> getCurrentAvailableTasks() {
         return this.currentAvailableTasks;
     }
 
+    /**
+     * assigns the player a UI to represent the tasks
+     * @param taskUI - the UI which shows the player's tasks
+     */
     public void setTaskUI(TaskUI taskUI) {
         this.taskUI = taskUI;
         this.checkTasks();
@@ -331,6 +363,10 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         return completedTasks;
     }
 
+    /**
+     * sets the player's tasks
+     * @param tasks - ArrayList of task
+     */
     public void setTasks(ArrayList<Task> tasks) {
         this.tasks = tasks;
         for (Task task: this.tasks) {
@@ -338,6 +374,9 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         }
     }
 
+    /**
+     * method which clears the player's tasks
+     */
     public void clearTasks() {
         if(this.tasks != null) {
             this.tasks.clear();
