@@ -15,6 +15,9 @@ import teamproject.wipeout.engine.system.GameSystem;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * MouseClickSystem hooks into InputHandler mouse hover events and forwards events to all hoverables in the game.
+ */
 public class MouseHoverSystem implements GameSystem {
 
     public static final Point2D CLICK_ERROR_OFFSET = MouseClickSystem.CLICK_ERROR_OFFSET;
@@ -27,23 +30,37 @@ public class MouseHoverSystem implements GameSystem {
     private double lastFrameWorldX;
     private double lastFrameWorldY;
 
+    /**
+     * InputHoverableAction implementation to update the stored mouse position.
+     */
     protected final InputHoverableAction onHover = (x, y) -> {
         this.currentMouseX = x + CLICK_ERROR_OFFSET.getX();
         this.currentMouseY = y + CLICK_ERROR_OFFSET.getY();
     };
 
+    /**
+     * Creates a new instance of MouseHoverSystem
+     * @param scene The GameScene this system is part of
+     * @param input The InputHandler instance to receive mouse events from
+     */
     public MouseHoverSystem(GameScene scene, InputHandler input) {
         this.collector = new SignatureEntityCollector(scene, Set.of(Transform.class, RenderComponent.class, Hoverable.class));
         this.cameraCollector = new CameraEntityCollector(scene);
         this.currentMouseX = 0;
         this.currentMouseY = 0;
+        this.lastFrameWorldX = 0;
+        this.lastFrameWorldY = 0;
 
         // Setup function to immediately update hoverable when added
-        this.collector.onAdd = (entity) -> entity.getComponent(Hoverable.class).onClick.performMouseHoverAction(this.currentMouseX, this.currentMouseY);
+        this.collector.onAdd = (entity) -> entity.getComponent(Hoverable.class).onClick.performMouseHoverAction(this.lastFrameWorldX, this.lastFrameWorldY);
 
         input.onMouseHover(this.onHover);
     }
 
+    /**
+     * Gets the most recently recorded mouse position in world coordinates
+     * @return A Point2D object with world coordinates representing the most recently recorded mouse position.
+     */
     public Point2D getCurrentMousePosition() {
         return new Point2D(this.lastFrameWorldX, this.lastFrameWorldY);
     }
