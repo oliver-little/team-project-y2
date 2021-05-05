@@ -179,7 +179,10 @@ public class SettingsUI extends VBox {
 
         Button closeButton = new Button("Return to Menu");
         closeButton.setId("close");
-        closeButton.setOnAction((e) -> doReturnToMenu.run());
+        closeButton.setOnAction((e) ->  {backingTrack.stop();
+                                         audioSys.mute();
+                                         mas.mute(); //stops all audio
+                                         doReturnToMenu.run();});
         HBox closeButtonContainer = new HBox();
         closeButtonContainer.getChildren().addAll(closeButton);
         closeButtonContainer.setAlignment(Pos.CENTER);

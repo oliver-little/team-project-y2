@@ -279,6 +279,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         int noOfThisItem = countItems(itemID);
         int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
         if(quantity > noOfThisItem) {
+            if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
             return new int[0];
         }
         int endQuantity = noOfThisItem - quantity;
@@ -311,13 +312,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         if(itemOccupiedSlots > minRequiredSlots) {
             this.rearrangeItems(itemID, endQuantity, slotWithSpace, stackLimit); //rearranges items if slots are being wasted
         }
-        int[] removedItem = new int[]{itemID, i};
-        if (removedItem.length == 2 && !(debug)) {
-            if (!debug) this.inventoryUI.updateUI(this.inventory, removedItem[1]);
-        } else {
-            if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
-        }
-        return removedItem;
+
+        return new int[]{itemID, i};
     }
 
     /**

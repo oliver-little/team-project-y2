@@ -84,6 +84,9 @@ public class ScrollableTileUI extends VBox {
      */
     public void fixBlurryText() {
         StackPane stackPane = (StackPane) this.scrollPane.lookup("ScrollPane .viewport");
-        stackPane.setCache(false);
+
+        if (stackPane != null) {
+            stackPane.setCache(false);
+        }
     }
 }
