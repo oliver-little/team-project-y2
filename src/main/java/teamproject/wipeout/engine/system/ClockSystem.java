@@ -1,6 +1,6 @@
-package teamproject.wipeout.engine.entity.gameclock;
+package teamproject.wipeout.engine.system;
 
-import teamproject.wipeout.engine.system.GameSystem;
+import teamproject.wipeout.game.UI.ClockUI;
 
 /**
  * The Clock System that is responsible for updating the ClockUI
