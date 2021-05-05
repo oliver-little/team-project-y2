@@ -11,8 +11,15 @@ import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
+/**
+ * Creates the MoneyUI that extends the Label, and it will be shown top center
+ */
 public class MoneyUI extends Label {
 
+    /**
+     * Creates the UI for showing the amount of money the currentPlayer has
+     * @param currentPlayer - the current Player who holds the amount of money we will display
+     */
     public MoneyUI(CurrentPlayer currentPlayer) {
         super();
 
