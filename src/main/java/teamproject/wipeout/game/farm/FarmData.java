@@ -9,6 +9,7 @@ import teamproject.wipeout.networking.state.StateUpdatable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -420,19 +421,27 @@ public class FarmData implements StateUpdatable<FarmState> {
         this.farmColumns += expandBy;
         this.expansionLevel += expandBy;
 
-        // Farms expand diagonally outward, thus each farm's grid needs to be expanded differently
+        int rowShift = 0;
+        int columnShift = 0;
+
+        // Farms expand diagonally outward, thus each farm's grid needs to be expanded differently:
 
         // Expands existing rows accordingly
         switch (this.farmID) {
             case 1:
             case 3:
                 for (ArrayList<FarmItem> row : this.items) {
-                    row.add(0, null);
+                    for (int i = 0; i < expandBy; i++) {
+                        row.add(0, null);
+                    }
                 }
+                columnShift = expandBy;
                 break;
             default:
                 for (ArrayList<FarmItem> row : this.items) {
-                    row.add(null);
+                    for (int i = 0; i < expandBy; i++) {
+                        row.add(null);
+                    }
                 }
                 break;
         }
@@ -445,6 +454,7 @@ public class FarmData implements StateUpdatable<FarmState> {
                     ArrayList<FarmItem> newRow = new ArrayList<FarmItem>(Collections.nCopies(this.farmColumns, null));
                     this.items.add(0, newRow);
                 }
+                rowShift = expandBy;
                 break;
             default:
                 for (int i = 0; i < expandBy; i++) {
@@ -452,6 +462,29 @@ public class FarmData implements StateUpdatable<FarmState> {
                     this.items.add(newRow);
                 }
                 break;
+        }
+
+        HashMap<FarmItem, Double> newCoordinates = new HashMap<FarmItem, Double>();
+
+        for (ArrayList<FarmItem> row : this.items) {
+            for (FarmItem farmItem : row) {
+                if (farmItem != null && farmItem.get() == null) { // it is a tree
+                    Double existingNewCoordinates = newCoordinates.get(farmItem);
+
+                    if (existingNewCoordinates != null) {
+                        farmItem.growth.set(existingNewCoordinates);
+
+                    } else {
+                        int[] oldCoordinates = this.getFarmPosition(farmItem);
+                        if (oldCoordinates.length == 2) {
+                            String stringCoordinates = (oldCoordinates[0] + rowShift) + "." + (oldCoordinates[1] + columnShift);
+                            double doubleCoordinates = Double.parseDouble(stringCoordinates);
+                            farmItem.growth.set(doubleCoordinates);
+                            newCoordinates.put(farmItem, doubleCoordinates);
+                        }
+                    }
+                }
+            }
         }
 
         // Callback after the expansion of the data container is finished
@@ -488,7 +521,7 @@ public class FarmData implements StateUpdatable<FarmState> {
             // Encodes the oversized FarmItem coordinates as a double value ("x.y")
             // which is then stored as the growth value.
             String doubleCoordinates = row + "." + column;
-            dummyItem = new FarmItem(null, Double.valueOf(doubleCoordinates));
+            dummyItem = new FarmItem(null, Double.parseDouble(doubleCoordinates));
         }
 
         for (int r = row; r < row + h; r++) {

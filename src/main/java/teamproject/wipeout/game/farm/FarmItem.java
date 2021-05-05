@@ -34,7 +34,7 @@ public class FarmItem {
      * @param item   {@link Item} with which the {@code FarmItem} is initialized
      * @param growth Item's growth value
      */
-    public FarmItem(Item item, Double growth) {
+    public FarmItem(Item item, double growth) {
         this.item = item;
         this.growth = new SimpleDoubleProperty(growth);
     }
