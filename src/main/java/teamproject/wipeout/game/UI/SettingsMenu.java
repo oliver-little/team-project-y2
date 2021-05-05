@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.UI;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -94,6 +95,7 @@ public class SettingsMenu {
 
         TilePane tilePane = new TilePane();
         tilePane.setAlignment(Pos.TOP_CENTER);
+        tilePane.setPadding(new Insets(10, 10, 10, 10));
         tilePane.setVgap(5);
         tilePane.setHgap(20);
         tilePane.setMaxSize(600, 300);

@@ -3,12 +3,16 @@ package teamproject.wipeout.game.UI;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 import teamproject.wipeout.ServerListItem;
 import teamproject.wipeout.game.market.ui.ErrorUI;
@@ -26,7 +30,6 @@ import java.util.function.Consumer;
 
 /**
  * Class that constructs the multiplayer UI screens
- *
  */
 public class MultiplayerMenu {
 
@@ -92,26 +95,27 @@ public class MultiplayerMenu {
         stackPane.getStyleClass().add("tile-pane");
 
         VBox hostPane = new VBox();
+        hostPane.setSpacing(10);
+        hostPane.setPadding(new Insets(10, 10, 10, 10));
         hostPane.setAlignment(Pos.CENTER);
         hostPane.setMaxWidth(600);
 
-        HBox nameBox = new HBox();
-        nameBox.setAlignment(Pos.CENTER);
-        nameBox.getStyleClass().add("hbox");
-        nameBox.setSpacing(40);
+        GridPane namesPane = new GridPane();
+        namesPane.setAlignment(Pos.CENTER);
+        namesPane.setHgap(10);
+        namesPane.setVgap(20);
+
         Label nameLabel = new Label("Name:");
         nameLabel.getStyleClass().add("black-label");
         TextField nameTF = new TextField();
-        nameBox.getChildren().addAll(nameLabel, nameTF);
+        namesPane.add(nameLabel, 0, 0, 1, 1);
+        namesPane.add(nameTF, 1, 0, 2, 1);
 
-        HBox serverNameBox = new HBox();
-        serverNameBox.getStyleClass().add("hbox");
-        serverNameBox.setSpacing(5);
-        serverNameBox.setAlignment(Pos.CENTER);
         Label serverNameLabel = new Label("Server Name:");
         serverNameLabel.getStyleClass().add("black-label");
         TextField serverNameTF = new TextField();
-        serverNameBox.getChildren().addAll(serverNameLabel,serverNameTF);
+        namesPane.add(serverNameLabel, 0, 1, 1, 1);
+        namesPane.add(serverNameTF, 1, 1, 2, 1);
 
         GameModeUI gameModeBox = new GameModeUI();
 
@@ -134,7 +138,7 @@ public class MultiplayerMenu {
             }
         }));
 
-        hostPane.getChildren().addAll(nameBox, serverNameBox, gameModeBox, hostButton);
+        hostPane.getChildren().addAll(namesPane, gameModeBox, hostButton);
         stackPane.getChildren().add(hostPane);
 
         menuBox.getChildren().addAll(stackPane);
@@ -156,12 +160,12 @@ public class MultiplayerMenu {
         stackPane.getStyleClass().add("tile-pane");
 
         VBox joinPane = new VBox();
-        joinPane.setSpacing(10);
+        joinPane.setSpacing(20);
+        joinPane.setPadding(new Insets(10, 10, 10, 10));
         joinPane.setAlignment(Pos.CENTER);
         joinPane.setMaxWidth(600);
 
         HBox playerInfoBox = new HBox();
-        playerInfoBox.getStyleClass().add("hbox");
         playerInfoBox.setAlignment(Pos.CENTER);
 
         HBox nameBox = new HBox();
@@ -176,18 +180,11 @@ public class MultiplayerMenu {
 
         ObservableMap<String, InetSocketAddress> servers = this.networker.getServerDiscovery().getAvailableServers();
 
-        /*VBox serverBox = new VBox();
-        serverBox.getStyleClass().add("hbox");
-        serverBox.setAlignment(Pos.CENTER);
-        serverBox.setMaxHeight(120);
-        serverBox.setPrefHeight(120);*/
-
         ListView<ServerListItem> serverList = new ListView<>();
         serverList.setMaxWidth(180);
         serverList.setMaxHeight(120);
         serverList.setStyle("-fx-stroke: black; -fx-stroke-width: 3;");
 
-        //serverBox.getChildren().add(serverList);
         joinPane.getChildren().addAll(playerInfoBox, serverList);
 
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview
@@ -294,7 +291,7 @@ public class MultiplayerMenu {
         if (isHost) {
             Pair<String, Runnable> startButton = new Pair<String, Runnable>("Start Game", () -> startServerGame());
             VBox startBox = UIUtil.createMenu(Arrays.asList(startButton));
-            startBox.getStyleClass().add("hbox");
+            startBox.setPadding(new Insets(10, 10, 10, 10));;
             vBox.getChildren().add(startBox);
         }
 
