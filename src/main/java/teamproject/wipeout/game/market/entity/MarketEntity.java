@@ -208,6 +208,7 @@ public class MarketEntity extends GameEntity {
                 this.onUIOpen.run();
             }
             this.uiContainer.getChildren().add(this.marketUI);
+            this.marketUI.onDisplay();
         }
     };
 

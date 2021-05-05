@@ -36,14 +36,17 @@ public class MarketUI extends AnchorPane {
     public Runnable onUIClose;
 
     private Pane parent;
+    private List<ScrollableTileUI> pages;
 
-    public MarketUI(
-            Collection<Item> items,
-            Market market,
-            CurrentPlayer currentPlayer,
-            SpriteManager spriteManager,
-            ArrayList<Task> purchasableTasks
-    ) {
+    /**
+     * Creates a new instance of MarketUI
+     * @param items The list of items to render
+     * @param market The Market instance to use
+     * @param currentPlayer The current player
+     * @param spriteManager A SpriteManager instance to get Market images from
+     * @param purchasableTasks The list of purchasable tasks to display
+     */
+    public MarketUI(Collection<Item> items, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager, ArrayList<Task> purchasableTasks) {
         super();
 
         try {
@@ -90,11 +93,27 @@ public class MarketUI extends AnchorPane {
 
         farmsList.add(new Pair<>(new FarmExpansionUI(currentPlayer, spriteManager), "Farm"));
 
-        Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList, true));
-        Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList, true));
-        Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList, true));
-        Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList, false));
-        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList, false));
+        pages = new ArrayList<>();
+
+        ScrollableTileUI page = new ScrollableTileUI(seedsList, true);
+        pages.add(page);
+        Tab seeds = new Tab("Seeds", page);
+
+        page = new ScrollableTileUI(plantsList, true);
+        pages.add(page);
+        Tab plants = new Tab("Plants & Veg", page);
+
+        page = new ScrollableTileUI(potionsList, true);
+        pages.add(page);
+        Tab potions = new Tab("Potions", page);
+
+        page = new ScrollableTileUI(farmsList, false);
+        pages.add(page);
+        Tab farmExpansions = new Tab("Farm Expansions", page);
+
+        page = new ScrollableTileUI(tasksList, false);
+        pages.add(page);
+        Tab tasks = new Tab("Tasks", page);
         tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions, tasks);
 
         Button close = new Button("X");
@@ -117,8 +136,19 @@ public class MarketUI extends AnchorPane {
         this.getChildren().addAll(tabPane, close);
     }
 
+    /**
+     * Sets the parent this MarketUI is attached to
+     * @param parent The Parent pane 
+     */
     public void setParent(Pane parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Should be called when the market is shown on the screen
+     */
+    public void onDisplay() {
+        this.pages.forEach((page) -> page.fixBlurryText());
     }
 
     public Parent getContent() {
