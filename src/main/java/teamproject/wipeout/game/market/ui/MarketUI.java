@@ -69,13 +69,13 @@ public class MarketUI extends AnchorPane {
         // Services
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
-                seedsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
+                seedsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name.toLowerCase()));
             }
             else if (item.hasComponent(SabotageComponent.class)) {
-                potionsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
+                potionsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name.toLowerCase()));
             }
             else {
-                plantsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
+                plantsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name.toLowerCase()));
             }
         }
 
@@ -94,7 +94,7 @@ public class MarketUI extends AnchorPane {
         Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList, true));
         Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList, true));
         Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList, false));
-        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList, true));
+        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList, false));
         tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions, tasks);
 
         Button close = new Button("X");

@@ -110,3 +110,12 @@
 .hbox {
     -fx-padding: 0 10 15 10;
 }
+
+#searchBox {
+    -fx-background-color: rgba(255, 246, 231, 0.9);
+    -fx-border-color: transparent transparent rgba(0, 0, 0, 0.9) transparent;
+}
+
+.text-field {
+    -fx-max-width: 400px;
+}

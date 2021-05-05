@@ -26,6 +26,8 @@ import java.util.List;
  */
 public class UIUtil {
 
+    public static boolean titleFontLoaded = false;
+
     /**
      * A method that creates a title with the specified string
      * @param t The text to be displayed in the title
@@ -34,13 +36,7 @@ public class UIUtil {
     public static Text createTitle(String t) {
         Text title = new Text(t);
 
-        try {
-            InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
-            Font.loadFont(path, 12);
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        loadTitleFont();
 
         title.setFont(Font.font("Kalam", 40));
         title.setFill(Color.WHITE);
@@ -86,4 +82,21 @@ public class UIUtil {
 
     }
 
+    /**
+     * Loads the title font (ignoring subsequent calls)
+     */
+    public static void loadTitleFont() {
+        if (titleFontLoaded) {
+            return;
+        }
+
+        try {
+            InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
+            Font.loadFont(path, 12);
+            UIUtil.titleFontLoaded = true;
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 }
