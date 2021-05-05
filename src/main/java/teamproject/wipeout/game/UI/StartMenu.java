@@ -8,21 +8,23 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import teamproject.wipeout.Controller;
 import teamproject.wipeout.Gameplay;
 import teamproject.wipeout.game.market.ui.ErrorUI;
-import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.networking.Networker;
+import teamproject.wipeout.networking.data.InitContainer;
 import teamproject.wipeout.util.resources.ResourceLoader;
 import teamproject.wipeout.util.resources.ResourceType;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * StartMenu is a class which is used for creating and setting up the start menu of the game.
@@ -35,6 +37,7 @@ public class StartMenu extends StackPane implements Controller {
     private Text title;
     private VBox buttonBox;
 
+    private final SingleplayerMenu singleplayerMenu;
     private final MultiplayerMenu multiplayerMenu;
     private final SettingsMenu settingsMenu;
 
@@ -45,6 +48,7 @@ public class StartMenu extends StackPane implements Controller {
         super();
         this.menuBox = new VBox(30);
 
+        this.singleplayerMenu = new SingleplayerMenu(this, this.menuBox);
         this.multiplayerMenu = new MultiplayerMenu(this, this.menuBox);
         this.settingsMenu = new SettingsMenu(this.menuBox, () -> this.createMainMenu());
     }
@@ -86,48 +90,13 @@ public class StartMenu extends StackPane implements Controller {
     private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
-                new Pair<String, Runnable>("Singleplayer", () -> createSingleplayerMenu()),
+                new Pair<String, Runnable>("Singleplayer", this.singleplayerMenu.getMenu()),
                 new Pair<String, Runnable>("Multiplayer", this.multiplayerMenu.getMenu()),
                 new Pair<String, Runnable>("How to Play", this.settingsMenu.getMenu()),
                 new Pair<String, Runnable>("Exit to Desktop", Platform::exit)
         );
 
         return menuData;
-    }
-
-    /**
-     * Creates the UI for starting a singleplayer game
-     */
-    private void createSingleplayerMenu() {
-        menuBox.getChildren().clear();
-
-        VBox vBox = new VBox();
-        vBox.setAlignment(Pos.TOP_CENTER);
-        vBox.setSpacing(10);
-        vBox.setMaxSize(600, 100);
-        vBox.getStyleClass().add("tile-pane");
-
-        menuBox.getChildren().addAll(UIUtil.createTitle("Singleplayer"));
-
-        GameModeUI gameModeBox = new GameModeUI();
-        vBox.getChildren().add(gameModeBox);
-
-        Runnable startGameAction = () -> {
-            GameMode gameMode = gameModeBox.getGameMode();
-            long gameModeValue = (long) gameModeBox.getValue();
-            InitContainer initContainer = new InitContainer(gameMode, gameModeValue, null, null, null);
-            startLocalGame(null, null, null, initContainer);
-        };
-
-        List<Pair<String, Runnable>> menuData = Arrays.asList(
-                new Pair<String, Runnable>("Back", () -> createMainMenu())
-        );
-
-        VBox startBox = UIUtil.createMenu(Arrays.asList(new Pair<String, Runnable>("Start Game", startGameAction)));
-        vBox.getChildren().add(startBox);
-
-        buttonBox = UIUtil.createMenu(menuData);
-        menuBox.getChildren().addAll(vBox, buttonBox);
     }
 
     public void disconnectError() {

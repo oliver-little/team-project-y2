@@ -3,12 +3,13 @@ package teamproject.wipeout.game.UI;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Map;
 /**
  * Class that constructs the game mode selection UI
  */
-public class GameModeUI extends VBox {
+public class GameModeUI extends GridPane {
 
 	private static final int SECONDS_PER_MIN = 60;
 
@@ -47,26 +48,27 @@ public class GameModeUI extends VBox {
 
     public GameModeUI() {
         this.setAlignment(Pos.CENTER);
-
-        Label gameModeLabel = new Label("Game Mode:");
-        gameModeLabel.getStyleClass().add("black-label");
-
-        Label valueDesc = new Label();
-        valueDesc.getStyleClass().add("black-label");
-
-        HBox valueBox = new HBox();
-        valueBox.getStyleClass().add("hbox");
-        valueBox.setSpacing(3);
-        valueBox.setAlignment(Pos.CENTER);
-
-        valueLabel = new Label();
-        valueLabel.getStyleClass().add("black-label");
+        this.setHgap(10);
+        this.setVgap(20);
+        this.setPadding(new Insets(10, 10, 10, 10));
 
         GameMode[] gameModes = GameMode.values();
         String[] gameModeStrings = new String[gameModes.length];
         for (int i = 0; i < gameModes.length; i++) {
             gameModeStrings[i] = gameModes[i].toString();
         }
+
+        Label valueDesc = new Label();
+        valueDesc.setAlignment(Pos.CENTER_RIGHT);
+        valueDesc.getStyleClass().add("black-label");
+
+        Label gameModeLabel = new Label("Game Mode:");
+        gameModeLabel.setAlignment(Pos.CENTER_RIGHT);
+        gameModeLabel.getStyleClass().add("black-label");
+
+        valueLabel = new Label();
+        valueLabel.setAlignment(Pos.CENTER);
+        valueLabel.getStyleClass().add("black-label");
 
         gameModeSelector = new ComboBox<String>(FXCollections.observableArrayList(gameModeStrings));
         gameModeSelector.setOnAction((event) -> {
@@ -78,6 +80,7 @@ public class GameModeUI extends VBox {
 
         // trigger event to set value label
         Event.fireEvent(gameModeSelector, new ActionEvent());
+
         int interval = 5;
 
         Button decrementButton = new Button("-");
@@ -102,19 +105,15 @@ public class GameModeUI extends VBox {
 
         });
 
+        HBox valueBox = new HBox();
+        valueBox.setSpacing(3);
+        valueBox.setAlignment(Pos.CENTER_LEFT);
         valueBox.getChildren().addAll(decrementButton, valueLabel, incrementButton);
 
-		HBox gameModeBox = new HBox();
-		gameModeBox.setSpacing(5);
-		gameModeBox.setAlignment(Pos.CENTER);
-		gameModeBox.getChildren().addAll(gameModeLabel, gameModeSelector);
-
-		HBox modeValueBox = new HBox();
-		modeValueBox.setSpacing(20);
-		modeValueBox.setAlignment(Pos.CENTER);
-		modeValueBox.getChildren().addAll(valueDesc, valueBox);
-
-        this.getChildren().addAll(gameModeBox, modeValueBox);
+        this.add(gameModeLabel, 0, 0, 1, 1);
+        this.add(valueDesc, 0, 1, 1, 1);
+        this.add(gameModeSelector, 1, 0, 2, 1);
+        this.add(valueBox, 1, 1, 2, 1);
     }
 
     public double getValue() {
