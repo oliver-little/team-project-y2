@@ -2,10 +2,11 @@ package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
 import teamproject.wipeout.engine.component.physics.GeometryUtil;
-import teamproject.wipeout.engine.component.shape.Shape;
 
-public class Circle extends Shape
-{
+/**
+ * Class for a Circle with a radius about a point in 2D space
+ */
+public class Circle extends Shape {
 
 	/**
 	 * x coordinate of centre of circle

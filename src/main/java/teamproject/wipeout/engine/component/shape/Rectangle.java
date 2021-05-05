@@ -1,17 +1,18 @@
 package teamproject.wipeout.engine.component.shape;
 
 import javafx.geometry.Point2D;
-import teamproject.wipeout.engine.component.shape.Shape;
 
-public class Rectangle extends Shape
-{
+/**
+ * Class for a rectangle starting at a point in 2D space, with a width and height.
+ */
+public class Rectangle extends Shape {
 	private double x;
 	private double y;
 	private double width;
+	private double height;
 
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -30,7 +31,6 @@ public class Rectangle extends Shape
 		return true;
 	}
 
-	private double height;
 	
 	public Rectangle(double width, double height) {
 		this.x=0;

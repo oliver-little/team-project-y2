@@ -5,7 +5,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-//TODO: add multiple contructors for different fonts, sizes and colors etc
 public class TextRenderable implements Renderable {
 
 	public Font font;
