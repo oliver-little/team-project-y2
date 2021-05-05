@@ -18,6 +18,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Window;
 import javafx.util.Pair;
+import teamproject.wipeout.engine.audio.GameAudio;
 import teamproject.wipeout.engine.component.render.CameraFollowComponent;
 import teamproject.wipeout.engine.component.render.RenderComponent;
 import teamproject.wipeout.engine.core.GameLoop;
@@ -107,6 +108,8 @@ public class Gameplay extends StackPane implements Controller {
 
     private AudioSystem audioSystem;
     private MovementAudioSystem movementAudio;
+    private GameAudio backingTrack;
+
     private List<EventSystem> eventSystems;
 
     private ChangeListener<? super Boolean> focusListener;
@@ -257,7 +260,8 @@ public class Gameplay extends StackPane implements Controller {
             this.getScene().setRoot(startMenu.getContent());
             
         };
-        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu, this.keyBindings);
+        this.backingTrack = new GameAudio("backingTrack2.wav", true);
+        SettingsUI settingsUI = new SettingsUI(this.audioSystem, this.movementAudio, returnToMenu, this.keyBindings, this.backingTrack);
         
         this.interfaceOverlay.getChildren().addAll(inventoryUI, moneyUI);
         
@@ -354,6 +358,10 @@ public class Gameplay extends StackPane implements Controller {
         }
         if (this.focusListener != null) {
             this.getScene().getWindow().focusedProperty().removeListener(this.focusListener);
+        }
+
+        if (this.backingTrack != null && this.backingTrack.isPlaying()) {
+            this.backingTrack.stop();
         }
 
         // Attempt to clean up networking in case of hard shutdown

@@ -33,6 +33,7 @@ public class AudioSystem implements GameSystem {
 	 * Removes AudioComponent observer and stops all AudioComponents.
 	 */
 	public void cleanup() {
+		this.mute();
 		this.entityCollector.cleanup();
 	}
 
