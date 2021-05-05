@@ -199,17 +199,56 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     }
 
     /**
-     * Adds new pair to inventory if item not present, otherwise increments quantity
+     * Adds new pair to inventory if item not present, otherwise increments quantity and updates UI
      * @param itemID ID of item to be added
      * @param quantity quantity to be added
      * @return index of where item was added to
     */
+    @Override
     protected int addToInventory(int itemID, Integer quantity) {
-        int addedToInventoryIndex = super.addToInventory(itemID, quantity);
-        if (addedToInventoryIndex >= 0 && !(debug)) {
-            this.inventoryUI.updateUI(this.inventory, addedToInventoryIndex);
+        if(quantity > countFreeItemSpaces(itemID)) {
+            return -1; //not enough space for this many items
         }
-    	return addedToInventoryIndex;
+
+        int i = 0;
+        int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
+
+        //adding to item's existing slots
+        for (InventoryItem pair : inventory) {
+            if ((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
+                pair.quantity += quantity;
+                this.inventory.set(i, pair);
+                this.inventoryUI.updateUI(this.inventory, i);
+                return i;
+            } else if ((pair != null) && (itemID == pair.itemID)) {
+                quantity -= stackLimit - pair.quantity;
+                pair.quantity = stackLimit;
+                this.inventory.set(i, pair);
+                this.inventoryUI.updateUI(this.inventory, i);
+            }
+            i++;
+        }
+
+        //adding to separate slot(s) to hold remaining items
+        if (quantity != 0) {
+            i = 0;
+            for (InventoryItem pair : inventory) {
+                if ((pair == null) && (quantity <= stackLimit)) {
+                    pair = new InventoryItem(itemID, quantity);
+                    this.inventory.set(i, pair);
+                    this.inventoryUI.updateUI(this.inventory, i);
+                    return i;
+
+                } else if (pair == null) {
+                    pair = new InventoryItem(itemID, stackLimit);
+                    quantity -= stackLimit;
+                    this.inventory.set(i, pair);
+                    this.inventoryUI.updateUI(this.inventory, i);
+                }
+                i++;
+            }
+        }
+        return -1;
     }
     
     /**
@@ -230,7 +269,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     }
 
     /**
-     * removes item(s) from the inventory, even if they span multiple slots, starting from the right-most slot
+     * removes item(s) from the inventory, even if they span multiple slots, starting from the right-most slot and updates UI
      * @param itemID for item to be removed
      * @param quantity of items to be removed
      * @return int[] with itemID - 0, and quantity removed - 1 (if successfully removed, empty int[] if unable to remove)

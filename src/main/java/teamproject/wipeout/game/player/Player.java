@@ -401,7 +401,7 @@ public class Player extends GameEntity implements StateUpdatable<PlayerState> {
      * @param itemID - of item to be counted
      * @return - number of free spaces available for item
      */
-    private int countFreeItemSpaces(Integer itemID) {
+    protected int countFreeItemSpaces(Integer itemID) {
         int counter = 0;
         int stackLimit = this.itemStore.getItem(itemID).getComponent(InventoryComponent.class).stackSizeLimit;
         for (InventoryItem pair : inventory) {
