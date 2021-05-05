@@ -24,6 +24,11 @@ public class SignatureEntityCollector extends BaseEntityCollector {
     protected List<Class<? extends GameComponent>> signatureList;
     protected List<GameEntity> entityList;
 
+    /**
+     * Creates a new instance of SignatureEntityCollector
+     * @param scene The GameScene this EntityCollector is listening to
+     * @param signature The component signature to listen for (represented as a set of unique GameComponents)
+     */
     public SignatureEntityCollector(GameScene scene, Set<Class<? extends GameComponent>> signature) {
         super(scene);
 
@@ -39,6 +44,10 @@ public class SignatureEntityCollector extends BaseEntityCollector {
         }
     }
 
+    /**
+     * Gets the list of entities in the scene that meet the provided signature
+     * @return A list of GameEntities
+     */
     public List<GameEntity> getEntities() {
         return this.entityList;
     }
@@ -71,7 +80,11 @@ public class SignatureEntityCollector extends BaseEntityCollector {
         }
     }
     
-
+    /**
+     * Tests a component against the provided signature
+     * @param entity The GameEntity to test
+     * @return Whether the component contains all components in the signature
+     */
     private boolean testComponent(GameEntity entity) {
         for (Class<? extends GameComponent> componentClass : this.signatureList) {
             if (!entity.hasComponent(componentClass)) {

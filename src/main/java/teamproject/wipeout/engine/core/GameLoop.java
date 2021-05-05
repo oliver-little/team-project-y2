@@ -4,15 +4,18 @@ import java.util.function.Consumer;
 
 import javafx.animation.AnimationTimer;
 
+/**
+ * GameLoop implements the core loop used by the game to update the renderer and GameSystems.
+ */
 public class GameLoop extends AnimationTimer {
 
     public static final double timeStep = 0.01666f;
 
-    private Consumer<Double> _update;
-    private Consumer<Double> _renderer;
+    private Consumer<Double> update;
+    private Consumer<Double> renderer;
 
-    private double _lastTime;
-    private double _accumulator;
+    private double lastTime;
+    private double accumulator;
 
     /**
      * Creates a new GameLoop object
@@ -20,46 +23,44 @@ public class GameLoop extends AnimationTimer {
      * @param {Consumer<Double>} A consumer object taking the previous frame time, which will rerender the scene.
      */
     public GameLoop(Consumer<Double> update, Consumer<Double> renderer) {
-        this._update = update;
-        this._renderer = renderer;
-    }
-
-    @Override
-    public void start() {
-        this._lastTime = System.nanoTime() / 1000000000.0;
-        this._accumulator = 0;
-        super.start();
-    }
-
-    // TODO: frame interpolation
-    @Override
-    public void handle(long currentTime) {        
-        double newCurrentTime = (currentTime / 1000000000.0);
-        this._accumulator += (newCurrentTime - this._lastTime);
-
-        while (this._accumulator > timeStep) {
-            this._update.accept(timeStep);
-            this._accumulator -= timeStep;
-        }
-
-        this._renderer.accept(timeStep);
-        this._lastTime = newCurrentTime;
+        this.update = update;
+        this.renderer = renderer;
     }
 
     /**
-     * double timeDelta = (currentTime - this._lastTime);
-        System.out.printf("%f \n", timeDelta);
-        timeDelta /= 1000000000.0;
-
-        this._update.accept(timeDelta);
-        this._renderer.accept(timeDelta);
-        this._lastTime = currentTime;
+     * Called when the GameLoop begins
      */
+    @Override
+    public void start() {
+        this.lastTime = System.nanoTime() / 1000000000.0;
+        this.accumulator = 0;
+        super.start();
+    }
 
+    /**
+     * Called at every frame of the GameLoop - updates the renderer every frame and the other GameSystems every time step.
+     */
+    @Override
+    public void handle(long currentTime) {        
+        double newCurrentTime = (currentTime / 1000000000.0);
+        this.accumulator += (newCurrentTime - this.lastTime);
+
+        while (this.accumulator > timeStep) {
+            this.update.accept(timeStep);
+            this.accumulator -= timeStep;
+        }
+
+        this.renderer.accept(timeStep);
+        this.lastTime = newCurrentTime;
+    }
+
+    /**
+     * Called when the GameLoop stops
+     */
     @Override
     public void stop() {
-        this._lastTime = 0;
-        this._accumulator = 0;
+        this.lastTime = 0;
+        this.accumulator = 0;
         super.stop();
     }
 }

@@ -5,15 +5,21 @@ import teamproject.wipeout.engine.component.render.CameraComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.event.EntityChangeData;
-import teamproject.wipeout.util.EventObserver;
 
-public class CameraEntityCollector implements EventObserver<EntityChangeData> {
+/**
+ * Custom EntityCollector implementation for tracking the Main Camera in the scene
+ */
+public class CameraEntityCollector implements EntityCollector {
 
     protected GameEntity camera;
     protected Transform cameraTransform;
     protected CameraComponent cameraComponent;
     protected GameScene scene;
 
+    /**
+     * Creates a new instance of CameraEntityCollector
+     * @param scene The scene this EntityCollector is listening to
+     */
     public CameraEntityCollector(GameScene scene) {
         this.scene = scene;
         this.scene.entityChangeEvent.addObserver(this);
@@ -28,14 +34,26 @@ public class CameraEntityCollector implements EventObserver<EntityChangeData> {
         this.scene.entityChangeEvent.removeObserver(this);
     }
 
+    /**
+     * Gets the Main Camera entity in this GameScene
+     * @return A GameEntity instance
+     */
     public GameEntity getMainCamera() {
         return this.camera;
     }
 
+    /**
+     * Gets the Transform on the main camera in this scene
+     * @return A Transform GameComponent for the main camera entity
+     */
     public Transform getCameraTransform() {
         return this.cameraTransform;
     }
 
+    /**
+     * Gets the CameraComponent on the main camera in this scene
+     * @return A CameraComponent for the main camera entity
+     */
     public CameraComponent getCameraComponent() {
         return this.cameraComponent;
     }
