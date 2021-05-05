@@ -7,8 +7,17 @@ import teamproject.wipeout.game.player.CurrentPlayer;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Task helper that helps us create the tasks
+ */
 public class TasksHelper {
 
+    /**
+     * CReate tasks for the current player
+     * @param itemStore - all the items available
+     * @param currentPlayer - the current player
+     * @return - the list of tasks assigned to the current player
+     */
     public static ArrayList<Task> createTasks(ItemStore itemStore, CurrentPlayer currentPlayer) {
         ArrayList<Task> allTasks = createAllTasks(itemStore);
 
@@ -21,6 +30,11 @@ public class TasksHelper {
         return allTasks;
     }
 
+    /**
+     * Create all available tasks
+     * @param itemStore - item with all available items
+     * @return - the list of all available tasks
+     */
     private static ArrayList<Task> createAllTasks(ItemStore itemStore) {
         ArrayList<Task> tasks = new ArrayList<>();
         ArrayList<Integer> itemIds  = new ArrayList<>();
