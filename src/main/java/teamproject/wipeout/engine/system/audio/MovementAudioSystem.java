@@ -3,7 +3,6 @@ package teamproject.wipeout.engine.system.audio;
 import java.util.Set;
 import java.util.List;
 
-import teamproject.wipeout.engine.component.audio.AudioComponent;
 import teamproject.wipeout.engine.component.audio.MovementAudioComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
@@ -34,6 +33,12 @@ public class MovementAudioSystem implements GameSystem {
 	 * Removes MovementAudioComponent observer and stops all MovementAudioComponents.
 	 */
 	public void cleanup() {
+		List<GameEntity> entities = this.entityCollector.getEntities();
+		for (GameEntity entity : entities) {
+			MovementAudioComponent s = entity.getComponent(MovementAudioComponent.class);
+			s.stop();
+		}
+
 		this.entityCollector.cleanup();
 	}
 

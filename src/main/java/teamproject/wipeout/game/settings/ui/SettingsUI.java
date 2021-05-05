@@ -52,14 +52,16 @@ public class SettingsUI extends VBox {
      * Creates the UI for the in-game settings menu
      * @param audioSys - audio system for volume changes
      * @param mas - movement-audio system for volume changes
+     * @param doReturnToMenu - called when the return to menu button is clicked
+     * @param keyBindings - a Map of the keybindings for the current game
      * @param backingTrack - GameAudio object for backing track volume
      */
-    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, Runnable doReturnToMenu, Map<String, KeyCode> keyBindings){
+    public SettingsUI(AudioSystem audioSys, MovementAudioSystem mas, Runnable doReturnToMenu, Map<String, KeyCode> keyBindings, GameAudio backingTrack){
         super();
 
         this.mas = mas;
         this.as = audioSys;
-        this.backingTrack = new GameAudio("backingTrack2.wav", true);
+        this.backingTrack = backingTrack;
         this.getStylesheets().add(ResourceType.STYLESHEET.path + "settings-ui.css");
         try {
             InputStream path = new FileInputStream(ResourceLoader.get(ResourceType.STYLESHEET, "fonts/Kalam-Regular.ttf"));
@@ -179,10 +181,7 @@ public class SettingsUI extends VBox {
 
         Button closeButton = new Button("Return to Menu");
         closeButton.setId("close");
-        closeButton.setOnAction((e) ->  {backingTrack.stop();
-                                         audioSys.mute();
-                                         mas.mute(); //stops all audio
-                                         doReturnToMenu.run();});
+        closeButton.setOnAction((e) ->  {doReturnToMenu.run();});
         HBox closeButtonContainer = new HBox();
         closeButtonContainer.getChildren().addAll(closeButton);
         closeButtonContainer.setAlignment(Pos.CENTER);
