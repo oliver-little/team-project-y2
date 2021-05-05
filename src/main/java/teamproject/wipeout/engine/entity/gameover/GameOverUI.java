@@ -23,6 +23,9 @@ import teamproject.wipeout.util.resources.ResourceType;
 
 import java.util.List;
 
+/**
+ * Creates the Game Over UI that is displayed once the game finishes
+ */
 public class GameOverUI extends StackPane {
 
     private final StackPane root;
@@ -33,6 +36,13 @@ public class GameOverUI extends StackPane {
     private final Text winner;
     private final Leaderboard leaderboard;
 
+    /**
+     * Initializes the GameOverUI
+     * @param root - in order to help us return to start menu
+     * @param networker - the networker responsible for helping us retrieve the current player's name, and stop the server once the game ends
+     * @param players - for creating the leaderboard shown at the end
+     * @param onClose - a closure that is run once the player wants to return to start menu
+     */
     public GameOverUI(StackPane root, Networker networker, List<Player> players, Runnable onClose) {
         super();
         this.root = root;
@@ -106,6 +116,9 @@ public class GameOverUI extends StackPane {
         st.play();
     }
 
+    /**
+     * Shows the text of who wins
+     */
     public void refreshText() {
         List<Player> sortedPlayers = this.leaderboard.update(this.players);
 
@@ -118,6 +131,9 @@ public class GameOverUI extends StackPane {
         winner.setText(winString);
     }
 
+    /**
+     * When the player clicks on return to start menu
+     */
     public void endGame() {
         if (this.networker != null && !this.networker.stopServer()) {
             GameClient client = this.networker.getClient();
@@ -132,6 +148,10 @@ public class GameOverUI extends StackPane {
         this.root.getScene().setRoot(startMenu.getContent());
     }
 
+    /**
+     * Get current player's name
+     * @return - player's name
+     */
     private String getCurrentPlayerName() {
         if (this.networker == null) {
             return CurrentPlayer.DEFAULT_NAME;
