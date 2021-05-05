@@ -17,7 +17,7 @@ import javafx.util.Pair;
 import java.util.*;
 
 /**
- * Class that constructs the settings/how to play screen 
+ * Class that constructs the settings/how to play screen.
  */
 public class SettingsMenu {
 
@@ -29,6 +29,12 @@ public class SettingsMenu {
     private final LinkedHashMap<String, KeyCode> keyBindings; //maps string describing action to a key
     private final ArrayList<ComboBox<String>> dropDowns;
 
+    /**
+     * Default initializer for {@code SettingsMenu}.
+     *
+     * @param menuBox {@code VBox} used for the menu
+     * @param backAction Action to be executed when back button will be clicked
+     */
     public SettingsMenu(VBox menuBox, Runnable backAction) {
         this.menuBox = menuBox;
         this.backAction = backAction;
@@ -39,16 +45,22 @@ public class SettingsMenu {
         this.createDefaultBindings();
     }
 
+    /**
+     * @return UI for settings/how to play screen
+     */
     public Runnable getMenu() {
         return () -> this.createSettingsMenu();
     }
 
+    /**
+     * @return {@code Map<String, KeyCode>} of set key bindings
+     */
     public Map<String, KeyCode> getKeyBindings() {
         return this.keyBindings;
     }
 
     /**
-     * Creates settings menu for changing key bindings
+     * Creates settings menu for changing key bindings.
      */
     private void createSettingsMenu() {
         menuBox.getChildren().clear();
@@ -140,7 +152,7 @@ public class SettingsMenu {
     }
 
     /**
-     * Creates default key bindings to be passed into game
+     * Creates default key bindings to be passed into game.
      */
     private void createDefaultBindings() {
         keyBindings.put("Move left", KeyCode.LEFT);
@@ -154,7 +166,8 @@ public class SettingsMenu {
     }
 
     /**
-     * Gets key bindings which are taken
+     * Gets key bindings which are taken.
+     *
      * @return ArrayList of strings representing key bindings which are taken
      */
     private ArrayList<String> getTakenBindings() {
@@ -167,7 +180,7 @@ public class SettingsMenu {
     }
 
     /**
-     * Method to grey out items in all of the comboboxes which are already taken
+     * Method to grey out items in all of the comboboxes which are already taken.
      */
     private void updateDisabledItems() {
         ArrayList<String> takenBindings = getTakenBindings();
