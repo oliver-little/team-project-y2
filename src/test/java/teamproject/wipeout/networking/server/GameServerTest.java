@@ -68,16 +68,18 @@ class GameServerTest {
     @AfterAll
     void stopGameServer() {
         try {
+            this.gameServer.serverStopping();
             this.gameServer.stopServer();
+            Thread.sleep(CATCHUP_TIME * 4);
 
-        } catch (IOException exception) {
+        } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
     }
 
     @BeforeEach
     void setUp() throws IOException, ClassNotFoundException, InterruptedException {
-        this.gameClients = new GameClient[CLIENT_IDs.length];
+        this.gameClients = new GameClient[MAX_CONNECTIONS];
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
             GameClient client = GameClient.openConnection(this.serverAddress, this.clientPlayers[i].playerName, (c) -> {});
 
@@ -106,11 +108,13 @@ class GameServerTest {
             this.gameServer.stopClientSearch();
             Assertions.assertFalse(this.gameServer.isSearching.get());
 
-        } catch (IOException exception) {
+            Thread.sleep(CATCHUP_TIME);
+
+        } catch (IOException | InterruptedException exception) {
             Assertions.fail(exception.getMessage());
         }
 
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
+        Assertions.assertFalse(this.gameServer.getConnectedClients().isEmpty());
     }
 
     @RepeatedTest(5)
@@ -137,7 +141,6 @@ class GameServerTest {
     @RepeatedTest(5)
     void testStartingGame() {
         Assertions.assertFalse(this.gameServer.isActive.get());
-        Assertions.assertEquals(MAX_CONNECTIONS, this.gameServer.getConnectedClients().size());
 
         this.gameServer.startGame();
 
@@ -166,7 +169,6 @@ class GameServerTest {
         Assertions.assertFalse(this.gameServer.isSearching.get());
 
         List<GameClientHandler> clients = this.gameServer.getConnectedClients();
-        Assertions.assertEquals(MAX_CONNECTIONS, clients.size());
 
         try {
             this.gameServer.disconnectClient(clients.get(0).clientID);

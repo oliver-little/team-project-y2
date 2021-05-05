@@ -132,8 +132,8 @@ public class Networker {
                 return this.client;
             }
 
-        } catch (IOException | ClassNotFoundException exception) {
-            exception.printStackTrace();
+        } catch (IOException | ClassNotFoundException ignore) {
+            return null;
         }
 
         return null;

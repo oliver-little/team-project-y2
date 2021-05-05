@@ -40,8 +40,6 @@ public class SabotageSystemTest {
         }
 
         assertEquals(1, mc.getSpeedMultiplier());
-        System.out.println("past one");
-
         
         try {
             entity.addComponent(new SabotageComponent(SabotageType.SPEED, 1, 2));
