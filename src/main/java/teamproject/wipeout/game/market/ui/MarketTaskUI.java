@@ -24,6 +24,14 @@ import teamproject.wipeout.util.ImageUtil;
 public class MarketTaskUI extends VBox {
     public static final int IMAGE_SIZE = 48;
 
+    /**
+     * Initialise the Market UI cards for purchasable tasks
+     * @param task - the task to be displayed
+     * @param item - the repsonsible item for the task
+     * @param market - the market
+     * @param currentPlayer - the current player
+     * @param spriteManager - the spriteManager in order to display the related icon
+     */
     public MarketTaskUI(Task task, Item item, Market market, CurrentPlayer currentPlayer, SpriteManager spriteManager) {
         super();
 
