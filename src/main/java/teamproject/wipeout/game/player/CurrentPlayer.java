@@ -218,13 +218,13 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
             if ((pair != null) && (itemID == pair.itemID) && ((pair.quantity + quantity) <= stackLimit)) {
                 pair.quantity += quantity;
                 this.inventory.set(i, pair);
-                this.inventoryUI.updateUI(this.inventory, i);
+                if (!debug) this.inventoryUI.updateUI(this.inventory, i);
                 return i;
             } else if ((pair != null) && (itemID == pair.itemID)) {
                 quantity -= stackLimit - pair.quantity;
                 pair.quantity = stackLimit;
                 this.inventory.set(i, pair);
-                this.inventoryUI.updateUI(this.inventory, i);
+                if (!debug) this.inventoryUI.updateUI(this.inventory, i);
             }
             i++;
         }
@@ -236,14 +236,14 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 if ((pair == null) && (quantity <= stackLimit)) {
                     pair = new InventoryItem(itemID, quantity);
                     this.inventory.set(i, pair);
-                    this.inventoryUI.updateUI(this.inventory, i);
+                    if (!debug) this.inventoryUI.updateUI(this.inventory, i);
                     return i;
 
                 } else if (pair == null) {
                     pair = new InventoryItem(itemID, stackLimit);
                     quantity -= stackLimit;
                     this.inventory.set(i, pair);
-                    this.inventoryUI.updateUI(this.inventory, i);
+                    if (!debug) this.inventoryUI.updateUI(this.inventory, i);
                 }
                 i++;
             }
@@ -262,8 +262,8 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
     protected int[] rearrangeItems(Integer itemID, int quantity, int slotWithSpace, int stackLimit) {
     	int[] rearrangedItems = super.rearrangeItems(itemID, quantity, slotWithSpace, stackLimit);
     	if (rearrangedItems.length == 2 && !(debug)) {
-            this.inventoryUI.updateUI(this.inventory, rearrangedItems[0]);
-            this.inventoryUI.updateUI(this.inventory, rearrangedItems[1]);
+            if (!debug) this.inventoryUI.updateUI(this.inventory, rearrangedItems[0]);
+            if (!debug) this.inventoryUI.updateUI(this.inventory, rearrangedItems[1]);
         }
     	return rearrangedItems;
     }
@@ -292,7 +292,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 if(quantity >= pair.quantity) {
                     quantity -= pair.quantity;
                     inventory.set(i, null); //free inventory slot
-                    this.inventoryUI.updateUI(this.inventory, i);
+                    if (!debug) this.inventoryUI.updateUI(this.inventory, i);
                     if(quantity == 0) {
                         break;
                     }
@@ -300,6 +300,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
                 } else {
                     pair.quantity -= quantity;
                     inventory.set(i, pair);
+                    if (!debug) this.inventoryUI.updateUI(this.inventory, i);
                     slotWithSpace = i;
                     break;
                 }
@@ -312,7 +313,7 @@ public class CurrentPlayer extends Player implements StateUpdatable<PlayerState>
         }
         int[] removedItem = new int[]{itemID, i};
         if (removedItem.length == 2 && !(debug)) {
-            this.inventoryUI.updateUI(this.inventory, removedItem[1]);
+            if (!debug) this.inventoryUI.updateUI(this.inventory, removedItem[1]);
         } else {
             if (!debug) this.inventoryUI.displayMessage(ERROR_TYPE.INVENTORY_EMPTY);
         }
