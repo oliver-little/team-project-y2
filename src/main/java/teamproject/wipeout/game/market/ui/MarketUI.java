@@ -17,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
+import javafx.util.Pair;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;
 import teamproject.wipeout.game.item.Item;
 import teamproject.wipeout.game.item.components.PlantComponent;
@@ -59,22 +60,22 @@ public class MarketUI extends AnchorPane {
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-        List<Node> seedsList = new ArrayList<>();
-        List<Node> plantsList = new ArrayList<>();
-        List<Node> potionsList = new ArrayList<>();
-        List<Node> tasksList = new ArrayList<>();
-        List<Node> farmsList = new ArrayList<>();
+        List<Pair<Node, String>> seedsList = new ArrayList<>();
+        List<Pair<Node, String>> plantsList = new ArrayList<>();
+        List<Pair<Node, String>> potionsList = new ArrayList<>();
+        List<Pair<Node, String>> tasksList = new ArrayList<>();
+        List<Pair<Node, String>> farmsList = new ArrayList<>();
 
         // Services
         for (Item item : items) {
             if (item.hasComponent(PlantComponent.class)) {
-                seedsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
+                seedsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
             }
             else if (item.hasComponent(SabotageComponent.class)) {
-                potionsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
+                potionsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
             }
             else {
-                plantsList.add(new MarketItemUI(item, market, currentPlayer, spriteManager));
+                plantsList.add(new Pair<>(new MarketItemUI(item, market, currentPlayer, spriteManager), item.name));
             }
         }
 
@@ -84,16 +85,16 @@ public class MarketUI extends AnchorPane {
                 continue;
             }
             Item relatedItem = purchasableTask.relatedItem;
-            tasksList.add(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager));
+            tasksList.add(new Pair<>(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager), purchasableTask.description));
         }
 
-        farmsList.add(new FarmExpansionUI(currentPlayer, spriteManager));
+        farmsList.add(new Pair<>(new FarmExpansionUI(currentPlayer, spriteManager), "Farm"));
 
-        Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList));
-        Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList));
-        Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList));
-        Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList));
-        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList));
+        Tab seeds = new Tab("Seeds", new ScrollableTileUI(seedsList, true));
+        Tab plants = new Tab("Plants & Veg", new ScrollableTileUI(plantsList, true));
+        Tab potions = new Tab("Potions", new ScrollableTileUI(potionsList, true));
+        Tab farmExpansions = new Tab("Farm Expansions", new ScrollableTileUI(farmsList, false));
+        Tab tasks = new Tab("Tasks", new ScrollableTileUI(tasksList, true));
         tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions, tasks);
 
         Button close = new Button("X");
