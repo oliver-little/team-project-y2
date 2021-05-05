@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ServerDiscovery {
 
-    public static final int REFRESH_DELAY = GameServer.MULTICAST_DELAY + 5;
+    public static final int REFRESH_DELAY = GameServer.MULTICAST_DELAY + 250;
 
     protected final SimpleMapProperty<String, InetSocketAddress> availableServers;
     protected final HashMap<String, Long> lastHeardServers;
