@@ -71,6 +71,11 @@ public class InventoryUI extends StackPane {
 	private final ImageView[] spriteViews = new ImageView[MAX_SIZE];
 	private final Text[] quantityTexts = new Text[MAX_SIZE];
 
+	/**
+	 * Initialise inventory UI
+	 * @param spriteManager - sprite manager to display icons
+	 * @param itemStore - all available items
+	 */
 	public InventoryUI(SpriteManager spriteManager, ItemStore itemStore) {
 		super();
 		this.root = new Group(); //sets the root node of the inventory UI scene graph
