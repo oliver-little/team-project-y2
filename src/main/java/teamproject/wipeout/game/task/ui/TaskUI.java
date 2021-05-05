@@ -27,6 +27,10 @@ public class TaskUI extends VBox {
 
     private boolean opened = true;
 
+    /**
+     * Initialises the Task UI - the list, and the open/close button
+     * @param currentPlayer - which contains the list of tasks assigned to the currentPlayer
+     */
     public TaskUI(CurrentPlayer currentPlayer) {
         super();
 
@@ -54,6 +58,10 @@ public class TaskUI extends VBox {
         showTasks(currentPlayer.getTasks());
     }
 
+    /**
+     * Updates the listview of the tasks, by clearing the items in it
+     * @param tasks - the tasks added to the list
+     */
     public void showTasks(ArrayList<Task> tasks) {
         int i = 0;
         list.getItems().clear();
@@ -70,6 +78,10 @@ public class TaskUI extends VBox {
         }
     }
 
+    /**
+     * Expands the list if the player clicks on Show Tasks, or compressess it if the player clicks on Hide Tasks
+     * @param visible - whether the list should be visible or not
+     */
     private void setListVisible(boolean visible) {
         KeyValue goalWidth = null;
         if (visible) {
