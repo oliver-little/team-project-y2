@@ -1,4 +1,4 @@
-package teamproject.wipeout.engine.entity.gameover;
+package teamproject.wipeout.game.UI;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -12,9 +12,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import teamproject.wipeout.game.UI.Leaderboard;
-import teamproject.wipeout.game.UI.StartMenu;
-import teamproject.wipeout.game.UI.UIUtil;
 import teamproject.wipeout.game.player.CurrentPlayer;
 import teamproject.wipeout.game.player.Player;
 import teamproject.wipeout.networking.Networker;

@@ -10,7 +10,7 @@ import teamproject.wipeout.engine.component.ai.SteeringComponent;
 import teamproject.wipeout.engine.component.physics.CollisionResolutionComponent;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
-import teamproject.wipeout.engine.entity.gameclock.ClockSystem;
+import teamproject.wipeout.engine.system.ClockSystem;
 import teamproject.wipeout.engine.system.ai.PathFindingSystem;
 import teamproject.wipeout.game.entity.WorldEntity;
 import teamproject.wipeout.game.farm.FarmItem;

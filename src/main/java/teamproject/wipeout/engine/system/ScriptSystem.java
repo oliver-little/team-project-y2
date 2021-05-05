@@ -8,6 +8,9 @@ import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.entity.collector.SignatureEntityCollector;
 
+/**
+ * ScriptSystem calls a function on a ScriptComponent every frame of the game.
+ */
 public class ScriptSystem implements GameSystem {
     
     protected SignatureEntityCollector entityCollector;
