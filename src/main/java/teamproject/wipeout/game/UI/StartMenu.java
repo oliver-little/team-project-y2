@@ -42,7 +42,7 @@ public class StartMenu extends StackPane implements Controller {
     private final SettingsMenu settingsMenu;
 
     /**
-     * Creates a new instance of StartMenu
+     * Creates a new instance of StartMenu.
      */
     public StartMenu() {
         super();
@@ -58,6 +58,17 @@ public class StartMenu extends StackPane implements Controller {
      */
     public void cleanup() {
         this.multiplayerMenu.cleanupNetworker();
+    }
+
+    /**
+     * Displays connection error in the menu.
+     */
+    public void disconnectError() {
+        menuBox.getChildren().clear();
+
+        StackPane errorBox = new StackPane();
+        new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
+        menuBox.getChildren().add(errorBox);
     }
 
     /**
@@ -78,6 +89,14 @@ public class StartMenu extends StackPane implements Controller {
 
     }
 
+    /**
+     * Start local game session.
+     *
+     * @param givenNetworker {@link Networker} to be used (can be {@code null})
+     * @param chosenName Chosen player's name
+     * @param gameStartTime Time of the game session start
+     * @param initContainer {@link InitContainer} with information about the player
+     */
     public void startLocalGame(Networker givenNetworker, String chosenName, Long gameStartTime, InitContainer initContainer) {
         Gameplay game = new Gameplay(givenNetworker, gameStartTime, initContainer, chosenName, this.settingsMenu.getKeyBindings());
 
@@ -87,6 +106,9 @@ public class StartMenu extends StackPane implements Controller {
         game.createContent();
     }
 
+    /**
+     * @return UI for the main menu screen
+     */
     private List<Pair<String, Runnable>> getMainMenuData() {
         List<Pair<String, Runnable>> menuData = Arrays.asList(
                 // (creating content is called separately after so InputHandler has a scene to add listeners to.)
@@ -97,14 +119,6 @@ public class StartMenu extends StackPane implements Controller {
         );
 
         return menuData;
-    }
-
-    public void disconnectError() {
-        menuBox.getChildren().clear();
-
-        StackPane errorBox = new StackPane();
-        new ErrorUI(errorBox, "Error: Game server connection issue", () -> this.createMainMenu());
-        menuBox.getChildren().add(errorBox);
     }
 
     /**

@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Class that constructs the multiplayer UI screens
+ * Class that constructs the multiplayer UI screens.
  */
 public class MultiplayerMenu {
 
@@ -41,6 +41,12 @@ public class MultiplayerMenu {
 
     private String chosenName;
 
+    /**
+     * Default initializer for {@code MultiplayerMenu}.
+     *
+     * @param parentMenu Current {@link StartMenu} instance
+     * @param menuBox {@code VBox} used for the menu
+     */
     public MultiplayerMenu(StartMenu parentMenu, VBox menuBox) {
         this.networker = new Networker();
 
@@ -53,10 +59,16 @@ public class MultiplayerMenu {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> this.cleanupNetworker()));
     }
 
+    /**
+     * @return UI for starting a multiplayer game
+     */
     public Runnable getMenu() {
         return () -> this.createMultiplayerMenu();
     }
 
+    /**
+     * Stops server if it is running, and/or disconnects client.
+     */
     public void cleanupNetworker() {
         if (!this.networker.stopServer()) {
             GameClient client = this.networker.getClient();
@@ -69,6 +81,9 @@ public class MultiplayerMenu {
         }
     }
 
+    /**
+     * Creates the UI for starting a multiplayer game.
+     */
     private void createMultiplayerMenu() {
         menuBox.getChildren().clear();
 
@@ -84,6 +99,9 @@ public class MultiplayerMenu {
         menuBox.getChildren().add(buttonBox);
     }
 
+    /**
+     * Creates the UI for hosting server.
+     */
     private void createHostGameMenu() {
         menuBox.getChildren().clear();
 
@@ -150,6 +168,9 @@ public class MultiplayerMenu {
         menuBox.getChildren().add(buttonBox);
     }
 
+    /**
+     * Creates the UI for joining a server.
+     */
     private void createJoinGameMenu() {
         menuBox.getChildren().clear();
         menuBox.getChildren().add(UIUtil.createTitle("Join Game"));
@@ -237,6 +258,9 @@ public class MultiplayerMenu {
         }
     }
 
+    /**
+     * Creates the UI for the server lobby.
+     */
     private void createLobbyMenu(String serverName, String userName, InetSocketAddress serverAddress, boolean isHost) {
         menuBox.getChildren().clear();
 
@@ -303,13 +327,21 @@ public class MultiplayerMenu {
         }
     }
 
-    private void createServer(String serverName, String hostName, GameMode gameMode, long gameModeValue) {
+    /**
+     * Creates a server through the {@link Networker} object.
+     *
+     * @param serverName Chosen server name
+     * @param userName Chosen player name
+     * @param gameMode Chosen {@link GameMode}
+     * @param gameModeValue {@code long} value for the {@code GameMode}
+     */
+    private void createServer(String serverName, String userName, GameMode gameMode, long gameModeValue) {
         InetSocketAddress serverAddress = networker.startServer(serverName, gameMode, gameModeValue);
-        createLobbyMenu(serverName, hostName, serverAddress, true);
+        createLobbyMenu(serverName, userName, serverAddress, true);
     }
 
     /**
-     * Connects player to server.
+     * Connects a player to the server.
      *
      * @param serverName Chosen server name
      * @param username Chosen player name
@@ -320,6 +352,9 @@ public class MultiplayerMenu {
         createLobbyMenu(serverName, username, serverAddress, false);
     }
 
+    /**
+     * Starts game session on the server.
+     */
     private void startServerGame() {
         try {
             this.networker.serverRunner.startGame();
@@ -329,7 +364,12 @@ public class MultiplayerMenu {
         }
     }
 
-
+    /**
+     * Starts local game session.
+     *
+     * @param givenNetworker {@link Networker} to be used (can be {@code null})
+     * @param client {@link GameClient} to be used (can be {@code null})
+     */
     private void startLocalGame(Networker givenNetworker, GameClient client) {
         if (client != null) {
             this.parentMenu.startLocalGame(givenNetworker, this.chosenName, client.getGameStartTime(), client.getInitContainer());

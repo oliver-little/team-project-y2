@@ -8,24 +8,36 @@ import teamproject.wipeout.networking.data.InitContainer;
 
 import java.util.Arrays;
 
+/**
+ * Class that constructs the singleplayer UI screens.
+ */
 public class SingleplayerMenu {
 
     private final StartMenu parentMenu;
     private final VBox menuBox;
     private final Runnable backToMainMenu;
 
+    /**
+     * Default initializer for {@code SingleplayerMenu}.
+     *
+     * @param parentMenu Current {@link StartMenu} instance
+     * @param menuBox {@code VBox} used for the menu
+     */
     public SingleplayerMenu(StartMenu parentMenu, VBox menuBox) {
         this.parentMenu = parentMenu;
         this.menuBox = menuBox;
         this.backToMainMenu = () -> this.parentMenu.createMainMenu();
     }
 
+    /**
+     * @return UI for starting a singleplayer game
+     */
     public Runnable getMenu() {
         return () -> this.createSingleplayerMenu();
     }
 
     /**
-     * Creates the UI for starting a singleplayer game
+     * Creates the UI for starting a singleplayer game.
      */
     private void createSingleplayerMenu() {
         menuBox.getChildren().clear();
