@@ -184,7 +184,6 @@ public class Segment extends Shape
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
 			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
 				//lines overlap
-				//TODO make sure point is on both lines
 				Point2D p = new Point2D(this.getStartX(), this.getStartY());
 				if(l2.contains(p)) {
 					return p;

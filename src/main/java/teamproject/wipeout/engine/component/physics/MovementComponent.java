@@ -6,7 +6,6 @@ import teamproject.wipeout.engine.component.GameComponent;
 import teamproject.wipeout.util.BasicEvent;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Component to add velocity and acceleration properties to an entity

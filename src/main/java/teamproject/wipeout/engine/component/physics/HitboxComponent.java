@@ -1,7 +1,6 @@
 package teamproject.wipeout.engine.component.physics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javafx.geometry.Point2D;
 import javafx.util.Pair;

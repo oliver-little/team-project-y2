@@ -8,6 +8,9 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import teamproject.wipeout.engine.component.GameComponent;
 
+/**
+ * RenderComponent contains information used to render a number of Renderables to the screen.
+ */
 public class RenderComponent implements GameComponent {
 
     public Point2D offset = Point2D.ZERO;
