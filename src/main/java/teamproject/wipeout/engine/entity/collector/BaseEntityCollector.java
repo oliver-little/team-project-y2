@@ -40,7 +40,6 @@ public abstract class BaseEntityCollector implements EntityCollector {
                 this.removeEntity(entity);
                 break;
             default:
-                System.out.println("Invalid entity change message:" + change);
                 break;
         }
     }

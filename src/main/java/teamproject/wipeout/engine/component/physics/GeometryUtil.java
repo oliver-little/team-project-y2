@@ -26,10 +26,7 @@ public class GeometryUtil
     	Point2D centre2 = new Point2D(c2.getCentreX(), c2.getCentreY());
     	double distanceBetweenCentres = getDistanceBetweenTwoPoints(centre1, centre2);
     	
-    	double overlap = radiusSum - distanceBetweenCentres;
-    	//System.out.println("overlap: "+overlap);
-    	
-    	if(distanceBetweenCentres <= radiusSum) {
+    	if (distanceBetweenCentres <= radiusSum) {
     		return true;
     	}
     	
@@ -69,52 +66,40 @@ public class GeometryUtil
     public static boolean intersects(Circle c1, Rectangle r1) {
     	Point2D centre = new Point2D(c1.getCentreX(), c1.getCentreY());
     	
-    	//System.out.println("centre: "+centre);
-    	
     	Segment top = new Segment(r1.getX(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY());
     	double distance = calculateDistanceBetweenPointAndLine(centre, top);
-    	if(distance<=c1.getRadius()) {
-    		//System.out.println(" 1 distance: "+distance);
-    		//System.out.println("top: "+top.toString());
+    	if (distance<=c1.getRadius()) {
     		return true;
     	}
     	
     	Segment bottom = new Segment(r1.getX(), r1.getY()+r1.getHeight(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, bottom);
-    	if(distance<=c1.getRadius()) {
-    		//System.out.println(" 2 distance: "+distance);
+    	if (distance<=c1.getRadius()) {
     		return true;
     	}
     	
     	Segment left = new Segment(r1.getX(), r1.getY(), r1.getX(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, left);
-    	if(distance<=c1.getRadius()) {
-    		//System.out.println(" 3 distance: "+distance);
+    	if (distance<=c1.getRadius()) {
     		return true;
     	}
     	
     	Segment right = new Segment(r1.getX()+r1.getWidth(), r1.getY(), r1.getX()+r1.getWidth(),r1.getY()+r1.getHeight());
        	distance = calculateDistanceBetweenPointAndLine(centre, right);
-    	if(distance<=c1.getRadius()) {
-    		//System.out.println(" 4 distance: "+distance);
+    	if (distance<=c1.getRadius()) {
     		return true;
     	}
     	
-    	//System.out.println("not colliding with line");
-    	
     	//circle inside rectangle
-    	if(r1.contains(centre)) {
-    		//System.out.println(" circle inside rectangle ");
+    	if (r1.contains(centre)) {
     		return true;
     	}
     	
     	//also if rectangle inside circle
-    	if(c1.contains(new Point2D(r1.getX(),r1.getY()))) {
-    		//System.out.println(" rectangle inside circle");
+    	if (c1.contains(new Point2D(r1.getX(),r1.getY()))) {
     		return true;
     	}
-    	
-    	//System.out.println(" no collision");
+
     	return false;
     }
     
@@ -324,9 +309,6 @@ public class GeometryUtil
 			minDistance=distanceToRight;
 			p = new Point2D(-minDistance,0);			
 		}
-				
-		
-		//System.out.println("overlap: "+p.toString());
 		
 		return p;
 	}
@@ -339,7 +321,7 @@ public class GeometryUtil
 	 */
 	public static double calculateDistanceBetweenPointAndLine(Point2D p, Segment l) {
 		
-		if(l.contains(p)) {
+		if (l.contains(p)) {
 			return 0;
 		}
 		
@@ -347,26 +329,22 @@ public class GeometryUtil
 		Point2D ac = calculateVector(new Point2D(l.getStartX(), l.getStartY()), p);
 		
 		double distance = ac.dotProduct(normal);
-		//System.out.println("distance: "+distance);
+
 		Point2D d = p.add(normal.multiply(-distance));
-		//System.out.println("d: "+d.toString());
 		
 		distance = Math.abs(distance);
 		//check closest point is on segment
-		if(l.contains(d)) {
-			//System.out.println("point on segment");
+		if (l.contains(d)) {
 			return distance;
 		}
 		
 		//if not, closest point is either start or end of segment
 		Point2D bc = calculateVector(new Point2D(l.getEndX(), l.getEndY()), p);
 		
-		
 		//because line is a segment, shortest distance could be from point to end point
-		if(ac.magnitude()<bc.magnitude()) {
+		if (ac.magnitude()<bc.magnitude()) {
 			distance = ac.magnitude();
-		}
-		else {
+		} else {
 			distance = bc.magnitude();
 		}
 			
@@ -427,9 +405,7 @@ public class GeometryUtil
 				return GeometryUtil.intersects(c1,c2);
 			}
 		}
-		
-		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
-		
+
 		return false;
 	}
 
@@ -461,13 +437,10 @@ public class GeometryUtil
 			}
 			else if(s2 instanceof Circle) {
 				Circle c2 = (Circle) s2;
-				//System.out.println("calling it");
 				return GeometryUtil.getResolutionVector(c1,c2);
 			}
 		}
-		
-		System.out.print("Collision not implemented yet between "+ s1.getClass().toString()+ " and "+ s2.getClass().toString());
-		
+
 		return null;
 		
 	}

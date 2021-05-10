@@ -151,7 +151,6 @@ public class HitboxComponent implements GameComponent {
     		return addAbsolutePosition(p, (Circle) shape);
     	}
     	
-    	System.out.print("addAbsolutePosition not implemented yet for "+ shape.getClass().toString());
     	return null;
     }
 

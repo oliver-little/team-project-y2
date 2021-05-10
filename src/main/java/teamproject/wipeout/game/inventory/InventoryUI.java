@@ -213,7 +213,6 @@ public class InventoryUI extends StackPane {
 	public InputKeyAction dropOnKeyRelease(CurrentPlayer currentPlayer, Pickables pickables) {
 		return () -> {
 			int id = currentPlayer.dropItem();
-			System.out.println("***itemID: " + id);
 			if (id != -1) {
 				Transform transform = currentPlayer.getComponent(Transform.class);
 				RenderComponent renderComponent = currentPlayer.getComponent(RenderComponent.class);

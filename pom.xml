@@ -5,13 +5,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>test</groupId>
-	<artifactId>maventest</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>wipeout</groupId>
+	<artifactId>farmageddon</artifactId>
+	<version>1.0</version>
 
-	<name>maventest</name>
-	<!-- FIXME change it to the project's website -->
-	<url>http://www.example.com</url>
+	<name>farmageddon</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,12 +28,6 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.7.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testfx</groupId>
-			<artifactId>testfx-junit5</artifactId>
-			<version>4.0.16-alpha</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -106,14 +98,6 @@
 						<mainClass>teamproject.wipeout.Main</mainClass>
 					</configuration>
 				</plugin>
-				<!-- <plugin>
-					<groupId>org.openjfx</groupId>
-					<artifactId>javafx-maven-plugin</artifactId>
-					<version>0.0.5</version>
-					<configuration>
-						<mainClass>test.maventest.App</mainClass>
-					</configuration>
-				</plugin> -->
 			</plugins>
 		</pluginManagement>
 	</build>

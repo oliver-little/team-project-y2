@@ -143,7 +143,7 @@ public class Spritesheet {
         }
 
         if (!spritesheetDescriptor.version.equals(Spritesheet.SPRITESHEET_VERSION)) {
-            System.out.println("Version of spritesheet descriptor is different to current version, unexpected behaviour may occur.");
+            throw new FileNotFoundException("Version of spritesheet descriptor is different to current version, unexpected behaviour may occur.");
         }
 
         return spritesheetDescriptor;

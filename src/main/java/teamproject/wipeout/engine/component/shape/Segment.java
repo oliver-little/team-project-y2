@@ -69,7 +69,7 @@ public class Segment extends Shape
 	 */
     public boolean contains(Point2D p) {
     	double m = calculateGradient();
-    	//System.out.println("m: "+m);
+
     	if(Double.compare(m, Double.MAX_VALUE)==0) {
     		//x=i
     		if(Double.compare(p.getX(), this.getStartX())!=0) {
@@ -79,14 +79,10 @@ public class Segment extends Shape
     	}
     	else {
         	double c = calculateYIntercept(m);
-        	
-        	//System.out.println("y: "+p.getY());
-        	//System.out.println("mx+c: "+(m*p.getX()+c));
         
         	//y = mx + c
         	double y_new = m*p.getX()+c;
         	if(!GeometryUtil.approxEquals(y_new, p.getY())) {
-        		//System.out.println("not on line");
         		return false;
         	}
     	}
@@ -164,7 +160,6 @@ public class Segment extends Shape
 	
     /**
      * Finds the point of intersection of two lines if they meet
-     * @param l1 the first line
      * @param l2 the second line
      * @return the point of intersection if they meet, otherwise null.
      */
@@ -175,16 +170,9 @@ public class Segment extends Shape
 		double gradient_l2 = l2.calculateGradient();
 		double yIntercept_l2 = l2.calculateYIntercept(gradient_l2);
 		
-		//System.out.println("gradient_l1: "+gradient_l1);
-		//System.out.println("gradient_l2: "+gradient_l2);
-		//System.out.println("yIntercept_l1: "+yIntercept_l1);
-		//System.out.println("yIntercept_l2: "+yIntercept_l2);
-
-		
 		if(Double.compare(gradient_l1, gradient_l2)==0) {
 			if(Double.compare(yIntercept_l1, yIntercept_l2)==0) {
 				//lines overlap
-				//TODO make sure point is on both lines
 				Point2D p = new Point2D(this.getStartX(), this.getStartY());
 				if(l2.contains(p)) {
 					return p;
@@ -221,10 +209,9 @@ public class Segment extends Shape
 		}
 		
 		Point2D p = new Point2D(x,y);
-		//System.out.println("point : "+p.toString());
+
 		//check point lies on l1 and l2
 		if(!this.contains(p) || !l2.contains(p)) {
-			//System.out.println("not on at least one segment");
 			return null;
 		}
 		return p;

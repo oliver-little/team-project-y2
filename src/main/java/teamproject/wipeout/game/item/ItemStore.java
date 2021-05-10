@@ -69,7 +69,7 @@ public class ItemStore {
         }
 
         if (!itemFile.version.equals(VERSION)) {
-            System.out.println("Version of item file is different to current version, unexpected behaviour may occur.");
+            throw new FileNotFoundException("Version of item file is different to current version, unexpected behaviour may occur.");
         }
 
         Map<Integer, Item> itemMap = new HashMap<>();

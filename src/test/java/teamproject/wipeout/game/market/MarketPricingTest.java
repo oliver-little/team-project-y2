@@ -1,5 +1,6 @@
 package teamproject.wipeout.game.market;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class MarketPricingTest {
             assertEquals("8.63", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         marketPriceUpdater.stop();
@@ -79,7 +80,7 @@ public class MarketPricingTest {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         market.buyItem(50, 10);
@@ -100,7 +101,7 @@ public class MarketPricingTest {
             assertEquals("19.19", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         marketPriceUpdater.stop();
@@ -124,7 +125,7 @@ public class MarketPricingTest {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         market.buyItem(50, 10);
@@ -143,7 +144,7 @@ public class MarketPricingTest {
             assertEquals("5.26", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         marketPriceUpdater.stop();
@@ -167,7 +168,7 @@ public class MarketPricingTest {
             Thread.sleep((MarketPriceUpdater.TIMEFREQUENCY*2000) + 100);
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         market.buyItem(50, 10);
@@ -186,7 +187,7 @@ public class MarketPricingTest {
             assertEquals("3.38", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
 
@@ -217,7 +218,7 @@ public class MarketPricingTest {
             assertEquals("4.74", String.format("%.2f", marketItem.getCurrentSellPrice()));
         }
         catch (Exception e) {
-            System.out.println(e);
+            Assertions.fail(e.getMessage());
         }
 
         marketPriceUpdater.stop();
