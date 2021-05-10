@@ -88,7 +88,7 @@ public class MarketUI extends AnchorPane {
                 continue;
             }
             Item relatedItem = purchasableTask.relatedItem;
-            tasksList.add(new Pair<>(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager), purchasableTask.description));
+            tasksList.add(new Pair<>(new MarketTaskUI(purchasableTask, relatedItem, market, currentPlayer, spriteManager), purchasableTask.descriptionWithoutMoney.toLowerCase()));
         }
 
         farmsList.add(new Pair<>(new FarmExpansionUI(currentPlayer, spriteManager), "Farm"));
@@ -111,7 +111,7 @@ public class MarketUI extends AnchorPane {
         pages.add(page);
         Tab farmExpansions = new Tab("Farm Expansions", page);
 
-        page = new ScrollableTileUI(tasksList, false);
+        page = new ScrollableTileUI(tasksList, true);
         pages.add(page);
         Tab tasks = new Tab("Tasks", page);
         tabPane.getTabs().addAll(seeds, plants, potions, farmExpansions, tasks);

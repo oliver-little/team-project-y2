@@ -4,7 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
 
 /** 
- * Renderable to display a Rectangle
+ * Renderable to display an Oval
  */
 public class OvalRenderable implements Renderable {
 
@@ -14,11 +14,11 @@ public class OvalRenderable implements Renderable {
     public double alpha;
 
     /**
-     * Creates an instance of RectRenderable with a given color, width and height
+     * Creates an instance of OvalRenderable with a given color, width and height
      * 
-     * @param color The color of this Rectangle
-     * @param width The width of this Rectangle, in game units
-     * @param height The height of this Rectangle, in game units
+     * @param color The color of this Oval
+     * @param width The width of this Oval, in game units
+     * @param height The height of this Oval, in game units
      */
     public OvalRenderable(Paint color, double width, double height) {
         this.color = color;

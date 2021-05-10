@@ -4,6 +4,9 @@ import teamproject.wipeout.engine.component.EntityAwareGameComponent;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.engine.input.InputHoverableAction;
 
+/**
+ * Hoverable contains information about what to do with this entity when a MouseHover event occurs.
+ */
 public class Hoverable implements EntityAwareGameComponent {
 
     public InputHoverableAction onClick;

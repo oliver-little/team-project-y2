@@ -5,6 +5,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+/**
+ * Renderable to display some Text on the screen
+ */
 public class TextRenderable implements Renderable {
 
 	public Font font;

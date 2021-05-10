@@ -1,8 +1,7 @@
 package teamproject.wipeout.engine.component.physics;
 
 /**
- * Enum to indicate direction
- *
+ * Enum to indicate direction an entity is moving in
  */
 public enum FacingDirection
 {

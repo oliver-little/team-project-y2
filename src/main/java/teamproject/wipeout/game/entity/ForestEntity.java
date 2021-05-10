@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
-import teamproject.wipeout.engine.component.render.SpriteRenderable;
 import teamproject.wipeout.engine.core.GameScene;
 import teamproject.wipeout.engine.entity.GameEntity;
 import teamproject.wipeout.game.assetmanagement.SpriteManager;

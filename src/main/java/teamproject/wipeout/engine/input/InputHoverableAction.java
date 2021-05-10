@@ -1,7 +1,5 @@
 package teamproject.wipeout.engine.input;
 
-import javafx.scene.input.MouseButton;
-
 /**
  * InputHoverableAction is a functional interface representing any action
  * that will be triggered by a mouse hover.
